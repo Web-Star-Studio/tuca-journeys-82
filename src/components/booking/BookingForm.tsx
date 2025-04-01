@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -51,8 +52,8 @@ const BookingForm = () => {
       name: profile?.name || "",
       email: profile?.email || "",
       phone: profile?.phone || "",
-      tourId: "",
-      accommodationId: "",
+      tourId: undefined,
+      accommodationId: undefined,
       checkInDate: new Date(),
       checkOutDate: new Date(new Date().setDate(new Date().getDate() + 5)),
       guests: "2",
@@ -168,7 +169,7 @@ const BookingForm = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhum passeio</SelectItem>
+                        <SelectItem value="none">Nenhum passeio</SelectItem>
                         {tours.map((tour) => (
                           <SelectItem key={tour.id} value={tour.id.toString()}>
                             {tour.title}
@@ -197,7 +198,7 @@ const BookingForm = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhuma hospedagem</SelectItem>
+                        <SelectItem value="none">Nenhuma hospedagem</SelectItem>
                         {accommodations.map((accommodation) => (
                           <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
                             {accommodation.title}
@@ -242,6 +243,7 @@ const BookingForm = () => {
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date()}
                             initialFocus
+                            className="p-3 pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
@@ -284,6 +286,7 @@ const BookingForm = () => {
                               return date < checkIn || date < new Date();
                             }}
                             initialFocus
+                            className="p-3 pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>

@@ -1,38 +1,62 @@
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/hooks/use-auth-state";
 import { useAuthOperations } from "@/hooks/use-auth-operations";
-import { useDemoAccount } from "@/hooks/use-demo-account";
-import { supabase } from "@/lib/supabase";
-import { AuthContextType } from "@/types/auth";
 
-// Create the auth context with default values
+type AuthContextType = {
+  user: User | null;
+  supabase: typeof supabase;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create the auth provider
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Use the refactored hooks
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, setLoading } = useAuthState();
-  const { signIn: authSignIn, signUp: authSignUp, signOut, resetPassword } = useAuthOperations();
-  
-  // Ensure demo account exists
-  useDemoAccount();
+  const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
 
-  // Wrapped version of sign in that manages loading state
+  // Sign In - Modified from useAuthOperations to return void for consistency
   const signIn = async (email: string, password: string) => {
-    setLoading(true);
-    await authSignIn(email, password);
-    setLoading(false);
+    try {
+      await authSignIn(email, password);
+    } catch (error) {
+      console.error("Error in signIn:", error);
+    }
   };
 
-  // Wrapped version of sign up that manages loading state
+  // Sign Up - Modified from useAuthOperations to return void for consistency
   const signUp = async (email: string, password: string, name: string) => {
-    setLoading(true);
-    await authSignUp(email, password, name);
-    setLoading(false);
+    try {
+      await authSignUp(email, password, name);
+    } catch (error) {
+      console.error("Error in signUp:", error);
+    }
   };
 
-  // Context value
+  // Sign Out - Modified from useAuthOperations to return void for consistency
+  const signOut = async () => {
+    try {
+      await authSignOut();
+    } catch (error) {
+      console.error("Error in signOut:", error);
+    }
+  };
+
+  // Reset Password - Modified from useAuthOperations to return void for consistency
+  const resetPassword = async (email: string) => {
+    try {
+      await authResetPassword(email);
+    } catch (error) {
+      console.error("Error in resetPassword:", error);
+    }
+  };
+
   const value = {
     user,
     supabase,
@@ -40,23 +64,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
-    resetPassword,
+    resetPassword
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Create a hook to use the auth context
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
   return context;
 };

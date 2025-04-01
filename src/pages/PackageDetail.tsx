@@ -47,7 +47,7 @@ const PackageDetail = () => {
       addToWishlist({
         id: packageData.id,
         type: "package",
-        title: packageData.title,
+        name: packageData.title, // Changed from title to name to match WishlistItem interface
         image: packageData.image,
         price: packageData.price,
       });

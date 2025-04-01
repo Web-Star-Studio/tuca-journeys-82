@@ -13,6 +13,7 @@ import AccommodationDetail from "./pages/AccommodationDetail";
 import Tours from "./pages/Tours";
 import TourDetail from "./pages/TourDetail";
 import Booking from "./pages/Booking";
+import BookingConfirmation from "./pages/BookingConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/passeios" element={<Tours />} />
           <Route path="/passeios/:id" element={<TourDetail />} />
           <Route path="/reservar" element={<Booking />} />
+          <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

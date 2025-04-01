@@ -2,6 +2,7 @@
 import HeroSection from "@/components/HeroSection";
 import FeaturedPackages from "@/components/FeaturedPackages";
 import FeaturedTours from "@/components/FeaturedTours";
+import FeaturedAccommodations from "@/components/FeaturedAccommodations";
 import Testimonials from "@/components/Testimonials";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import InstagramFeed from "@/components/InstagramFeed";
@@ -16,6 +17,7 @@ const Index = () => {
       <main>
         <HeroSection />
         <FeaturedPackages />
+        <FeaturedAccommodations />
         <FeaturedTours />
         <Testimonials />
         <FeaturedProducts />

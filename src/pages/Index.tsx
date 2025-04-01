@@ -10,6 +10,7 @@ import InstagramFeed from "@/components/InstagramFeed";
 import ContactCTA from "@/components/ContactCTA";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BookingCTA from "@/components/BookingCTA";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
         <FeatureHighlights />
         <FeaturedPackages />
         <FeaturedTours />
+        <BookingCTA />
         <FeaturedAccommodations />
         <Testimonials />
         <FeaturedProducts />

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
@@ -13,16 +13,47 @@ import { accommodations, Accommodation } from "@/data/accommodations";
 
 const Hospedagens = () => {
   const [filteredAccommodations, setFilteredAccommodations] = useState(accommodations);
+  const [sortedAccommodations, setSortedAccommodations] = useState(accommodations);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(3000);
   const [capacityFilter, setCapacityFilter] = useState<number[]>([]);
   const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("priceAsc");
 
   // Get unique amenities from all accommodations
   const allAmenities = Array.from(
     new Set(accommodations.flatMap((accommodation) => accommodation.amenities))
   ).sort();
+
+  // Apply sorting to filtered accommodations
+  useEffect(() => {
+    const sortAccommodations = (accommodations: Accommodation[]) => {
+      const sorted = [...accommodations];
+      switch (sortBy) {
+        case "priceAsc":
+          sorted.sort((a, b) => a.price - b.price);
+          break;
+        case "priceDesc":
+          sorted.sort((a, b) => b.price - a.price);
+          break;
+        case "ratingDesc":
+          sorted.sort((a, b) => b.rating - a.rating);
+          break;
+        case "capacityAsc":
+          sorted.sort((a, b) => a.capacity - b.capacity);
+          break;
+        case "capacityDesc":
+          sorted.sort((a, b) => b.capacity - a.capacity);
+          break;
+        default:
+          break;
+      }
+      return sorted;
+    };
+
+    setSortedAccommodations(sortAccommodations(filteredAccommodations));
+  }, [filteredAccommodations, sortBy]);
 
   // Filter accommodations based on criteria
   const applyFilters = () => {
@@ -47,6 +78,11 @@ const Hospedagens = () => {
     });
 
     setFilteredAccommodations(filtered);
+  };
+
+  // Handle sort change
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
   };
 
   // Reset filters
@@ -104,8 +140,10 @@ const Hospedagens = () => {
               />
 
               <AccommodationsGrid
-                filteredAccommodations={filteredAccommodations}
+                filteredAccommodations={sortedAccommodations}
                 resetFilters={resetFilters}
+                onSortChange={handleSortChange}
+                sortBy={sortBy}
               />
             </div>
           </div>

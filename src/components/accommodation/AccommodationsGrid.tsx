@@ -14,9 +14,16 @@ import { Accommodation } from "@/data/accommodations";
 interface AccommodationsGridProps {
   filteredAccommodations: Accommodation[];
   resetFilters: () => void;
+  onSortChange: (value: string) => void;
+  sortBy: string;
 }
 
-const AccommodationsGrid = ({ filteredAccommodations, resetFilters }: AccommodationsGridProps) => {
+const AccommodationsGrid = ({ 
+  filteredAccommodations, 
+  resetFilters, 
+  onSortChange,
+  sortBy 
+}: AccommodationsGridProps) => {
   return (
     <div className="w-full md:w-3/4 lg:w-4/5">
       <div className="flex justify-between items-center mb-8">
@@ -24,7 +31,7 @@ const AccommodationsGrid = ({ filteredAccommodations, resetFilters }: Accommodat
           {filteredAccommodations.length} Hospedagens Disponíveis
         </h2>
         <div className="hidden md:block">
-          <Select defaultValue="priceAsc">
+          <Select value={sortBy} onValueChange={onSortChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 // Array of hero images for rotation
 const heroImages = [
@@ -12,9 +13,16 @@ const heroImages = [
 
 // Array of hero titles for rotation
 const heroTitles = [
-  "Descubra o Paraíso em Fernando de Noronha",
-  "Experiências Exclusivas no Arquipélago",
-  "Mergulhe em Águas Cristalinas",
+  "Descubra o Paraíso",
+  "Experiências Exclusivas",
+  "Águas Cristalinas",
+];
+
+// Array of hero subtitles for rotation
+const heroSubtitles = [
+  "Fernando de Noronha como você nunca viu.",
+  "Momentos únicos no arquipélago mais preservado do Brasil.",
+  "Mergulhe em um dos mares mais ricos em biodiversidade do mundo."
 ];
 
 const HeroSection = () => {
@@ -23,7 +31,7 @@ const HeroSection = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, []);
@@ -34,7 +42,7 @@ const HeroSection = () => {
       {heroImages.map((image, index) => (
         <div
           key={index}
-          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+          className={`absolute inset-0 w-full h-full transition-opacity duration-2000 ${
             index === currentImageIndex ? "opacity-100" : "opacity-0"
           }`}
           style={{
@@ -45,41 +53,42 @@ const HeroSection = () => {
         />
       ))}
 
-      {/* Dark Overlay */}
-      <div className="hero-overlay" />
+      {/* Dark Overlay with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40 z-10" />
 
       {/* Content */}
       <div className="hero-content">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-center max-w-4xl animate-fade-in">
+        <h1 className="text-5xl md:text-7xl font-medium tracking-tight mb-4 text-center max-w-4xl text-white animate-fade-in">
           {heroTitles[currentImageIndex]}
         </h1>
-        <p className="text-lg md:text-xl mb-8 text-center max-w-2xl animate-fade-in">
-          Sua viagem perfeita começa aqui. Pacotes exclusivos, hospedagens selecionadas e experiências únicas.
+        <p className="text-xl md:text-2xl font-light mb-12 text-center max-w-2xl text-white/90 animate-fade-in">
+          {heroSubtitles[currentImageIndex]}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-          <Link to="/pacotes">
-            <Button className="bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90 text-white min-w-[160px]">
-              Ver Pacotes
+          <Link to="/passeios">
+            <Button className="rounded-full text-sm px-8 py-6 bg-white text-foreground hover:bg-white/90 transition-all duration-300">
+              Explorar Passeios
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <Link to="/passeios">
-            <Button className="bg-tuca-coral hover:bg-tuca-coral/90 text-white min-w-[160px]">
-              Explorar Passeios
+          <Link to="/pacotes">
+            <Button className="rounded-full text-sm px-8 py-6 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-0">
+              Ver Pacotes
             </Button>
           </Link>
         </div>
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
         {heroImages.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentImageIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentImageIndex
-                ? "bg-white w-6"
-                : "bg-white/50"
+                ? "bg-white w-8"
+                : "bg-white/40"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

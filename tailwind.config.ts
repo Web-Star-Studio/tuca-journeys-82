@@ -20,8 +20,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ["'Montserrat'", "sans-serif"],
-				serif: ["'Playfair Display'", "serif"],
+				sans: ["'SF Pro Display'", "'Montserrat'", "sans-serif"],
+				serif: ["'SF Pro Display'", "'Playfair Display'", "serif"],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -67,15 +67,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Tuca Noronha custom colors
+				// Tuca Noronha custom colors - updated for minimalist design
 				tuca: {
-					"ocean-blue": "#0EA5E9",
-					"deep-blue": "#1E40AF",
-					"light-blue": "#BAE6FD",
-					"sand": "#F5E9D6",
-					"coral": "#FF7F50",
-					"green": "#10B981",
-					"light-green": "#D1FAE5",
+					"ocean-blue": "#0077ED", // Apple blue equivalent
+					"deep-blue": "#000814",
+					"light-blue": "#E1F0FF",
+					"sand": "#F5F5F7", // Apple background gray equivalent
+					"coral": "#A259FF", // More modern accent color
+					"green": "#34C759", // Apple green equivalent
+					"light-green": "#F2FBF6",
 				}
 			},
 			borderRadius: {
@@ -103,7 +103,7 @@ export default {
 				'fade-in': {
 					'0%': {
 						opacity: '0',
-						transform: 'translateY(10px)'
+						transform: 'translateY(20px)'
 					},
 					'100%': {
 						opacity: '1',
@@ -117,12 +117,12 @@ export default {
 					},
 					'100%': {
 						opacity: '0',
-						transform: 'translateY(10px)'
+						transform: 'translateY(20px)'
 					}
 				},
 				'scale-in': {
 					'0%': {
-						transform: 'scale(0.95)',
+						transform: 'scale(0.98)',
 						opacity: '0'
 					},
 					'100%': {
@@ -130,13 +130,31 @@ export default {
 						opacity: '1'
 					}
 				},
+				'slide-up': {
+					'0%': {
+						transform: 'translateY(100%)'
+					},
+					'100%': {
+						transform: 'translateY(0)'
+					}
+				},
+				'slide-down': {
+					'0%': {
+						transform: 'translateY(-100%)'
+					},
+					'100%': {
+						transform: 'translateY(0)'
+					}
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.8s ease-out',
-				'fade-out': 'fade-out 0.8s ease-out',
-				'scale-in': 'scale-in 0.5s ease-out',
+				'fade-in': 'fade-in 0.7s ease-out',
+				'fade-out': 'fade-out 0.7s ease-out',
+				'scale-in': 'scale-in 0.7s ease-out',
+				'slide-up': 'slide-up 0.7s ease-out',
+				'slide-down': 'slide-down 0.7s ease-out',
 			}
 		}
 	},

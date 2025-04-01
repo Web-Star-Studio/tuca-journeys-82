@@ -1,5 +1,6 @@
 
 import HeroSection from "@/components/HeroSection";
+import FeatureHighlights from "@/components/FeatureHighlights";
 import FeaturedPackages from "@/components/FeaturedPackages";
 import FeaturedTours from "@/components/FeaturedTours";
 import FeaturedAccommodations from "@/components/FeaturedAccommodations";
@@ -16,9 +17,10 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
+        <FeatureHighlights />
         <FeaturedPackages />
-        <FeaturedAccommodations />
         <FeaturedTours />
+        <FeaturedAccommodations />
         <Testimonials />
         <FeaturedProducts />
         <InstagramFeed />

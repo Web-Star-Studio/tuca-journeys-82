@@ -1,136 +1,181 @@
+
 import React, { useState, useEffect } from "react";
-import { Link, NavLink as RouterNavLink } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { useWindowScroll } from "usehooks-ts";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
-interface NavLinkProps {
-  to: string;
-  isScrolled: boolean;
-  children: React.ReactNode;
-}
-
-const NavLink: React.FC<NavLinkProps> = ({ to, isScrolled, children }) => {
-  return (
-    <RouterNavLink
-      to={to}
-      className={({ isActive }) =>
-        cn(
-          "text-sm font-medium transition-colors hover:text-gray-500",
-          isScrolled ? "text-gray-900" : "text-gray-50",
-          isActive && "text-tuca-ocean-blue"
-        )
-      }
-    >
-      {children}
-    </RouterNavLink>
-  );
-};
-
-interface MobileNavLinkProps {
-  to: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, onClick, children }) => {
-  return (
-    <RouterNavLink
-      to={to}
-      onClick={onClick}
-      className={({ isActive }) =>
-        cn(
-          "block py-2 text-base font-medium transition-colors hover:text-gray-500",
-          "text-gray-900",
-          isActive && "text-tuca-ocean-blue"
-        )
-      }
-    >
-      {children}
-    </RouterNavLink>
-  );
-};
-
-interface LogoProps {
-  isScrolled: boolean;
-}
-
-const Logo: React.FC<LogoProps> = ({ isScrolled }) => {
-  return (
-    <Link to="/" className="flex items-center gap-2">
-      <span className="font-bold text-xl md:text-2xl text-tuca-ocean-blue">
-        Tuca
-      </span>
-      <span className={cn("font-semibold text-xl md:text-2xl", isScrolled ? "text-gray-900" : "text-gray-50")}>
-        Noronha
-      </span>
-    </Link>
-  );
+// Use custom hook to detect scroll position
+const useScrollPosition = () => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  
+  useEffect(() => {
+    const updatePosition = () => {
+      setScrollPosition(window.pageYOffset);
+    };
+    window.addEventListener("scroll", updatePosition);
+    updatePosition();
+    return () => window.removeEventListener("scroll", updatePosition);
+  }, []);
+  
+  return scrollPosition;
 };
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { y } = useWindowScroll();
-  const isScrolled = y > 0;
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+  const scrollPosition = useScrollPosition();
+  const location = useLocation();
+  
+  // Determine if we're on the homepage
+  const isHomePage = location.pathname === "/";
+  
+  // Apply transparent header on home page when at the top
+  const isTransparent = isHomePage && scrollPosition < 50;
 
   return (
-    <header className={cn(
-      "fixed top-0 w-full z-50 transition-all duration-300",
-      isScrolled ? "bg-white/95 backdrop-blur-md shadow-sm" : "bg-transparent",
-      isMenuOpen ? "bg-white" : ""
-    )}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isTransparent
+          ? "bg-transparent text-white"
+          : "bg-white/90 backdrop-blur-md text-gray-900 shadow-sm"
+      }`}
+    >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16 md:h-20">
-          <Logo isScrolled={isScrolled} />
-          
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-1">
-            <NavLink to="/" isScrolled={isScrolled}>Início</NavLink>
-            <NavLink to="/sobre" isScrolled={isScrolled}>Sobre</NavLink>
-            <NavLink to="/pacotes" isScrolled={isScrolled}>Pacotes</NavLink>
-            <NavLink to="/passeios" isScrolled={isScrolled}>Passeios</NavLink>
-            <NavLink to="/hospedagens" isScrolled={isScrolled}>Hospedagens</NavLink>
-            <NavLink to="/contato" isScrolled={isScrolled}>Contato</NavLink>
-            <NavLink to="/reservar" isScrolled={isScrolled}>Reservar</NavLink>
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link
+            to="/"
+            className="text-2xl font-bold font-serif tracking-tighter"
+          >
+            Tuca Noronha
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-8">
+            <Link
+              to="/"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname === "/" ? "font-medium" : ""
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/passeios"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname.includes("/passeios") ? "font-medium" : ""
+              }`}
+            >
+              Passeios
+            </Link>
+            <Link
+              to="/hospedagens"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname.includes("/hospedagens") ? "font-medium" : ""
+              }`}
+            >
+              Hospedagens
+            </Link>
+            <Link
+              to="/pacotes"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname.includes("/pacotes") ? "font-medium" : ""
+              }`}
+            >
+              Pacotes
+            </Link>
+            <Link
+              to="/sobre"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname.includes("/sobre") ? "font-medium" : ""
+              }`}
+            >
+              Sobre
+            </Link>
+            <Link
+              to="/contato"
+              className={`hover:opacity-75 transition-opacity ${
+                location.pathname.includes("/contato") ? "font-medium" : ""
+              }`}
+            >
+              Contato
+            </Link>
+            <Link
+              to="/reservar"
+              className={`px-4 py-2 rounded-full bg-tuca-coral text-white hover:bg-tuca-coral/90 transition-colors ${
+                location.pathname.includes("/reservar") ? "font-medium" : ""
+              }`}
+            >
+              Reservar
+            </Link>
           </nav>
-          
+
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden flex items-center"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
+          <button
+            className="md:hidden focus:outline-none"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
-              <X className="h-6 w-6 text-gray-900" />
+              <X className="h-6 w-6" />
             ) : (
               <Menu className="h-6 w-6" />
             )}
           </button>
         </div>
       </div>
-      
-      {/* Mobile Menu */}
+
+      {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white">
-          <div className="container mx-auto px-4 py-4">
-            <nav className="flex flex-col space-y-3">
-              <MobileNavLink to="/" onClick={closeMenu}>Início</MobileNavLink>
-              <MobileNavLink to="/sobre" onClick={closeMenu}>Sobre</MobileNavLink>
-              <MobileNavLink to="/pacotes" onClick={closeMenu}>Pacotes</MobileNavLink>
-              <MobileNavLink to="/passeios" onClick={closeMenu}>Passeios</MobileNavLink>
-              <MobileNavLink to="/hospedagens" onClick={closeMenu}>Hospedagens</MobileNavLink>
-              <MobileNavLink to="/contato" onClick={closeMenu}>Contato</MobileNavLink>
-              <MobileNavLink to="/reservar" onClick={closeMenu}>Reservar</MobileNavLink>
-            </nav>
-          </div>
+        <div className="md:hidden bg-white text-gray-900 shadow-lg p-4 animate-fade-in">
+          <nav className="flex flex-col space-y-4">
+            <Link
+              to="/"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              to="/passeios"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Passeios
+            </Link>
+            <Link
+              to="/hospedagens"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Hospedagens
+            </Link>
+            <Link
+              to="/pacotes"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Pacotes
+            </Link>
+            <Link
+              to="/sobre"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sobre
+            </Link>
+            <Link
+              to="/contato"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contato
+            </Link>
+            <Link
+              to="/reservar"
+              className="px-4 py-2 bg-tuca-coral text-white rounded-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Reservar
+            </Link>
+          </nav>
         </div>
       )}
     </header>

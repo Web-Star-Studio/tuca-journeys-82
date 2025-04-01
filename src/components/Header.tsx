@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Heart } from "lucide-react";
 import UserMenu from "./UserMenu";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 // Use custom hook to detect scroll position
 const useScrollPosition = () => {
@@ -24,6 +25,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const scrollPosition = useScrollPosition();
   const location = useLocation();
+  const { wishlistItems } = useWishlist();
   
   // Determine if we're on the homepage
   const isHomePage = location.pathname === "/";
@@ -103,6 +105,20 @@ const Header = () => {
 
           {/* User Menu and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
+            <Link 
+              to="/lista-de-desejos"
+              className={`relative hover:opacity-75 transition-opacity ${
+                isTransparent ? "text-white" : "text-gray-900"
+              }`}
+            >
+              <Heart className="h-6 w-6" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-tuca-coral text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
+            
             <UserMenu />
             
             <button
@@ -164,6 +180,13 @@ const Header = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Contato
+            </Link>
+            <Link
+              to="/lista-de-desejos"
+              className="px-4 py-2 rounded hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Lista de Desejos
             </Link>
             <Link
               to="/reservar"

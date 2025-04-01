@@ -1,239 +1,386 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { CalendarIcon, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/use-profile";
+import { tours } from "@/data/tours";
+import { accommodations } from "@/data/accommodations";
+
+// Define the form schema
+const bookingFormSchema = z.object({
+  name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  email: z.string().email({ message: "Email inválido" }),
+  phone: z.string().min(10, { message: "Telefone deve ter pelo menos 10 dígitos" }),
+  tourId: z.string().optional(),
+  accommodationId: z.string().optional(),
+  checkInDate: z.date({ required_error: "Data de check-in é obrigatória" }),
+  checkOutDate: z.date({ required_error: "Data de check-out é obrigatória" }),
+  guests: z.string().min(1, { message: "Número de hóspedes é obrigatório" }),
+  specialRequests: z.string().optional(),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: "Você deve aceitar os termos e condições",
+  }),
+});
+
+type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
 const BookingForm = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [guests, setGuests] = useState("2");
-  const [checkIn, setCheckIn] = useState<Date | undefined>();
-  const [checkOut, setCheckOut] = useState<Date | undefined>();
-  const [accommodationType, setAccommodationType] = useState("");
-  const [notes, setNotes] = useState("");
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Initialize form with user data if available
+  const form = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingFormSchema),
+    defaultValues: {
+      name: profile?.name || "",
+      email: profile?.email || "",
+      phone: profile?.phone || "",
+      tourId: "",
+      accommodationId: "",
+      checkInDate: new Date(),
+      checkOutDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+      guests: "2",
+      specialRequests: "",
+      termsAccepted: false,
+    },
+  });
+
+  // Function to handle form submission
+  const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
     
-    // Validate form
-    if (!name || !email || !phone || !checkIn || !checkOut || !accommodationType) {
+    try {
+      // Here we would typically send the data to a backend API
+      console.log("Booking form data:", data);
+      
+      // Show success toast
       toast({
-        title: "Formulário incompleto",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        title: "Reserva iniciada",
+        description: "Sua solicitação de reserva foi enviada com sucesso!",
+      });
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Redirect to booking confirmation page
+        navigate("/reserva-confirmada");
+      }, 1500);
+    } catch (error) {
+      console.error("Error submitting booking form:", error);
+      toast({
+        title: "Erro ao enviar reserva",
+        description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-    
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Reserva Enviada!",
-        description: "Entraremos em contato em breve para confirmar sua reserva.",
-      });
-      setIsSubmitting(false);
-      
-      // Store booking data in localStorage for demo purposes
-      const bookingData = {
-        name,
-        email,
-        phone,
-        guests,
-        checkIn,
-        checkOut,
-        accommodationType,
-        notes,
-        bookingId: `TN-${Math.floor(Math.random() * 10000)}`,
-        status: "Pendente",
-        createdAt: new Date().toISOString(),
-      };
-      
-      const existingBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-      localStorage.setItem("bookings", JSON.stringify([...existingBookings, bookingData]));
-      
-      // Redirect to confirmation page
-      navigate("/reserva-confirmada", { state: { booking: bookingData } });
-    }, 1500);
   };
 
   return (
-    <Card className="p-6 md:p-8 shadow-md">
-      <h2 className="text-2xl font-medium mb-6">Faça sua Reserva</h2>
+    <div className="w-full max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-sm">
+      <h2 className="text-2xl md:text-3xl font-serif font-bold mb-6 text-tuca-deep-blue">
+        Solicitar Reserva
+      </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="name">Nome Completo</Label>
-            <Input 
-              id="name" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="Seu nome completo"
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="email">E-mail</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                placeholder="seu@email.com"
-                required
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Personal Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Informações Pessoais</h3>
+              
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seu nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="seu@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(xx) xxxxx-xxxx" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input 
-                id="phone" 
-                type="tel" 
-                value={phone} 
-                onChange={(e) => setPhone(e.target.value)} 
-                placeholder="(00) 00000-0000"
-                required
+            
+            {/* Booking Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Detalhes da Reserva</h3>
+              
+              <FormField
+                control={form.control}
+                name="tourId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Passeio (opcional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um passeio" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum passeio</SelectItem>
+                        {tours.map((tour) => (
+                          <SelectItem key={tour.id} value={tour.id.toString()}>
+                            {tour.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="accommodationId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hospedagem (opcional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma hospedagem" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Nenhuma hospedagem</SelectItem>
+                        {accommodations.map((accommodation) => (
+                          <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
+                            {accommodation.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="checkInDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Check-in</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full pl-3 text-left font-normal ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="checkOutDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Check-out</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full pl-3 text-left font-normal ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => {
+                              const checkIn = form.getValues("checkInDate");
+                              return date < checkIn || date < new Date();
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="guests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de Hóspedes</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o número de hóspedes" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                          (num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? "pessoa" : "pessoas"}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-1">
-              <Label htmlFor="guests">Hóspedes</Label>
-              <Select value={guests} onValueChange={setGuests}>
-                <SelectTrigger id="guests">
-                  <SelectValue placeholder="Número de pessoas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 pessoa</SelectItem>
-                  <SelectItem value="2">2 pessoas</SelectItem>
-                  <SelectItem value="3">3 pessoas</SelectItem>
-                  <SelectItem value="4">4 pessoas</SelectItem>
-                  <SelectItem value="5">5 pessoas</SelectItem>
-                  <SelectItem value="6">6 pessoas</SelectItem>
-                  <SelectItem value="7+">7+ pessoas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label>Check-in</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {checkIn ? (
-                      format(checkIn, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Selecione uma data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={checkIn}
-                    onSelect={setCheckIn}
-                    initialFocus
-                    disabled={(date) => date < new Date()}
+          <FormField
+            control={form.control}
+            name="specialRequests"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Solicitações Especiais</FormLabel>
+                <FormControl>
+                  <textarea
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Informe qualquer solicitação especial para sua estadia..."
+                    {...field}
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div>
-              <Label>Check-out</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {checkOut ? (
-                      format(checkOut, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Selecione uma data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={checkOut}
-                    onSelect={setCheckOut}
-                    initialFocus
-                    disabled={(date) => !checkIn || date <= checkIn}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="termsAccepted"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Eu concordo com os{" "}
+                    <a
+                      href="#"
+                      className="text-tuca-ocean-blue hover:underline"
+                    >
+                      termos e condições
+                    </a>
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
           
-          <div>
-            <Label htmlFor="accommodationType">Tipo de Hospedagem</Label>
-            <Select value={accommodationType} onValueChange={setAccommodationType}>
-              <SelectTrigger id="accommodationType">
-                <SelectValue placeholder="Selecione uma opção" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pousada">Pousada</SelectItem>
-                <SelectItem value="casa">Casa</SelectItem>
-                <SelectItem value="apartamento">Apartamento</SelectItem>
-                <SelectItem value="villa">Villa</SelectItem>
-                <SelectItem value="chalé">Chalé</SelectItem>
-                <SelectItem value="camping">Camping</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="notes">Observações</Label>
-            <Textarea 
-              id="notes" 
-              value={notes} 
-              onChange={(e) => setNotes(e.target.value)} 
-              placeholder="Alguma solicitação especial?"
-              rows={4}
-            />
-          </div>
-        </div>
-        
-        <Button 
-          type="submit" 
-          className="w-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Processando..." : "Enviar Solicitação de Reserva"}
-        </Button>
-        
-        <p className="text-sm text-muted-foreground text-center mt-4">
-          Ao enviar este formulário, você concorda com nossos termos e condições.
-        </p>
-      </form>
-    </Card>
+          <Button
+            type="submit"
+            className="w-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90 py-6 text-lg"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enviando..." : "Enviar Solicitação de Reserva"}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 };
 

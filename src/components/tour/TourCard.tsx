@@ -4,14 +4,35 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Star, MapPin } from "lucide-react";
+import { Clock, Star, MapPin, Heart } from "lucide-react";
 import { Tour } from "@/data/tours";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 interface TourCardProps {
   tour: Tour;
 }
 
 const TourCard = ({ tour }: TourCardProps) => {
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isInWishlist(tour.id, 'tour')) {
+      removeFromWishlist(tour.id, 'tour');
+    } else {
+      addToWishlist({
+        id: tour.id,
+        type: 'tour',
+        name: tour.title,
+        image: tour.image
+      });
+    }
+  };
+
+  const isWishlisted = isInWishlist(tour.id, 'tour');
+
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -23,6 +44,15 @@ const TourCard = ({ tour }: TourCardProps) => {
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full font-medium">
           {tour.category}
         </div>
+        <button 
+          onClick={handleWishlistToggle}
+          className="absolute top-4 left-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
+          aria-label={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        >
+          <Heart 
+            className={`h-5 w-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} 
+          />
+        </button>
       </div>
       <div className="p-6 md:p-8">
         <div className="flex justify-between items-start mb-2">

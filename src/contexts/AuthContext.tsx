@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -17,18 +16,20 @@ type AuthContextType = {
 // Create the auth context with default values
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Default Supabase configuration
+// These are placeholder values - in a real app, use your actual Supabase project
+const DEMO_SUPABASE_URL = "https://guvbcxxulxcjotrdplkm.supabase.co";
+const DEMO_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dmJjeHh1bHhjam90cmRwbGttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI2OTY2MTUsImV4cCI6MjAyODI3MjYxNX0.Dq1KqjGjOy7m3-LXZQ08I-s4B8nGJseCDRj2EYsn60I";
+
 // Create the Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEMO_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEMO_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("Supabase URL or Anon Key is missing");
-}
+console.log("Supabase URL:", supabaseUrl);
+console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not Set");
 
-const supabase = createClient(
-  supabaseUrl || "",
-  supabaseAnonKey || ""
-);
+// Create the Supabase client with the values
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Create the auth provider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -1,4 +1,11 @@
 
+/**
+ * Note: This app is using demo Supabase credentials for development.
+ * In a production environment, you should set up proper environment variables:
+ * - VITE_SUPABASE_URL
+ * - VITE_SUPABASE_ANON_KEY
+ */
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

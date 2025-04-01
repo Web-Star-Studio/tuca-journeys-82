@@ -16,6 +16,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const Login = () => {
   const { signIn, loading } = useAuth();
@@ -26,6 +27,17 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await signIn(email, password);
+    navigate("/");
+  };
+
+  const handleDemoLogin = async () => {
+    const demoEmail = "demo@tucanoronha.com";
+    const demoPassword = "demo123456";
+    
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    
+    await signIn(demoEmail, demoPassword);
     navigate("/");
   };
 
@@ -96,6 +108,28 @@ const Login = () => {
                     )}
                   </Button>
                 </form>
+                
+                <div className="my-4">
+                  <Separator className="my-4">
+                    <span className="mx-2 text-xs text-muted-foreground">OU</span>
+                  </Separator>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full mt-2"
+                    onClick={handleDemoLogin}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      "Acessar como Demonstração"
+                    )}
+                  </Button>
+                </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">
                 <div className="text-center text-sm text-muted-foreground">

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -31,11 +32,57 @@ console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not Set");
 // Create the Supabase client with the values
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Demo account credentials
+const DEMO_EMAIL = "demo@tucanoronha.com";
+const DEMO_PASSWORD = "demo123456";
+const DEMO_NAME = "Usuário Demo";
+
 // Create the auth provider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
+
+  // Ensure demo account exists
+  useEffect(() => {
+    const createDemoAccountIfNeeded = async () => {
+      try {
+        // Check if demo user exists by trying to sign in
+        const { error } = await supabase.auth.signInWithPassword({
+          email: DEMO_EMAIL,
+          password: DEMO_PASSWORD,
+        });
+        
+        // If we get an error about user not found, create the demo account
+        if (error && error.message.includes("Invalid login credentials")) {
+          console.log("Creating demo account...");
+          
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: DEMO_EMAIL,
+            password: DEMO_PASSWORD,
+            options: {
+              data: {
+                name: DEMO_NAME,
+              },
+            },
+          });
+          
+          if (signUpError) {
+            console.error("Error creating demo account:", signUpError);
+          } else {
+            console.log("Demo account created successfully");
+          }
+        }
+        
+        // Sign out after checking/creating
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error("Error ensuring demo account exists:", error);
+      }
+    };
+    
+    createDemoAccountIfNeeded();
+  }, []);
 
   // Initialize the auth state
   useEffect(() => {

@@ -71,7 +71,7 @@ const FeaturedAccommodations = () => {
                   </div>
                 </div>
 
-                <Link to={`/hospedagens`}>
+                <Link to={`/hospedagens/${accommodation.id}`}>
                   <Button className="w-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white">
                     Ver Detalhes
                   </Button>

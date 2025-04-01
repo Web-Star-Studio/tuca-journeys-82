@@ -41,6 +41,18 @@ const Login = () => {
     navigate("/");
   };
 
+  // Added quick login with any credentials
+  const handleQuickLogin = async () => {
+    const quickEmail = "user@example.com";
+    const quickPassword = "password";
+    
+    setEmail(quickEmail);
+    setPassword(quickPassword);
+    
+    await signIn(quickEmail, quickPassword);
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -51,7 +63,7 @@ const Login = () => {
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
                 <CardDescription className="text-center">
-                  Entre com seu email e senha para acessar sua conta
+                  Durante o desenvolvimento, qualquer email e senha funcionarão
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -113,6 +125,22 @@ const Login = () => {
                   <Separator className="my-4">
                     <span className="mx-2 text-xs text-muted-foreground">OU</span>
                   </Separator>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full mt-2 mb-2"
+                    onClick={handleQuickLogin}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      "Login Rápido (Qualquer Credencial)"
+                    )}
+                  </Button>
                   
                   <Button
                     variant="outline"

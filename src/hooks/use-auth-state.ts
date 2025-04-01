@@ -9,36 +9,42 @@ export const useAuthState = () => {
 
   // Initialize the auth state
   useEffect(() => {
-    // Get the session from supabase
-    const initSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Error getting session:", error);
-        setLoading(false);
-        return;
-      }
-      
-      if (data.session) {
-        setUser(data.session.user);
-      }
-      
-      // Set up auth state listener
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          setUser(session?.user ?? null);
+    // Check for mock session in localStorage
+    const checkSession = () => {
+      try {
+        const storedSession = localStorage.getItem('supabase.auth.token');
+        if (storedSession) {
+          const parsedSession = JSON.parse(storedSession);
+          if (parsedSession.currentSession?.user) {
+            setUser(parsedSession.currentSession.user as User);
+          } else {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
         }
-      );
-      
-      setLoading(false);
-      
-      // Clean up the listener when the component unmounts
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
+        setLoading(false);
+      } catch (error) {
+        console.error("Error parsing stored session:", error);
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    // Initial check
+    checkSession();
+    
+    // Listen for auth state changes
+    const handleAuthChange = () => {
+      checkSession();
     };
     
-    initSession();
+    window.addEventListener('supabase.auth.token-change', handleAuthChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('supabase.auth.token-change', handleAuthChange);
+    };
   }, []);
 
   return { user, loading, setLoading };

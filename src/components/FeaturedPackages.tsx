@@ -3,54 +3,24 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Clock, Star } from "lucide-react";
-
-// Sample data for packages
-const packages = [
-  {
-    id: 1,
-    title: "Escapada Romântica",
-    description: "Um pacote perfeito para casais que desejam vivenciar momentos inesquecíveis em Fernando de Noronha.",
-    image: "/package-romantic.jpg",
-    price: 4899,
-    days: 5,
-    persons: 2,
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    title: "Aventura Completa",
-    description: "Para os amantes da natureza e aventuras. Inclui trilhas, mergulho e passeios de barco.",
-    image: "/package-adventure.jpg",
-    price: 5299,
-    days: 7,
-    persons: 1,
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    title: "Família em Noronha",
-    description: "Pacote ideal para famílias descobrirem as maravilhas de Fernando de Noronha com conforto e segurança.",
-    image: "/package-family.jpg",
-    price: 9899,
-    days: 6,
-    persons: 4,
-    rating: 4.7,
-  },
-];
+import { packages } from "@/data/packages";
 
 const FeaturedPackages = () => {
   const [hoveredPackage, setHoveredPackage] = useState<number | null>(null);
+  
+  // Select featured packages (first 3)
+  const featuredPackages = packages.slice(0, 3);
 
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-white py-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title">Pacotes em Destaque</h2>
-        <p className="section-subtitle">
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-4">Pacotes em Destaque</h2>
+        <p className="text-lg text-center text-gray-600 max-w-3xl mx-auto mb-12">
           Selecionamos os melhores pacotes para sua experiência em Fernando de Noronha
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {packages.map((pkg) => (
+          {featuredPackages.map((pkg) => (
             <div
               key={pkg.id}
               className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
@@ -89,7 +59,7 @@ const FeaturedPackages = () => {
                   </div>
                 </div>
 
-                <Link to={`/pacotes/${pkg.id}`}>
+                <Link to={`/pacotes`}>
                   <Button className="w-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white">
                     Ver Detalhes
                   </Button>

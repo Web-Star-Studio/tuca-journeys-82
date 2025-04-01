@@ -23,6 +23,7 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Wishlist from "./pages/Wishlist";
+import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -52,6 +53,7 @@ const App = () => {
               <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/pagamentos" element={<Payments />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

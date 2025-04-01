@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -201,7 +200,7 @@ const BookingForm = () => {
                         <SelectItem value="">Nenhuma hospedagem</SelectItem>
                         {accommodations.map((accommodation) => (
                           <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
-                            {accommodation.name}
+                            {accommodation.title}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -34,10 +34,10 @@ const Wishlist = () => {
       if (accommodation) {
         addItem({
           id: accommodation.id,
-          name: accommodation.name,
+          name: accommodation.title, // Changed from name to title
           price: accommodation.price,
           quantity: 1,
-          image: accommodation.images[0],
+          image: accommodation.image, // Changed from images[0] to image
           variation: 'Hospedagem'
         });
       }

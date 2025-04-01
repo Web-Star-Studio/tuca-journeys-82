@@ -19,6 +19,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
+import Store from "./pages/Store";
+import ProductDetail from "./pages/ProductDetail";
+import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,7 +49,11 @@ const App = () => (
             <Route path="/cadastro" element={<Register />} />
             <Route path="/recuperar-senha" element={<ResetPassword />} />
             <Route path="/perfil" element={<Profile />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/loja" element={<Store />} />
+            <Route path="/loja/produto/:id" element={<ProductDetail />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/pagamentos" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

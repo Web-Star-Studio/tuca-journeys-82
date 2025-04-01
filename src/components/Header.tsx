@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import UserMenu from "./UserMenu";
 
 // Use custom hook to detect scroll position
 const useScrollPosition = () => {
@@ -98,27 +99,23 @@ const Header = () => {
             >
               Contato
             </Link>
-            <Link
-              to="/reservar"
-              className={`px-4 py-2 rounded-full bg-tuca-coral text-white hover:bg-tuca-coral/90 transition-colors ${
-                location.pathname.includes("/reservar") ? "font-medium" : ""
-              }`}
-            >
-              Reservar
-            </Link>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden focus:outline-none"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          {/* User Menu and Mobile Menu Button */}
+          <div className="flex items-center space-x-4">
+            <UserMenu />
+            
+            <button
+              className="md:hidden focus:outline-none"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

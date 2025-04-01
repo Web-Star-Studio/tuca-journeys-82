@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -327,9 +327,11 @@ const Packages = () => {
                           </div>
                         </CardContent>
                         <CardFooter>
-                          <Button className="w-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white">
-                            Ver Detalhes
-                          </Button>
+                          <Link to={`/pacotes/${pkg.id}`} className="w-full">
+                            <Button className="w-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white">
+                              Ver Detalhes
+                            </Button>
+                          </Link>
                         </CardFooter>
                       </Card>
                     ))}

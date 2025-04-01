@@ -12,6 +12,7 @@ import TourDetail from "./pages/TourDetail";
 import Hospedagens from "./pages/Hospedagens";
 import AccommodationDetail from "./pages/AccommodationDetail";
 import Packages from "./pages/Packages";
+import PackageDetail from "./pages/PackageDetail";
 import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
 import Login from "./pages/Login";
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="/hospedagens" element={<Hospedagens />} />
               <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
               <Route path="/pacotes" element={<Packages />} />
+              <Route path="/pacotes/:id" element={<PackageDetail />} />
               <Route path="/loja" element={<Store />} />
               <Route path="/loja/:id" element={<ProductDetail />} />
               <Route path="/login" element={<Login />} />

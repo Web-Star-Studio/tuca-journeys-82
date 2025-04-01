@@ -5,8 +5,8 @@ const AccommodationHero = () => {
   return (
     <section className="relative">
       <div
-        className="h-[40vh] bg-cover bg-center"
-        style={{ backgroundImage: "url('/hero-noronha-3.jpg')" }}
+        className="h-[50vh] w-full bg-cover bg-center"
+        style={{ backgroundImage: "url('/hero-noronha-beach.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center text-white px-4">

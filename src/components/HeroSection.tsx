@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
-// Array of hero images for rotation
+// Array of hero images for rotation with high-quality free-to-use images
 const heroImages = [
-  "/hero-noronha-1.jpg",
-  "/hero-noronha-2.jpg",
-  "/hero-noronha-3.jpg",
+  "/hero-noronha-beach.jpg",
+  "/hero-noronha-aerial.jpg",
+  "/hero-noronha-sunset.jpg",
 ];
 
 // Array of hero titles for rotation
@@ -37,7 +37,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="hero-section">
+    <section className="relative w-full h-screen">
       {/* Background Image Slider */}
       {heroImages.map((image, index) => (
         <div
@@ -54,10 +54,10 @@ const HeroSection = () => {
       ))}
 
       {/* Dark Overlay with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50 z-10" />
 
       {/* Content */}
-      <div className="hero-content">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 sm:px-8 md:px-16">
         <h1 className="text-5xl md:text-7xl font-medium tracking-tight mb-4 text-center max-w-4xl text-white animate-fade-in">
           {heroTitles[currentImageIndex]}
         </h1>

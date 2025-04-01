@@ -12,7 +12,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star, Wifi, Wind, Coffee, Pool, Users, Bed, Bath, Filter } from "lucide-react";
+import { MapPin, Star, Wifi, Wind, Coffee, Waves, Users, Bed, Bath, Filter } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
@@ -96,7 +96,7 @@ const Hospedagens = () => {
         return <Coffee className="h-3 w-3" />;
       case "Piscina":
       case "Piscina privativa":
-        return <Pool className="h-3 w-3" />;
+        return <Waves className="h-3 w-3" />; // Replacing Pool with Waves
       default:
         return null;
     }

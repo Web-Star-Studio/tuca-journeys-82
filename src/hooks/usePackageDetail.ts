@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Package, packages } from "@/data/packages";
+import { Package, getPackageById } from "@/data/packages";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -12,7 +12,7 @@ export const usePackageDetail = (id: string | undefined) => {
   const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
-    const foundPackage = packages.find((pkg) => pkg.id === Number(id));
+    const foundPackage = getPackageById(Number(id));
     setPackageData(foundPackage || null);
     setIsLoading(false);
 

@@ -1,15 +1,14 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Star, ArrowRight } from "lucide-react";
-import { packages } from "@/data/packages";
+import { getFeaturedPackages } from "@/data/packages";
 
 const FeaturedPackages = () => {
   const [hoveredPackage, setHoveredPackage] = useState<number | null>(null);
   
-  // Select featured packages (first 3)
-  const featuredPackages = packages.slice(0, 3);
+  // Get featured packages using our helper function
+  const featuredPackages = getFeaturedPackages(3);
 
   return (
     <section className="section-padding bg-white">

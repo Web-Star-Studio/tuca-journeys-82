@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, Clock } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for accommodations
 const heroImages = [
-  "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=1974&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=1932&auto=format&fit=crop"
+  "https://images.pexels.com/photos/11396433/pexels-photo-11396433.jpeg?auto=compress&cs=tinysrgb&w=1920", // Beach pousada view
+  "https://images.pexels.com/photos/2409953/pexels-photo-2409953.jpeg?auto=compress&cs=tinysrgb&w=1920", // Luxury accommodation
+  "https://images.pexels.com/photos/6109989/pexels-photo-6109989.jpeg?auto=compress&cs=tinysrgb&w=1920"  // Beach front view
 ];
 
 const AccommodationHero = () => {

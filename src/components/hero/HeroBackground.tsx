@@ -3,11 +3,11 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import SafeImage from "@/components/ui/safe-image";
 
-// Array of hero images for rotation with high-quality free-to-use images
+// Array of hero images for rotation with high-quality Pexels images
 const heroImages = [
-  "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=1974&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=1932&auto=format&fit=crop"
+  "https://images.pexels.com/photos/1202821/pexels-photo-1202821.jpeg?auto=compress&cs=tinysrgb&w=1920", // Fernando de Noronha aerial view
+  "https://images.pexels.com/photos/3355732/pexels-photo-3355732.jpeg?auto=compress&cs=tinysrgb&w=1920", // Beautiful beach with rock formations
+  "https://images.pexels.com/photos/4930336/pexels-photo-4930336.jpeg?auto=compress&cs=tinysrgb&w=1920"  // Ocean view of Noronha
 ];
 
 type HeroBackgroundProps = {

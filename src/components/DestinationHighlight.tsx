@@ -140,7 +140,7 @@ const DestinationHighlight = () => {
             }} transition={{
               duration: 0.4
             }}>
-                <img alt="Praia de Noronha" src="https://ibb.co/s9sZGPrX" className="w-full h-full object-cover" />
+                <img alt="Praia de Noronha" className="w-full h-full object-cover" src="/lovable-uploads/1ed8fc0e-6277-4755-8c6e-88af20896e06.png" />
               </motion.div>
               <motion.div className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-xl" whileHover={{
               scale: 1.04

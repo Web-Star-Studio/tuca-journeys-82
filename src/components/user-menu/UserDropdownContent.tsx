@@ -15,13 +15,13 @@ interface UserDropdownContentProps {
 }
 
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
-  const displayName = user.user_metadata?.name || user.email || "";
+  const displayName = user?.user_metadata?.name || user?.email || "";
   
   return (
     <DropdownMenuContent align="end" className="w-56 shadow-lg border-tuca-light-blue/20">
       <div className="px-3 py-2.5 border-b border-tuca-light-blue/10">
         <div className="font-medium text-tuca-deep-blue">{displayName}</div>
-        <div className="text-xs text-muted-foreground">{user.email}</div>
+        <div className="text-xs text-muted-foreground">{user?.email}</div>
       </div>
       
       <div className="p-1">

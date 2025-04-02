@@ -4,11 +4,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "@supabase/supabase-js";
 
 interface UserAvatarProps {
-  user: User;
+  user: User | null;
 }
 
 const UserAvatar = ({ user }: UserAvatarProps) => {
   const getInitials = (name: string) => {
+    if (!name) return "UN";
+    
     return name
       .split(" ")
       .map((part) => part[0])
@@ -17,7 +19,8 @@ const UserAvatar = ({ user }: UserAvatarProps) => {
       .substring(0, 2);
   };
 
-  const displayName = user.user_metadata?.name || user.email || "";
+  // Safely access user metadata and provide fallbacks
+  const displayName = user?.user_metadata?.name || user?.email || "";
   const initials = displayName ? getInitials(displayName) : "UN";
 
   return (

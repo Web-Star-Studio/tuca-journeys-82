@@ -35,7 +35,7 @@ const AdminHeader = ({ pageTitle }: AdminHeaderProps) => {
         
         <div className="flex items-center space-x-3">
           <div className="hidden md:block text-right">
-            <p className="text-sm font-medium">{user?.user_metadata?.name || user?.email}</p>
+            <p className="text-sm font-medium">{user?.user_metadata?.name || user?.email || 'Administrador'}</p>
             <p className="text-xs text-gray-500">Administrador</p>
           </div>
           <UserAvatar user={user} />

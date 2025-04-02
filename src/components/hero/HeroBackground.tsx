@@ -3,11 +3,11 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import SafeImage from "@/components/ui/safe-image";
 
-// Array of hero images for rotation with high-quality Pexels images
+// Array of hero images with our new images
 const heroImages = [
-  "/hero-noronha-beach.jpg", // Beautiful beach view
-  "/hero-noronha-aerial.jpg", // Aerial view of the island
-  "/hero-noronha-sunset.jpg"  // Sunset view
+  "https://ibb.co/s9sZGPrX", // Fernando de Noronha image 1
+  "https://ibb.co/LXXcnd8r", // Fernando de Noronha image 2
+  "https://ibb.co/pmMT8sg"  // Fernando de Noronha image 3
 ];
 
 type HeroBackgroundProps = {

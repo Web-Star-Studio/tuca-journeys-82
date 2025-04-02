@@ -6,7 +6,7 @@ export const premiumPackages: Package[] = [
     id: 4,
     title: "Noronha Exclusivo",
     description: "Experiência premium com serviços exclusivos e hospedagem de luxo para uma experiência inesquecível.",
-    image: "/hero-noronha-1.jpg",
+    image: "https://ibb.co/cKzB4CVQ",
     price: 12999,
     days: 7,
     persons: 2,

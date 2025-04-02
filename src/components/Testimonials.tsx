@@ -9,7 +9,7 @@ const testimonials = [
   {
     id: 1,
     name: "Mariana Silva",
-    image: "/testimonial-1.jpg",
+    image: "https://ibb.co/cKzB4CVQ",
     comment:
       "A viagem com a Tuca Noronha superou todas as minhas expectativas! O atendimento foi impecável desde o primeiro contato, e os passeios sugeridos foram perfeitos para o que eu buscava.",
     rating: 5,
@@ -17,7 +17,7 @@ const testimonials = [
   {
     id: 2,
     name: "Carlos e Juliana",
-    image: "/testimonial-2.jpg",
+    image: "https://ibb.co/s9sZGPrX",
     comment:
       "Planejamos nossa lua de mel com a Tuca Noronha e foi a melhor decisão. Cada detalhe foi pensado com carinho, desde a pousada com vista para o mar até os passeios românticos.",
     rating: 5,
@@ -25,7 +25,7 @@ const testimonials = [
   {
     id: 3,
     name: "Família Oliveira",
-    image: "/testimonial-3.jpg",
+    image: "https://ibb.co/LXXcnd8r",
     comment:
       "Viajar com crianças pode ser desafiador, mas a equipe da Tuca facilitou tudo! Roteiros adaptados para as crianças, hospedagem confortável e atendimento personalizado.",
     rating: 4,
@@ -33,7 +33,7 @@ const testimonials = [
   {
     id: 4,
     name: "Patricia Mendes",
-    image: "/testimonial-4.jpg",
+    image: "https://ibb.co/pmMT8sg",
     comment:
       "Sou viajante solo e me preocupava com a logística, mas a Tuca Noronha cuidou de tudo. Me senti segura e aproveitei cada momento nesse paraíso!",
     rating: 5,

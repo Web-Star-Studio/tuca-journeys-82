@@ -7,8 +7,8 @@ const BookingBackground = () => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/hero-noronha-sunset.jpg" 
-          alt="Fernando de Noronha Sunset" 
+          src="https://ibb.co/fzbqbfHG" 
+          alt="Fernando de Noronha" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 backdrop-blur-sm" />

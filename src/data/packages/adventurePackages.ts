@@ -6,7 +6,7 @@ export const adventurePackages: Package[] = [
     id: 2,
     title: "Aventura Completa",
     description: "Para os amantes da natureza e aventuras. Inclui trilhas, mergulho e passeios de barco.",
-    image: "/package-adventure.jpg",
+    image: "https://ibb.co/pmMT8sg",
     price: 5299,
     days: 7,
     persons: 1,

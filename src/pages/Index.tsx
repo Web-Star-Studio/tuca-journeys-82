@@ -15,11 +15,11 @@ import DestinationHighlight from "@/components/DestinationHighlight";
 
 const Index = () => {
   return (
-    <div className="min-h-screen w-screen overflow-hidden">
+    <div className="relative overflow-x-hidden w-full">
       <Header />
-      <main className="w-full">
+      <main>
         <HeroSection />
-        <div className="container mx-auto px-4">
+        <div className="w-full">
           <FeatureHighlights />
           <DestinationHighlight />
           <FeaturedPackages />

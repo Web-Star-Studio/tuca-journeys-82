@@ -1,6 +1,5 @@
 
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 import { heroImages } from "./HeroBackground";
 
 type HeroIndicatorsProps = {
@@ -19,7 +18,10 @@ const HeroIndicators = ({
   return (
     <>
       {/* Image transition indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20"
+        animate={{ opacity: 1 - scrollProgress * 2 }}
+      >
         {heroImages.map((_, index) => (
           <button 
             key={index} 
@@ -30,7 +32,7 @@ const HeroIndicators = ({
             aria-label={`Go to slide ${index + 1}`} 
           />
         ))}
-      </div>
+      </motion.div>
     </>
   );
 };

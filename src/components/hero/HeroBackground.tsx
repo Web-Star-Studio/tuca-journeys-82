@@ -32,7 +32,7 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
   return (
     <>
       {/* Background Image Slider with Parallax */}
-      <div className="absolute inset-0 w-screen h-screen overflow-hidden">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {heroImages.map((image, index) => (
           <motion.div
             key={index}
@@ -47,7 +47,6 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               opacity: { duration: 1.5 },
               scale: { duration: 7 }
             }}
-            style={{ width: '100vw', height: '100vh' }}
           >
             <SafeImage
               src={image}

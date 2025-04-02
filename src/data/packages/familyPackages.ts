@@ -6,7 +6,7 @@ export const familyPackages: Package[] = [
     id: 3,
     title: "Família em Noronha",
     description: "Pacote ideal para famílias descobrirem as maravilhas de Fernando de Noronha com conforto e segurança.",
-    image: "https://ibb.co/fzbqbfHG",
+    image: "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
     price: 9899,
     days: 6,
     persons: 4,

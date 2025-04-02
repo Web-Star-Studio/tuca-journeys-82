@@ -6,7 +6,7 @@ export const budgetPackages: Package[] = [
     id: 5,
     title: "Noronha Econômico",
     description: "Pacote com ótimo custo-benefício para conhecer as principais atrações de Fernando de Noronha.",
-    image: "https://ibb.co/s9sZGPrX",
+    image: "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png",
     price: 3799,
     days: 4,
     persons: 1,

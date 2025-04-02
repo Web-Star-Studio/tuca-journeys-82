@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Users, Star } from "lucide-react";
 import { Package } from "@/data/packages";
+import SafeImage from "@/components/ui/safe-image";
 
 interface PackageDetailHeroProps {
   packageData: Package;
@@ -9,10 +10,12 @@ interface PackageDetailHeroProps {
 
 const PackageDetailHero = ({ packageData }: PackageDetailHeroProps) => {
   return (
-    <div 
-      className="relative h-[60vh] bg-cover bg-center"
-      style={{ backgroundImage: `url(${packageData.image})` }}
-    >
+    <div className="relative h-[60vh]">
+      <SafeImage
+        src={packageData.image}
+        alt={packageData.title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60">
         <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-12">
           <div className="max-w-3xl">

@@ -2,6 +2,7 @@
 import React from "react";
 import { MapPin, Clock, Star } from "lucide-react";
 import { Tour } from "@/data/tours";
+import SafeImage from "@/components/ui/safe-image";
 
 interface TourDetailHeroProps {
   tour: Tour;
@@ -9,7 +10,12 @@ interface TourDetailHeroProps {
 
 const TourDetailHero = ({ tour }: TourDetailHeroProps) => {
   return (
-    <div className="relative h-[50vh] bg-cover bg-center" style={{ backgroundImage: `url(${tour.image})` }}>
+    <div className="relative h-[50vh] bg-cover bg-center">
+      <SafeImage
+        src={tour.image}
+        alt={tour.title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       <div className="absolute inset-0 bg-black/30 flex items-end">
         <div className="container mx-auto px-4 pb-8">
           <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-lg inline-block">

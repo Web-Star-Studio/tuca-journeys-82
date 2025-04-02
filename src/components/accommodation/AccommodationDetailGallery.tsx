@@ -14,12 +14,13 @@ interface AccommodationDetailGalleryProps {
 }
 
 const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGalleryProps) => {
-  // For a real gallery, we would have multiple images
-  // Since we only have one image in the data model, we'll duplicate it for demo purposes
+  // Use all 5 images for demonstration purposes
   const images = [
     accommodation.image,
-    accommodation.image, // Duplicated for demo
-    accommodation.image, // Duplicated for demo
+    "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
+    "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
+    "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png",
+    "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png",
   ];
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

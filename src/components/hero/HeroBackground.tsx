@@ -5,9 +5,11 @@ import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images with our new images
 const heroImages = [
-  "https://ibb.co/s9sZGPrX", // Fernando de Noronha image 1
-  "https://ibb.co/LXXcnd8r", // Fernando de Noronha image 2
-  "https://ibb.co/pmMT8sg"  // Fernando de Noronha image 3
+  "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png", // Fernando de Noronha two rocks image
+  "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png", // Fernando de Noronha underwater image
+  "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png", // Fernando de Noronha beach image
+  "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png", // Fernando de Noronha church image
+  "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png"  // Fernando de Noronha sunset image
 ];
 
 type HeroBackgroundProps = {

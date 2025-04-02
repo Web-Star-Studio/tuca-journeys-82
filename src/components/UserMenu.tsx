@@ -21,7 +21,8 @@ const UserMenu = () => {
   };
 
   if (!user) {
-    return <AuthButtons />;
+    // Hide auth buttons on mobile, they'll be shown in the mobile menu
+    return <div className="hidden md:block"><AuthButtons /></div>;
   }
 
   return (

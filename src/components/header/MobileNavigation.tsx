@@ -1,6 +1,8 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import AuthButtons from "../user-menu/AuthButtons";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -8,6 +10,8 @@ interface MobileNavigationProps {
 }
 
 const MobileNavigation = ({ isOpen, onClose }: MobileNavigationProps) => {
+  const { user } = useAuth();
+  
   if (!isOpen) return null;
 
   return (
@@ -69,6 +73,13 @@ const MobileNavigation = ({ isOpen, onClose }: MobileNavigationProps) => {
         >
           Reservar
         </Link>
+        
+        {/* Botões de autenticação (apenas mostrar se o usuário não estiver logado) */}
+        {!user && (
+          <div className="mt-4 border-t pt-4">
+            <AuthButtons />
+          </div>
+        )}
       </nav>
     </div>
   );

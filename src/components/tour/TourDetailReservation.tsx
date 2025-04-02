@@ -5,8 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Users, Star } from "lucide-react";
-import { Tour } from "@/data/tours";
+import { Tour } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateBooking } from "@/hooks/use-bookings";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface TourDetailReservationProps {
   tour: Tour;
@@ -16,8 +19,11 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
   const [participants, setParticipants] = useState(1);
   const [selectedDate, setSelectedDate] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
+  const createBookingMutation = useCreateBooking();
+  const navigate = useNavigate();
 
-  const handleReservation = (e: React.FormEvent) => {
+  const handleReservation = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedDate) {
@@ -29,10 +35,37 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
       return;
     }
 
-    toast({
-      title: "Reserva realizada com sucesso!",
-      description: `Seu passeio "${tour.title}" foi reservado para ${selectedDate} com ${participants} ${participants > 1 ? 'pessoas' : 'pessoa'}.`,
-    });
+    if (!user) {
+      toast({
+        title: "Autenticação necessária",
+        description: "Você precisa estar logado para fazer uma reserva.",
+        variant: "destructive",
+      });
+      navigate("/login", { state: { from: window.location.pathname } });
+      return;
+    }
+
+    // Calculate total price
+    const totalPrice = tour.price * participants;
+
+    try {
+      await createBookingMutation.mutateAsync({
+        tour_id: tour.id,
+        accommodation_id: null,
+        start_date: selectedDate,
+        end_date: selectedDate, // For tours, start and end date are the same
+        guests: participants,
+        total_price: totalPrice,
+        status: 'pending',
+        payment_status: 'pending',
+        payment_method: null,
+        special_requests: null
+      });
+
+      navigate("/reserva-confirmada");
+    } catch (error) {
+      console.error("Error creating booking:", error);
+    }
   };
 
   return (
@@ -71,7 +104,7 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
                 type="button" 
                 variant="outline" 
                 size="sm"
-                onClick={() => setParticipants(Math.max(1, participants - 1))}
+                onClick={() => setParticipants(Math.max(tour.min_participants, participants - 1))}
               >
                 -
               </Button>
@@ -79,8 +112,8 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
                 <Input 
                   id="participants" 
                   type="number" 
-                  min="1" 
-                  max={tour.maxParticipants}
+                  min={tour.min_participants} 
+                  max={tour.max_participants}
                   value={participants} 
                   onChange={(e) => setParticipants(Number(e.target.value))}
                   className="text-center" 
@@ -90,14 +123,14 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
                 type="button" 
                 variant="outline" 
                 size="sm"
-                onClick={() => setParticipants(Math.min(tour.maxParticipants, participants + 1))}
+                onClick={() => setParticipants(Math.min(tour.max_participants, participants + 1))}
               >
                 +
               </Button>
             </div>
             <div className="mt-1 text-sm text-gray-500 flex items-center">
               <Users className="h-4 w-4 mr-1" />
-              <span>Máximo de {tour.maxParticipants} pessoas</span>
+              <span>Máximo de {tour.max_participants} pessoas</span>
             </div>
           </div>
 
@@ -120,8 +153,9 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
           <Button 
             type="submit" 
             className="w-full bg-tuca-coral hover:bg-tuca-coral/90 text-white"
+            disabled={createBookingMutation.isPending}
           >
-            Reservar agora
+            {createBookingMutation.isPending ? "Processando..." : "Reservar agora"}
           </Button>
         </div>
       </form>

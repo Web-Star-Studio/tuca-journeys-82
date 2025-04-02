@@ -6,20 +6,50 @@ import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
-import { tours } from "@/data/tours";
 import TourDetailHero from "@/components/tour/TourDetailHero";
 import TourDetailInfo from "@/components/tour/TourDetailInfo";
 import TourDetailSchedule from "@/components/tour/TourDetailSchedule";
 import TourDetailReservation from "@/components/tour/TourDetailReservation";
 import TourDetailAccordion from "@/components/tour/TourDetailAccordion";
+import { useTour } from "@/hooks/use-tours";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TourDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const tour = tours.find((tour) => tour.id === Number(id));
+  const tourId = id ? parseInt(id) : undefined;
+  const { data: tour, isLoading, error } = useTour(tourId);
 
-  if (!tour) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mt-16">
+          <div className="h-[50vh] w-full bg-gray-100">
+            <Skeleton className="h-full w-full" />
+          </div>
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-3/4" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <Skeleton className="h-[500px] w-full" />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !tour) {
     return (
       <div className="min-h-screen">
         <Header />

@@ -1,51 +1,52 @@
 
 import { useState, useEffect } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Initialize the auth state
   useEffect(() => {
-    // Check for mock session in localStorage
-    const checkSession = () => {
+    // Get the initial session
+    const initializeAuth = async () => {
+      setLoading(true);
+      
       try {
-        const storedSession = localStorage.getItem('supabase.auth.token');
-        if (storedSession) {
-          const parsedSession = JSON.parse(storedSession);
-          if (parsedSession.currentSession?.user) {
-            setUser(parsedSession.currentSession.user as User);
-          } else {
-            setUser(null);
-          }
-        } else {
-          setUser(null);
+        // Get the current session
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          setSession(data.session);
+          setUser(data.session.user);
         }
-        setLoading(false);
       } catch (error) {
-        console.error("Error parsing stored session:", error);
-        setUser(null);
+        console.error("Error initializing auth:", error);
+      } finally {
         setLoading(false);
       }
     };
 
-    // Initial check
-    checkSession();
+    initializeAuth();
     
-    // Listen for auth state changes
-    const handleAuthChange = () => {
-      checkSession();
-    };
-    
-    window.addEventListener('supabase.auth.token-change', handleAuthChange);
+    // Set up the auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event);
+        setSession(currentSession);
+        setUser(currentSession?.user || null);
+        setLoading(false);
+      }
+    );
     
     // Cleanup
     return () => {
-      window.removeEventListener('supabase.auth.token-change', handleAuthChange);
+      if (authListener?.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
 
-  return { user, loading, setLoading };
+  return { user, session, loading, setLoading };
 };

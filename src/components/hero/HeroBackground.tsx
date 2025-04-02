@@ -1,4 +1,5 @@
 
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import SafeImage from "@/components/ui/safe-image";
 
@@ -24,7 +25,7 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
   };
 
   // Preload images on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     preloadImages();
   }, []);
 

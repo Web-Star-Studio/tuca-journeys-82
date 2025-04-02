@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, Clock } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for accommodations
 const heroImages = [
-  "/hero-noronha-beach.jpg",
-  "/hero-noronha-aerial.jpg",
-  "/hero-noronha-sunset.jpg",
+  "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=1974&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=1932&auto=format&fit=crop"
 ];
 
 const AccommodationHero = () => {

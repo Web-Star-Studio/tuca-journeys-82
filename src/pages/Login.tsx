@@ -23,11 +23,17 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [redirectToAdmin, setRedirectToAdmin] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await signIn(email, password);
-    navigate("/");
+    
+    if (redirectToAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   };
 
   const handleDemoLogin = async () => {
@@ -38,7 +44,12 @@ const Login = () => {
     setPassword(demoPassword);
     
     await signIn(demoEmail, demoPassword);
-    navigate("/");
+    
+    if (redirectToAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   };
 
   // Added quick login with any credentials
@@ -50,7 +61,12 @@ const Login = () => {
     setPassword(quickPassword);
     
     await signIn(quickEmail, quickPassword);
-    navigate("/");
+    
+    if (redirectToAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   };
 
   return (
@@ -105,6 +121,23 @@ const Login = () => {
                       />
                     </div>
                   </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin" 
+                      checked={redirectToAdmin}
+                      onCheckedChange={(checked) => {
+                        setRedirectToAdmin(checked === true);
+                      }}
+                    />
+                    <label
+                      htmlFor="admin"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Acessar como Administrador
+                    </label>
+                  </div>
+                  
                   <Button
                     type="submit"
                     className="w-full"

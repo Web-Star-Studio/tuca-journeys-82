@@ -27,6 +27,15 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Wishlist from "./pages/Wishlist";
 import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminTours from "./pages/admin/Tours";
+import AdminAccommodations from "./pages/admin/Accommodations";
+import AdminUsers from "./pages/admin/Users";
+import AdminBookings from "./pages/admin/Bookings";
+import AdminMedia from "./pages/admin/Media";
+
 import "./App.css";
 
 const App = () => {
@@ -58,6 +67,15 @@ const App = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/pagamentos" element={<Payments />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/tours" element={<AdminTours />} />
+                <Route path="/admin/accommodations" element={<AdminAccommodations />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/media" element={<AdminMedia />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />

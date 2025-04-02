@@ -1,37 +1,32 @@
 
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Heart } from "lucide-react";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import UserMenu from "./UserMenu";
-import { useWishlist } from "@/contexts/WishlistContext";
-
-// Use custom hook to detect scroll position
-const useScrollPosition = () => {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  
-  useEffect(() => {
-    const updatePosition = () => {
-      setScrollPosition(window.pageYOffset);
-    };
-    window.addEventListener("scroll", updatePosition);
-    updatePosition();
-    return () => window.removeEventListener("scroll", updatePosition);
-  }, []);
-  
-  return scrollPosition;
-};
+import DesktopNavigation from "./header/DesktopNavigation";
+import MobileNavigation from "./header/MobileNavigation";
+import Logo from "./header/Logo";
+import WishlistIcon from "./header/WishlistIcon";
+import { useScrollPosition } from "./header/useScrollPosition";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const scrollPosition = useScrollPosition();
   const location = useLocation();
-  const { wishlistItems } = useWishlist();
   
   // Determine if we're on the homepage
   const isHomePage = location.pathname === "/";
   
   // Apply transparent header on home page when at the top
   const isTransparent = isHomePage && scrollPosition < 50;
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <header
@@ -44,86 +39,20 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link
-            to="/"
-            className="text-2xl font-bold font-serif tracking-tighter"
-          >
-            Tuca Noronha
-          </Link>
+          <Logo />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link
-              to="/"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname === "/" ? "font-medium" : ""
-              }`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/passeios"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname.includes("/passeios") ? "font-medium" : ""
-              }`}
-            >
-              Passeios
-            </Link>
-            <Link
-              to="/hospedagens"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname.includes("/hospedagens") ? "font-medium" : ""
-              }`}
-            >
-              Hospedagens
-            </Link>
-            <Link
-              to="/pacotes"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname.includes("/pacotes") ? "font-medium" : ""
-              }`}
-            >
-              Pacotes
-            </Link>
-            <Link
-              to="/sobre"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname.includes("/sobre") ? "font-medium" : ""
-              }`}
-            >
-              Sobre
-            </Link>
-            <Link
-              to="/contato"
-              className={`hover:opacity-75 transition-opacity ${
-                location.pathname.includes("/contato") ? "font-medium" : ""
-              }`}
-            >
-              Contato
-            </Link>
-          </nav>
+          <DesktopNavigation />
 
           {/* User Menu and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-            <Link 
-              to="/lista-de-desejos"
-              className={`relative hover:opacity-75 transition-opacity ${
-                isTransparent ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <Heart className="h-6 w-6" />
-              {wishlistItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-tuca-ocean-blue text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {wishlistItems.length}
-                </span>
-              )}
-            </Link>
+            <WishlistIcon isTransparent={isTransparent} />
             
             <UserMenu />
             
             <button
               className="md:hidden focus:outline-none"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={handleMenuToggle}
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -136,68 +65,7 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white text-gray-900 shadow-lg p-4 animate-fade-in">
-          <nav className="flex flex-col space-y-4">
-            <Link
-              to="/"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/passeios"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Passeios
-            </Link>
-            <Link
-              to="/hospedagens"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Hospedagens
-            </Link>
-            <Link
-              to="/pacotes"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Pacotes
-            </Link>
-            <Link
-              to="/sobre"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sobre
-            </Link>
-            <Link
-              to="/contato"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contato
-            </Link>
-            <Link
-              to="/lista-de-desejos"
-              className="px-4 py-2 rounded hover:bg-gray-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Lista de Desejos
-            </Link>
-            <Link
-              to="/reservar"
-              className="px-4 py-2 bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue text-white rounded-full"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Reservar
-            </Link>
-          </nav>
-        </div>
-      )}
+      <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />
     </header>
   );
 };

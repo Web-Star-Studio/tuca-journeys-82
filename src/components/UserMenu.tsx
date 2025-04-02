@@ -35,12 +35,21 @@ const UserMenu = () => {
     return (
       <div className="flex space-x-2">
         <Link to="/login">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="secondary" 
+            size="sm"
+            className="text-tuca-ocean-blue hover:text-tuca-deep-blue font-medium"
+          >
             Entrar
           </Button>
         </Link>
         <Link to="/cadastro">
-          <Button size="sm">Cadastrar</Button>
+          <Button 
+            size="sm" 
+            className="bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue hover:from-tuca-ocean-blue hover:to-tuca-deep-blue transition-all duration-300"
+          >
+            Cadastrar
+          </Button>
         </Link>
       </div>
     );

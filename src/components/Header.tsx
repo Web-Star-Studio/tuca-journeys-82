@@ -113,7 +113,7 @@ const Header = () => {
             >
               <Heart className="h-6 w-6" />
               {wishlistItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-tuca-coral text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-tuca-ocean-blue text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {wishlistItems.length}
                 </span>
               )}
@@ -190,7 +190,7 @@ const Header = () => {
             </Link>
             <Link
               to="/reservar"
-              className="px-4 py-2 bg-tuca-coral text-white rounded-full"
+              className="px-4 py-2 bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue text-white rounded-full"
               onClick={() => setIsMenuOpen(false)}
             >
               Reservar

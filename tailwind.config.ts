@@ -67,15 +67,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Tuca Noronha custom colors - updated for minimalist design
+				// Tuca Noronha custom colors - updated with blue palette
 				tuca: {
-					"ocean-blue": "#0077ED", // Apple blue equivalent
-					"deep-blue": "#000814",
-					"light-blue": "#E1F0FF",
-					"sand": "#F5F5F7", // Apple background gray equivalent
-					"coral": "#A259FF", // More modern accent color
-					"green": "#34C759", // Apple green equivalent
-					"light-green": "#F2FBF6",
+					"ocean-blue": "#0077ED", // Primary blue
+					"deep-blue": "#005BBD", // Darker blue
+					"medium-blue": "#4C9EFF", // Medium blue
+					"light-blue": "#E1F0FF", // Light blue
+					"sand": "#F5F5F7", // Light background
+					"green": "#34C759", // Keep green for success states
+					"light-green": "#F2FBF6", // Light green background
 				}
 			},
 			borderRadius: {

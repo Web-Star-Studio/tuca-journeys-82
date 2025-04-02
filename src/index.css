@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -24,7 +25,7 @@
     --muted: 220 14% 96%;
     --muted-foreground: 220 14% 46%;
 
-    --accent: 271 100% 67%;
+    --accent: 210 100% 40%;
     --accent-foreground: 220 20% 10%;
 
     --destructive: 0 84% 60%;
@@ -56,7 +57,7 @@
     --muted: 220 20% 18%;
     --muted-foreground: 220 20% 60%;
 
-    --accent: 271 100% 67%;
+    --accent: 210 100% 40%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
@@ -125,14 +126,18 @@
   }
 
   .button-primary {
-    @apply bg-tuca-ocean-blue text-white px-6 py-3 rounded-full transition-all duration-300 hover:bg-tuca-ocean-blue/90 hover:shadow-md;
+    @apply bg-tuca-ocean-blue text-white px-6 py-3 rounded-full transition-all duration-300 hover:bg-tuca-deep-blue hover:shadow-md;
   }
 
   .button-secondary {
-    @apply bg-transparent border border-tuca-ocean-blue text-tuca-ocean-blue px-6 py-3 rounded-full transition-all duration-300 hover:bg-tuca-ocean-blue/10;
+    @apply bg-transparent border border-tuca-ocean-blue text-tuca-ocean-blue px-6 py-3 rounded-full transition-all duration-300 hover:bg-tuca-light-blue;
   }
 
   .card-minimal {
     @apply bg-white dark:bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .gradient-blue {
+    @apply bg-gradient-to-r from-tuca-deep-blue via-tuca-ocean-blue to-tuca-medium-blue;
   }
 }

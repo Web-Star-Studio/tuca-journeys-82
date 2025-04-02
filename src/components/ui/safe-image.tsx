@@ -59,12 +59,12 @@ const SafeImage = ({
   return (
     <>
       {isLoading && (
-        <div className={cn("bg-muted animate-pulse", className)} {...props} />
+        <div className={cn("bg-muted animate-pulse w-full h-full", className)} {...props} />
       )}
       <img
         src={imgSrc}
         alt={alt}
-        className={cn(className, {
+        className={cn("w-full h-full object-cover", className, {
           "hidden": isLoading,
           "opacity-95": hasError
         })}

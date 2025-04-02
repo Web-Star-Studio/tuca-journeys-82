@@ -47,12 +47,14 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               opacity: { duration: 1.5 },
               scale: { duration: 7 }
             }}
+            style={{ width: '100vw', height: '100vh' }}
           >
             <SafeImage
               src={image}
               alt={`Fernando de Noronha - Scene ${index + 1}`}
               className="w-full h-full object-cover"
               fallbackSrc="/placeholder.svg"
+              style={{ objectPosition: 'center' }}
             />
           </motion.div>
         ))}

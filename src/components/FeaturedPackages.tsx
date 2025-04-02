@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,14 @@ const FeaturedPackages = () => {
   const featuredPackages = getFeaturedPackages(3);
 
   return (
-    <section className="section-padding bg-white">
-      <div className="container mx-auto px-6 md:px-12">
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-center mb-4">Pacotes em Destaque</h2>
-        <p className="text-lg text-center text-muted-foreground max-w-3xl mx-auto mb-16">
+        <p className="text-lg text-center text-muted-foreground max-w-3xl mx-auto mb-14">
           Experiências cuidadosamente planejadas para sua viagem perfeita em Fernando de Noronha
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {featuredPackages.map((pkg) => (
             <div
               key={pkg.id}

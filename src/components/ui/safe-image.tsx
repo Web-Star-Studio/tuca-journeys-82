@@ -15,6 +15,7 @@ const SafeImage = ({
   fallbackSrc = "/placeholder.svg",
   onLoadSuccess,
   onLoadError,
+  style,
   ...props
 }: SafeImageProps) => {
   const [imgSrc, setImgSrc] = useState<string | undefined>(src);
@@ -59,7 +60,11 @@ const SafeImage = ({
   return (
     <>
       {isLoading && (
-        <div className={cn("bg-muted animate-pulse w-full h-full", className)} {...props} />
+        <div 
+          className={cn("bg-muted animate-pulse w-full h-full", className)} 
+          style={style} 
+          {...props} 
+        />
       )}
       <img
         src={imgSrc}
@@ -68,6 +73,7 @@ const SafeImage = ({
           "hidden": isLoading,
           "opacity-95": hasError
         })}
+        style={style}
         onError={() => {
           setImgSrc(fallbackSrc);
           setHasError(true);

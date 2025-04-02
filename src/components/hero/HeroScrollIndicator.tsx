@@ -13,7 +13,7 @@ const HeroScrollIndicator = ({
 }: HeroScrollIndicatorProps) => {
   return (
     <motion.div 
-      className="absolute bottom-28 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer" 
+      className="absolute bottom-36 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer" 
       animate={{
         opacity: 1 - scrollProgress * 3,
         y: scrollProgress * 50

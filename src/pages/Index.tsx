@@ -15,22 +15,20 @@ import DestinationHighlight from "@/components/DestinationHighlight";
 
 const Index = () => {
   return (
-    <div className="relative overflow-x-hidden w-full">
+    <div className="relative w-full overflow-hidden">
       <Header />
       <main>
         <HeroSection />
-        <div className="w-full">
-          <FeatureHighlights />
-          <DestinationHighlight />
-          <FeaturedPackages />
-          <BookingCTA />
-          <FeaturedTours />
-          <FeaturedAccommodations />
-          <Testimonials />
-          <FeaturedProducts />
-          <InstagramFeed />
-          <ContactCTA />
-        </div>
+        <FeatureHighlights />
+        <DestinationHighlight />
+        <FeaturedPackages />
+        <BookingCTA />
+        <FeaturedTours />
+        <FeaturedAccommodations />
+        <Testimonials />
+        <FeaturedProducts />
+        <InstagramFeed />
+        <ContactCTA />
       </main>
       <Footer />
     </div>

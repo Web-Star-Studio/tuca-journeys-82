@@ -6,8 +6,8 @@ import { ArrowRight, MapPin, Camera, Umbrella, Fish } from "lucide-react";
 
 const DestinationHighlight = () => {
   return (
-    <section className="py-16 bg-gradient-to-r from-tuca-light-blue to-white overflow-hidden">
-      <div className="container mx-auto px-6 lg:px-8">
+    <section className="py-20 bg-gradient-to-r from-tuca-light-blue to-white overflow-hidden">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         <div className="flex flex-col lg:flex-row items-center gap-12">
           {/* Left content */}
           <motion.div 

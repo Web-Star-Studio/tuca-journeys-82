@@ -45,7 +45,7 @@ const HeroSection = () => {
   return (
     <section 
       ref={containerRef}
-      className="relative w-full h-[100vh] overflow-hidden"
+      className="relative w-screen h-screen overflow-hidden"
     >
       <HeroBackground 
         currentImageIndex={currentImageIndex} 

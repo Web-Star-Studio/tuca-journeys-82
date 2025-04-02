@@ -11,7 +11,7 @@ import { useScrollPosition } from "./header/useScrollPosition";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const scrollPosition = useScrollPosition();
+  const { scrollPosition } = useScrollPosition(); // Destructure to get just the scrollPosition
   const location = useLocation();
   
   // Determine if we're on the homepage

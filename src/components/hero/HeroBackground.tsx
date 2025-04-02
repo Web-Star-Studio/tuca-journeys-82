@@ -32,7 +32,7 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
   return (
     <>
       {/* Background Image Slider with Parallax */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {heroImages.map((image, index) => (
           <motion.div
             key={index}
@@ -52,7 +52,6 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               src={image}
               alt={`Fernando de Noronha - Scene ${index + 1}`}
               className="w-full h-full object-cover"
-              style={{ width: "100vw", height: "100vh" }}
               fallbackSrc="/placeholder.svg"
             />
           </motion.div>

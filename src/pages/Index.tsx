@@ -11,6 +11,7 @@ import ContactCTA from "@/components/ContactCTA";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingCTA from "@/components/BookingCTA";
+import DestinationHighlight from "@/components/DestinationHighlight";
 
 const Index = () => {
   return (
@@ -19,9 +20,10 @@ const Index = () => {
       <main>
         <HeroSection />
         <FeatureHighlights />
+        <DestinationHighlight />
         <FeaturedPackages />
-        <FeaturedTours />
         <BookingCTA />
+        <FeaturedTours />
         <FeaturedAccommodations />
         <Testimonials />
         <FeaturedProducts />

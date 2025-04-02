@@ -1,80 +1,14 @@
 
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Mail, Lock, Loader2, ShieldCheck } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import LoginCard from "@/components/login/LoginCard";
 
 const Login = () => {
-  const { signIn, loading } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [redirectToAdmin, setRedirectToAdmin] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await signIn(email, password);
-    
-    if (redirectToAdmin) {
-      navigate("/admin");
-    } else {
-      navigate("/");
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    const demoEmail = "demo@tucanoronha.com";
-    const demoPassword = "demo123456";
-    
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    
-    await signIn(demoEmail, demoPassword);
-    
-    if (redirectToAdmin) {
-      navigate("/admin");
-    } else {
-      navigate("/");
-    }
-  };
-
-  // Admin demo quick access
-  const handleAdminDemoLogin = async () => {
-    const adminEmail = "admin@tucanoronha.com";
-    const adminPassword = "admin123456";
-    
-    setEmail(adminEmail);
-    setPassword(adminPassword);
-    
-    await signIn(adminEmail, adminPassword);
-    navigate("/admin");
-  };
-
-  // Added quick login with any credentials
-  const handleQuickLogin = async () => {
-    const quickEmail = "user@example.com";
-    const quickPassword = "password";
-    
-    setEmail(quickEmail);
-    setPassword(quickPassword);
-    
-    await signIn(quickEmail, quickPassword);
-    
+  
+  const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
     if (redirectToAdmin) {
       navigate("/admin");
     } else {
@@ -88,141 +22,7 @@ const Login = () => {
       <main className="flex-grow py-20 md:py-32 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
-                <CardDescription className="text-center">
-                  Durante o desenvolvimento, qualquer email e senha funcionarão
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="seu@email.com"
-                        className="pl-10"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Senha</Label>
-                      <Link
-                        to="/recuperar-senha"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        Esqueceu a senha?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        className="pl-10"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin" 
-                      checked={redirectToAdmin}
-                      onCheckedChange={(checked) => {
-                        setRedirectToAdmin(checked === true);
-                      }}
-                    />
-                    <label
-                      htmlFor="admin"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Acessar como Administrador
-                    </label>
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : (
-                      "Entrar"
-                    )}
-                  </Button>
-                </form>
-                
-                <div className="my-4">
-                  <Separator className="my-4">
-                    <span className="mx-2 text-xs text-muted-foreground">ACESSO RÁPIDO</span>
-                  </Separator>
-                  
-                  <Button
-                    variant="outline"
-                    className="w-full mt-2 mb-2 flex justify-between items-center"
-                    onClick={handleAdminDemoLogin}
-                    disabled={loading}
-                  >
-                    <div className="flex items-center">
-                      <ShieldCheck className="mr-2 h-4 w-4 text-tuca-deep-blue" />
-                      <span>Acessar Painel Admin</span>
-                    </div>
-                    <span className="bg-tuca-light-blue text-tuca-deep-blue px-2 py-0.5 rounded-full text-xs">Rápido</span>
-                  </Button>
-                  
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handleQuickLogin}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Login Rápido"
-                      )}
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handleDemoLogin}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Acesso Demo"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-4">
-                <div className="text-center text-sm text-muted-foreground">
-                  Não tem uma conta?{" "}
-                  <Link to="/cadastro" className="text-primary hover:underline">
-                    Cadastre-se
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
+            <LoginCard onSuccessfulLogin={handleSuccessfulLogin} />
           </div>
         </div>
       </main>

@@ -42,12 +42,12 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
             initial={{ opacity: 0 }}
             animate={{ 
               opacity: index === currentImageIndex ? 1 : 0,
-              scale: index === currentImageIndex ? 1 : 1.1,
+              scale: index === currentImageIndex ? 1.1 : 1, // Changed from scale down to scale up (zoom in)
               y: scrollProgress * -150 // Enhanced parallax effect
             }}
             transition={{ 
               opacity: { duration: 1.8, ease: "easeInOut" },
-              scale: { duration: 8, ease: "easeOut" }
+              scale: { duration: 8, ease: "easeOut" } // Slower scale animation for more subtle effect
             }}
           >
             <SafeImage

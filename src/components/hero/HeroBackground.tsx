@@ -5,9 +5,9 @@ import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for rotation with high-quality Pexels images
 const heroImages = [
-  "https://images.pexels.com/photos/1202821/pexels-photo-1202821.jpeg?auto=compress&cs=tinysrgb&w=1920", // Fernando de Noronha aerial view
-  "https://images.pexels.com/photos/3355732/pexels-photo-3355732.jpeg?auto=compress&cs=tinysrgb&w=1920", // Beautiful beach with rock formations
-  "https://images.pexels.com/photos/4930336/pexels-photo-4930336.jpeg?auto=compress&cs=tinysrgb&w=1920"  // Ocean view of Noronha
+  "/hero-noronha-beach.jpg", // Beautiful beach view
+  "/hero-noronha-aerial.jpg", // Aerial view of the island
+  "/hero-noronha-sunset.jpg"  // Sunset view
 ];
 
 type HeroBackgroundProps = {

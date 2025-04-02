@@ -5,9 +5,9 @@ import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for accommodations
 const heroImages = [
-  "https://images.pexels.com/photos/11396433/pexels-photo-11396433.jpeg?auto=compress&cs=tinysrgb&w=1920", // Beach pousada view
-  "https://images.pexels.com/photos/2409953/pexels-photo-2409953.jpeg?auto=compress&cs=tinysrgb&w=1920", // Luxury accommodation
-  "https://images.pexels.com/photos/6109989/pexels-photo-6109989.jpeg?auto=compress&cs=tinysrgb&w=1920"  // Beach front view
+  "/tour-sunset.jpg", // Beautiful sunset view
+  "/tour-underwater.jpg", // Underwater scene
+  "/tour-trail.jpg"  // Beach trail view
 ];
 
 const AccommodationHero = () => {

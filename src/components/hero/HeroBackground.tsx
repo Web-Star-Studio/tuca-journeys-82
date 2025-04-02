@@ -1,6 +1,6 @@
 
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images with our new images
@@ -18,6 +18,22 @@ type HeroBackgroundProps = {
 };
 
 const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundProps) => {
+  const { scrollY } = useScroll();
+  const [windowHeight, setWindowHeight] = useState(0);
+  
+  // Enhanced parallax effect with framer-motion
+  useEffect(() => {
+    // Get window height for better parallax calculations
+    setWindowHeight(window.innerHeight);
+    
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Preload all hero images
   const preloadImages = () => {
     heroImages.forEach(src => {
@@ -31,33 +47,45 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
     preloadImages();
   }, []);
 
+  // Set up parallax values for different images
+  const y1 = useTransform(scrollY, [0, windowHeight], [0, windowHeight * 0.3]);
+  const y2 = useTransform(scrollY, [0, windowHeight], [0, windowHeight * 0.4]);
+  const y3 = useTransform(scrollY, [0, windowHeight], [0, windowHeight * 0.25]);
+
   return (
     <>
-      {/* Background Image Slider with Parallax */}
+      {/* Background Image Slider with Enhanced Parallax */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
-        {heroImages.map((image, index) => (
-          <motion.div
-            key={index}
-            className="absolute inset-0 w-full h-full"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: index === currentImageIndex ? 1 : 0,
-              scale: index === currentImageIndex ? 1.1 : 1, // Changed from scale down to scale up (zoom in)
-              y: scrollProgress * -150 // Enhanced parallax effect
-            }}
-            transition={{ 
-              opacity: { duration: 1.8, ease: "easeInOut" },
-              scale: { duration: 8, ease: "easeOut" } // Slower scale animation for more subtle effect
-            }}
-          >
-            <SafeImage
-              src={image}
-              alt={`Fernando de Noronha - Scene ${index + 1}`}
-              className="w-full h-full object-cover"
-              fallbackSrc="/placeholder.svg"
-            />
-          </motion.div>
-        ))}
+        {heroImages.map((image, index) => {
+          // Create different parallax speeds for different images
+          const yOffset = index % 3 === 0 ? y1 : index % 3 === 1 ? y2 : y3;
+          
+          return (
+            <motion.div
+              key={index}
+              className="absolute inset-0 w-full h-full"
+              initial={{ opacity: 0 }}
+              animate={{ 
+                opacity: index === currentImageIndex ? 1 : 0,
+                scale: index === currentImageIndex ? 1.1 : 1, // Zoom in effect
+              }}
+              style={{
+                y: index === currentImageIndex ? yOffset : 0, // Apply parallax only to visible image
+              }}
+              transition={{ 
+                opacity: { duration: 1.8, ease: "easeInOut" },
+                scale: { duration: 8, ease: "easeOut" }, // Slower scale animation for subtle effect
+              }}
+            >
+              <SafeImage
+                src={image}
+                alt={`Fernando de Noronha - Scene ${index + 1}`}
+                className="w-full h-full object-cover"
+                fallbackSrc="/placeholder.svg"
+              />
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Modern gradient overlay with improved aesthetics */}

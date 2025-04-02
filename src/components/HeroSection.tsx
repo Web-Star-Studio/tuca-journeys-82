@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
+import { useScroll } from "framer-motion";
 import HeroBackground from "./hero/HeroBackground";
 import HeroContent from "./hero/HeroContent";
 import HeroScrollIndicator from "./hero/HeroScrollIndicator";
@@ -9,11 +10,15 @@ const HeroSection = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
 
   // Auto-rotate images with improved timing
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % 3);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % 5); // Updated to use all 5 images
     }, 7000); // Slightly longer for better user experience
 
     return () => clearInterval(interval);

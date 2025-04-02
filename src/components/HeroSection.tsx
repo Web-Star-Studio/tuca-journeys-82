@@ -10,22 +10,22 @@ const HeroSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Auto-rotate images
+  // Auto-rotate images with improved timing
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % 3);
-    }, 6000);
+    }, 7000); // Slightly longer for better user experience
 
     return () => clearInterval(interval);
   }, []);
 
-  // Handle scroll effect
+  // Enhanced scroll effect handling
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
       const scrollPosition = window.scrollY;
       const heroHeight = containerRef.current.offsetHeight;
-      const progress = Math.min(scrollPosition / heroHeight, 1);
+      const progress = Math.min(scrollPosition / (heroHeight * 0.8), 1); // Use 80% of hero height for better effect
       setScrollProgress(progress);
     };
 
@@ -33,7 +33,7 @@ const HeroSection = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll to next section
+  // Improved smooth scroll to next section
   const scrollToNextSection = () => {
     const heroHeight = containerRef.current?.offsetHeight || 0;
     window.scrollTo({

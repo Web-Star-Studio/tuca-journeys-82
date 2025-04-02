@@ -41,11 +41,11 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
             animate={{ 
               opacity: index === currentImageIndex ? 1 : 0,
               scale: index === currentImageIndex ? 1 : 1.1,
-              y: scrollProgress * -100 // Parallax effect
+              y: scrollProgress * -150 // Enhanced parallax effect
             }}
             transition={{ 
-              opacity: { duration: 1.5 },
-              scale: { duration: 7 }
+              opacity: { duration: 1.8, ease: "easeInOut" },
+              scale: { duration: 8, ease: "easeOutQuart" }
             }}
           >
             <SafeImage
@@ -58,13 +58,16 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
         ))}
       </div>
 
-      {/* Modern gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-10" />
+      {/* Modern gradient overlay with improved aesthetics */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 z-10" />
       
-      {/* Abstract shapes for visual interest */}
-      <div className="absolute right-0 top-1/4 w-48 h-48 rounded-full bg-tuca-ocean-blue/20 blur-3xl z-10 animate-pulse" />
-      <div className="absolute left-10 bottom-1/4 w-40 h-40 rounded-full bg-tuca-light-blue/30 blur-3xl z-10 animate-pulse" 
-           style={{ animationDelay: "1s" }} />
+      {/* Enhanced abstract shapes with better animation */}
+      <div className="absolute right-0 top-1/4 w-64 h-64 rounded-full bg-tuca-ocean-blue/20 blur-3xl z-10 opacity-60 animate-pulse" 
+           style={{ animationDuration: "8s" }} />
+      <div className="absolute left-10 bottom-1/4 w-52 h-52 rounded-full bg-tuca-light-blue/30 blur-3xl z-10 opacity-50 animate-pulse" 
+           style={{ animationDuration: "10s", animationDelay: "1s" }} />
+      <div className="absolute left-1/4 top-1/3 w-40 h-40 rounded-full bg-tuca-deep-blue/20 blur-3xl z-10 opacity-40 animate-pulse" 
+           style={{ animationDuration: "12s", animationDelay: "2s" }} />
     </>
   );
 };

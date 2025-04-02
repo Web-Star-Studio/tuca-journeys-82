@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -42,6 +42,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign Out - Modified from useAuthOperations to return void for consistency
   const signOut = async () => {
     try {
+      // Clear mock session if it exists
+      localStorage.removeItem("supabase-mock-session");
       await authSignOut();
     } catch (error) {
       console.error("Error in signOut:", error);

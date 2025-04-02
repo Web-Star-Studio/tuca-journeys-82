@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const Login = () => {
@@ -51,6 +51,18 @@ const Login = () => {
     } else {
       navigate("/");
     }
+  };
+
+  // Admin demo quick access
+  const handleAdminDemoLogin = async () => {
+    const adminEmail = "admin@tucanoronha.com";
+    const adminPassword = "admin123456";
+    
+    setEmail(adminEmail);
+    setPassword(adminPassword);
+    
+    await signIn(adminEmail, adminPassword);
+    navigate("/admin");
   };
 
   // Added quick login with any credentials
@@ -157,40 +169,49 @@ const Login = () => {
                 
                 <div className="my-4">
                   <Separator className="my-4">
-                    <span className="mx-2 text-xs text-muted-foreground">OU</span>
+                    <span className="mx-2 text-xs text-muted-foreground">ACESSO RÁPIDO</span>
                   </Separator>
                   
                   <Button
                     variant="outline"
-                    className="w-full mt-2 mb-2"
-                    onClick={handleQuickLogin}
+                    className="w-full mt-2 mb-2 flex justify-between items-center"
+                    onClick={handleAdminDemoLogin}
                     disabled={loading}
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : (
-                      "Login Rápido (Qualquer Credencial)"
-                    )}
+                    <div className="flex items-center">
+                      <ShieldCheck className="mr-2 h-4 w-4 text-tuca-deep-blue" />
+                      <span>Acessar Painel Admin</span>
+                    </div>
+                    <span className="bg-tuca-light-blue text-tuca-deep-blue px-2 py-0.5 rounded-full text-xs">Rápido</span>
                   </Button>
                   
-                  <Button
-                    variant="outline"
-                    className="w-full mt-2"
-                    onClick={handleDemoLogin}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : (
-                      "Acessar como Demonstração"
-                    )}
-                  </Button>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleQuickLogin}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Login Rápido"
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleDemoLogin}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Acesso Demo"
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">

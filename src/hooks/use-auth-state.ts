@@ -15,7 +15,23 @@ export const useAuthState = () => {
       setLoading(true);
       
       try {
-        // Get the current session
+        // Check for a mock session first
+        const mockSessionStr = localStorage.getItem("supabase-mock-session");
+        if (mockSessionStr) {
+          const mockSession = JSON.parse(mockSessionStr);
+          // Check if mock session is expired
+          if (mockSession.expires_at > Math.floor(Date.now() / 1000)) {
+            setSession(mockSession);
+            setUser(mockSession.user);
+            setLoading(false);
+            return;
+          } else {
+            // Clear expired mock session
+            localStorage.removeItem("supabase-mock-session");
+          }
+        }
+        
+        // Get the current session from Supabase
         const { data } = await supabase.auth.getSession();
         if (data?.session) {
           setSession(data.session);
@@ -34,6 +50,12 @@ export const useAuthState = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log("Auth state changed:", event);
+        
+        // If we get a SIGNED_OUT event, also clear any mock session
+        if (event === 'SIGNED_OUT') {
+          localStorage.removeItem("supabase-mock-session");
+        }
+        
         setSession(currentSession);
         setUser(currentSession?.user || null);
         setLoading(false);

@@ -45,7 +45,7 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
             }}
             transition={{ 
               opacity: { duration: 1.8, ease: "easeInOut" },
-              scale: { duration: 8, ease: "easeOutQuart" }
+              scale: { duration: 8, ease: "easeOut" }
             }}
           >
             <SafeImage

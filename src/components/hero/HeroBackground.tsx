@@ -1,5 +1,6 @@
 
 import { motion } from "framer-motion";
+import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for rotation with high-quality free-to-use images
 const heroImages = [
@@ -14,6 +15,19 @@ type HeroBackgroundProps = {
 };
 
 const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundProps) => {
+  // Preload all hero images
+  const preloadImages = () => {
+    heroImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  };
+
+  // Preload images on component mount
+  React.useEffect(() => {
+    preloadImages();
+  }, []);
+
   return (
     <>
       {/* Background Image Slider with Parallax */}
@@ -32,14 +46,15 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               opacity: { duration: 1.5 },
               scale: { duration: 7 }
             }}
-            style={{
-              backgroundImage: `url(${image})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              width: "100vw",
-              height: "100vh"
-            }}
-          />
+          >
+            <SafeImage
+              src={image}
+              alt={`Fernando de Noronha - Scene ${index + 1}`}
+              className="w-full h-full object-cover"
+              style={{ width: "100vw", height: "100vh" }}
+              fallbackSrc="/placeholder.svg"
+            />
+          </motion.div>
         ))}
       </div>
 

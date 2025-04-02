@@ -6,12 +6,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Wifi, Wind, Coffee, Waves, Users, Bed, Bath } from "lucide-react";
 import { Accommodation } from "@/data/accommodations";
+import SafeImage from "@/components/ui/safe-image";
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
 }
 
 const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  
   // Get icon for amenity
   const getAmenityIcon = (amenity: string) => {
     switch (amenity) {
@@ -32,10 +35,11 @@ const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img
+        <SafeImage
           src={accommodation.image}
           alt={accommodation.title}
-          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
+          onLoadSuccess={() => setImageLoaded(true)}
         />
       </div>
       <div className="p-6 md:p-8">

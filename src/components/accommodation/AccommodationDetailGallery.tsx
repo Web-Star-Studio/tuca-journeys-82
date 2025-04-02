@@ -7,6 +7,7 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X, Maximize } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
 
 interface AccommodationDetailGalleryProps {
   accommodation: Accommodation;
@@ -23,6 +24,7 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -32,14 +34,19 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const handleImageLoaded = (imageSrc: string) => {
+    setLoadedImages(prev => new Set(prev).add(imageSrc));
+  };
+
   return (
     <div className="container mx-auto px-4 mb-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-lg overflow-hidden">
         <div className="md:col-span-2 h-80 md:h-[500px] relative group">
-          <img
+          <SafeImage
             src={images[0]}
             alt={accommodation.title}
             className="w-full h-full object-cover"
+            onLoadSuccess={() => handleImageLoaded(images[0])}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
             <Dialog open={showFullscreen} onOpenChange={setShowFullscreen}>
@@ -50,10 +57,11 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
               </DialogTrigger>
               <DialogContent className="max-w-6xl h-[80vh] p-0 bg-black">
                 <div className="relative h-full flex items-center justify-center">
-                  <img
+                  <SafeImage
                     src={images[currentImageIndex]}
                     alt={`${accommodation.title} - Imagem ${currentImageIndex + 1}`}
                     className="max-h-full max-w-full object-contain"
+                    onLoadSuccess={() => handleImageLoaded(images[currentImageIndex])}
                   />
                   
                   <button 
@@ -104,10 +112,11 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
             setCurrentImageIndex(1);
             setShowFullscreen(true);
           }}>
-            <img
+            <SafeImage
               src={images[1]}
               alt={accommodation.title}
               className="w-full h-full object-cover brightness-95"
+              onLoadSuccess={() => handleImageLoaded(images[1])}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
           </div>
@@ -115,10 +124,11 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
             setCurrentImageIndex(2);
             setShowFullscreen(true);
           }}>
-            <img
+            <SafeImage
               src={images[2]}
               alt={accommodation.title}
               className="w-full h-full object-cover brightness-90"
+              onLoadSuccess={() => handleImageLoaded(images[2])}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
           </div>

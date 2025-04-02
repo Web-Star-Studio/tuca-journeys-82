@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, Clock } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
 
 // Array of hero images for accommodations
 const heroImages = [
@@ -11,6 +12,7 @@ const heroImages = [
 
 const AccommodationHero = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   
   // Auto-rotate images
   useEffect(() => {
@@ -34,6 +36,11 @@ const AccommodationHero = () => {
     );
   };
 
+  // Track loaded images
+  const handleImageLoaded = (imageSrc: string) => {
+    setLoadedImages(prev => new Set(prev).add(imageSrc));
+  };
+
   return (
     <section className="relative">
       {/* Image Slider */}
@@ -44,12 +51,15 @@ const AccommodationHero = () => {
             className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
               index === currentImageIndex ? "opacity-100" : "opacity-0"
             }`}
-            style={{ 
-              backgroundImage: `url('${image}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center" 
-            }}
-          />
+          >
+            <SafeImage
+              src={image}
+              alt={`Fernando de Noronha Accommodation - Scene ${index + 1}`}
+              className="w-full h-full object-cover"
+              fallbackSrc="/placeholder.svg"
+              onLoadSuccess={() => handleImageLoaded(image)}
+            />
+          </div>
         ))}
         
         {/* Dark Overlay with gradient */}

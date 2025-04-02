@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Star, MapPin, Heart } from "lucide-react";
 import { Tour } from "@/data/tours";
 import { useWishlist } from "@/contexts/WishlistContext";
+import SafeImage from "@/components/ui/safe-image";
 
 interface TourCardProps {
   tour: Tour;
@@ -14,6 +15,7 @@ interface TourCardProps {
 
 const TourCard = ({ tour }: TourCardProps) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,10 +38,11 @@ const TourCard = ({ tour }: TourCardProps) => {
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img
+        <SafeImage
           src={tour.image}
           alt={tour.title}
-          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
+          onLoadSuccess={() => setImageLoaded(true)}
         />
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full font-medium">
           {tour.category}

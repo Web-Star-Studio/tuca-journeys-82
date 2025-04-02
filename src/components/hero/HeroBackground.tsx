@@ -47,25 +47,23 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               opacity: { duration: 1.5 },
               scale: { duration: 7 }
             }}
-            style={{ width: '100vw', height: '100vh' }}
           >
             <SafeImage
               src={image}
               alt={`Fernando de Noronha - Scene ${index + 1}`}
               className="w-full h-full object-cover"
               fallbackSrc="/placeholder.svg"
-              style={{ objectPosition: 'center' }}
             />
           </motion.div>
         ))}
       </div>
 
       {/* Modern gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-10 w-full h-full" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-10" />
       
       {/* Abstract shapes for visual interest */}
       <div className="absolute right-0 top-1/4 w-48 h-48 rounded-full bg-tuca-ocean-blue/20 blur-3xl z-10 animate-pulse" />
-      <div className="absolute left-10 bottom-1/4 w-40 h-40 rounded-full bg-tuca-coral/20 blur-3xl z-10 animate-pulse" 
+      <div className="absolute left-10 bottom-1/4 w-40 h-40 rounded-full bg-tuca-light-blue/30 blur-3xl z-10 animate-pulse" 
            style={{ animationDelay: "1s" }} />
     </>
   );

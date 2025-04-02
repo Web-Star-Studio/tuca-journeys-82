@@ -19,15 +19,15 @@ const HeroIndicators = ({
     <>
       {/* Image transition indicators */}
       <motion.div 
-        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20"
+        className="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20"
         animate={{ opacity: 1 - scrollProgress * 2 }}
       >
         {heroImages.map((_, index) => (
           <button 
             key={index} 
             onClick={() => setCurrentImageIndex(index)} 
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentImageIndex ? "bg-white w-10" : "bg-white/40"
+            className={`h-2 rounded-full transition-all duration-300 ${
+              index === currentImageIndex ? "bg-white w-10" : "bg-white/40 w-2"
             }`} 
             aria-label={`Go to slide ${index + 1}`} 
           />

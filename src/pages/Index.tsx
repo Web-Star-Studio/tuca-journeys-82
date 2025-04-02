@@ -17,18 +17,20 @@ const Index = () => {
   return (
     <div className="relative w-full overflow-hidden">
       <Header />
-      <main>
+      <main className="flex flex-col">
         <HeroSection />
-        <FeatureHighlights />
-        <DestinationHighlight />
-        <FeaturedPackages />
-        <BookingCTA />
-        <FeaturedTours />
-        <FeaturedAccommodations />
-        <Testimonials />
-        <FeaturedProducts />
-        <InstagramFeed />
-        <ContactCTA />
+        <div className="space-y-16 md:space-y-24 lg:space-y-32">
+          <FeatureHighlights />
+          <DestinationHighlight />
+          <FeaturedPackages />
+          <BookingCTA />
+          <FeaturedTours />
+          <FeaturedAccommodations />
+          <Testimonials />
+          <FeaturedProducts />
+          <InstagramFeed />
+          <ContactCTA />
+        </div>
       </main>
       <Footer />
     </div>

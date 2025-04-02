@@ -74,8 +74,12 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -94,7 +98,7 @@
   }
   
   .hero-content {
-    @apply absolute inset-0 flex flex-col items-center justify-center z-20 px-8 sm:px-12 lg:px-24;
+    @apply absolute inset-0 flex flex-col items-center justify-center z-20;
   }
   
   .section-title {
@@ -114,7 +118,7 @@
   }
 
   .section-padding {
-    @apply py-20 md:py-32;
+    @apply py-16 md:py-20 lg:py-28;
   }
   
   .grid-gallery {
@@ -139,5 +143,18 @@
   
   .gradient-blue {
     @apply bg-gradient-to-r from-tuca-deep-blue via-tuca-ocean-blue to-tuca-medium-blue;
+  }
+
+  /* New utility classes for consistent spacing */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-spacing {
+    @apply py-16 md:py-20 lg:py-28;
+  }
+
+  .spacing-y {
+    @apply space-y-16 md:space-y-20 lg:space-y-28;
   }
 }

@@ -9,12 +9,14 @@ export const useAccommodations = () => {
   return useQuery({
     queryKey: ['accommodations'],
     queryFn: getAccommodationsFromDB,
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao carregar hospedagens",
-        description: error.message,
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erro ao carregar hospedagens",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   });
 };
@@ -29,12 +31,14 @@ export const useAccommodation = (id: number | undefined) => {
       return getAccommodationByIdFromDB(id);
     },
     enabled: !!id,
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao carregar detalhes da hospedagem",
-        description: error.message,
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erro ao carregar detalhes da hospedagem",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   });
 };

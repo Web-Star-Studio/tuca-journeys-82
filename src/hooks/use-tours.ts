@@ -9,12 +9,14 @@ export const useTours = () => {
   return useQuery({
     queryKey: ['tours'],
     queryFn: getToursFromDB,
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao carregar passeios",
-        description: error.message,
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erro ao carregar passeios",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   });
 };
@@ -29,12 +31,14 @@ export const useTour = (id: number | undefined) => {
       return getTourByIdFromDB(id);
     },
     enabled: !!id,
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao carregar detalhes do passeio",
-        description: error.message,
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erro ao carregar detalhes do passeio",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   });
 };

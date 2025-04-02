@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,13 +12,14 @@ import TourDetailReservation from "@/components/tour/TourDetailReservation";
 import TourDetailAccordion from "@/components/tour/TourDetailAccordion";
 import { useTour } from "@/hooks/use-tours";
 import { Skeleton } from "@/components/ui/skeleton";
+import { adaptDBTourToComponentTour } from "@/utils/tourAdapter";
 
 const TourDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
   const tourId = id ? parseInt(id) : undefined;
-  const { data: tour, isLoading, error } = useTour(tourId);
+  const { data: dbTour, isLoading, error } = useTour(tourId);
 
   if (isLoading) {
     return (
@@ -49,7 +49,7 @@ const TourDetail = () => {
     );
   }
 
-  if (error || !tour) {
+  if (error || !dbTour) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -69,6 +69,9 @@ const TourDetail = () => {
       </div>
     );
   }
+
+  // Convert DB tour to component-compatible format
+  const tour = adaptDBTourToComponentTour(dbTour);
 
   return (
     <div className="min-h-screen">
@@ -93,7 +96,7 @@ const TourDetail = () => {
 
             {/* Booking form */}
             <div className="lg:col-span-1">
-              <TourDetailReservation tour={tour} />
+              <TourDetailReservation tour={dbTour} />
             </div>
           </div>
         </div>

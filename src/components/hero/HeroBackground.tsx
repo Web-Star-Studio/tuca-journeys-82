@@ -1,6 +1,5 @@
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 
 // Array of hero images for rotation with high-quality free-to-use images
 const heroImages = [
@@ -37,13 +36,15 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
               backgroundImage: `url(${image})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
+              width: "100vw",
+              height: "100vh"
             }}
           />
         ))}
       </div>
 
       {/* Modern gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-10 w-full h-full" />
       
       {/* Abstract shapes for visual interest */}
       <div className="absolute right-0 top-1/4 w-48 h-48 rounded-full bg-tuca-ocean-blue/20 blur-3xl z-10 animate-pulse" />

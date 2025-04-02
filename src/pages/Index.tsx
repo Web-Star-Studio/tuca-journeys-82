@@ -19,16 +19,18 @@ const Index = () => {
       <Header />
       <main className="w-full">
         <HeroSection />
-        <FeatureHighlights />
-        <DestinationHighlight />
-        <FeaturedPackages />
-        <BookingCTA />
-        <FeaturedTours />
-        <FeaturedAccommodations />
-        <Testimonials />
-        <FeaturedProducts />
-        <InstagramFeed />
-        <ContactCTA />
+        <div className="container mx-auto px-4">
+          <FeatureHighlights />
+          <DestinationHighlight />
+          <FeaturedPackages />
+          <BookingCTA />
+          <FeaturedTours />
+          <FeaturedAccommodations />
+          <Testimonials />
+          <FeaturedProducts />
+          <InstagramFeed />
+          <ContactCTA />
+        </div>
       </main>
       <Footer />
     </div>

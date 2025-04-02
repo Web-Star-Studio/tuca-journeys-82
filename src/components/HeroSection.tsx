@@ -52,7 +52,7 @@ const HeroSection = () => {
         scrollProgress={scrollProgress} 
       />
       
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 sm:px-8 md:px-16">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-20 w-full px-4 sm:px-8 md:px-16">
         <HeroContent 
           currentImageIndex={currentImageIndex} 
           scrollProgress={scrollProgress} 

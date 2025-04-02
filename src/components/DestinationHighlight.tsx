@@ -147,7 +147,7 @@ const DestinationHighlight = () => {
             }} transition={{
               duration: 0.4
             }}>
-                <img src="/hero-noronha-sunset.jpg" alt="Pôr do sol em Noronha" className="w-full h-full object-cover" />
+                <img alt="Pôr do sol em Noronha" className="w-full h-full object-cover" src="/lovable-uploads/fa98842d-11c7-407f-80d4-096d976437d9.png" />
               </motion.div>
               <motion.div className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-xl" whileHover={{
               scale: 1.04

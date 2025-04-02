@@ -154,7 +154,7 @@ const DestinationHighlight = () => {
             }} transition={{
               duration: 0.4
             }}>
-                <img src="/hero-noronha-aerial.jpg" alt="Vista aérea de Noronha" className="w-full h-full object-cover" />
+                <img alt="Vista aérea de Noronha" className="w-full h-full object-cover" src="/lovable-uploads/a0ddc5c0-6278-4db1-bf75-74b22f26362d.png" />
               </motion.div>
             </div>
           </motion.div>

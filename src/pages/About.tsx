@@ -1,8 +1,8 @@
-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
 import { Users, Heart, Map, Award } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const About = () => {
   return (
@@ -145,12 +145,11 @@ const About = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tuca-ocean-blue">
-                  <img
-                    src="/team-karol.jpg"
-                    alt="Karol Tuca"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative mb-6 mx-auto">
+                  <Avatar className="w-48 h-48 mx-auto border-4 border-tuca-ocean-blue">
+                    <AvatarImage src="/team-karol.jpg" alt="Karol Tuca" />
+                    <AvatarFallback>KT</AvatarFallback>
+                  </Avatar>
                 </div>
                 <h3 className="text-xl font-serif font-bold">Karol Tuca</h3>
                 <p className="text-tuca-ocean-blue font-medium mb-2">Fundadora e CEO</p>
@@ -160,12 +159,11 @@ const About = () => {
               </div>
 
               <div className="text-center">
-                <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tuca-ocean-blue">
-                  <img
-                    src="/team-rafael.jpg"
-                    alt="Rafael Oliveira"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative mb-6 mx-auto">
+                  <Avatar className="w-48 h-48 mx-auto border-4 border-tuca-ocean-blue">
+                    <AvatarImage src="/team-rafael.jpg" alt="Rafael Oliveira" />
+                    <AvatarFallback>RO</AvatarFallback>
+                  </Avatar>
                 </div>
                 <h3 className="text-xl font-serif font-bold">Rafael Oliveira</h3>
                 <p className="text-tuca-ocean-blue font-medium mb-2">Gerente de Experiências</p>
@@ -175,12 +173,11 @@ const About = () => {
               </div>
 
               <div className="text-center">
-                <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tuca-ocean-blue">
-                  <img
-                    src="/team-marina.jpg"
-                    alt="Marina Santos"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative mb-6 mx-auto">
+                  <Avatar className="w-48 h-48 mx-auto border-4 border-tuca-ocean-blue">
+                    <AvatarImage src="/team-marina.jpg" alt="Marina Santos" />
+                    <AvatarFallback>MS</AvatarFallback>
+                  </Avatar>
                 </div>
                 <h3 className="text-xl font-serif font-bold">Marina Santos</h3>
                 <p className="text-tuca-ocean-blue font-medium mb-2">Consultora de Viagens</p>
@@ -190,12 +187,11 @@ const About = () => {
               </div>
 
               <div className="text-center">
-                <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tuca-ocean-blue">
-                  <img
-                    src="/team-lucas.jpg"
-                    alt="Lucas Mendes"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative mb-6 mx-auto">
+                  <Avatar className="w-48 h-48 mx-auto border-4 border-tuca-ocean-blue">
+                    <AvatarImage src="/team-lucas.jpg" alt="Lucas Mendes" />
+                    <AvatarFallback>LM</AvatarFallback>
+                  </Avatar>
                 </div>
                 <h3 className="text-xl font-serif font-bold">Lucas Mendes</h3>
                 <p className="text-tuca-ocean-blue font-medium mb-2">Guia Local</p>

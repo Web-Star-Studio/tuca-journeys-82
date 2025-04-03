@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import SafeImage from "@/components/ui/safe-image";
 
-// Sample testimonials data
+// Updated testimonials data with correct image paths
 const testimonials = [
   {
     id: 1,
     name: "Mariana Silva",
-    image: "https://ibb.co/cKzB4CVQ",
+    image: "/testimonial-1.jpg",
     comment:
       "A viagem com a Tuca Noronha superou todas as minhas expectativas! O atendimento foi impecável desde o primeiro contato, e os passeios sugeridos foram perfeitos para o que eu buscava.",
     rating: 5,
@@ -17,7 +19,7 @@ const testimonials = [
   {
     id: 2,
     name: "Carlos e Juliana",
-    image: "https://ibb.co/s9sZGPrX",
+    image: "/testimonial-2.jpg",
     comment:
       "Planejamos nossa lua de mel com a Tuca Noronha e foi a melhor decisão. Cada detalhe foi pensado com carinho, desde a pousada com vista para o mar até os passeios românticos.",
     rating: 5,
@@ -25,7 +27,7 @@ const testimonials = [
   {
     id: 3,
     name: "Família Oliveira",
-    image: "https://ibb.co/LXXcnd8r",
+    image: "/testimonial-3.jpg",
     comment:
       "Viajar com crianças pode ser desafiador, mas a equipe da Tuca facilitou tudo! Roteiros adaptados para as crianças, hospedagem confortável e atendimento personalizado.",
     rating: 4,
@@ -33,7 +35,7 @@ const testimonials = [
   {
     id: 4,
     name: "Patricia Mendes",
-    image: "https://ibb.co/pmMT8sg",
+    image: "/testimonial-4.jpg",
     comment:
       "Sou viajante solo e me preocupava com a logística, mas a Tuca Noronha cuidou de tudo. Me senti segura e aproveitei cada momento nesse paraíso!",
     rating: 5,
@@ -143,11 +145,13 @@ const Testimonials = () => {
                 className="flex flex-col md:flex-row items-center md:items-start gap-8"
               >
                 <div className="shrink-0">
-                  <img
-                    src={testimonials[activeIndex].image}
-                    alt={testimonials[activeIndex].name}
-                    className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-tuca-ocean-blue"
-                  />
+                  <Avatar className="w-24 h-24 md:w-28 md:h-28 border-4 border-tuca-ocean-blue">
+                    <AvatarImage 
+                      src={testimonials[activeIndex].image} 
+                      alt={testimonials[activeIndex].name} 
+                    />
+                    <AvatarFallback>{testimonials[activeIndex].name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
                 </div>
                 <div>
                   <div className="flex mb-3">

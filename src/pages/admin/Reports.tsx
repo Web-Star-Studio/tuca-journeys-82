@@ -7,7 +7,7 @@ import BookingsReportContainer from "@/components/admin/reports/bookings/Booking
 import UsersReport from "@/components/admin/reports/UsersReport";
 import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
-import { Download, FileBar, Calendar, Users, Package } from "lucide-react";
+import { BarChart2, Calendar, Users, Package, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -58,7 +58,7 @@ const Reports = () => {
         <Tabs value={selectedReport} onValueChange={setSelectedReport} className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted">
             <TabsTrigger value="revenue" className="flex items-center gap-2 h-10">
-              <FileBar className="h-4 w-4" />
+              <BarChart2 className="h-4 w-4" />
               <span className="hidden sm:inline">Receita</span>
             </TabsTrigger>
             <TabsTrigger value="bookings" className="flex items-center gap-2 h-10">

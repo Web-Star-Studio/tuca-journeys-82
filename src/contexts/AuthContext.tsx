@@ -44,12 +44,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Starting sign out process...");
       setLoading(true);
-      await authSignOut();
+      const { error } = await authSignOut();
+      
+      if (error) {
+        console.error("Error during sign out:", error);
+        // Still proceed with local cleanup even if there was an API error
+      }
+      
       // Ensure we don't have any lingering session data
       localStorage.removeItem("supabase-mock-session");
+      
       console.log("Sign out process completed");
     } catch (error) {
       console.error("Error in signOut:", error);
+      // Attempt to clean up even if there was an exception
+      localStorage.removeItem("supabase-mock-session");
     } finally {
       setLoading(false);
     }

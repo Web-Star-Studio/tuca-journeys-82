@@ -7,6 +7,8 @@ export const useSignOut = () => {
   // Sign out function with real Supabase authentication
   const signOut = async () => {
     try {
+      console.log("Starting sign out process...");
+      
       // First check if we're using a mock session
       const mockSessionStr = localStorage.getItem("supabase-mock-session");
       if (mockSessionStr) {
@@ -22,9 +24,17 @@ export const useSignOut = () => {
       }
       
       // Otherwise, sign out with Supabase
+      console.log("Signing out with Supabase");
       const { error } = await supabase.auth.signOut();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase sign out error:", error);
+        throw error;
+      }
+      
+      // Clear any potential lingering session data
+      console.log("Sign out successful, clearing any session data");
+      localStorage.removeItem("supabase-session");
       
       toast({
         title: "Sessão encerrada",
@@ -34,11 +44,17 @@ export const useSignOut = () => {
       return { error: null };
     } catch (error: any) {
       console.error("Error during sign out:", error);
+      
+      // Still attempt to clear any session data on error
+      localStorage.removeItem("supabase-mock-session");
+      
       toast({
         title: "Erro ao sair",
-        description: error.message,
+        description: error.message || "Falha ao encerrar a sessão.",
         variant: "destructive",
       });
+      
+      // Return the error but don't block the sign out process
       return { error };
     }
   };

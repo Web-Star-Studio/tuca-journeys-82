@@ -15,7 +15,6 @@ import HighlightsForm from "./form/HighlightsForm";
 import DetailsForm from "./form/DetailsForm";
 import ItineraryForm from "./form/ItineraryForm";
 import FormActions from "./form/FormActions";
-import { PackageFormValues } from "./types";
 
 // Import our custom hooks
 import { usePackageForm } from "@/hooks/packages/usePackageForm";

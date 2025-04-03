@@ -28,7 +28,7 @@ const PackageSearch: React.FC<PackageSearchProps> = ({
 }) => {
   // Get package categories
   const categories = [
-    { value: "", label: "Todos" },
+    { value: "all", label: "Todos" }, // Changed from empty string to "all"
     { value: "romantic", label: "Romântico" },
     { value: "adventure", label: "Aventura" },
     { value: "family", label: "Família" },

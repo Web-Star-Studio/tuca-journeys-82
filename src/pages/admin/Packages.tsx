@@ -15,7 +15,7 @@ const AdminPackages = () => {
   const [packageToEdit, setPackageToEdit] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [packageToDelete, setPackageToDelete] = useState<number | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   const { toast } = useToast();
   const { 
@@ -24,7 +24,7 @@ const AdminPackages = () => {
     isError,
     error,
     deletePackage: deletePackageMutation
-  } = usePackages(categoryFilter);
+  } = usePackages(categoryFilter === "all" ? "" : categoryFilter);
 
   // Filter packages based on search query
   const filteredPackages = packages?.filter(

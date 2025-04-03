@@ -4,16 +4,16 @@ import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const TourTableHeader: React.FC = () => {
   return (
-    <TableHeader>
+    <TableHeader className="bg-tuca-light-blue/30">
       <TableRow>
-        <TableHead>ID</TableHead>
-        <TableHead>Imagem</TableHead>
-        <TableHead>Nome</TableHead>
-        <TableHead>Categoria</TableHead>
-        <TableHead>Preço</TableHead>
-        <TableHead>Duração</TableHead>
-        <TableHead>Avaliação</TableHead>
-        <TableHead className="text-right">Ações</TableHead>
+        <TableHead className="font-medium">ID</TableHead>
+        <TableHead className="font-medium">Imagem</TableHead>
+        <TableHead className="font-medium">Nome</TableHead>
+        <TableHead className="font-medium">Categoria</TableHead>
+        <TableHead className="font-medium">Preço</TableHead>
+        <TableHead className="font-medium">Duração</TableHead>
+        <TableHead className="font-medium">Avaliação</TableHead>
+        <TableHead className="text-right font-medium">Ações</TableHead>
       </TableRow>
     </TableHeader>
   );

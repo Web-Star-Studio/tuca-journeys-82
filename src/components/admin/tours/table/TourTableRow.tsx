@@ -19,20 +19,20 @@ const TourTableRow: React.FC<TourTableRowProps> = ({
   onDeleteTour,
 }) => {
   return (
-    <TableRow key={tour.id}>
+    <TableRow key={tour.id} className="hover:bg-tuca-light-blue/10">
       <TableCell className="font-medium">{tour.id}</TableCell>
       <TableCell>
         <img
           src={tour.image_url}
           alt={tour.title}
-          className="h-10 w-16 object-cover rounded"
+          className="h-10 w-16 object-cover rounded-md border border-tuca-light-blue/40"
         />
       </TableCell>
-      <TableCell className="font-medium">{tour.title}</TableCell>
+      <TableCell className="font-medium text-tuca-deep-blue">{tour.title}</TableCell>
       <TableCell>
-        <Badge variant="outline">{tour.category}</Badge>
+        <Badge variant="tuca">{tour.category}</Badge>
       </TableCell>
-      <TableCell>R$ {tour.price.toFixed(2)}</TableCell>
+      <TableCell className="text-tuca-deep-blue">R$ {tour.price.toFixed(2)}</TableCell>
       <TableCell>{tour.duration}</TableCell>
       <TableCell>
         <div className="flex items-center">
@@ -46,7 +46,7 @@ const TourTableRow: React.FC<TourTableRowProps> = ({
             variant="ghost"
             size="icon"
             asChild
-            className="h-8 w-8"
+            className="h-8 w-8 text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
           >
             <Link to={`/passeios/${tour.id}`} target="_blank">
               <ExternalLink className="h-4 w-4" />
@@ -55,7 +55,7 @@ const TourTableRow: React.FC<TourTableRowProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-blue-600"
+            className="h-8 w-8 text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
             onClick={() => onEditTour(tour)}
           >
             <Edit className="h-4 w-4" />
@@ -63,7 +63,7 @@ const TourTableRow: React.FC<TourTableRowProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-red-600"
+            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
             onClick={() => onDeleteTour(tour)}
           >
             <Trash2 className="h-4 w-4" />

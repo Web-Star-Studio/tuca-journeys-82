@@ -73,7 +73,7 @@ export const PackageForm = ({
     },
   });
 
-  // Create the field arrays using useFieldArray hook directly
+  // Create the field arrays with proper typing
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",

@@ -36,6 +36,8 @@ import AdminAccommodations from "./pages/admin/Accommodations";
 import AdminUsers from "./pages/admin/Users";
 import AdminBookings from "./pages/admin/Bookings";
 import AdminMedia from "./pages/admin/Media";
+import AdminProducts from "./pages/admin/Products";
+import AdminSettings from "./pages/admin/Settings";
 
 import "./App.css";
 
@@ -77,6 +79,8 @@ const App = () => {
                 <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/bookings" element={<AdminBookings />} />
                 <Route path="/admin/media" element={<AdminMedia />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

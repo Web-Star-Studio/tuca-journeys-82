@@ -4,7 +4,7 @@ import { Bell, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import UserAvatar from "@/components/user-menu/UserAvatar";
+import UserMenu from "./UserMenu";
 
 interface AdminHeaderProps {
   pageTitle: string;
@@ -33,13 +33,7 @@ const AdminHeader = ({ pageTitle }: AdminHeaderProps) => {
           </span>
         </Button>
         
-        <div className="flex items-center space-x-3">
-          <div className="hidden md:block text-right">
-            <p className="text-sm font-medium">{user?.user_metadata?.name || user?.email || 'Administrador'}</p>
-            <p className="text-xs text-gray-500">Administrador</p>
-          </div>
-          <UserAvatar user={user} />
-        </div>
+        <UserMenu user={user} />
       </div>
     </header>
   );

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import BookingFilters from "@/components/admin/bookings/BookingFilters";
 import BookingsTable from "@/components/admin/bookings/BookingsTable";
@@ -66,12 +66,33 @@ const dummyBookings = [
   },
 ];
 
+// Generate more dummy bookings for pagination demo
+const generateMoreBookings = () => {
+  const additionalBookings: Booking[] = [];
+  
+  // Generate 30 more bookings with slightly modified data
+  for (let i = 0; i < 30; i++) {
+    const baseBooking = dummyBookings[i % dummyBookings.length];
+    additionalBookings.push({
+      ...baseBooking,
+      id: `B${5000 + i}`,
+      user_name: `${baseBooking.user_name} ${i + 1}`,
+      user_email: `user${i + 1}@example.com`,
+      created_at: new Date(new Date(baseBooking.created_at).getTime() + i * 24 * 60 * 60 * 1000).toISOString(),
+    });
+  }
+  
+  return [...dummyBookings, ...additionalBookings];
+};
+
 const Bookings = () => {
-  const [bookings] = useState<Booking[]>(dummyBookings);
+  const [allBookings] = useState<Booking[]>(generateMoreBookings());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Handle booking view
   const handleViewBooking = (booking: Booking) => {
@@ -80,18 +101,37 @@ const Bookings = () => {
   };
 
   // Filter bookings based on search query and status
-  const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch = 
-      booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.item_name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = 
-      statusFilter === "all" || booking.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const filteredBookings = useMemo(() => {
+    return allBookings.filter((booking) => {
+      const matchesSearch = 
+        booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.item_name.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = 
+        statusFilter === "all" || booking.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [allBookings, searchQuery, statusFilter]);
+
+  // Calculate pagination values
+  const totalBookings = filteredBookings.length;
+  const totalPages = Math.ceil(totalBookings / itemsPerPage);
+  
+  // Get current page of bookings
+  const currentBookings = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredBookings.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredBookings, currentPage, itemsPerPage]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of table when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Get badge color based on status
   const getStatusBadgeColor = (status: string) => {
@@ -121,6 +161,11 @@ const Bookings = () => {
     }
   };
 
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
   return (
     <AdminLayout pageTitle="Gerenciar Reservas">
       <BookingFilters
@@ -131,10 +176,14 @@ const Bookings = () => {
       />
 
       <BookingsTable
-        bookings={filteredBookings}
+        bookings={currentBookings}
         onViewBooking={handleViewBooking}
         getStatusBadgeColor={getStatusBadgeColor}
         getPaymentBadgeColor={getPaymentBadgeColor}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalBookings={totalBookings}
       />
 
       <BookingDetailDrawer

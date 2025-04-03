@@ -1,20 +1,7 @@
 
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { usePackageDetail, usePackages } from "@/hooks/use-packages";
-import { Package } from "@/data/types/packageTypes";
+import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   Tabs,
   TabsContent,
@@ -22,13 +9,17 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 
-// Import our new components
+// Import our form components
 import BasicInfoForm from "./form/BasicInfoForm";
 import HighlightsForm from "./form/HighlightsForm";
 import DetailsForm from "./form/DetailsForm";
 import ItineraryForm from "./form/ItineraryForm";
 import FormActions from "./form/FormActions";
-import { packageFormSchema, PackageFormValues } from "./types";
+import { PackageFormValues } from "./types";
+
+// Import our custom hooks
+import { usePackageForm } from "@/hooks/packages/usePackageForm";
+import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
 
 interface PackageFormProps {
   packageId: number | null;
@@ -42,136 +33,20 @@ export const PackageForm = ({
   onSuccess,
 }: PackageFormProps) => {
   const [activeTab, setActiveTab] = useState("basic");
-  const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  const { data: packageData, isLoading: isLoadingPackage } = usePackageDetail(
-    packageId || 0
-  );
   
-  const { 
-    createPackage, 
-    updatePackage
-  } = usePackages();
-
-  // Define the form
-  const form = useForm<PackageFormValues>({
-    resolver: zodResolver(packageFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      image: "",
-      price: 0,
-      days: 1,
-      persons: 1,
-      rating: 4.5,
-      category: "romantic",
-      highlights: [""],
-      includes: [""],
-      excludes: [""],
-      itinerary: [{ day: 1, title: "", description: "" }],
-      dates: [""],
-    },
-  });
-
-  // Create the field arrays with proper typing
-  const highlightsArray = useFieldArray({
-    control: form.control,
-    name: "highlights",
-  });
-
-  const includesArray = useFieldArray({
-    control: form.control,
-    name: "includes",
-  });
-
-  const excludesArray = useFieldArray({
-    control: form.control,
-    name: "excludes",
-  });
-
-  const itineraryArray = useFieldArray({
-    control: form.control,
-    name: "itinerary",
-  });
-
-  const datesArray = useFieldArray({
-    control: form.control,
-    name: "dates",
-  });
-
-  // Load package data when editing
-  useEffect(() => {
-    if (packageData) {
-      // Determine category based on package ID patterns
-      let category = packageData.category || "romantic";
-      if (!packageData.category) {
-        if (packageData.id >= 1 && packageData.id <= 2 || packageData.id === 6) {
-          category = "romantic";
-        } else if (packageData.id >= 3 && packageData.id <= 4) {
-          category = "adventure";
-        } else if (packageData.id === 5) {
-          category = "family";
-        } else if (packageData.id === 4) {
-          category = "premium";
-        } else {
-          category = "budget";
-        }
-      }
-
-      // Set form values
-      form.reset({
-        title: packageData.title,
-        description: packageData.description,
-        image: packageData.image,
-        price: packageData.price,
-        days: packageData.days,
-        persons: packageData.persons,
-        rating: packageData.rating,
-        category,
-        highlights: packageData.highlights || [""],
-        includes: packageData.includes || [""],
-        excludes: packageData.excludes || [""],
-        itinerary: packageData.itinerary || [{ day: 1, title: "", description: "" }],
-        dates: packageData.dates || [""],
-      });
-
-      setPreviewUrl(packageData.image);
-    }
-  }, [packageData, form]);
-
-  // Update image preview when URL changes
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "image") {
-        setPreviewUrl(value.image as string);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
-
-  // Form submission
-  const onSubmit = (data: PackageFormValues) => {
-    if (packageId) {
-      // Update existing package
-      updatePackage.mutate(
-        {
-          id: packageId,
-          ...data,
-        } as Package,
-        {
-          onSuccess: onSuccess,
-        }
-      );
-    } else {
-      // Create new package
-      createPackage.mutate(data as Omit<Package, "id">, {
-        onSuccess: onSuccess,
-      });
-    }
-  };
-
-  // Check if the form is being submitted
-  const isSubmitting = createPackage.isPending || updatePackage.isPending;
+  // Use our custom hooks
+  const {
+    form,
+    previewUrl,
+    isLoadingPackage,
+    highlightsArray,
+    includesArray,
+    excludesArray,
+    itineraryArray,
+    datesArray
+  } = usePackageForm(packageId);
+  
+  const { handleSubmit, isSubmitting } = usePackageSubmit(packageId, onSuccess);
 
   if (packageId && isLoadingPackage) {
     return (
@@ -184,7 +59,7 @@ export const PackageForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full">
             <TabsTrigger value="basic" className="flex-1">

@@ -57,7 +57,6 @@ const UsersReport = ({ dateRange }: UsersReportProps) => {
   const totalRegions = usersByRegion.length;
   const conversionRate = 28; // In percentage, would be calculated in a real app
   
-  const DEVICE_COLORS = deviceData.map(item => item.color);
   const deviceChartConfig = Object.fromEntries(
     deviceData.map(item => [item.name, { 
       label: item.name, 

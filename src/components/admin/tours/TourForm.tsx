@@ -11,6 +11,7 @@ import TourMediaForm from "./form/TourMediaForm";
 import TourScheduleForm from "./form/TourScheduleForm";
 import TourFormActions from "./form/TourFormActions";
 import { Form } from "@/components/ui/form";
+import { Tour } from "@/types/database";
 
 interface TourFormProps {
   tourId?: number;
@@ -109,6 +110,9 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
       ...data,
       // Ensure price is always set
       price: data.price || 0,
+      // Ensure all required fields are present including max_participants
+      max_participants: data.max_participants || 10,
+      min_participants: data.min_participants || 1,
       gallery_images: data.gallery_images ? data.gallery_images.split(",").map(item => item.trim()).filter(Boolean) : [],
       schedule: data.schedule ? data.schedule.split("\n").map(item => item.trim()).filter(Boolean) : [],
       includes: data.includes ? data.includes.split("\n").map(item => item.trim()).filter(Boolean) : [],
@@ -121,7 +125,7 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
       duration: data.duration || "1 hora",
       category: data.category || "aventura",
       image_url: data.image_url || "/placeholder.jpg"
-    };
+    } as Omit<Tour, "id" | "created_at" | "updated_at">;
 
     try {
       if (tourId) {

@@ -28,14 +28,11 @@ export const ChartLegendContent = React.forwardRef<
     }
 
     // Function to safely truncate any label type
-    const truncateLabel = (label: React.ReactNode, maxLength: number): React.ReactNode => {
+    const truncateLabel = (label: any, maxLength: number): React.ReactNode => {
       if (typeof label === 'string') {
         return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
       }
-      if (typeof label === 'number') {
-        return label.toString();
-      }
-      return label; // Return as is for other types
+      return String(label); // Convert any type to string for safety
     };
 
     return (

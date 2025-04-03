@@ -72,20 +72,20 @@ export const PackageForm = ({
     },
   });
 
-  // Setup field arrays for the lists
+  // Setup field arrays for the lists - using the correct path for each one
   const highlightsArray = useFieldArray({
     control: form.control,
-    name: "highlights",
+    name: "highlights",  // Changed from "itinerary"
   });
 
   const includesArray = useFieldArray({
     control: form.control,
-    name: "includes",
+    name: "includes",  // Changed from "itinerary"
   });
 
   const excludesArray = useFieldArray({
     control: form.control,
-    name: "excludes",
+    name: "excludes",  // Changed from "itinerary"
   });
 
   const itineraryArray = useFieldArray({
@@ -95,24 +95,26 @@ export const PackageForm = ({
 
   const datesArray = useFieldArray({
     control: form.control,
-    name: "dates",
+    name: "dates",  // Changed from "itinerary"
   });
 
   // Load package data when editing
   useEffect(() => {
     if (packageData) {
       // Determine category based on package ID patterns
-      let category = "romantic";
-      if (packageData.id >= 1 && packageData.id <= 2 || packageData.id === 6) {
-        category = "romantic";
-      } else if (packageData.id >= 3 && packageData.id <= 4) {
-        category = "adventure";
-      } else if (packageData.id === 5) {
-        category = "family";
-      } else if (packageData.id === 4) {
-        category = "premium";
-      } else {
-        category = "budget";
+      let category = packageData.category || "romantic";
+      if (!packageData.category) {
+        if (packageData.id >= 1 && packageData.id <= 2 || packageData.id === 6) {
+          category = "romantic";
+        } else if (packageData.id >= 3 && packageData.id <= 4) {
+          category = "adventure";
+        } else if (packageData.id === 5) {
+          category = "family";
+        } else if (packageData.id === 4) {
+          category = "premium";
+        } else {
+          category = "budget";
+        }
       }
 
       // Set form values

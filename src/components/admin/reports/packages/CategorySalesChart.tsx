@@ -1,16 +1,12 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ChartContainer, 
-  ChartTooltip, 
-  ChartTooltipContent 
-} from "@/components/ui/chart";
 import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Tooltip
 } from 'recharts';
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -32,6 +28,18 @@ const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartPro
     return `${name}: ${(percent * 100).toFixed(0)}%`;
   };
   
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-md shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm">{`${payload[0].value} vendas`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="col-span-1">
       <CardHeader className="pb-2">
@@ -42,25 +50,9 @@ const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartPro
       </CardHeader>
       <CardContent>
         <div className="h-64 sm:h-80">
-          <ChartContainer
-            config={{
-              "Romântico": { color: COLORS[0] },
-              "Aventura": { color: COLORS[1] },
-              "Família": { color: COLORS[2] },
-              "Premium": { color: COLORS[3] },
-              "Econômico": { color: COLORS[4] }
-            }}
-            height="100%"
-          >
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <ChartTooltip
-                content={props => (
-                  <ChartTooltipContent
-                    {...props}
-                    formatter={(value, name) => [`${value} vendas`, name]}
-                  />
-                )}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Pie
                 data={categorySalesData}
                 cx="50%"
@@ -76,7 +68,7 @@ const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartPro
                 ))}
               </Pie>
             </PieChart>
-          </ChartContainer>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>

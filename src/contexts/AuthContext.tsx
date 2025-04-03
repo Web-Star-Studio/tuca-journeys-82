@@ -3,7 +3,7 @@ import React, { createContext, useContext } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/hooks/use-auth-state";
-import { useAuthOperations } from "@/hooks/use-auth-operations";
+import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
 
 type AuthContextType = {
   user: User | null;

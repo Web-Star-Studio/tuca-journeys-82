@@ -33,7 +33,7 @@ export const usePackageForm = (packageId: number | null) => {
     },
   });
 
-  // Create the field arrays
+  // Create the field arrays with their proper types
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",

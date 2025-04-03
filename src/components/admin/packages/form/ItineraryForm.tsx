@@ -10,7 +10,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface ItineraryFormProps {
   form: UseFormReturn<PackageFormValues>;
-  itineraryArray: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">;
+  itineraryArray: UseFieldArrayReturn<PackageFormValues, "itinerary">;
 }
 
 const ItineraryForm = ({ form, itineraryArray }: ItineraryFormProps) => {

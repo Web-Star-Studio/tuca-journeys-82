@@ -4,6 +4,7 @@ import * as RechartsPrimitive from "recharts";
 import { cn } from "@/lib/utils";
 import { useChart } from "./ChartContext";
 import { getPayloadConfigFromPayload } from "./utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const ChartLegend = RechartsPrimitive.Legend;
 
@@ -20,6 +21,7 @@ export const ChartLegendContent = React.forwardRef<
     ref
   ) => {
     const { config } = useChart();
+    const isMobile = useIsMobile();
 
     if (!payload?.length) {
       return null;
@@ -29,7 +31,7 @@ export const ChartLegendContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex items-center justify-center gap-4",
+          "flex flex-wrap items-center justify-center gap-3",
           verticalAlign === "top" ? "pb-3" : "pt-3",
           className
         )}
@@ -55,7 +57,7 @@ export const ChartLegendContent = React.forwardRef<
                   }}
                 />
               )}
-              {itemConfig?.label}
+              <span className="text-xs">{isMobile ? (itemConfig?.label || '').substring(0, 10) : itemConfig?.label}</span>
             </div>
           );
         })}

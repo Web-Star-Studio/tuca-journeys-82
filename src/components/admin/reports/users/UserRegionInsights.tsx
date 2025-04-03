@@ -4,7 +4,7 @@ import { TrendingUp, BarChart, ExternalLink } from "lucide-react";
 
 const UserRegionInsights = () => {
   return (
-    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div className="bg-blue-50 rounded-lg border border-blue-100 p-4 transition-transform hover:scale-[1.02] duration-300">
         <div className="flex justify-between items-start mb-3">
           <div className="text-sm font-medium text-blue-800">
@@ -31,7 +31,7 @@ const UserRegionInsights = () => {
         </div>
       </div>
       
-      <div className="bg-purple-50 rounded-lg border border-purple-100 p-4 transition-transform hover:scale-[1.02] duration-300">
+      <div className="bg-purple-50 rounded-lg border border-purple-100 p-4 transition-transform hover:scale-[1.02] duration-300 sm:col-span-2 lg:col-span-1">
         <div className="flex justify-between items-start mb-3">
           <div className="text-sm font-medium text-purple-800">
             Maior Conversão

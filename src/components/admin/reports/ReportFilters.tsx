@@ -23,13 +23,13 @@ interface ReportFiltersProps {
 
 const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
   return (
-    <div className="flex items-center flex-1 md:flex-none">
+    <div className="w-full sm:w-auto">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
             variant={"outline"}
-            className="w-full justify-start text-left font-normal border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="w-full justify-start text-left font-normal border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
           >
             <Calendar className="mr-2 h-4 w-4 text-tuca-ocean-blue" />
             {dateRange?.from ? (
@@ -63,11 +63,28 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
                 });
               }
             }}
-            numberOfMonths={2}
+            numberOfMonths={1}
             locale={ptBR}
             className="rounded-md border-0"
           />
-          <div className="p-3 border-t border-gray-100 flex justify-end">
+          <div className="p-3 border-t border-gray-100 flex justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Set date range to last 7 days
+                const today = new Date();
+                const lastWeek = new Date();
+                lastWeek.setDate(today.getDate() - 7);
+                setDateRange({
+                  from: lastWeek,
+                  to: today
+                });
+              }}
+              className="text-xs h-8"
+            >
+              Últimos 7 dias
+            </Button>
             <Button
               variant="outline"
               size="sm"

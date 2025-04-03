@@ -2,6 +2,7 @@
 import React from "react";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RegionData {
   regiao: string;
@@ -25,13 +26,21 @@ interface UserRegionChartProps {
 }
 
 const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
+  const isMobile = useIsMobile();
+  
+  // Reduce text length for mobile
+  const formattedData = regionData.map(item => ({
+    ...item,
+    regiao: isMobile && item.regiao.length > 8 ? item.regiao.substring(0, 8) + '..' : item.regiao
+  }));
+  
   return (
-    <div className="h-80 pt-4">
-      <ChartContainer config={chartConfig}>
+    <div className="h-64 sm:h-80 pt-4">
+      <ChartContainer config={chartConfig} height="100%">
         <BarChart 
-          data={regionData} 
+          data={formattedData} 
           layout="vertical"
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 5, right: 20, left: isMobile ? 50 : 70, bottom: 5 }}
         >
           <CartesianGrid 
             strokeDasharray="3 3" 
@@ -42,15 +51,15 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
             type="number"
             tickLine={false}
             axisLine={{ stroke: '#e0e0e0' }}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 10 }}
           />
           <YAxis 
             type="category" 
             dataKey="regiao"
-            width={80}
+            width={isMobile ? 50 : 70}
             tickLine={false}
             axisLine={{ stroke: '#e0e0e0' }}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 10 }}
           />
           <Tooltip 
             content={(props) => (
@@ -71,8 +80,8 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
             label={{ 
               position: 'right', 
               fill: '#666',
-              fontSize: 12,
-              formatter: (value: any) => value
+              fontSize: 10,
+              formatter: (value: any) => isMobile ? value : value
             }}
           />
         </BarChart>

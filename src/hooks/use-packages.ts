@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { Package } from '@/data/types/packageTypes';
-import { packages, getPackageById } from '@/data/packages';
+import { packages, getPackageById, getPackagesByCategory } from '@/data/packages';
 
 // This is a mock implementation using the static data from packages.ts
 // In a real app, this would be replaced with API calls to Supabase or other backend
@@ -18,25 +18,10 @@ export const usePackages = (category?: string) => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (category) {
-      return packages.filter(pkg => {
-        // This is just for demonstration purposes - in a real app, 
-        // we would have categories properly defined
-        const pkgCategory = getPkgCategory(pkg);
-        return pkgCategory === category;
-      });
+      return getPackagesByCategory(category);
     }
     
     return packages;
-  };
-
-  // Helper to get a package's category based on its ID
-  // This is a mock implementation - in a real app, we would store the category in the Package object
-  const getPkgCategory = (pkg: Package): string => {
-    if (pkg.id >= 1 && pkg.id <= 2) return 'romantic';
-    if (pkg.id >= 3 && pkg.id <= 4) return 'adventure';
-    if (pkg.id === 5) return 'family';
-    if (pkg.id === 6) return 'premium';
-    return 'budget';
   };
 
   // Query to fetch packages

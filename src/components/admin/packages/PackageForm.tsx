@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { PlusCircle, Trash2, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import * as z from "zod";
+import { usePackageDetail, usePackages } from "@/hooks/use-packages";
+import { Package } from "@/data/types/packageTypes";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -15,31 +17,41 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { getPackageById } from "@/data/packages";
-import { Package } from "@/data/types/packageTypes";
-import { DialogFooter } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SafeImage from "@/components/ui/safe-image";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getPackagesByCategory } from "@/data/packages";
 
-// Define the form schema with Zod for validation
+// Define the form schema with zod
 const packageFormSchema = z.object({
-  title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres" }),
-  description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres" }),
-  image: z.string().url({ message: "URL da imagem inválida" }),
+  title: z.string().min(5, { message: "O título deve ter pelo menos 5 caracteres" }),
+  description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
+  image: z.string().url({ message: "Informe uma URL de imagem válida" }),
   price: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
-  days: z.coerce.number().int().positive({ message: "Os dias devem ser um número positivo" }),
-  persons: z.coerce.number().int().positive({ message: "As pessoas devem ser um número positivo" }),
+  days: z.coerce.number().int().positive({ message: "A duração deve ser um número inteiro positivo" }),
+  persons: z.coerce.number().int().positive({ message: "O número de pessoas deve ser um número inteiro positivo" }),
   rating: z.coerce.number().min(0).max(5, { message: "A avaliação deve estar entre 0 e 5" }),
+  category: z.string(),
   highlights: z.array(z.string()).optional(),
   includes: z.array(z.string()).optional(),
   excludes: z.array(z.string()).optional(),
-  itinerary: z.array(
-    z.object({
-      day: z.number(),
-      title: z.string(),
-      description: z.string(),
-    })
-  ).optional(),
+  itinerary: z
+    .array(
+      z.object({
+        day: z.coerce.number().int().positive(),
+        title: z.string().min(3),
+        description: z.string().min(10),
+      })
+    )
+    .optional(),
   dates: z.array(z.string()).optional(),
 });
 
@@ -51,11 +63,24 @@ interface PackageFormProps {
   onSuccess: () => void;
 }
 
-export function PackageForm({ packageId, onCancel, onSuccess }: PackageFormProps) {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+export const PackageForm = ({
+  packageId,
+  onCancel,
+  onSuccess,
+}: PackageFormProps) => {
+  const [activeTab, setActiveTab] = useState("basic");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
+  const { data: packageData, isLoading: isLoadingPackage } = usePackageDetail(
+    packageId || 0
+  );
   
-  // Define form default values
+  const { 
+    createPackage, 
+    updatePackage
+  } = usePackages();
+
+  // Define the form
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageFormSchema),
     defaultValues: {
@@ -65,493 +90,644 @@ export function PackageForm({ packageId, onCancel, onSuccess }: PackageFormProps
       price: 0,
       days: 1,
       persons: 1,
-      rating: 0,
-      highlights: [],
-      includes: [],
-      excludes: [],
-      itinerary: [],
-      dates: [],
-    }
+      rating: 4.5,
+      category: "romantic",
+      highlights: [""],
+      includes: [""],
+      excludes: [""],
+      itinerary: [{ day: 1, title: "", description: "" }],
+      dates: [""],
+    },
   });
 
-  // Load existing package data if editing
+  // Setup field arrays for the lists
+  const highlightsArray = useFieldArray({
+    control: form.control,
+    name: "highlights",
+  });
+
+  const includesArray = useFieldArray({
+    control: form.control,
+    name: "includes",
+  });
+
+  const excludesArray = useFieldArray({
+    control: form.control,
+    name: "excludes",
+  });
+
+  const itineraryArray = useFieldArray({
+    control: form.control,
+    name: "itinerary",
+  });
+
+  const datesArray = useFieldArray({
+    control: form.control,
+    name: "dates",
+  });
+
+  // Load package data when editing
   useEffect(() => {
-    if (packageId) {
-      const existingPackage = getPackageById(packageId);
-      
-      if (existingPackage) {
-        form.reset({
-          title: existingPackage.title,
-          description: existingPackage.description,
-          image: existingPackage.image,
-          price: existingPackage.price,
-          days: existingPackage.days,
-          persons: existingPackage.persons,
-          rating: existingPackage.rating,
-          highlights: existingPackage.highlights || [],
-          includes: existingPackage.includes || [],
-          excludes: existingPackage.excludes || [],
-          itinerary: existingPackage.itinerary || [],
-          dates: existingPackage.dates || [],
-        });
+    if (packageData) {
+      // Determine category based on package ID patterns
+      let category = "romantic";
+      if (packageData.id >= 1 && packageData.id <= 2 || packageData.id === 6) {
+        category = "romantic";
+      } else if (packageData.id >= 3 && packageData.id <= 4) {
+        category = "adventure";
+      } else if (packageData.id === 5) {
+        category = "family";
+      } else if (packageData.id === 4) {
+        category = "premium";
+      } else {
+        category = "budget";
       }
-    }
-  }, [packageId, form]);
 
-  // Form submission handler
-  const onSubmit = (data: PackageFormValues) => {
-    setLoading(true);
-
-    try {
-      // Here we would call an API to save the package data
-      console.log("Package data:", data);
-      
-      // Simulating API call with timeout
-      setTimeout(() => {
-        toast({
-          title: packageId ? "Pacote atualizado" : "Pacote criado",
-          description: packageId 
-            ? "O pacote foi atualizado com sucesso." 
-            : "O novo pacote foi criado com sucesso.",
-        });
-        
-        setLoading(false);
-        onSuccess();
-      }, 800);
-    } catch (error) {
-      console.error("Error saving package:", error);
-      
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o pacote. Tente novamente.",
-        variant: "destructive",
+      // Set form values
+      form.reset({
+        title: packageData.title,
+        description: packageData.description,
+        image: packageData.image,
+        price: packageData.price,
+        days: packageData.days,
+        persons: packageData.persons,
+        rating: packageData.rating,
+        category,
+        highlights: packageData.highlights || [""],
+        includes: packageData.includes || [""],
+        excludes: packageData.excludes || [""],
+        itinerary: packageData.itinerary || [{ day: 1, title: "", description: "" }],
+        dates: packageData.dates || [""],
       });
-      
-      setLoading(false);
+
+      setPreviewUrl(packageData.image);
+    }
+  }, [packageData, form]);
+
+  // Update image preview when URL changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "image") {
+        setPreviewUrl(value.image as string);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  // Form submission
+  const onSubmit = (data: PackageFormValues) => {
+    if (packageId) {
+      // Update existing package
+      updatePackage.mutate(
+        {
+          id: packageId,
+          ...data,
+        } as Package,
+        {
+          onSuccess: onSuccess,
+        }
+      );
+    } else {
+      // Create new package
+      createPackage.mutate(data as Omit<Package, "id">, {
+        onSuccess: onSuccess,
+      });
     }
   };
 
-  // Helper functions for array fields
-  const addArrayItem = (fieldName: "highlights" | "includes" | "excludes" | "dates") => {
-    const currentValues = form.getValues(fieldName) || [];
-    form.setValue(fieldName, [...currentValues, ""]);
-  };
+  // Check if the form is being submitted
+  const isSubmitting = createPackage.isPending || updatePackage.isPending;
 
-  const removeArrayItem = (fieldName: "highlights" | "includes" | "excludes" | "dates", index: number) => {
-    const currentValues = form.getValues(fieldName) || [];
-    form.setValue(
-      fieldName,
-      currentValues.filter((_, i) => i !== index)
+  if (packageId && isLoadingPackage) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
+        <span className="ml-2">Carregando informações do pacote...</span>
+      </div>
     );
-  };
-
-  const addItineraryItem = () => {
-    const currentValues = form.getValues("itinerary") || [];
-    const nextDay = currentValues.length > 0 
-      ? Math.max(...currentValues.map(item => item.day)) + 1 
-      : 1;
-    
-    form.setValue("itinerary", [
-      ...currentValues,
-      { day: nextDay, title: "", description: "" }
-    ]);
-  };
-
-  const removeItineraryItem = (index: number) => {
-    const currentValues = form.getValues("itinerary") || [];
-    form.setValue(
-      "itinerary",
-      currentValues.filter((_, i) => i !== index)
-    );
-  };
+  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Título do pacote" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full">
+            <TabsTrigger value="basic" className="flex-1">
+              Informações Básicas
+            </TabsTrigger>
+            <TabsTrigger value="highlights" className="flex-1">
+              Destaques
+            </TabsTrigger>
+            <TabsTrigger value="details" className="flex-1">
+              Detalhes
+            </TabsTrigger>
+            <TabsTrigger value="itinerary" className="flex-1">
+              Itinerário
+            </TabsTrigger>
+          </TabsList>
 
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL da Imagem</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="URL da imagem do pacote" />
-                  </FormControl>
-                  <FormDescription>
-                    URL da imagem principal do pacote
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço (R$)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        placeholder="Preço do pacote" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rating"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Avaliação (0-5)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.1" 
-                        {...field} 
-                        placeholder="Avaliação" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="days"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dias</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        placeholder="Número de dias" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="persons"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pessoas</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        placeholder="Número de pessoas" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          <div>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Descrição detalhada do pacote" 
-                      rows={10}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Array Fields - Highlights, Includes, Excludes */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Highlights */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium text-gray-700">Destaques</h3>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => addArrayItem("highlights")}
-              >
-                <PlusCircle className="h-4 w-4 mr-1" />
-                Adicionar
-              </Button>
-            </div>
-            {form.watch("highlights")?.map((_, index) => (
-              <div key={index} className="flex items-center mb-2">
+          {/* Basic Information Tab */}
+          <TabsContent value="basic" className="space-y-4 pt-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name={`highlights.${index}`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input {...field} placeholder="Destaque do pacote" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2"
-                  onClick={() => removeArrayItem("highlights", index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Includes */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium text-gray-700">Inclui</h3>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => addArrayItem("includes")}
-              >
-                <PlusCircle className="h-4 w-4 mr-1" />
-                Adicionar
-              </Button>
-            </div>
-            {form.watch("includes")?.map((_, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <FormField
-                  control={form.control}
-                  name={`includes.${index}`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input {...field} placeholder="Item incluído" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2"
-                  onClick={() => removeArrayItem("includes", index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Excludes */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium text-gray-700">Não Inclui</h3>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => addArrayItem("excludes")}
-              >
-                <PlusCircle className="h-4 w-4 mr-1" />
-                Adicionar
-              </Button>
-            </div>
-            {form.watch("excludes")?.map((_, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <FormField
-                  control={form.control}
-                  name={`excludes.${index}`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input {...field} placeholder="Item não incluído" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2"
-                  onClick={() => removeArrayItem("excludes", index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Itinerary */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-700">Itinerário</h3>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={addItineraryItem}
-            >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Adicionar Dia
-            </Button>
-          </div>
-          {form.watch("itinerary")?.map((_, index) => (
-            <div key={index} className="border p-4 rounded-md mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium">Dia {form.watch(`itinerary.${index}.day`)}</h4>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => removeItineraryItem(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name={`itinerary.${index}.day`}
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Dia</FormLabel>
+                      <FormLabel>Título do Pacote</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} />
+                        <Input {...field} placeholder="Escapada Romântica" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name={`itinerary.${index}.title`}
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Título</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Título do dia" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`itinerary.${index}.description`}
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
                       <FormLabel>Descrição</FormLabel>
                       <FormControl>
-                        <Textarea {...field} placeholder="Descrição do dia" />
+                        <Textarea
+                          {...field}
+                          placeholder="Descreva o pacote de viagem"
+                          rows={4}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Available Dates */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-700">Datas Disponíveis</h3>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => addArrayItem("dates")}
-            >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Adicionar Data
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {form.watch("dates")?.map((_, index) => (
-              <div key={index} className="flex items-center">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preço (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="rating"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Avaliação (0-5)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="4.5"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="days"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duração (dias)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="3"
+                            min="1"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="persons"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pessoas</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="2"
+                            min="1"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name={`dates.${index}`}
+                  name="category"
                   render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input {...field} placeholder="Ex: 01/01/2023 - 10/01/2023" />
-                      </FormControl>
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="romantic">Romântico</SelectItem>
+                          <SelectItem value="adventure">Aventura</SelectItem>
+                          <SelectItem value="family">Família</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="budget">Econômico</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+              
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL da Imagem</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://example.com/image.jpg" />
+                      </FormControl>
+                      <FormDescription>
+                        Informe a URL da imagem principal do pacote
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="mt-4 border rounded-md overflow-hidden bg-gray-50 aspect-video flex items-center justify-center">
+                  {previewUrl ? (
+                    <SafeImage
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      fallbackSrc="/placeholder.svg"
+                    />
+                  ) : (
+                    <div className="text-gray-400 text-center p-4">
+                      <p>Pré-visualização da imagem</p>
+                      <p className="text-sm">Informe uma URL válida para ver a imagem aqui</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Highlights Tab */}
+          <TabsContent value="highlights" className="space-y-4 pt-4">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Destaques do Pacote</h3>
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2"
-                  onClick={() => removeArrayItem("dates", index)}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => highlightsArray.append("")}
                 >
-                  <X className="h-4 w-4" />
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Destaque
                 </Button>
               </div>
-            ))}
-          </div>
-        </div>
+              
+              <div className="space-y-3">
+                {highlightsArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`highlights.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 mb-0">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Destaque do pacote"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => highlightsArray.remove(index)}
+                      disabled={highlightsArray.fields.length <= 1}
+                      className="h-10 w-10 text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <DialogFooter>
+            <Separator className="my-6" />
+
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Datas Disponíveis</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => datesArray.append("")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Data
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {datesArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`dates.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 mb-0">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="01/06/2023 - 05/06/2023"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => datesArray.remove(index)}
+                      disabled={datesArray.fields.length <= 1}
+                      className="h-10 w-10 text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Details Tab */}
+          <TabsContent value="details" className="space-y-6 pt-4">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">O que Inclui</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => includesArray.append("")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Item
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {includesArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`includes.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 mb-0">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Item incluído no pacote"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => includesArray.remove(index)}
+                      disabled={includesArray.fields.length <= 1}
+                      className="h-10 w-10 text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">O que Não Inclui</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => excludesArray.append("")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Item
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {excludesArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`excludes.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 mb-0">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Item não incluído no pacote"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => excludesArray.remove(index)}
+                      disabled={excludesArray.fields.length <= 1}
+                      className="h-10 w-10 text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Itinerary Tab */}
+          <TabsContent value="itinerary" className="space-y-4 pt-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Itinerário</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const nextDay = itineraryArray.fields.length + 1;
+                  itineraryArray.append({
+                    day: nextDay,
+                    title: "",
+                    description: "",
+                  });
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Dia
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {itineraryArray.fields.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-md bg-gray-50">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-medium">Dia {index + 1}</h4>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => itineraryArray.remove(index)}
+                      disabled={itineraryArray.fields.length <= 1}
+                      className="text-red-500 h-8"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remover
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name={`itinerary.${index}.day`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dia</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              min="1"
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value);
+                                field.onChange(value || 1);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`itinerary.${index}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título do Dia</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Chegada a Fernando de Noronha"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`itinerary.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição das Atividades</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Descreva as atividades do dia"
+                              rows={3}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end gap-2 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Salvando..." : packageId ? "Atualizar Pacote" : "Criar Pacote"}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {packageId ? "Salvando..." : "Criando..."}
+              </>
+            ) : (
+              <>{packageId ? "Salvar Alterações" : "Criar Pacote"}</>
+            )}
           </Button>
-        </DialogFooter>
+        </div>
       </form>
     </Form>
   );
-}
+};

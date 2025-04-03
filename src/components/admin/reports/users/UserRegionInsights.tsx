@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowTrendingUp, ChartBarSquare, ArrowTopRightOnSquare } from "lucide-react";
+import { ArrowTrendingUp, ChartBarSquare, ExternalLink } from "lucide-react";
 
 const UserRegionInsights = () => {
   return (
@@ -36,7 +36,7 @@ const UserRegionInsights = () => {
           <div className="text-sm font-medium text-purple-800">
             Maior Conversão
           </div>
-          <ArrowTopRightOnSquare className="text-purple-500 h-5 w-5" />
+          <ExternalLink className="text-purple-500 h-5 w-5" />
         </div>
         <div className="mt-2">
           <div className="font-bold text-xl text-purple-800">Sul</div>

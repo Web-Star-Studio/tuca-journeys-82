@@ -13,83 +13,61 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingCTA from "@/components/BookingCTA";
 import DestinationHighlight from "@/components/DestinationHighlight";
+import PageContainer from "@/components/layout/PageContainer";
+import AnimatedSections from "@/components/layout/AnimatedSections";
+import AnimatedSection from "@/components/layout/AnimatedSection";
 
 const Index = () => {
-  // Staggered animation for page sections
-  const sectionVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
-  };
-
-  const sectionItemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.8 }
-    }
-  };
-
   return (
-    <div className="relative w-full overflow-hidden">
+    <PageContainer>
       <Header />
       <main className="flex flex-col">
         <HeroSection />
         
-        <motion.div 
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-0" // Remove default spacing and let each section handle its own padding
-        >
-          <motion.div variants={sectionItemVariants}>
+        <AnimatedSections>
+          <AnimatedSection>
             <FeatureHighlights />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <DestinationHighlight />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <FeaturedPackages />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <BookingCTA />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <FeaturedTours />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <FeaturedAccommodations />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <Testimonials />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <FeaturedProducts />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <InstagramFeed />
-          </motion.div>
+          </AnimatedSection>
           
-          <motion.div variants={sectionItemVariants}>
+          <AnimatedSection>
             <ContactCTA />
-          </motion.div>
-        </motion.div>
+          </AnimatedSection>
+        </AnimatedSections>
       </main>
       <Footer />
-    </div>
+    </PageContainer>
   );
 };
 

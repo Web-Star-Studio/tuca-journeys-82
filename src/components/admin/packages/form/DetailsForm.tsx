@@ -10,8 +10,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface DetailsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  includesArray: UseFieldArrayReturn<PackageFormValues, "includes">;
-  excludesArray: UseFieldArrayReturn<PackageFormValues, "excludes">;
+  includesArray: UseFieldArrayReturn<PackageFormValues>;
+  excludesArray: UseFieldArrayReturn<PackageFormValues>;
 }
 
 const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) => {

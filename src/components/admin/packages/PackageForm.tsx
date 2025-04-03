@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePackageDetail, usePackages } from "@/hooks/use-packages";
 import { Package } from "@/data/types/packageTypes";
@@ -72,7 +73,7 @@ export const PackageForm = ({
     },
   });
 
-  // Create the field arrays using the imported useFieldArray hook
+  // Create the field arrays using useFieldArray hook directly
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",

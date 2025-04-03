@@ -6,8 +6,6 @@ import UsersTable from "@/components/admin/users/UsersTable";
 import DeleteUserDialog from "@/components/admin/users/DeleteUserDialog";
 import UserFormDialog from "@/components/admin/users/UserFormDialog";
 import { User } from "@/components/admin/users/types";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 // Sample user data (would come from API in real implementation)
 const dummyUsers: User[] = [
@@ -56,6 +54,8 @@ const Users = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<number | undefined>(undefined);
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Handle user actions
   const handleEmailClick = (user: User) => {
@@ -92,26 +92,31 @@ const Users = () => {
     console.log("User saved successfully");
   };
 
-  // Filter users based on search query
+  // Filter users based on search query, role and status
   const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (user) => {
+      const matchesSearch = 
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+      
+      return matchesSearch && matchesRole && matchesStatus;
+    }
   );
 
   return (
     <AdminLayout pageTitle="Gerenciar Usuários">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <UserFilters 
-          searchQuery={searchQuery} 
-          setSearchQuery={setSearchQuery} 
-        />
-        
-        <Button className="gap-1" onClick={handleAddNewUser}>
-          <Plus className="h-4 w-4" />
-          <span>Novo Usuário</span>
-        </Button>
-      </div>
+      <UserFilters 
+        searchQuery={searchQuery} 
+        setSearchQuery={setSearchQuery}
+        onAddUserClick={handleAddNewUser}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
       
       <UsersTable 
         users={filteredUsers}

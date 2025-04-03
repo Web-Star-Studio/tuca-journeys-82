@@ -21,14 +21,17 @@ const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
     setButtonClicked(buttonType);
     
     try {
-      console.log(`Attempting ${buttonType} login`);
+      console.log(`Attempting ${buttonType} login with email: ${email}`);
       await signIn(email, password);
       console.log(`${buttonType} login successful, redirecting to ${isAdmin ? 'admin' : 'home'}`);
       
-      onSuccessfulLogin(isAdmin);
+      // Slight delay to ensure state updates are processed
+      setTimeout(() => {
+        onSuccessfulLogin(isAdmin);
+      }, 100);
     } catch (error) {
       console.error(`${buttonType} login error:`, error);
-      // The toast is already shown in the signIn function
+      // Reset loading state since the toast is already shown in signIn function
     } finally {
       setIsLoading(false);
       setButtonClicked(null);

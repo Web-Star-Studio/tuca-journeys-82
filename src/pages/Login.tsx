@@ -18,6 +18,7 @@ const Login = () => {
   // If the user is already logged in, redirect
   useEffect(() => {
     if (user && !redirecting) {
+      console.log("User already logged in:", user);
       setRedirecting(true);
       
       // Check if the user is admin by email or metadata
@@ -26,25 +27,26 @@ const Login = () => {
                      (user.app_metadata && user.app_metadata.role === "admin");
       
       setRedirectMessage(isAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para a página inicial...");
+      console.log("User is admin:", isAdmin);
       
       // Add a slight delay to ensure the toast is shown
       setTimeout(() => {
         if (isAdmin) {
-          console.log("User is admin, redirecting to /admin");
+          console.log("Redirecting to /admin");
           toast({
             title: "Login bem-sucedido",
             description: "Bem-vindo ao painel de administração!",
           });
           navigate("/admin");
         } else {
-          console.log("User is not admin, redirecting to /");
+          console.log("Redirecting to /");
           toast({
             title: "Login bem-sucedido",
             description: "Bem-vindo de volta!",
           });
           navigate("/");
         }
-      }, 500);
+      }, 300);
     }
   }, [user, navigate, toast, redirecting]);
   
@@ -52,7 +54,7 @@ const Login = () => {
     setRedirecting(true);
     setRedirectMessage(redirectToAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para a página inicial...");
     
-    console.log("Login successful in Login.tsx, redirecting to", redirectToAdmin ? "/admin" : "/");
+    console.log("Login successful, redirecting to", redirectToAdmin ? "/admin" : "/");
     
     // Add a slight delay to ensure the state update is processed
     setTimeout(() => {
@@ -61,7 +63,7 @@ const Login = () => {
       } else {
         navigate("/");
       }
-    }, 500);
+    }, 300);
   };
 
   if (redirecting) {
@@ -73,6 +75,22 @@ const Login = () => {
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-tuca-ocean-blue" />
             <h2 className="text-2xl font-bold mb-2">Login bem-sucedido!</h2>
             <p className="text-lg text-gray-600">{redirectMessage}</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow py-20 md:py-32 bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-tuca-ocean-blue" />
+            <h2 className="text-2xl font-bold mb-2">Carregando...</h2>
+            <p className="text-lg text-gray-600">Verificando seu login</p>
           </div>
         </main>
         <Footer />

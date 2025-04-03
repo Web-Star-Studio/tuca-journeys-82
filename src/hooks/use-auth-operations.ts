@@ -1,3 +1,4 @@
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
@@ -12,10 +13,54 @@ export const useAuthOperations = () => {
       // Determine if it's an admin login
       const isAdminLogin = email === "admin@tucanoronha.com";
       
+      // Check if using demo credentials first
+      if (
+        (email === "admin@tucanoronha.com" && password === "admin123456") ||
+        (email === "demo@tucanoronha.com" && password === "demo123456") ||
+        (email === "user@example.com" && password === "password")
+      ) {
+        console.log("Using demo credentials, creating mock session");
+        // Use demo mode
+        const mockUser = {
+          id: "demo-user-id",
+          email: email,
+          user_metadata: {
+            name: isAdminLogin ? "Admin Demo" : "Demo User",
+            role: isAdminLogin ? "admin" : "user",
+          },
+          app_metadata: {
+            role: isAdminLogin ? "admin" : "user",
+          },
+          aud: "authenticated",
+          created_at: new Date().toISOString(),
+        };
+        
+        const mockSession = {
+          access_token: "mock-token",
+          refresh_token: "mock-refresh-token",
+          user: mockUser,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+        };
+        
+        // Store the mocked session in localStorage to persist
+        localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
+        
+        toast({
+          title: "Login de demonstração",
+          description: `Você está usando uma conta de demonstração como ${isAdminLogin ? 'administrador' : 'usuário'}`,
+          variant: "default",
+        });
+        
+        return { 
+          data: { session: mockSession, user: mockUser }, 
+          error: null 
+        };
+      }
+      
       try {
-        // Attempt Supabase auth first with a 5 second timeout
+        // Attempt Supabase auth with a shorter timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -38,57 +83,24 @@ export const useAuthOperations = () => {
       } catch (error: any) {
         console.error("Login error:", error?.message || "Connection error");
         
-        // Make mock user if using demo credentials
-        if (
-          (email === "admin@tucanoronha.com" && password === "admin123456") ||
-          (email === "demo@tucanoronha.com" && password === "demo123456") ||
-          (email === "user@example.com" && password === "password")
-        ) {
-          console.log("Using demo credentials, creating mock session");
-          // Fallback to demo mode due to network error or authentication
-          const mockUser = {
-            id: "demo-user-id",
-            email: email,
-            user_metadata: {
-              name: isAdminLogin ? "Admin Demo" : "Demo User",
-              role: isAdminLogin ? "admin" : "user",
-            },
-            app_metadata: {
-              role: isAdminLogin ? "admin" : "user",
-            },
-            aud: "authenticated",
-            created_at: new Date().toISOString(),
-          };
-          
-          const mockSession = {
-            access_token: "mock-token",
-            refresh_token: "mock-refresh-token",
-            user: mockUser,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-          };
-          
-          // Store the mocked session in localStorage to persist
-          localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
-          
-          toast({
-            title: "Login de demonstração",
-            description: `Você está usando uma conta de demonstração como ${isAdminLogin ? 'administrador' : 'usuário'}`,
-            variant: "default",
-          });
-          
-          return { 
-            data: { session: mockSession, user: mockUser }, 
-            error: null 
-          };
-        } else {
-          // If not using demo credentials, show an error
+        // Network error fallback - suggest using demo accounts or check network
+        if (error.name === "AbortError" || error.message === "Failed to fetch") {
           toast({
             title: "Erro de conexão",
-            description: "Não foi possível conectar ao servidor. Tente novamente ou use uma conta de demonstração.",
+            description: "Não foi possível conectar ao servidor. Use uma conta de demonstração ou verifique sua conexão.",
             variant: "destructive",
           });
           
           throw new Error("Connection error. Try using a demo account.");
+        } else {
+          // Regular auth error
+          toast({
+            title: "Erro no login",
+            description: error.message || "Email ou senha incorretos. Tente novamente.",
+            variant: "destructive",
+          });
+          
+          throw error;
         }
       }
     } catch (error: any) {

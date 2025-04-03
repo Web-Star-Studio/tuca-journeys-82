@@ -30,7 +30,11 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       await signIn(email, password);
       
       console.log("Login successful, redirecting to", redirectToAdmin ? "admin" : "home");
-      onSuccessfulLogin(redirectToAdmin);
+      
+      // Slight delay to ensure state updates are processed
+      setTimeout(() => {
+        onSuccessfulLogin(redirectToAdmin);
+      }, 100);
     } catch (error) {
       // Error is already handled in the signIn function
       console.error("Login form submission error:", error);

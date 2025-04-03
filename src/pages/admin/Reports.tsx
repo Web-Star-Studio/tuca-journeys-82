@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevenueReport from "@/components/admin/reports/RevenueReport";
-import BookingsReport from "@/components/admin/reports/BookingsReport";
+import BookingsReportContainer from "@/components/admin/reports/bookings/BookingsReportContainer";
 import UsersReport from "@/components/admin/reports/UsersReport";
 import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
@@ -65,7 +65,7 @@ const Reports = () => {
           </TabsContent>
           
           <TabsContent value="bookings" className="space-y-4 pt-2">
-            <BookingsReport dateRange={dateRange} />
+            <BookingsReportContainer dateRange={dateRange} />
           </TabsContent>
           
           <TabsContent value="packages" className="space-y-4 pt-2">

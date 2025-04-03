@@ -6,7 +6,6 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import { QueryProvider } from "./providers/QueryProvider";
 import { Toaster } from "./components/ui/toaster";
 import ScrollToTop from "./components/utils/ScrollToTop";
-import NewsLine from "./components/NewsLine";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -53,7 +52,6 @@ const App = () => {
           <WishlistProvider>
             <Router>
               <ScrollToTop />
-              <NewsLine />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/sobre" element={<About />} />

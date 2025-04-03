@@ -17,8 +17,8 @@ const Header = () => {
   // Determine if we're on the homepage
   const isHomePage = location.pathname === "/";
   
-  // Apply transparent header on home page when at the top, but account for the NewsLine height
-  const isTransparent = isHomePage && scrollPosition < 50;
+  // Apply transparent header on home page when at the top
+  const isTransparent = isHomePage && scrollPosition < 30;
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -30,7 +30,7 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 mt-7 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isTransparent
           ? "bg-transparent text-white"
           : "bg-white/90 backdrop-blur-md text-gray-900 shadow-sm"

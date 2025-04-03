@@ -83,6 +83,9 @@ const HeroBackground = ({ currentImageIndex, scrollProgress }: HeroBackgroundPro
                 className="w-full h-full object-cover"
                 fallbackSrc="/placeholder.svg"
               />
+              
+              {/* Black overlay with 50% opacity for each image */}
+              <div className="absolute inset-0 bg-black/50"></div>
             </motion.div>
           );
         })}

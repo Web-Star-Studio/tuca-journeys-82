@@ -67,7 +67,7 @@ const NewsLine = () => {
   ];
   
   return (
-    <div className="bg-tuca-ocean-blue text-white py-1 overflow-hidden text-sm">
+    <div className="bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue text-white py-1 overflow-hidden text-sm">
       <div className="container mx-auto px-4">
         <div className="overflow-hidden">
           <motion.div

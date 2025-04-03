@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -39,26 +38,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Sign Out - Modified from useAuthOperations to return void for consistency
+  // Sign Out - Modified to be more robust with error handling
   const signOut = async () => {
     try {
-      console.log("Starting sign out process...");
+      console.log("Starting sign out process in AuthContext...");
       setLoading(true);
-      const { error } = await authSignOut();
       
-      if (error) {
-        console.error("Error during sign out:", error);
-        // Still proceed with local cleanup even if there was an API error
-      }
+      // Call the signOut function from useAuthOperations
+      await authSignOut();
       
-      // Ensure we don't have any lingering session data
+      // Ensure we clear all possible session data
+      console.log("Clearing all session data in AuthContext");
       localStorage.removeItem("supabase-mock-session");
+      localStorage.removeItem("supabase-session");
+      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
       
-      console.log("Sign out process completed");
+      console.log("Sign out process completed in AuthContext");
     } catch (error) {
-      console.error("Error in signOut:", error);
+      console.error("Error in AuthContext signOut:", error);
+      
       // Attempt to clean up even if there was an exception
       localStorage.removeItem("supabase-mock-session");
+      localStorage.removeItem("supabase-session");
+      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
     } finally {
       setLoading(false);
     }

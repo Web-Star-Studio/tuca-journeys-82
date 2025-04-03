@@ -63,14 +63,19 @@ export const useAuthState = () => {
       async (event, currentSession) => {
         console.log("Auth state changed:", event);
         
-        // If we get a SIGNED_OUT event, also clear any mock session
+        // If we get a SIGNED_OUT event, clear ALL session data
         if (event === 'SIGNED_OUT') {
-          console.log("Signed out event received, clearing mock session");
+          console.log("Signed out event received, clearing all session data");
           localStorage.removeItem("supabase-mock-session");
+          localStorage.removeItem("supabase-session");
+          localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(currentSession);
+          setUser(currentSession?.user || null);
         }
         
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
         setLoading(false);
       }
     );

@@ -1,3 +1,4 @@
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
@@ -23,18 +24,31 @@ export const useSignOut = () => {
         return { error: null };
       }
       
-      // Otherwise, sign out with Supabase
-      console.log("Signing out with Supabase");
-      const { error } = await supabase.auth.signOut();
+      // Get the current session - to verify if we have a valid session before attempting to sign out
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (error) {
-        console.error("Supabase sign out error:", error);
-        throw error;
+      // If we have an active session, try to sign out with Supabase
+      if (sessionData?.session) {
+        console.log("Found active session, signing out with Supabase");
+        
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.warn("Supabase sign out warning:", error);
+            // Continue with cleanup even if there's an error
+          }
+        } catch (innerError) {
+          console.error("Supabase signOut error caught:", innerError);
+          // Continue with cleanup even if there's an exception
+        }
+      } else {
+        console.log("No active session found, just cleaning up local storage");
       }
       
-      // Clear any potential lingering session data
-      console.log("Sign out successful, clearing any session data");
+      // Clear all possible session data regardless of whether API call succeeded
+      console.log("Clearing all session data");
       localStorage.removeItem("supabase-session");
+      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
       
       toast({
         title: "Sessão encerrada",
@@ -45,8 +59,10 @@ export const useSignOut = () => {
     } catch (error: any) {
       console.error("Error during sign out:", error);
       
-      // Still attempt to clear any session data on error
+      // Still attempt to clear all session data on error
       localStorage.removeItem("supabase-mock-session");
+      localStorage.removeItem("supabase-session");
+      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
       
       toast({
         title: "Erro ao sair",

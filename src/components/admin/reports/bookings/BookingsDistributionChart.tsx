@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ChartTooltip, ChartTooltipContent } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
 import { BookingData, BookingChartConfig } from "./BookingsDataTypes";
 
 interface BookingsDistributionChartProps {
@@ -34,7 +34,7 @@ const BookingsDistributionChart = ({ data, chartConfig, totals }: BookingsDistri
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <ChartTooltip 
+              <Tooltip 
                 content={
                   <ChartTooltipContent indicator="dot" />
                 }

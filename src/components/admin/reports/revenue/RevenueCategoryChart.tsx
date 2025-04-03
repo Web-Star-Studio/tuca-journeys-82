@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { ComposedChart, CartesianGrid, XAxis, YAxis, Bar, Legend, Line } from "recharts";
+import { ComposedChart, CartesianGrid, XAxis, YAxis, Bar, Legend, Line, Tooltip } from "recharts";
 import { revenueData, chartConfig } from "./RevenueDataGenerator";
 
 const RevenueCategoryChart = () => {
@@ -23,7 +23,7 @@ const RevenueCategoryChart = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <ChartTooltip
+              <Tooltip
                 content={
                   <ChartTooltipContent
                     indicator="dot"

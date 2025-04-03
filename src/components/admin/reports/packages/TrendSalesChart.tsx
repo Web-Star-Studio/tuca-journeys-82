@@ -12,7 +12,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend
+  Legend,
+  Tooltip
 } from 'recharts';
 
 interface TrendSalesChartProps {
@@ -53,7 +54,7 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <ChartTooltip
+              <Tooltip
                 content={props => (
                   <ChartTooltipContent
                     {...props}

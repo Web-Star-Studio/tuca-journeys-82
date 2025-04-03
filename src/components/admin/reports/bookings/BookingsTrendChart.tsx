@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
 import { BookingData, BookingChartConfig } from "./BookingsDataTypes";
 
 interface BookingsTrendChartProps {
@@ -26,7 +26,7 @@ const BookingsTrendChart = ({ data, chartConfig }: BookingsTrendChartProps) => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <ChartTooltip 
+              <Tooltip 
                 content={
                   <ChartTooltipContent indicator="dot" />
                 }

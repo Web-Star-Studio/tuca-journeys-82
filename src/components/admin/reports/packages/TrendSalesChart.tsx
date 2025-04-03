@@ -12,7 +12,8 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
-  Tooltip
+  Tooltip,
+  TooltipProps
 } from 'recharts';
 
 interface TrendSalesChartProps {
@@ -37,6 +38,23 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
     "Premium": { color: COLORS[3], label: "Premium" },
     "Econômico": { color: COLORS[4], label: "Econômico" },
     "Total": { color: "#666", label: "Total" }
+  };
+
+  // Create a custom tooltip component to avoid type errors
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-md shadow-md">
+          <p className="font-medium">{label}</p>
+          {payload.map((item, index) => (
+            <p key={index} className="text-sm" style={{ color: item.color }}>
+              {`${item.name}: ${item.value} vendas`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -64,14 +82,7 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
                 axisLine={{ stroke: '#e0e0e0' }}
                 tickFormatter={(value) => `${value}`}
               />
-              <Tooltip
-                content={(props) => (
-                  <ChartTooltipContent
-                    {...props}
-                    formatter={(value, name) => [`${value} vendas`, name]}
-                  />
-                )}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Legend 
                 wrapperStyle={{ 
                   paddingTop: 15,

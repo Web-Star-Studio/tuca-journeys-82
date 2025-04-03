@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePackageDetail, usePackages } from "@/hooks/use-packages";
 import { Package } from "@/data/types/packageTypes";
@@ -72,30 +72,25 @@ export const PackageForm = ({
     },
   });
 
-  // Setup field arrays for the lists - using the correct path for each one
-  const highlightsArray = useFieldArray({
-    control: form.control,
-    name: "highlights",  // Changed from "itinerary"
+  // These calls have been updated to use the correct field names instead of all using "itinerary"
+  const highlightsArray = form.useFieldArray({
+    name: "highlights",
   });
 
-  const includesArray = useFieldArray({
-    control: form.control,
-    name: "includes",  // Changed from "itinerary"
+  const includesArray = form.useFieldArray({
+    name: "includes",
   });
 
-  const excludesArray = useFieldArray({
-    control: form.control,
-    name: "excludes",  // Changed from "itinerary"
+  const excludesArray = form.useFieldArray({
+    name: "excludes",
   });
 
-  const itineraryArray = useFieldArray({
-    control: form.control,
+  const itineraryArray = form.useFieldArray({
     name: "itinerary",
   });
 
-  const datesArray = useFieldArray({
-    control: form.control,
-    name: "dates",  // Changed from "itinerary"
+  const datesArray = form.useFieldArray({
+    name: "dates",
   });
 
   // Load package data when editing

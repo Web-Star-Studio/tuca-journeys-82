@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, TooltipProps, ResponsiveContainer } from "recharts";
 import { StatusData } from "./BookingsDataTypes";
 
 interface BookingsStatusChartProps {
@@ -17,7 +17,8 @@ const BookingsStatusChart = ({ statusData }: BookingsStatusChartProps) => {
     }])
   );
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  // Custom tooltip component to fix type errors
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border rounded-md shadow-md">

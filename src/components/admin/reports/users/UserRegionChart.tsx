@@ -1,7 +1,7 @@
 
 import React from "react";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps, ResponsiveContainer } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RegionData {
@@ -33,6 +33,19 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
     ...item,
     regiao: isMobile && item.regiao.length > 8 ? item.regiao.substring(0, 8) + '..' : item.regiao
   }));
+
+  // Custom tooltip to fix type errors
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-md shadow-md">
+          <p className="font-medium">{payload[0].payload.regiao}</p>
+          <p className="text-sm">{`${payload[0].value} usuários`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
   
   return (
     <div className="h-64 sm:h-80 pt-4">
@@ -61,15 +74,7 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
             axisLine={{ stroke: '#e0e0e0' }}
             tick={{ fontSize: 10 }}
           />
-          <Tooltip 
-            content={(props) => (
-              <ChartTooltipContent 
-                {...props} 
-                indicator="line"
-                formatter={(value) => [`${value} usuários`, 'Total']} 
-              />
-            )}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Bar 
             dataKey="usuarios" 
             name="Usuários" 

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
@@ -10,8 +10,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface HighlightsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  highlightsArray: any; // Changed to avoid type constraint
-  datesArray: any; // Changed to avoid type constraint
+  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights", "id">;
+  datesArray: UseFieldArrayReturn<PackageFormValues, "dates", "id">;
 }
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {
@@ -32,7 +32,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
         </div>
         
         <div className="space-y-3">
-          {highlightsArray.fields.map((field: any, index: number) => (
+          {highlightsArray.fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
@@ -81,7 +81,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
         </div>
         
         <div className="space-y-3">
-          {datesArray.fields.map((field: any, index: number) => (
+          {datesArray.fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}

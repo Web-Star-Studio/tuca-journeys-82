@@ -6,7 +6,8 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  TooltipProps
 } from 'recharts';
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -28,7 +29,8 @@ const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartPro
     return `${name}: ${(percent * 100).toFixed(0)}%`;
   };
   
-  const CustomTooltip = ({ active, payload }: any) => {
+  // Custom tooltip component to fix type errors
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border rounded-md shadow-md">

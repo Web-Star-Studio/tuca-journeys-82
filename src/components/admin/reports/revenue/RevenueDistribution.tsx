@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, Tooltip, TooltipProps } from "recharts";
 
 interface RevenueDistributionProps {
   totalRevenue: number;
@@ -36,6 +36,19 @@ const RevenueDistribution = ({
     }])
   );
 
+  // Create a custom tooltip component to fix type errors
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-md shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm">{`R$ ${Number(payload[0].value).toLocaleString('pt-BR')}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -63,14 +76,7 @@ const RevenueDistribution = ({
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  content={(props) => (
-                    <ChartTooltipContent
-                      {...props}
-                      formatter={(value, name) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]}
-                    />
-                  )}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ChartContainer>
           ) : (

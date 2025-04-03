@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, Tooltip, TooltipProps } from "recharts";
 
 interface DeviceData {
   name: string;
@@ -21,6 +21,19 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
       color: item.color 
     }])
   );
+
+  // Create custom tooltip component to fix type errors
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-md shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm">{`${payload[0].value}%`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card className="shadow-sm hover:shadow-md transition-all duration-300">
@@ -56,14 +69,7 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
                   />
                 ))}
               </Pie>
-              <Tooltip 
-                content={(props) => (
-                  <ChartTooltipContent 
-                    {...props} 
-                    formatter={(value) => [`${value}%`, 'Porcentagem']} 
-                  />
-                )}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ChartContainer>
           

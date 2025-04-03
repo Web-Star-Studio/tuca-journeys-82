@@ -25,9 +25,10 @@ import { Badge } from "@/components/ui/badge";
 import { useTours } from "@/hooks/use-tours";
 import { Tour } from "@/types/database";
 import TourFormDialog from "@/components/admin/tours/TourFormDialog";
+import { toast } from "sonner";
 
 const Tours = () => {
-  const { data: tours, isLoading, error } = useTours();
+  const { data: tours, isLoading, error, deleteTour } = useTours();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
@@ -47,10 +48,11 @@ const Tours = () => {
   };
 
   const confirmDelete = () => {
-    console.log("Deleting tour:", tourToDelete?.id);
-    // Here we would call the API to delete the tour
-    setDeleteDialogOpen(false);
-    setTourToDelete(null);
+    if (tourToDelete) {
+      deleteTour(tourToDelete.id);
+      setDeleteDialogOpen(false);
+      setTourToDelete(null);
+    }
   };
 
   // Handle adding new tour
@@ -61,8 +63,8 @@ const Tours = () => {
 
   // Handle form success
   const handleFormSuccess = () => {
-    // Refresh tour data
-    console.log("Tour saved successfully");
+    setFormDialogOpen(false);
+    toast.success(tourToEdit ? "Passeio atualizado com sucesso" : "Passeio criado com sucesso");
   };
 
   // Filter tours based on search query
@@ -119,61 +121,62 @@ const Tours = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTours?.map((tour) => (
-                <TableRow key={tour.id}>
-                  <TableCell className="font-medium">{tour.id}</TableCell>
-                  <TableCell>
-                    <img
-                      src={tour.image_url}
-                      alt={tour.title}
-                      className="h-10 w-16 object-cover rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{tour.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{tour.category}</Badge>
-                  </TableCell>
-                  <TableCell>R$ {tour.price.toFixed(2)}</TableCell>
-                  <TableCell>{tour.duration}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <span className="mr-1 text-yellow-500">★</span>
-                      {tour.rating}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        className="h-8 w-8"
-                      >
-                        <Link to={`/passeios/${tour.id}`} target="_blank">
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600"
-                        onClick={() => handleEditClick(tour)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600"
-                        onClick={() => handleDeleteClick(tour)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredTours?.length === 0 && (
+              {filteredTours && filteredTours.length > 0 ? (
+                filteredTours.map((tour) => (
+                  <TableRow key={tour.id}>
+                    <TableCell className="font-medium">{tour.id}</TableCell>
+                    <TableCell>
+                      <img
+                        src={tour.image_url}
+                        alt={tour.title}
+                        className="h-10 w-16 object-cover rounded"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{tour.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{tour.category}</Badge>
+                    </TableCell>
+                    <TableCell>R$ {tour.price.toFixed(2)}</TableCell>
+                    <TableCell>{tour.duration}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <span className="mr-1 text-yellow-500">★</span>
+                        {tour.rating}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          className="h-8 w-8"
+                        >
+                          <Link to={`/passeios/${tour.id}`} target="_blank">
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-blue-600"
+                          onClick={() => handleEditClick(tour)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-600"
+                          onClick={() => handleDeleteClick(tour)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum passeio encontrado.

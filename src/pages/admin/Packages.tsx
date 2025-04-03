@@ -21,6 +21,7 @@ const Packages = () => {
   const { 
     data: packages, 
     isLoading, 
+    isError,
     error,
     deletePackage: deletePackageMutation
   } = usePackages(categoryFilter);

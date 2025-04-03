@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevenueReport from "@/components/admin/reports/RevenueReport";
 import BookingsReport from "@/components/admin/reports/BookingsReport";
 import UsersReport from "@/components/admin/reports/UsersReport";
+import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
 import { CalendarIcon, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ const Reports = () => {
           <div>
             <h1 className="text-2xl font-bold">Relatórios & Análises</h1>
             <p className="text-muted-foreground">
-              Visualize e exporte dados sobre vendas, reservas e usuários
+              Visualize e exporte dados sobre vendas, reservas, pacotes e usuários
             </p>
           </div>
           
@@ -53,9 +54,10 @@ const Reports = () => {
         </div>
 
         <Tabs value={selectedReport} onValueChange={setSelectedReport}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="revenue">Receita</TabsTrigger>
             <TabsTrigger value="bookings">Reservas</TabsTrigger>
+            <TabsTrigger value="packages">Pacotes</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
           </TabsList>
           
@@ -65,6 +67,10 @@ const Reports = () => {
           
           <TabsContent value="bookings">
             <BookingsReport dateRange={dateRange} />
+          </TabsContent>
+          
+          <TabsContent value="packages">
+            <PackagesReport dateRange={dateRange} />
           </TabsContent>
           
           <TabsContent value="users">

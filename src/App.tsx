@@ -37,6 +37,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminBookings from "./pages/admin/Bookings";
 import AdminMedia from "./pages/admin/Media";
 import AdminProducts from "./pages/admin/Products";
+import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 
 import "./App.css";
@@ -80,6 +81,7 @@ const App = () => {
                 <Route path="/admin/bookings" element={<AdminBookings />} />
                 <Route path="/admin/media" element={<AdminMedia />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 <Route path="*" element={<NotFound />} />

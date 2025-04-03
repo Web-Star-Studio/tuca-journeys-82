@@ -1,7 +1,7 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { chartConfig } from "./RevenueDataGenerator";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 interface RevenueDistributionProps {
   totalRevenue: number;
@@ -16,113 +16,59 @@ const RevenueDistribution = ({
   passeiosTotal,
   hospedagensTotal,
   pacotesTotal,
-  produtosTotal
+  produtosTotal,
 }: RevenueDistributionProps) => {
+  const data = [
+    { name: "Passeios", value: passeiosTotal },
+    { name: "Hospedagens", value: hospedagensTotal },
+    { name: "Pacotes", value: pacotesTotal },
+    { name: "Produtos", value: produtosTotal },
+  ];
+
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Distribuição de Receita</CardTitle>
+        <CardTitle>Distribuição da Receita</CardTitle>
         <CardDescription>
-          Proporção de cada categoria na receita total
+          Percentual de receita por categoria de serviço
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded mr-2" style={{ backgroundColor: chartConfig.passeios.color }}></div>
-                <span>Passeios</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-medium">R$ {passeiosTotal.toLocaleString('pt-BR')}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({((passeiosTotal / totalRevenue) * 100).toFixed(1)}%)
-                </span>
-              </div>
+        <div className="h-80 flex flex-col items-center justify-center">
+          {totalRevenue > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <ChartTooltip
+                  content={props => (
+                    <ChartTooltipContent
+                      {...props}
+                      formatter={(value, name) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]}
+                    />
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              Nenhuma receita registrada no período selecionado.
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="h-2.5 rounded-full" 
-                style={{ 
-                  width: `${(passeiosTotal / totalRevenue) * 100}%`,
-                  backgroundColor: chartConfig.passeios.color 
-                }}
-              ></div>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded mr-2" style={{ backgroundColor: chartConfig.hospedagens.color }}></div>
-                <span>Hospedagens</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-medium">R$ {hospedagensTotal.toLocaleString('pt-BR')}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({((hospedagensTotal / totalRevenue) * 100).toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="h-2.5 rounded-full" 
-                style={{ 
-                  width: `${(hospedagensTotal / totalRevenue) * 100}%`,
-                  backgroundColor: chartConfig.hospedagens.color 
-                }}
-              ></div>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded mr-2" style={{ backgroundColor: chartConfig.pacotes.color }}></div>
-                <span>Pacotes</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-medium">R$ {pacotesTotal.toLocaleString('pt-BR')}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({((pacotesTotal / totalRevenue) * 100).toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="h-2.5 rounded-full" 
-                style={{ 
-                  width: `${(pacotesTotal / totalRevenue) * 100}%`,
-                  backgroundColor: chartConfig.pacotes.color 
-                }}
-              ></div>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded mr-2" style={{ backgroundColor: chartConfig.produtos.color }}></div>
-                <span>Produtos</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-medium">R$ {produtosTotal.toLocaleString('pt-BR')}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({((produtosTotal / totalRevenue) * 100).toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="h-2.5 rounded-full" 
-                style={{ 
-                  width: `${(produtosTotal / totalRevenue) * 100}%`,
-                  backgroundColor: chartConfig.produtos.color 
-                }}
-              ></div>
-            </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

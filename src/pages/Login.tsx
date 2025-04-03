@@ -26,7 +26,7 @@ const Login = () => {
                      (user.user_metadata && user.user_metadata.role === "admin") ||
                      (user.app_metadata && user.app_metadata.role === "admin");
       
-      setRedirectMessage(isAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para a página inicial...");
+      setRedirectMessage(isAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para o dashboard...");
       console.log("User is admin:", isAdmin);
       
       // Add a slight delay to ensure the toast is shown
@@ -39,12 +39,12 @@ const Login = () => {
           });
           navigate("/admin");
         } else {
-          console.log("Redirecting to /");
+          console.log("Redirecting to /dashboard");
           toast({
             title: "Login bem-sucedido",
-            description: "Bem-vindo de volta!",
+            description: "Bem-vindo ao dashboard!",
           });
-          navigate("/");
+          navigate("/dashboard");
         }
       }, 300);
     }
@@ -52,16 +52,16 @@ const Login = () => {
   
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
     setRedirecting(true);
-    setRedirectMessage(redirectToAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para a página inicial...");
+    setRedirectMessage(redirectToAdmin ? "Redirecionando para o painel de administração..." : "Redirecionando para o dashboard...");
     
-    console.log("Login successful, redirecting to", redirectToAdmin ? "/admin" : "/");
+    console.log("Login successful, redirecting to", redirectToAdmin ? "/admin" : "/dashboard");
     
     // Add a slight delay to ensure the state update is processed
     setTimeout(() => {
       if (redirectToAdmin) {
         navigate("/admin");
       } else {
-        navigate("/");
+        navigate("/dashboard");
       }
     }, 300);
   };

@@ -23,7 +23,7 @@ const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
     try {
       console.log(`Attempting ${buttonType} login with email: ${email}`);
       await signIn(email, password);
-      console.log(`${buttonType} login successful, redirecting to ${isAdmin ? 'admin' : 'home'}`);
+      console.log(`${buttonType} login successful, redirecting to ${isAdmin ? 'admin' : 'dashboard'}`);
       
       // Slight delay to ensure state updates are processed
       setTimeout(() => {

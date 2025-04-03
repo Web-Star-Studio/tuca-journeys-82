@@ -29,7 +29,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       console.log("Form submitted, attempting login with:", email);
       await signIn(email, password);
       
-      console.log("Login successful, redirecting to", redirectToAdmin ? "admin" : "home");
+      console.log("Login successful, redirecting to", redirectToAdmin ? "admin" : "dashboard");
       
       // Slight delay to ensure state updates are processed
       setTimeout(() => {

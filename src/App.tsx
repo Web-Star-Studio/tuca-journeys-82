@@ -27,6 +27,7 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Wishlist from "./pages/Wishlist";
 import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -67,6 +68,7 @@ const App = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/pagamentos" element={<Payments />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminDashboard />} />

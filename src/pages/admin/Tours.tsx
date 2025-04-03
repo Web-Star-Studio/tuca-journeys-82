@@ -20,17 +20,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useTours } from "@/hooks/use-tours";
 import { Tour } from "@/types/database";
+import TourFormDialog from "@/components/admin/tours/TourFormDialog";
 
 const Tours = () => {
   const { data: tours, isLoading, error } = useTours();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [tourToEdit, setTourToEdit] = useState<number | undefined>(undefined);
+
+  // Handle tour edit
+  const handleEditClick = (tour: Tour) => {
+    setTourToEdit(tour.id);
+    setFormDialogOpen(true);
+  };
 
   // Handle tour delete
   const handleDeleteClick = (tour: Tour) => {
@@ -43,6 +51,18 @@ const Tours = () => {
     // Here we would call the API to delete the tour
     setDeleteDialogOpen(false);
     setTourToDelete(null);
+  };
+
+  // Handle adding new tour
+  const handleAddNewTour = () => {
+    setTourToEdit(undefined);
+    setFormDialogOpen(true);
+  };
+
+  // Handle form success
+  const handleFormSuccess = () => {
+    // Refresh tour data
+    console.log("Tour saved successfully");
   };
 
   // Filter tours based on search query
@@ -69,7 +89,7 @@ const Tours = () => {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        <Button className="gap-1">
+        <Button className="gap-1" onClick={handleAddNewTour}>
           <Plus className="h-4 w-4" />
           <span>Novo Passeio</span>
         </Button>
@@ -137,6 +157,7 @@ const Tours = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-blue-600"
+                        onClick={() => handleEditClick(tour)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -164,6 +185,7 @@ const Tours = () => {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -189,6 +211,14 @@ const Tours = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Tour Form Dialog */}
+      <TourFormDialog 
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        tourId={tourToEdit}
+        onSuccess={handleFormSuccess}
+      />
     </AdminLayout>
   );
 };

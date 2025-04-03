@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
 
 // Sample product data
 const dummyProducts = [
@@ -86,6 +87,14 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<typeof dummyProducts[0] | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<number | undefined>(undefined);
+
+  // Handle product edit
+  const handleEditClick = (product: typeof dummyProducts[0]) => {
+    setProductToEdit(product.id);
+    setFormDialogOpen(true);
+  };
 
   // Handle product delete
   const handleDeleteClick = (product: typeof dummyProducts[0]) => {
@@ -99,6 +108,18 @@ const Products = () => {
       setDeleteDialogOpen(false);
       setProductToDelete(null);
     }
+  };
+
+  // Handle adding new product
+  const handleAddNewProduct = () => {
+    setProductToEdit(undefined);
+    setFormDialogOpen(true);
+  };
+
+  // Handle form success
+  const handleFormSuccess = () => {
+    // Refresh product data
+    console.log("Product saved successfully");
   };
 
   // Filter products based on search query
@@ -125,7 +146,7 @@ const Products = () => {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        <Button className="gap-1">
+        <Button className="gap-1" onClick={handleAddNewProduct}>
           <Plus className="h-4 w-4" />
           <span>Novo Produto</span>
         </Button>
@@ -189,6 +210,7 @@ const Products = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-blue-600"
+                      onClick={() => handleEditClick(product)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -215,6 +237,7 @@ const Products = () => {
         </Table>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -240,6 +263,14 @@ const Products = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Product Form Dialog */}
+      <ProductFormDialog 
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        productId={productToEdit}
+        onSuccess={handleFormSuccess}
+      />
     </AdminLayout>
   );
 };

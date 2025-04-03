@@ -24,12 +24,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAccommodations } from "@/hooks/use-accommodations";
 import { Accommodation } from "@/types/database";
+import AccommodationFormDialog from "@/components/admin/accommodations/AccommodationFormDialog";
 
 const Accommodations = () => {
   const { data: accommodations, isLoading, error } = useAccommodations();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accommodationToDelete, setAccommodationToDelete] = useState<Accommodation | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [accommodationToEdit, setAccommodationToEdit] = useState<number | undefined>(undefined);
+
+  // Handle accommodation edit
+  const handleEditClick = (accommodation: Accommodation) => {
+    setAccommodationToEdit(accommodation.id);
+    setFormDialogOpen(true);
+  };
 
   // Handle accommodation delete
   const handleDeleteClick = (accommodation: Accommodation) => {
@@ -42,6 +51,18 @@ const Accommodations = () => {
     // Here we would call the API to delete the accommodation
     setDeleteDialogOpen(false);
     setAccommodationToDelete(null);
+  };
+
+  // Handle adding new accommodation
+  const handleAddNewAccommodation = () => {
+    setAccommodationToEdit(undefined);
+    setFormDialogOpen(true);
+  };
+
+  // Handle form success
+  const handleFormSuccess = () => {
+    // Refresh accommodation data
+    console.log("Accommodation saved successfully");
   };
 
   // Filter accommodations based on search query
@@ -68,7 +89,7 @@ const Accommodations = () => {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        <Button className="gap-1">
+        <Button className="gap-1" onClick={handleAddNewAccommodation}>
           <Plus className="h-4 w-4" />
           <span>Nova Hospedagem</span>
         </Button>
@@ -136,6 +157,7 @@ const Accommodations = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-blue-600"
+                        onClick={() => handleEditClick(accommodation)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -163,6 +185,7 @@ const Accommodations = () => {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -188,6 +211,14 @@ const Accommodations = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Accommodation Form Dialog */}
+      <AccommodationFormDialog 
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        accommodationId={accommodationToEdit}
+        onSuccess={handleFormSuccess}
+      />
     </AdminLayout>
   );
 };

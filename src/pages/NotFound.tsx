@@ -1,108 +1,121 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Home, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { 
+  Home,
+  Search,
+  Map,
+  Hotel,
+  Package,
+  ShoppingBag,
+  Contact,
+  ArrowLeft
+} from "lucide-react";
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
-  // Sugestões inteligentes baseadas na URL
-  const getSuggestions = () => {
-    const path = location.pathname.toLowerCase();
-    
-    if (path.includes("admin")) {
-      return [
-        { label: "Painel de Admin", path: "/admin" },
-        { label: "Gerenciar Pacotes", path: "/admin/packages" },
-        { label: "Gerenciar Usuários", path: "/admin/users" },
-      ];
-    }
-    
-    if (path.includes("pacote") || path.includes("package")) {
-      return [
-        { label: "Pacotes", path: "/pacotes" },
-        { label: "Passeios", path: "/passeios" },
-        { label: "Hospedagens", path: "/hospedagens" }
-      ];
-    }
-    
-    if (path.includes("hospeda") || path.includes("hotel") || path.includes("accommodation")) {
-      return [
-        { label: "Hospedagens", path: "/hospedagens" },
-        { label: "Pacotes", path: "/pacotes" },
-        { label: "Contato", path: "/contato" }
-      ];
-    }
-    
-    // Default suggestions
-    return [
-      { label: "Página Inicial", path: "/" },
-      { label: "Pacotes", path: "/pacotes" },
-      { label: "Contato", path: "/contato" }
-    ];
-  };
-
-  const suggestions = getSuggestions();
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tuca-light-blue/20 to-white flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden">
-        <div className="bg-tuca-ocean-blue p-6 text-white text-center">
-          <AlertTriangle className="h-16 w-16 mx-auto mb-2" />
-          <h1 className="text-4xl font-bold">404</h1>
-          <p className="text-lg opacity-90">Página não encontrada</p>
-        </div>
-        
-        <div className="p-6">
-          <p className="text-gray-600 mb-6 text-center">
-            Não foi possível encontrar a página <span className="font-semibold text-tuca-ocean-blue">{location.pathname}</span>
-          </p>
-          
-          <div className="space-y-4">
-            <h3 className="font-medium text-gray-800 flex items-center">
-              <Search className="h-4 w-4 mr-2" />
-              Você pode estar procurando:
-            </h3>
-            
-            <div className="grid gap-2">
-              {suggestions.map((suggestion, index) => (
-                <Link 
-                  key={index} 
-                  to={suggestion.path}
-                  className="block p-3 bg-gray-50 hover:bg-tuca-light-blue/30 rounded-md transition-colors"
-                >
-                  {suggestion.label}
-                </Link>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => window.history.back()}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Button>
-              
-              <Button asChild className="w-full">
-                <Link to="/">
-                  <Home className="h-4 w-4 mr-2" />
-                  Página Inicial
-                </Link>
-              </Button>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-blue-100">
+      {/* Navigation */}
+      <div className="container mx-auto p-4">
+        <Link to="/" className="inline-flex items-center gap-2 text-tuca-ocean-blue hover:underline">
+          <ArrowLeft className="h-4 w-4" />
+          <span>Voltar para o início</span>
+        </Link>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center flex-1 px-4 text-center">
+        <div className="max-w-3xl">
+          {/* Error Illustration */}
+          <div className="mb-8 relative">
+            <img
+              src="/placeholder.svg"
+              alt="Ilustração de página não encontrada"
+              className="mx-auto h-48 md:h-64"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-8xl md:text-9xl font-bold text-tuca-ocean-blue/20">404</span>
             </div>
           </div>
+
+          {/* Error Message */}
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Página não encontrada
+          </h1>
+          <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
+            Parece que você se perdeu em Fernando de Noronha. A página que você
+            está procurando não existe ou foi removida.
+          </p>
+
+          {/* Primary Action */}
+          <div className="mb-12">
+            <Button asChild size="lg" className="px-8">
+              <Link to="/">
+                <Home className="mr-2 h-5 w-5" />
+                Voltar para o Início
+              </Link>
+            </Button>
+          </div>
+
+          {/* Suggested Links */}
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-gray-700 mb-4">
+              Talvez você esteja procurando por:
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Link
+                to="/passeios"
+                className="flex flex-col items-center p-4 rounded-lg bg-white shadow-sm hover:bg-blue-50 transition-colors"
+              >
+                <Map className="h-8 w-8 text-tuca-ocean-blue mb-2" />
+                <span className="text-sm font-medium">Passeios</span>
+              </Link>
+              <Link
+                to="/hospedagens"
+                className="flex flex-col items-center p-4 rounded-lg bg-white shadow-sm hover:bg-blue-50 transition-colors"
+              >
+                <Hotel className="h-8 w-8 text-tuca-ocean-blue mb-2" />
+                <span className="text-sm font-medium">Hospedagens</span>
+              </Link>
+              <Link
+                to="/pacotes"
+                className="flex flex-col items-center p-4 rounded-lg bg-white shadow-sm hover:bg-blue-50 transition-colors"
+              >
+                <Package className="h-8 w-8 text-tuca-ocean-blue mb-2" />
+                <span className="text-sm font-medium">Pacotes</span>
+              </Link>
+              <Link
+                to="/loja"
+                className="flex flex-col items-center p-4 rounded-lg bg-white shadow-sm hover:bg-blue-50 transition-colors"
+              >
+                <ShoppingBag className="h-8 w-8 text-tuca-ocean-blue mb-2" />
+                <span className="text-sm font-medium">Loja</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Help Section */}
+          <div className="text-gray-600">
+            <p className="mb-2">Ainda não encontrou o que procura?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/contato" className="flex items-center justify-center gap-2 text-tuca-ocean-blue hover:underline">
+                <Contact className="h-4 w-4" />
+                <span>Entre em contato</span>
+              </Link>
+              <Link to="/" className="flex items-center justify-center gap-2 text-tuca-ocean-blue hover:underline">
+                <Search className="h-4 w-4" />
+                <span>Buscar no site</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="py-6 bg-white mt-12">
+        <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
+          © {new Date().getFullYear()} Tuca Viagens. Todos os direitos reservados.
         </div>
       </div>
     </div>

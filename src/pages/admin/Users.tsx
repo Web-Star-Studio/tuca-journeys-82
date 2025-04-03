@@ -4,7 +4,10 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import UserFilters from "@/components/admin/users/UserFilters";
 import UsersTable from "@/components/admin/users/UsersTable";
 import DeleteUserDialog from "@/components/admin/users/DeleteUserDialog";
+import UserFormDialog from "@/components/admin/users/UserFormDialog";
 import { User } from "@/components/admin/users/types";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 // Sample user data (would come from API in real implementation)
 const dummyUsers: User[] = [
@@ -51,6 +54,8 @@ const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<number | undefined>(undefined);
 
   // Handle user actions
   const handleEmailClick = (user: User) => {
@@ -59,8 +64,8 @@ const Users = () => {
   };
 
   const handleEditClick = (user: User) => {
-    console.log("Edit user:", user.id);
-    // Implement edit functionality
+    setUserToEdit(user.id);
+    setFormDialogOpen(true);
   };
 
   const handleDeleteClick = (user: User) => {
@@ -75,6 +80,18 @@ const Users = () => {
     setUserToDelete(null);
   };
 
+  // Handle adding new user
+  const handleAddNewUser = () => {
+    setUserToEdit(undefined);
+    setFormDialogOpen(true);
+  };
+
+  // Handle form success
+  const handleFormSuccess = () => {
+    // Refresh user data
+    console.log("User saved successfully");
+  };
+
   // Filter users based on search query
   const filteredUsers = users.filter(
     (user) =>
@@ -84,10 +101,17 @@ const Users = () => {
 
   return (
     <AdminLayout pageTitle="Gerenciar Usuários">
-      <UserFilters 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-      />
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <UserFilters 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery} 
+        />
+        
+        <Button className="gap-1" onClick={handleAddNewUser}>
+          <Plus className="h-4 w-4" />
+          <span>Novo Usuário</span>
+        </Button>
+      </div>
       
       <UsersTable 
         users={filteredUsers}
@@ -103,6 +127,13 @@ const Users = () => {
         onOpenChange={setDeleteDialogOpen}
         user={userToDelete}
         onConfirmDelete={confirmDelete}
+      />
+
+      <UserFormDialog 
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        userId={userToEdit}
+        onSuccess={handleFormSuccess}
       />
     </AdminLayout>
   );

@@ -2,53 +2,15 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { useTours } from "@/hooks/use-tours";
-import { Tour } from "@/types/database";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-
-// Form schema for validation
-const tourFormSchema = z.object({
-  title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres" }),
-  description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres" }),
-  short_description: z.string().min(10, { message: "A descrição curta deve ter pelo menos 10 caracteres" }),
-  image_url: z.string().url({ message: "Forneça uma URL válida para a imagem" }),
-  price: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
-  duration: z.string().min(1, { message: "A duração é obrigatória" }),
-  category: z.string().min(1, { message: "A categoria é obrigatória" }),
-  max_participants: z.coerce.number().min(1, { message: "Número máximo de participantes é obrigatório"}),
-  min_participants: z.coerce.number().min(1, { message: "Número mínimo de participantes é obrigatório"}),
-  difficulty: z.string().optional(),
-  rating: z.coerce.number().min(0).max(5, { message: "A avaliação deve estar entre 0 e 5" }),
-  meeting_point: z.string().optional(),
-  schedule: z.string().optional(),
-  includes: z.string().optional(),
-  excludes: z.string().optional(),
-  notes: z.string().optional(),
-  gallery_images: z.string().optional(),
-});
-
-type TourFormValues = z.infer<typeof tourFormSchema>;
+import { TourFormValues, tourFormSchema, tourCategories, difficultyLevels } from "./TourFormTypes";
+import TourBasicInfoForm from "./form/TourBasicInfoForm";
+import TourMediaForm from "./form/TourMediaForm";
+import TourScheduleForm from "./form/TourScheduleForm";
+import TourFormActions from "./form/TourFormActions";
 
 interface TourFormProps {
   tourId?: number;
@@ -188,374 +150,33 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     );
   }
 
-  const tourCategories = [
-    "barco",
-    "mergulho",
-    "trilha",
-    "histórico",
-    "natureza",
-    "aventura",
-    "contemplação",
-    "terrestre",
-  ];
-
-  const difficultyLevels = [
-    "fácil",
-    "moderado",
-    "difícil",
-    "extremo"
-  ];
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Título do passeio" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="short_description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição Curta</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Uma breve descrição do passeio"
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Será exibida na listagem de passeios
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição Completa</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descrição detalhada do passeio"
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço (R$)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duração</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 3 horas" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {tourCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nível de Dificuldade</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {difficultyLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level.charAt(0).toUpperCase() + level.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="min_participants"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mínimo de Participantes</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="max_participants"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Máximo de Participantes</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="meeting_point"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ponto de Encontro</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Local de encontro para o passeio"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <TourBasicInfoForm 
+            form={form} 
+            tourCategories={tourCategories} 
+            difficultyLevels={difficultyLevels} 
+          />
 
           {/* Right Column */}
           <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="image_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL da Imagem Principal</FormLabel>
-                  <FormControl>
-                    <Input placeholder="URL da imagem principal" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="rounded-md h-40 object-cover"
-                        onError={() => setPreviewUrl("")}
-                      />
-                    </div>
-                  )}
-                </FormItem>
-              )}
+            <TourMediaForm 
+              form={form} 
+              previewUrl={previewUrl} 
+              setPreviewUrl={setPreviewUrl} 
             />
-
-            <FormField
-              control={form.control}
-              name="gallery_images"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Galeria de Imagens (URLs separadas por vírgula)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="/imagem1.jpg, /imagem2.jpg, /imagem3.jpg"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Lista de imagens adicionais para a galeria do passeio
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Avaliação (0-5)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="5"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="schedule"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cronograma (uma linha por item)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="09:00 - Saída do hotel&#10;10:00 - Chegada ao local&#10;..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Detalhe o cronograma do passeio. Cada linha será um item.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="includes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Incluso (uma linha por item)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Transporte&#10;Guia&#10;Almoço&#10;..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="excludes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Não Incluso (uma linha por item)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Bebidas&#10;Taxa de conservação&#10;..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações (uma linha por item)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Protetor solar&#10;Roupas leves&#10;Calçado adequado&#10;..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
+            <TourScheduleForm form={form} />
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit">
-            {tourId ? "Atualizar Passeio" : "Criar Passeio"}
-          </Button>
-        </div>
+        <TourFormActions onCancel={onCancel} isEditing={!!tourId} />
       </form>
     </Form>
   );
 };
+
+export default TourForm;

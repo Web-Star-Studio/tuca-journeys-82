@@ -9,7 +9,7 @@ import PackageTable from "@/components/admin/packages/PackageTable";
 import PackageSearch from "@/components/admin/packages/PackageSearch";
 import PackageDeleteDialog from "@/components/admin/packages/PackageDeleteDialog";
 
-const Packages = () => {
+const AdminPackages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
   const [packageToEdit, setPackageToEdit] = useState<number | null>(null);
@@ -123,4 +123,4 @@ const Packages = () => {
   );
 };
 
-export default Packages;
+export default AdminPackages;

@@ -1,5 +1,5 @@
 
-import { motion } from "framer-motion";
+import React from "react";
 import HeroSection from "@/components/HeroSection";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import FeaturedPackages from "@/components/FeaturedPackages";
@@ -21,7 +21,7 @@ const Index = () => {
   return (
     <PageContainer>
       <Header />
-      <main className="flex flex-col">
+      <main className="flex flex-col relative">
         <HeroSection />
         
         <AnimatedSections>

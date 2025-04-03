@@ -22,6 +22,14 @@ interface CategorySelectProps {
 }
 
 const CategorySelect = ({ form }: CategorySelectProps) => {
+  const categories = [
+    { value: "romantic", label: "Romântico" },
+    { value: "adventure", label: "Aventura" },
+    { value: "family", label: "Família" },
+    { value: "premium", label: "Premium" },
+    { value: "budget", label: "Econômico" },
+  ];
+
   return (
     <FormField
       control={form.control}
@@ -32,18 +40,19 @@ const CategorySelect = ({ form }: CategorySelectProps) => {
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
+            value={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
+                <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="romantic">Romântico</SelectItem>
-              <SelectItem value="adventure">Aventura</SelectItem>
-              <SelectItem value="family">Família</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
-              <SelectItem value="budget">Econômico</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <FormMessage />

@@ -25,11 +25,13 @@ const PriceRatingInputs = ({ form }: PriceRatingInputsProps) => {
           <FormItem>
             <FormLabel>Preço (R$)</FormLabel>
             <FormControl>
-              <Input
-                {...field}
-                type="number"
-                placeholder="0.00"
+              <Input 
+                {...field} 
+                type="number" 
+                placeholder="1000" 
+                min="0"
                 step="0.01"
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />
@@ -44,13 +46,14 @@ const PriceRatingInputs = ({ form }: PriceRatingInputsProps) => {
           <FormItem>
             <FormLabel>Avaliação (0-5)</FormLabel>
             <FormControl>
-              <Input
-                {...field}
-                type="number"
-                placeholder="4.5"
+              <Input 
+                {...field} 
+                type="number" 
+                placeholder="4.5" 
+                min="0" 
+                max="5" 
                 step="0.1"
-                min="0"
-                max="5"
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />

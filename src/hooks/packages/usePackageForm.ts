@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePackageDetail } from "@/hooks/use-packages";
-import { Package } from "@/data/types/packageTypes";
 import { packageFormSchema, PackageFormValues } from "@/components/admin/packages/types";
 
 export const usePackageForm = (packageId: number | null) => {
@@ -63,21 +62,8 @@ export const usePackageForm = (packageId: number | null) => {
   // Load package data when editing
   useEffect(() => {
     if (packageData) {
-      // Determine category based on package ID patterns
-      let category = packageData.category || "romantic";
-      if (!packageData.category) {
-        if (packageData.id >= 1 && packageData.id <= 2 || packageData.id === 6) {
-          category = "romantic";
-        } else if (packageData.id >= 3 && packageData.id <= 4) {
-          category = "adventure";
-        } else if (packageData.id === 5) {
-          category = "family";
-        } else if (packageData.id === 4) {
-          category = "premium";
-        } else {
-          category = "budget";
-        }
-      }
+      // Determine category based on package ID patterns or use existing category
+      const category = packageData.category || determineDefaultCategory(packageData.id);
 
       // Set form values
       form.reset({
@@ -100,6 +86,23 @@ export const usePackageForm = (packageId: number | null) => {
     }
   }, [packageData, form]);
 
+  // Helper to determine default category based on ID
+  const determineDefaultCategory = (id?: number): string => {
+    if (!id) return "romantic";
+    
+    if ((id >= 1 && id <= 2) || id === 6) {
+      return "romantic";
+    } else if (id >= 3 && id <= 4) {
+      return "adventure";
+    } else if (id === 5) {
+      return "family";
+    } else if (id === 4) {
+      return "premium";
+    }
+    
+    return "budget";
+  };
+
   // Update image preview when URL changes
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -108,7 +111,7 @@ export const usePackageForm = (packageId: number | null) => {
       }
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form]);
 
   return {
     form,

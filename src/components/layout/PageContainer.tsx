@@ -1,14 +1,13 @@
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { ReactNode } from "react";
 
 interface PageContainerProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const PageContainer = ({ children }: PageContainerProps) => {
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-x-hidden flex flex-col">
       {children}
     </div>
   );

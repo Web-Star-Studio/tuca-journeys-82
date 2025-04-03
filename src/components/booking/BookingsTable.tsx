@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useUserBookings } from "@/hooks/use-bookings";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,84 +10,90 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+// Status badge components for better reusability
+const StatusBadge = ({ status }: { status: string }) => {
+  const statusMap: Record<string, { color: string, label: string }> = {
+    confirmed: { color: "bg-green-500", label: "Confirmado" },
+    pending: { color: "bg-yellow-500", label: "Pendente" },
+    canceled: { color: "bg-red-500", label: "Cancelado" },
+    completed: { color: "bg-blue-500", label: "Concluído" }
+  };
+
+  const { color, label } = statusMap[status] || { color: "", label: status };
+  
+  return <Badge className={color}>{label}</Badge>;
+};
+
+const PaymentStatusBadge = ({ status }: { status: string }) => {
+  const statusMap: Record<string, { color: string, label: string }> = {
+    paid: { color: "bg-green-500", label: "Pago" },
+    pending: { color: "bg-yellow-500", label: "Pendente" },
+    refunded: { color: "bg-purple-500", label: "Reembolsado" },
+    failed: { color: "bg-red-500", label: "Falhou" }
+  };
+
+  const { color, label } = statusMap[status] || { color: "", label: status };
+  
+  return <Badge className={color}>{label}</Badge>;
+};
+
 const BookingsTable = () => {
   const { user } = useAuth();
   const { data: bookings, isLoading, error } = useUserBookings();
 
-  if (!user) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">Você precisa estar logado para ver suas reservas.</p>
-        <Link to="/login">
-          <Button>Entrar</Button>
+  // Empty state component for better readability
+  const EmptyState = () => (
+    <div className="text-center py-8">
+      <p className="text-muted-foreground">Você ainda não tem reservas.</p>
+      <div className="mt-4">
+        <Link to="/passeios">
+          <Button className="mr-2">Ver passeios</Button>
+        </Link>
+        <Link to="/hospedagens">
+          <Button variant="outline">Ver hospedagens</Button>
         </Link>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-    );
-  }
+  // Loading state component
+  const LoadingState = () => (
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Erro ao carregar reservas. Por favor, tente novamente.</p>
-      </div>
-    );
-  }
+  // Error state component
+  const ErrorState = () => (
+    <div className="text-center py-8">
+      <p className="text-red-500">Erro ao carregar reservas. Por favor, tente novamente.</p>
+    </div>
+  );
 
-  if (!bookings || bookings.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Você ainda não tem reservas.</p>
-        <div className="mt-4">
-          <Link to="/passeios">
-            <Button className="mr-2">Ver passeios</Button>
-          </Link>
-          <Link to="/hospedagens">
-            <Button variant="outline">Ver hospedagens</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Not logged in state component
+  const NotLoggedInState = () => (
+    <div className="text-center py-8">
+      <p className="text-muted-foreground mb-4">Você precisa estar logado para ver suas reservas.</p>
+      <Link to="/login">
+        <Button>Entrar</Button>
+      </Link>
+    </div>
+  );
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return <Badge className="bg-green-500">Confirmado</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-500">Pendente</Badge>;
-      case 'canceled':
-        return <Badge className="bg-red-500">Cancelado</Badge>;
-      case 'completed':
-        return <Badge className="bg-blue-500">Concluído</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
+  // Format booking dates with memoization
+  const formatBookingDate = useMemo(() => (startDate: string, endDate?: string) => {
+    const start = format(new Date(startDate), "dd/MM/yyyy", { locale: ptBR });
+    if (!endDate || endDate === startDate) return start;
+    return `${start} - ${format(new Date(endDate), "dd/MM/yyyy", { locale: ptBR })}`;
+  }, []);
 
-  const getPaymentStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <Badge className="bg-green-500">Pago</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-500">Pendente</Badge>;
-      case 'refunded':
-        return <Badge className="bg-purple-500">Reembolsado</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-500">Falhou</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
+  // Render based on state
+  if (!user) return <NotLoggedInState />;
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState />;
+  if (!bookings || bookings.length === 0) return <EmptyState />;
 
   return (
     <div className="overflow-x-auto">
@@ -109,10 +115,7 @@ const BookingsTable = () => {
                 #{booking.id.toString().padStart(6, '0')}
               </TableCell>
               <TableCell>
-                {format(new Date(booking.start_date), "dd/MM/yyyy", { locale: ptBR })}
-                {booking.end_date !== booking.start_date && (
-                  <> - {format(new Date(booking.end_date), "dd/MM/yyyy", { locale: ptBR })}</>
-                )}
+                {formatBookingDate(booking.start_date, booking.end_date)}
               </TableCell>
               <TableCell>
                 {booking.tours ? (
@@ -130,10 +133,10 @@ const BookingsTable = () => {
                 R$ {booking.total_price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </TableCell>
               <TableCell>
-                {getStatusBadge(booking.status)}
+                <StatusBadge status={booking.status} />
               </TableCell>
               <TableCell>
-                {getPaymentStatusBadge(booking.payment_status)}
+                <PaymentStatusBadge status={booking.payment_status} />
               </TableCell>
             </TableRow>
           ))}

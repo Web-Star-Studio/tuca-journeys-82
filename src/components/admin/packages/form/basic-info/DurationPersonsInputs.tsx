@@ -30,6 +30,7 @@ const DurationPersonsInputs = ({ form }: DurationPersonsInputsProps) => {
                 type="number"
                 placeholder="3"
                 min="1"
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />
@@ -49,6 +50,7 @@ const DurationPersonsInputs = ({ form }: DurationPersonsInputsProps) => {
                 type="number"
                 placeholder="2"
                 min="1"
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />

@@ -6,6 +6,7 @@ interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   onLoadSuccess?: () => void;
   onLoadError?: () => void;
+  loadingComponent?: React.ReactNode;
 }
 
 const SafeImage = ({
@@ -15,6 +16,7 @@ const SafeImage = ({
   fallbackSrc = "/placeholder.svg",
   onLoadSuccess,
   onLoadError,
+  loadingComponent,
   style,
   ...props
 }: SafeImageProps) => {
@@ -44,7 +46,6 @@ const SafeImage = ({
     };
     
     img.onerror = () => {
-      console.error(`Failed to load image: ${src}`);
       setImgSrc(fallbackSrc);
       setIsLoading(false);
       setHasError(true);
@@ -60,11 +61,13 @@ const SafeImage = ({
   return (
     <>
       {isLoading && (
-        <div 
-          className={cn("bg-muted animate-pulse w-full h-full", className)} 
-          style={style} 
-          {...props} 
-        />
+        loadingComponent || (
+          <div 
+            className={cn("bg-muted animate-pulse w-full h-full", className)} 
+            style={style} 
+            {...props} 
+          />
+        )
       )}
       <img
         src={imgSrc}

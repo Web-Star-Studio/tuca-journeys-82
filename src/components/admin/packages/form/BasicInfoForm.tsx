@@ -15,8 +15,8 @@ interface BasicInfoFormProps {
 
 const BasicInfoForm = ({ form, previewUrl }: BasicInfoFormProps) => {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="space-y-6">
         <TitleDescription form={form} />
         <PriceRatingInputs form={form} />
         <DurationPersonsInputs form={form} />

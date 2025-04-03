@@ -12,6 +12,7 @@ import TourScheduleForm from "./form/TourScheduleForm";
 import TourFormActions from "./form/TourFormActions";
 import { Form } from "@/components/ui/form";
 import { Tour } from "@/types/database";
+import { stringToArray } from "@/utils/formUtils";
 
 interface TourFormProps {
   tourId?: number;
@@ -113,11 +114,11 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
       // Ensure all required fields are present including max_participants
       max_participants: data.max_participants || 10,
       min_participants: data.min_participants || 1,
-      gallery_images: data.gallery_images ? data.gallery_images.split(",").map(item => item.trim()).filter(Boolean) : [],
-      schedule: data.schedule ? data.schedule.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      includes: data.includes ? data.includes.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      excludes: data.excludes ? data.excludes.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      notes: data.notes ? data.notes.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      gallery_images: stringToArray(data.gallery_images, ","),
+      schedule: stringToArray(data.schedule, "\n"),
+      includes: stringToArray(data.includes, "\n"),
+      excludes: stringToArray(data.excludes, "\n"),
+      notes: stringToArray(data.notes, "\n"),
       // Ensure required fields are present
       title: data.title || "Novo Passeio",
       description: data.description || "Descrição padrão",

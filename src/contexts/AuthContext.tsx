@@ -42,11 +42,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign Out - Modified from useAuthOperations to return void for consistency
   const signOut = async () => {
     try {
-      // Clear mock session if it exists
-      localStorage.removeItem("supabase-mock-session");
+      console.log("Starting sign out process...");
+      setLoading(true);
       await authSignOut();
+      // Ensure we don't have any lingering session data
+      localStorage.removeItem("supabase-mock-session");
+      console.log("Sign out process completed");
     } catch (error) {
       console.error("Error in signOut:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

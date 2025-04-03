@@ -18,15 +18,22 @@ export const useAuthState = () => {
         // Check for a mock session first
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr) {
-          const mockSession = JSON.parse(mockSessionStr);
-          // Check if mock session is expired
-          if (mockSession.expires_at > Math.floor(Date.now() / 1000)) {
-            setSession(mockSession);
-            setUser(mockSession.user);
-            setLoading(false);
-            return;
-          } else {
-            // Clear expired mock session
+          try {
+            const mockSession = JSON.parse(mockSessionStr);
+            // Check if mock session is expired
+            if (mockSession.expires_at > Math.floor(Date.now() / 1000)) {
+              console.log("Found valid mock session, setting user state");
+              setSession(mockSession);
+              setUser(mockSession.user);
+              setLoading(false);
+              return;
+            } else {
+              // Clear expired mock session
+              console.log("Mock session expired, removing it");
+              localStorage.removeItem("supabase-mock-session");
+            }
+          } catch (error) {
+            console.error("Error parsing mock session:", error);
             localStorage.removeItem("supabase-mock-session");
           }
         }
@@ -34,8 +41,13 @@ export const useAuthState = () => {
         // Get the current session from Supabase
         const { data } = await supabase.auth.getSession();
         if (data?.session) {
+          console.log("Found Supabase session, setting user state");
           setSession(data.session);
           setUser(data.session.user);
+        } else {
+          console.log("No valid session found");
+          setSession(null);
+          setUser(null);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -53,6 +65,7 @@ export const useAuthState = () => {
         
         // If we get a SIGNED_OUT event, also clear any mock session
         if (event === 'SIGNED_OUT') {
+          console.log("Signed out event received, clearing mock session");
           localStorage.removeItem("supabase-mock-session");
         }
         

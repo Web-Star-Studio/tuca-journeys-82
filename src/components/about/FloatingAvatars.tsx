@@ -1,38 +1,72 @@
 
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import TeamAvatar from "./TeamAvatar";
+import AvatarsBackground from "./AvatarsBackground";
 
 const FloatingAvatars = () => {
+  const teamMembers = [
+    {
+      name: "Karol Tuca",
+      image: "/team-karol.jpg",
+      initials: "KT",
+      position: "top-0 left-0",
+      borderColor: "border-tuca-ocean-blue",
+      size: "w-32 h-32",
+      animation: "animate-float-slow",
+      zIndex: "z-10"
+    },
+    {
+      name: "Rafael Oliveira",
+      image: "/team-rafael.jpg",
+      initials: "RO",
+      position: "bottom-20 left-12",
+      borderColor: "border-tuca-coral",
+      size: "w-40 h-40",
+      animation: "animate-float-medium",
+      zIndex: "z-20"
+    },
+    {
+      name: "Marina Santos",
+      image: "/team-marina.jpg",
+      initials: "MS",
+      position: "top-10 right-0",
+      borderColor: "border-tuca-light-blue",
+      size: "w-36 h-36",
+      animation: "animate-float-fast",
+      zIndex: "z-10"
+    },
+    {
+      name: "Lucas Mendes",
+      image: "/team-lucas.jpg",
+      initials: "LM",
+      position: "bottom-10 right-12",
+      borderColor: "border-tuca-green",
+      size: "w-32 h-32",
+      animation: "animate-float-slow",
+      zIndex: "z-20"
+    }
+  ];
+
   return (
     <div className="relative h-96">
       {/* Floating profile images */}
-      <div className="absolute top-0 left-0 z-10 animate-float-slow">
-        <Avatar className="w-32 h-32 border-4 border-tuca-ocean-blue">
-          <AvatarImage src="/team-karol.jpg" alt="Karol Tuca" />
-          <AvatarFallback>KT</AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="absolute bottom-20 left-12 z-20 animate-float-medium">
-        <Avatar className="w-40 h-40 border-4 border-tuca-coral">
-          <AvatarImage src="/team-rafael.jpg" alt="Rafael Oliveira" />
-          <AvatarFallback>RO</AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="absolute top-10 right-0 z-10 animate-float-fast">
-        <Avatar className="w-36 h-36 border-4 border-tuca-light-blue">
-          <AvatarImage src="/team-marina.jpg" alt="Marina Santos" />
-          <AvatarFallback>MS</AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="absolute bottom-10 right-12 z-20 animate-float-slow">
-        <Avatar className="w-32 h-32 border-4 border-tuca-green">
-          <AvatarImage src="/team-lucas.jpg" alt="Lucas Mendes" />
-          <AvatarFallback>LM</AvatarFallback>
-        </Avatar>
-      </div>
+      {teamMembers.map((member, index) => (
+        <TeamAvatar 
+          key={index}
+          name={member.name}
+          image={member.image}
+          initials={member.initials}
+          position={member.position}
+          borderColor={member.borderColor}
+          size={member.size}
+          animation={member.animation}
+          zIndex={member.zIndex}
+        />
+      ))}
+      
       {/* Background design elements */}
-      <div className="absolute -bottom-6 -left-6 w-48 h-48 border-4 border-tuca-coral rounded-lg -z-10"></div>
-      <div className="absolute -top-6 -right-6 w-32 h-32 border-4 border-tuca-light-blue rounded-lg -z-10"></div>
+      <AvatarsBackground />
     </div>
   );
 };

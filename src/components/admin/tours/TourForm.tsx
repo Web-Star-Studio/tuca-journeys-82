@@ -10,6 +10,7 @@ import TourBasicInfoForm from "./form/TourBasicInfoForm";
 import TourMediaForm from "./form/TourMediaForm";
 import TourScheduleForm from "./form/TourScheduleForm";
 import TourFormActions from "./form/TourFormActions";
+import { Form } from "@/components/ui/form";
 
 interface TourFormProps {
   tourId?: number;
@@ -106,6 +107,8 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     // Convert string lists to arrays
     const formattedData = {
       ...data,
+      // Ensure price is always set
+      price: data.price || 0,
       gallery_images: data.gallery_images ? data.gallery_images.split(",").map(item => item.trim()).filter(Boolean) : [],
       schedule: data.schedule ? data.schedule.split("\n").map(item => item.trim()).filter(Boolean) : [],
       includes: data.includes ? data.includes.split("\n").map(item => item.trim()).filter(Boolean) : [],

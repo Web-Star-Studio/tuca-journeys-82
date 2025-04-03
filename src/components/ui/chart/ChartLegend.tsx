@@ -27,6 +27,17 @@ export const ChartLegendContent = React.forwardRef<
       return null;
     }
 
+    // Function to safely truncate any label type
+    const truncateLabel = (label: React.ReactNode, maxLength: number): React.ReactNode => {
+      if (typeof label === 'string') {
+        return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+      }
+      if (typeof label === 'number') {
+        return label.toString();
+      }
+      return label; // Return as is for other types
+    };
+
     return (
       <div
         ref={ref}
@@ -39,6 +50,7 @@ export const ChartLegendContent = React.forwardRef<
         {payload.map((item) => {
           const key = `${nameKey || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
+          const label = itemConfig?.label || item.value;
 
           return (
             <div
@@ -58,11 +70,7 @@ export const ChartLegendContent = React.forwardRef<
                 />
               )}
               <span className="text-xs">
-                {isMobile 
-                  ? (typeof itemConfig?.label === 'string' 
-                     ? (itemConfig.label as string).substring(0, 10) 
-                     : itemConfig?.label) 
-                  : itemConfig?.label}
+                {isMobile ? truncateLabel(label, 10) : label}
               </span>
             </div>
           );

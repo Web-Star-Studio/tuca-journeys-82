@@ -32,10 +32,14 @@ export const useAccommodations = () => {
     }
   };
 
-  const createAccommodation = async (accommodation: Omit<Accommodation, 'id' | 'created_at' | 'updated_at'>) => {
+  const createAccommodation = async (accommodation: Omit<Accommodation, "id" | "created_at" | "updated_at" | "short_description" | "max_guests" | "gallery_images" | "address"> & { 
+    location?: string;
+    capacity?: number;
+    gallery?: string[];
+  }) => {
     // In a real application, this would make an API call
     console.log('Creating accommodation:', accommodation);
-    // Mock implementation
+    // Convert the accommodation object to match the database structure
     const newAccommodation = {
       ...accommodation,
       id: Math.floor(Math.random() * 1000),
@@ -51,10 +55,15 @@ export const useAccommodations = () => {
     return newAccommodation;
   };
 
-  const updateAccommodation = async (accommodation: Partial<Accommodation> & { id: number }) => {
+  const updateAccommodation = async (accommodation: Partial<Accommodation> & { 
+    id: number;
+    location?: string;
+    capacity?: number;
+    gallery?: string[];
+  }) => {
     // In a real application, this would make an API call
     console.log('Updating accommodation:', accommodation);
-    // Mock implementation
+    // Convert the accommodation object to match the database structure
     const updatedAccommodation = {
       ...accommodation,
       updated_at: new Date().toISOString(),

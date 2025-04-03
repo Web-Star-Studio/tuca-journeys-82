@@ -1,9 +1,10 @@
 
-import React, { useState } from "react";
-import { Search, Plus, Edit, Trash2, Filter, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { useAccommodations } from "@/hooks/use-accommodations";
 import { Button } from "@/components/ui/button";
+import { Plus, Search, Filter } from "lucide-react";
+import { Accommodation } from "@/types/database";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -14,213 +15,166 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { useAccommodations } from "@/hooks/use-accommodations";
-import { Accommodation } from "@/types/database";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import AccommodationFormDialog from "@/components/admin/accommodations/AccommodationFormDialog";
 
-const Accommodations = () => {
-  const { data: accommodations, isLoading, error } = useAccommodations();
+const AdminAccommodations = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [accommodationToDelete, setAccommodationToDelete] = useState<Accommodation | null>(null);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [accommodationToEdit, setAccommodationToEdit] = useState<number | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [showForm, setShowForm] = useState(false);
+  const [editAccommodationId, setEditAccommodationId] = useState<number | undefined>(undefined);
+
+  const { 
+    accommodations, 
+    isLoading, 
+    error, 
+    fetchAccommodations 
+  } = useAccommodations();
+
+  // Fetch accommodations on component mount
+  useEffect(() => {
+    fetchAccommodations().catch(console.error);
+  }, []);
+
+  // Filter accommodations based on search and type
+  const filteredAccommodations = accommodations
+    .filter((acc) =>
+      acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      acc.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((acc) => typeFilter === "all" || acc.type === typeFilter);
+
+  const accommodationTypes = [
+    { value: "all", label: "Todos os tipos" },
+    { value: "hotel", label: "Hotel" },
+    { value: "pousada", label: "Pousada" },
+    { value: "resort", label: "Resort" },
+    { value: "apartamento", label: "Apartamento" },
+    { value: "casa", label: "Casa" },
+  ];
 
   // Handle accommodation edit
   const handleEditClick = (accommodation: Accommodation) => {
-    setAccommodationToEdit(accommodation.id);
-    setFormDialogOpen(true);
+    setEditAccommodationId(accommodation.id);
+    setShowForm(true);
   };
-
-  // Handle accommodation delete
-  const handleDeleteClick = (accommodation: Accommodation) => {
-    setAccommodationToDelete(accommodation);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    console.log("Deleting accommodation:", accommodationToDelete?.id);
-    // Here we would call the API to delete the accommodation
-    setDeleteDialogOpen(false);
-    setAccommodationToDelete(null);
-  };
-
-  // Handle adding new accommodation
-  const handleAddNewAccommodation = () => {
-    setAccommodationToEdit(undefined);
-    setFormDialogOpen(true);
-  };
-
-  // Handle form success
-  const handleFormSuccess = () => {
-    // Refresh accommodation data
-    console.log("Accommodation saved successfully");
-  };
-
-  // Filter accommodations based on search query
-  const filteredAccommodations = accommodations?.filter(
-    (accommodation) =>
-      accommodation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      accommodation.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <AdminLayout pageTitle="Gerenciar Hospedagens">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
+              type="search"
               placeholder="Buscar hospedagens..."
-              className="pl-10 w-full md:w-80"
+              className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <Select
+            value={typeFilter}
+            onValueChange={setTypeFilter}
+          >
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {accommodationTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Button className="gap-1" onClick={handleAddNewAccommodation}>
-          <Plus className="h-4 w-4" />
-          <span>Nova Hospedagem</span>
+        <Button onClick={() => {
+          setEditAccommodationId(undefined);
+          setShowForm(true);
+        }}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Hospedagem
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center p-8">
-          <p>Carregando hospedagens...</p>
-        </div>
-      ) : error ? (
-        <div className="flex justify-center p-8 text-red-500">
-          <p>Erro ao carregar hospedagens. Tente novamente mais tarde.</p>
-        </div>
-      ) : (
-        <div className="rounded-md border bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Imagem</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Preço/Noite</TableHead>
-                <TableHead>Quartos</TableHead>
-                <TableHead>Avaliação</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAccommodations?.map((accommodation) => (
-                <TableRow key={accommodation.id}>
-                  <TableCell className="font-medium">{accommodation.id}</TableCell>
-                  <TableCell>
-                    <img
-                      src={accommodation.image_url}
-                      alt={accommodation.title}
-                      className="h-10 w-16 object-cover rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{accommodation.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{accommodation.type}</Badge>
-                  </TableCell>
-                  <TableCell>R$ {accommodation.price_per_night.toFixed(2)}</TableCell>
-                  <TableCell>{accommodation.bedrooms}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <span className="mr-1 text-yellow-500">★</span>
-                      {accommodation.rating}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        className="h-8 w-8"
-                      >
-                        <Link to={`/hospedagens/${accommodation.id}`} target="_blank">
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600"
-                        onClick={() => handleEditClick(accommodation)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600"
-                        onClick={() => handleDeleteClick(accommodation)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredAccommodations?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
-                    Nenhuma hospedagem encontrada.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-60">
+              <p>Carregando hospedagens...</p>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center h-60">
+              <p className="text-red-500">Erro ao carregar hospedagens. Por favor, tente novamente.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Localização</TableHead>
+                    <TableHead className="text-right">Preço/Noite</TableHead>
+                    <TableHead className="text-right">Avaliação</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAccommodations.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        Nenhuma hospedagem encontrada
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredAccommodations.map((accommodation) => (
+                      <TableRow key={accommodation.id}>
+                        <TableCell className="font-medium">{accommodation.title}</TableCell>
+                        <TableCell className="capitalize">{accommodation.type}</TableCell>
+                        <TableCell>{accommodation.address || accommodation.location}</TableCell>
+                        <TableCell className="text-right">
+                          R$ {accommodation.price_per_night.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">{accommodation.rating}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditClick(accommodation)}
+                          >
+                            Editar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir a hospedagem "{accommodationToDelete?.title}"?
-              Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-            >
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Accommodation Form Dialog */}
-      <AccommodationFormDialog 
-        open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
-        accommodationId={accommodationToEdit}
-        onSuccess={handleFormSuccess}
+      <AccommodationFormDialog
+        open={showForm}
+        onOpenChange={setShowForm}
+        accommodationId={editAccommodationId}
+        onSuccess={() => {
+          setShowForm(false);
+          fetchAccommodations();
+        }}
       />
     </AdminLayout>
   );
 };
 
-export default Accommodations;
+export default AdminAccommodations;

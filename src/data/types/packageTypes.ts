@@ -8,6 +8,7 @@ export type Package = {
   days: number;
   persons: number;
   rating: number;
+  category?: string; // Add the category field
   highlights?: string[];
   includes?: string[];
   excludes?: string[];

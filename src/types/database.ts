@@ -39,6 +39,10 @@ export type Accommodation = {
   address: string;
   created_at: string;
   updated_at: string;
+  // Additional properties used in the application
+  capacity?: number;
+  location?: string;
+  gallery?: string[];
 };
 
 export type Booking = {

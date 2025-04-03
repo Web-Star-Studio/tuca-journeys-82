@@ -3,7 +3,6 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ChartContainer, 
-  ChartTooltip, 
   ChartTooltipContent 
 } from "@/components/ui/chart";
 import {
@@ -30,6 +29,16 @@ interface TrendSalesChartProps {
 }
 
 const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
+  // Create config for chart
+  const chartConfig = {
+    "Romântico": { color: COLORS[0], label: "Romântico" },
+    "Aventura": { color: COLORS[1], label: "Aventura" },
+    "Família": { color: COLORS[2], label: "Família" },
+    "Premium": { color: COLORS[3], label: "Premium" },
+    "Econômico": { color: COLORS[4], label: "Econômico" },
+    "Total": { color: "#666", label: "Total" }
+  };
+
   return (
     <Card className="col-span-1">
       <CardHeader>
@@ -40,22 +49,13 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
       </CardHeader>
       <CardContent>
         <div className="h-80">
-          <ChartContainer
-            config={{
-              "Romântico": { color: COLORS[0] },
-              "Aventura": { color: COLORS[1] },
-              "Família": { color: COLORS[2] },
-              "Premium": { color: COLORS[3] },
-              "Econômico": { color: COLORS[4] },
-              "Total": { color: "#666" }
-            }}
-          >
+          <ChartContainer config={chartConfig}>
             <BarChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip
-                content={props => (
+                content={(props) => (
                   <ChartTooltipContent
                     {...props}
                     formatter={(value, name) => [`${value} vendas`, name]}

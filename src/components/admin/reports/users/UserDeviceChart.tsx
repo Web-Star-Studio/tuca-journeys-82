@@ -33,28 +33,26 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
       <CardContent>
         <div className="h-80 flex flex-col justify-center">
           <ChartContainer config={deviceChartConfig}>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={deviceData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {deviceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value}%`, 'Porcentagem']}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={deviceData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                {deviceData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip 
+                content={(props) => <ChartTooltipContent {...props} formatter={(value) => [`${value}%`, 'Porcentagem']} />}
+              />
+            </PieChart>
           </ChartContainer>
           
           <div className="mt-4 space-y-2">

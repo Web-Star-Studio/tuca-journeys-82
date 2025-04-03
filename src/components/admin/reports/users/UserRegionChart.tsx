@@ -1,8 +1,7 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 interface RegionData {
   regiao: string;
@@ -33,10 +32,10 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
           <YAxis type="category" dataKey="regiao" />
-          <ChartTooltip 
-            content={
-              <ChartTooltipContent indicator="line" />
-            }
+          <Tooltip 
+            content={(props) => (
+              <ChartTooltipContent {...props} indicator="line" />
+            )}
           />
           <Bar 
             dataKey="usuarios" 

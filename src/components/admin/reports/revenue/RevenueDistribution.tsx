@@ -1,7 +1,8 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 interface RevenueDistributionProps {
   totalRevenue: number;
@@ -26,6 +27,14 @@ const RevenueDistribution = ({
   ];
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+  
+  // Create config object for ChartContainer
+  const chartConfig = Object.fromEntries(
+    data.map((item, index) => [item.name, { 
+      label: item.name, 
+      color: COLORS[index % COLORS.length] 
+    }])
+  );
 
   return (
     <Card>
@@ -38,7 +47,7 @@ const RevenueDistribution = ({
       <CardContent>
         <div className="h-80 flex flex-col items-center justify-center">
           {totalRevenue > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="w-full h-[300px]">
               <PieChart>
                 <Pie
                   data={data}
@@ -54,8 +63,8 @@ const RevenueDistribution = ({
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <ChartTooltip
-                  content={props => (
+                <Tooltip
+                  content={(props) => (
                     <ChartTooltipContent
                       {...props}
                       formatter={(value, name) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]}
@@ -63,7 +72,7 @@ const RevenueDistribution = ({
                   )}
                 />
               </PieChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           ) : (
             <div className="text-center text-muted-foreground">
               Nenhuma receita registrada no período selecionado.

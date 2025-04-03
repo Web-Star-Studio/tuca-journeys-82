@@ -1,14 +1,13 @@
 
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevenueReport from "@/components/admin/reports/RevenueReport";
 import BookingsReport from "@/components/admin/reports/BookingsReport";
 import UsersReport from "@/components/admin/reports/UsersReport";
 import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
-import { CalendarIcon, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Reports = () => {
@@ -30,7 +29,7 @@ const Reports = () => {
 
   return (
     <AdminLayout pageTitle="Relatórios">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Relatórios & Análises</h1>
@@ -53,27 +52,27 @@ const Reports = () => {
           </div>
         </div>
 
-        <Tabs value={selectedReport} onValueChange={setSelectedReport}>
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs value={selectedReport} onValueChange={setSelectedReport} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="revenue">Receita</TabsTrigger>
             <TabsTrigger value="bookings">Reservas</TabsTrigger>
             <TabsTrigger value="packages">Pacotes</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="revenue">
+          <TabsContent value="revenue" className="space-y-4 pt-2">
             <RevenueReport dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="bookings">
+          <TabsContent value="bookings" className="space-y-4 pt-2">
             <BookingsReport dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="packages">
+          <TabsContent value="packages" className="space-y-4 pt-2">
             <PackagesReport dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="users">
+          <TabsContent value="users" className="space-y-4 pt-2">
             <UsersReport dateRange={dateRange} />
           </TabsContent>
         </Tabs>

@@ -9,12 +9,14 @@ import DashboardRightColumn from "@/components/admin/dashboard/DashboardRightCol
 const Dashboard = () => {
   return (
     <AdminLayout pageTitle="Dashboard">
-      <DashboardMetrics />
-      
-      <DashboardRow>
-        <BookingOverviewChart />
-        <DashboardRightColumn />
-      </DashboardRow>
+      <div className="space-y-6 pb-6">
+        <DashboardMetrics />
+        
+        <DashboardRow>
+          <BookingOverviewChart />
+          <DashboardRightColumn />
+        </DashboardRow>
+      </div>
     </AdminLayout>
   );
 };

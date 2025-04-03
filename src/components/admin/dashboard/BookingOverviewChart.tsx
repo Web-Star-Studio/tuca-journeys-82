@@ -15,24 +15,26 @@ const bookingData = [
 
 const BookingOverviewChart = () => {
   return (
-    <Card className="col-span-1">
-      <CardHeader>
+    <Card className="col-span-1 h-full">
+      <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">Visão Geral de Reservas</CardTitle>
         <CardDescription>Reservas de passeios, hospedagens e pacotes nos últimos 6 meses</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={bookingData}>
-            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="passeios" name="Passeios" fill="#2563eb" />
-            <Bar dataKey="hospedagens" name="Hospedagens" fill="#10b981" />
-            <Bar dataKey="pacotes" name="Pacotes" fill="#f59e0b" />
-          </BarChart>
-        </ResponsiveContainer>
+      <CardContent className="px-2 sm:px-6">
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={bookingData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+              <Bar dataKey="passeios" name="Passeios" fill="#2563eb" />
+              <Bar dataKey="hospedagens" name="Hospedagens" fill="#10b981" />
+              <Bar dataKey="pacotes" name="Pacotes" fill="#f59e0b" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

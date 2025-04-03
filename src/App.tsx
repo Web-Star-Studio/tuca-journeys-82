@@ -5,6 +5,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { QueryProvider } from "./providers/QueryProvider";
 import { Toaster } from "./components/ui/toaster";
+import ScrollToTop from "./components/utils/ScrollToTop";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -50,6 +51,7 @@ const App = () => {
         <CartProvider>
           <WishlistProvider>
             <Router>
+              <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/sobre" element={<About />} />

@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent, ChartTooltip } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Line, ComposedChart } from "recharts";
-import { ArrowUpIcon, ArrowDownIcon, DollarSign, TrendingUp } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, DollarSign, TrendingUp, Calendar } from "lucide-react";
 
 // Sample data - in a real application, this would come from an API
 const revenueData = [
@@ -140,7 +139,7 @@ const RevenueReport = ({ dateRange }: RevenueReportProps) => {
               <div className="font-bold text-2xl">
                 R$ {lastMonthRevenue.toLocaleString('pt-BR')}
               </div>
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="h-4 w-4 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>

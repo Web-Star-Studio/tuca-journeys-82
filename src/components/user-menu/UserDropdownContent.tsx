@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, User as UserIcon, CreditCard, LogOut } from "lucide-react";
+import { BookOpen, User as UserIcon, CreditCard, LogOut, LayoutDashboard } from "lucide-react";
 
 interface UserDropdownContentProps {
   user: User;
@@ -25,6 +25,13 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
       </div>
       
       <div className="p-1">
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        
         <DropdownMenuItem asChild>
           <Link to="/reservar" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
             <BookOpen className="mr-2 h-4 w-4" />

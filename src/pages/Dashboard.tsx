@@ -38,7 +38,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow py-12 bg-gray-50">
+      <main className="flex-grow py-16 mt-6 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Olá, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Viajante'}!</h1>

@@ -1,18 +1,12 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { ExternalLink, Edit, Trash2 } from "lucide-react";
 import { Tour } from "@/types/database";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody } from "@/components/ui/table";
+import TourTableHeader from "./table/TourTableHeader";
+import TourTableRow from "./table/TourTableRow";
+import TourEmptyState from "./table/TourEmptyState";
+import TourLoadingState from "./table/TourLoadingState";
+import TourErrorState from "./table/TourErrorState";
 
 interface TourListProps {
   tours: Tour[] | undefined;
@@ -30,44 +24,19 @@ const TourList: React.FC<TourListProps> = ({
   onDeleteTour,
 }) => {
   if (isLoading) {
-    return (
-      <div className="flex justify-center p-8">
-        <p>Carregando passeios...</p>
-      </div>
-    );
+    return <TourLoadingState />;
   }
 
   if (error) {
-    return (
-      <div className="flex justify-center p-8 text-red-500">
-        <p>Erro ao carregar passeios. Tente novamente mais tarde.</p>
-      </div>
-    );
+    return <TourErrorState />;
   }
 
   if (!tours || tours.length === 0) {
     return (
       <div className="rounded-md border bg-white">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Imagem</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Duração</TableHead>
-              <TableHead>Avaliação</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
-                Nenhum passeio encontrado.
-              </TableCell>
-            </TableRow>
-          </TableBody>
+          <TourTableHeader />
+          <TourEmptyState />
         </Table>
       </div>
     );
@@ -76,72 +45,15 @@ const TourList: React.FC<TourListProps> = ({
   return (
     <div className="rounded-md border bg-white">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Imagem</TableHead>
-            <TableHead>Nome</TableHead>
-            <TableHead>Categoria</TableHead>
-            <TableHead>Preço</TableHead>
-            <TableHead>Duração</TableHead>
-            <TableHead>Avaliação</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
+        <TourTableHeader />
         <TableBody>
           {tours.map((tour) => (
-            <TableRow key={tour.id}>
-              <TableCell className="font-medium">{tour.id}</TableCell>
-              <TableCell>
-                <img
-                  src={tour.image_url}
-                  alt={tour.title}
-                  className="h-10 w-16 object-cover rounded"
-                />
-              </TableCell>
-              <TableCell className="font-medium">{tour.title}</TableCell>
-              <TableCell>
-                <Badge variant="outline">{tour.category}</Badge>
-              </TableCell>
-              <TableCell>R$ {tour.price.toFixed(2)}</TableCell>
-              <TableCell>{tour.duration}</TableCell>
-              <TableCell>
-                <div className="flex items-center">
-                  <span className="mr-1 text-yellow-500">★</span>
-                  {tour.rating}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    className="h-8 w-8"
-                  >
-                    <Link to={`/passeios/${tour.id}`} target="_blank">
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-blue-600"
-                    onClick={() => onEditTour(tour)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-red-600"
-                    onClick={() => onDeleteTour(tour)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+            <TourTableRow
+              key={tour.id}
+              tour={tour}
+              onEditTour={onEditTour}
+              onDeleteTour={onDeleteTour}
+            />
           ))}
         </TableBody>
       </Table>

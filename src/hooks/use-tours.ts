@@ -127,3 +127,26 @@ export const useTours = () => {
     isPendingDelete: deleteTour.isPending,
   };
 };
+
+// Export a hook for a single tour by ID
+export const useTour = (id?: number) => {
+  return useQuery({
+    queryKey: ['tours', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const { data, error } = await supabase
+        .from('tours')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        throw new Error(`Error fetching tour with id ${id}: ${error.message}`);
+      }
+
+      return data as Tour;
+    },
+    enabled: !!id, // Only run the query if id is provided
+  });
+};

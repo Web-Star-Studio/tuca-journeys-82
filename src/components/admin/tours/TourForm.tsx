@@ -31,16 +31,21 @@ import { useToast } from "@/hooks/use-toast";
 const tourFormSchema = z.object({
   title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres" }),
   description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres" }),
+  short_description: z.string().min(10, { message: "A descrição curta deve ter pelo menos 10 caracteres" }),
   image_url: z.string().url({ message: "Forneça uma URL válida para a imagem" }),
   price: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
   duration: z.string().min(1, { message: "A duração é obrigatória" }),
   category: z.string().min(1, { message: "A categoria é obrigatória" }),
+  max_participants: z.coerce.number().min(1, { message: "Número máximo de participantes é obrigatório"}),
+  min_participants: z.coerce.number().min(1, { message: "Número mínimo de participantes é obrigatório"}),
+  difficulty: z.string().optional(),
   rating: z.coerce.number().min(0).max(5, { message: "A avaliação deve estar entre 0 e 5" }),
-  locations: z.string().optional(),
+  meeting_point: z.string().optional(),
   schedule: z.string().optional(),
-  included: z.string().optional(),
-  not_included: z.string().optional(),
-  requirements: z.string().optional(),
+  includes: z.string().optional(),
+  excludes: z.string().optional(),
+  notes: z.string().optional(),
+  gallery_images: z.string().optional(),
 });
 
 type TourFormValues = z.infer<typeof tourFormSchema>;
@@ -63,16 +68,21 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     defaultValues: {
       title: "",
       description: "",
+      short_description: "",
       image_url: "",
       price: 0,
       duration: "",
       category: "",
+      max_participants: 10,
+      min_participants: 1,
+      difficulty: "fácil",
       rating: 4.5,
-      locations: "",
+      meeting_point: "",
       schedule: "",
-      included: "",
-      not_included: "",
-      requirements: "",
+      includes: "",
+      excludes: "",
+      notes: "",
+      gallery_images: "",
     },
   });
 
@@ -86,16 +96,21 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
             form.reset({
               title: tour.title,
               description: tour.description,
+              short_description: tour.short_description,
               image_url: tour.image_url,
               price: tour.price,
               duration: tour.duration,
               category: tour.category,
+              max_participants: tour.max_participants,
+              min_participants: tour.min_participants,
+              difficulty: tour.difficulty || "fácil",
               rating: tour.rating,
-              locations: tour.locations?.join(", ") || "",
+              meeting_point: tour.meeting_point || "",
               schedule: tour.schedule?.join("\n") || "",
-              included: tour.included?.join("\n") || "",
-              not_included: tour.not_included?.join("\n") || "",
-              requirements: tour.requirements?.join("\n") || "",
+              includes: tour.includes?.join("\n") || "",
+              excludes: tour.excludes?.join("\n") || "",
+              notes: tour.notes?.join("\n") || "",
+              gallery_images: tour.gallery_images?.join(",") || "",
             });
             setPreviewUrl(tour.image_url);
           }
@@ -130,24 +145,24 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     // Convert string lists to arrays
     const formattedData = {
       ...data,
-      locations: data.locations ? data.locations.split(",").map(item => item.trim()) : [],
+      gallery_images: data.gallery_images ? data.gallery_images.split(",").map(item => item.trim()).filter(Boolean) : [],
       schedule: data.schedule ? data.schedule.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      included: data.included ? data.included.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      not_included: data.not_included ? data.not_included.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      requirements: data.requirements ? data.requirements.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      includes: data.includes ? data.includes.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      excludes: data.excludes ? data.excludes.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      notes: data.notes ? data.notes.split("\n").map(item => item.trim()).filter(Boolean) : [],
     };
 
     try {
       if (tourId) {
         // Update existing tour
-        await updateTour({ ...formattedData, id: tourId } as Tour);
+        await updateTour({ ...formattedData, id: tourId });
         toast({
           title: "Sucesso",
           description: "Passeio atualizado com sucesso.",
         });
       } else {
         // Create new tour
-        await createTour(formattedData as Omit<Tour, "id">);
+        await createTour(formattedData);
         toast({
           title: "Sucesso",
           description: "Novo passeio criado com sucesso.",
@@ -174,14 +189,21 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
   }
 
   const tourCategories = [
-    "aventura",
+    "barco",
     "mergulho",
     "trilha",
     "histórico",
     "natureza",
-    "praia",
-    "barco",
-    "família",
+    "aventura",
+    "contemplação",
+    "terrestre",
+  ];
+
+  const difficultyLevels = [
+    "fácil",
+    "moderado",
+    "difícil",
+    "extremo"
   ];
 
   return (
@@ -206,13 +228,34 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
 
             <FormField
               control={form.control}
+              name="short_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição Curta</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Uma breve descrição do passeio"
+                      className="min-h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Será exibida na listagem de passeios
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>Descrição Completa</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Descrição do passeio"
+                      placeholder="Descrição detalhada do passeio"
                       className="min-h-[120px]"
                       {...field}
                     />
@@ -283,40 +326,75 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
 
               <FormField
                 control={form.control}
-                name="rating"
+                name="difficulty"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Avaliação (0-5)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="5"
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>Nível de Dificuldade</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {difficultyLevels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="min_participants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mínimo de Participantes</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="max_participants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Máximo de Participantes</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
             <FormField
               control={form.control}
-              name="locations"
+              name="meeting_point"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Locais (separados por vírgula)</FormLabel>
+                  <FormLabel>Ponto de Encontro</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Praia do Sancho, Baía dos Porcos, ..."
+                      placeholder="Local de encontro para o passeio"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Lista de locais visitados durante o passeio
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -330,7 +408,7 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
               name="image_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL da Imagem</FormLabel>
+                  <FormLabel>URL da Imagem Principal</FormLabel>
                   <FormControl>
                     <Input placeholder="URL da imagem principal" {...field} />
                   </FormControl>
@@ -346,6 +424,46 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
                       />
                     </div>
                   )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="gallery_images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Galeria de Imagens (URLs separadas por vírgula)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="/imagem1.jpg, /imagem2.jpg, /imagem3.jpg"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Lista de imagens adicionais para a galeria do passeio
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Avaliação (0-5)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -374,7 +492,7 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="included"
+                name="includes"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Incluso (uma linha por item)</FormLabel>
@@ -392,7 +510,7 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
 
               <FormField
                 control={form.control}
-                name="not_included"
+                name="excludes"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Não Incluso (uma linha por item)</FormLabel>
@@ -411,10 +529,10 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
 
             <FormField
               control={form.control}
-              name="requirements"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Requisitos (uma linha por item)</FormLabel>
+                  <FormLabel>Observações (uma linha por item)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Protetor solar&#10;Roupas leves&#10;Calçado adequado&#10;..."

@@ -71,7 +71,8 @@ const Tours = () => {
   const filteredTours = tours?.filter(
     (tour) =>
       tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.category.toLowerCase().includes(searchQuery.toLowerCase())
+      tour.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tour.short_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

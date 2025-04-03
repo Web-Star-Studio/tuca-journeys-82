@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuickAccessButtonsProps {
   onSuccessfulLogin: (redirectToAdmin: boolean) => void;
@@ -11,29 +12,72 @@ interface QuickAccessButtonsProps {
 
 const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
   const { loading, signIn } = useAuth();
+  const { toast } = useToast();
 
   const handleDemoLogin = async () => {
-    const demoEmail = "demo@tucanoronha.com";
-    const demoPassword = "demo123456";
-    
-    await signIn(demoEmail, demoPassword);
-    onSuccessfulLogin(false);
+    try {
+      const demoEmail = "demo@tucanoronha.com";
+      const demoPassword = "demo123456";
+      
+      await signIn(demoEmail, demoPassword);
+      console.log("Demo login successful, redirecting to home");
+      toast({
+        title: "Login de demonstração",
+        description: "Redirecionando para página inicial",
+      });
+      onSuccessfulLogin(false);
+    } catch (error) {
+      console.error("Demo login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Não foi possível fazer login de demonstração",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAdminDemoLogin = async () => {
-    const adminEmail = "admin@tucanoronha.com";
-    const adminPassword = "admin123456";
-    
-    await signIn(adminEmail, adminPassword);
-    onSuccessfulLogin(true);
+    try {
+      const adminEmail = "admin@tucanoronha.com";
+      const adminPassword = "admin123456";
+      
+      await signIn(adminEmail, adminPassword);
+      console.log("Admin demo login successful, redirecting to admin");
+      toast({
+        title: "Login de administrador",
+        description: "Redirecionando para painel admin",
+      });
+      onSuccessfulLogin(true);
+    } catch (error) {
+      console.error("Admin login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Não foi possível fazer login como administrador",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleQuickLogin = async () => {
-    const quickEmail = "user@example.com";
-    const quickPassword = "password";
-    
-    await signIn(quickEmail, quickPassword);
-    onSuccessfulLogin(false);
+    try {
+      const quickEmail = "user@example.com";
+      const quickPassword = "password";
+      
+      await signIn(quickEmail, quickPassword);
+      console.log("Quick login successful, redirecting to home");
+      toast({
+        title: "Login rápido",
+        description: "Redirecionando para página inicial",
+      });
+      onSuccessfulLogin(false);
+    } catch (error) {
+      console.error("Quick login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Não foi possível fazer login rápido",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

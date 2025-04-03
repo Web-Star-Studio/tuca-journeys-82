@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
   onSuccessfulLogin: (redirectToAdmin: boolean) => void;
@@ -17,11 +18,26 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [redirectToAdmin, setRedirectToAdmin] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signIn(email, password);
-    onSuccessfulLogin(redirectToAdmin);
+    try {
+      await signIn(email, password);
+      console.log("Login successful, redirecting to", redirectToAdmin ? "admin" : "home");
+      toast({
+        title: "Login bem-sucedido",
+        description: `Redirecionando para ${redirectToAdmin ? "painel admin" : "página inicial"}`,
+      });
+      onSuccessfulLogin(redirectToAdmin);
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Ocorreu um erro ao fazer login. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

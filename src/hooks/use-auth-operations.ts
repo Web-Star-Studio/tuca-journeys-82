@@ -1,3 +1,4 @@
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
@@ -7,26 +8,42 @@ export const useAuthOperations = () => {
   // Sign in function with Supabase authentication and fallback for demo mode
   const signIn = async (email: string, password: string) => {
     try {
-      // First try Supabase auth
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      console.log("Attempting to sign in with:", email);
+      
+      // Determinar se é um login administrativo
+      const isAdminLogin = email === "admin@tucanoronha.com";
+      
+      try {
+        // Tentar Supabase auth primeiro
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
-        console.warn("Supabase auth error:", error.message);
+        if (error) {
+          console.warn("Supabase auth error:", error.message);
+          throw error;
+        }
+
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo de volta!",
+        });
         
-        // For development/demo - create a mock user when Supabase is unavailable
-        // This allows the app to function without a working backend
+        return { data, error: null };
+      } catch (error: any) {
+        console.error("Login error:", error);
+        
+        // Fallback para modo demo devido a erro de rede ou autenticação
         const mockUser = {
           id: "demo-user-id",
           email: email,
           user_metadata: {
-            name: email === "admin@tucanoronha.com" ? "Admin Demo" : "Demo User",
-            role: email === "admin@tucanoronha.com" ? "admin" : "user",
+            name: isAdminLogin ? "Admin Demo" : "Demo User",
+            role: isAdminLogin ? "admin" : "user",
           },
           app_metadata: {
-            role: email === "admin@tucanoronha.com" ? "admin" : "user",
+            role: isAdminLogin ? "admin" : "user",
           },
           aud: "authenticated",
           created_at: new Date().toISOString(),
@@ -39,60 +56,30 @@ export const useAuthOperations = () => {
           expires_at: Math.floor(Date.now() / 1000) + 3600,
         };
         
-        // Store the mock session in localStorage to persist it
+        // Armazenar a sessão mockada no localStorage para persistir
         localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
         
         toast({
           title: "Login de demonstração",
-          description: "Você está usando uma conta de demonstração",
+          description: `Você está usando uma conta de demonstração como ${isAdminLogin ? 'administrador' : 'usuário'}`,
+          variant: "default",
         });
         
-        return { data: { session: mockSession, user: mockUser }, error: null };
+        return { 
+          data: { session: mockSession, user: mockUser }, 
+          error: null 
+        };
       }
-
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo de volta!",
-      });
-      
-      return { data, error: null };
     } catch (error: any) {
-      console.error("Login error:", error);
-      
-      // Fallback to demo mode if network error
-      const mockUser = {
-        id: "demo-user-id",
-        email: email,
-        user_metadata: {
-          name: email === "admin@tucanoronha.com" ? "Admin Demo" : "Demo User",
-          role: email === "admin@tucanoronha.com" ? "admin" : "user",
-        },
-        app_metadata: {
-          role: email === "admin@tucanoronha.com" ? "admin" : "user",
-        },
-        aud: "authenticated",
-        created_at: new Date().toISOString(),
-      };
-      
-      const mockSession = {
-        access_token: "mock-token",
-        refresh_token: "mock-refresh-token",
-        user: mockUser,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      };
-      
-      localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
+      console.error("Unexpected error during login:", error);
       
       toast({
-        title: "Login de demonstração",
-        description: "Você está usando uma conta de demonstração",
-        variant: "default",
+        title: "Erro no login",
+        description: error.message || "Ocorreu um erro durante o login. Tente novamente.",
+        variant: "destructive",
       });
       
-      return { 
-        data: { session: mockSession, user: mockUser }, 
-        error: null 
-      };
+      throw error;
     }
   };
 
@@ -131,6 +118,9 @@ export const useAuthOperations = () => {
   // Sign out function with real Supabase authentication
   const signOut = async () => {
     try {
+      // Clear mock session if it exists
+      localStorage.removeItem("supabase-mock-session");
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;

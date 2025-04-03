@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowTrendingUp, ChartBarSquare, ExternalLink } from "lucide-react";
+import { TrendingUp, ChartBarSquare, ExternalLink } from "lucide-react";
 
 const UserRegionInsights = () => {
   return (
@@ -23,7 +23,7 @@ const UserRegionInsights = () => {
           <div className="text-sm font-medium text-amber-800">
             Maior Crescimento
           </div>
-          <ArrowTrendingUp className="text-amber-500 h-5 w-5" />
+          <TrendingUp className="text-amber-500 h-5 w-5" />
         </div>
         <div className="mt-2">
           <div className="font-bold text-xl text-amber-800">Nordeste</div>

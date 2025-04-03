@@ -58,6 +58,12 @@ const UsersReport = ({ dateRange }: UsersReportProps) => {
   const conversionRate = 28; // In percentage, would be calculated in a real app
   
   const DEVICE_COLORS = deviceData.map(item => item.color);
+  const deviceChartConfig = Object.fromEntries(
+    deviceData.map(item => [item.name, { 
+      label: item.name, 
+      color: item.color 
+    }])
+  );
 
   return (
     <div className="space-y-6">
@@ -161,28 +167,30 @@ const UsersReport = ({ dateRange }: UsersReportProps) => {
           </CardHeader>
           <CardContent>
             <div className="h-80 flex flex-col justify-center">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={deviceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {deviceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value) => [`${value}%`, 'Porcentagem']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <ChartContainer config={deviceChartConfig}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={deviceData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {deviceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => [`${value}%`, 'Porcentagem']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartContainer>
               
               <div className="mt-4 space-y-2">
                 {deviceData.map((item) => (

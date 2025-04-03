@@ -3,22 +3,18 @@ import React from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import DashboardMetrics from "@/components/admin/dashboard/DashboardMetrics";
 import BookingOverviewChart from "@/components/admin/dashboard/BookingOverviewChart";
-import SitePerformance from "@/components/admin/dashboard/SitePerformance";
-import RecentActivities from "@/components/admin/dashboard/RecentActivities";
+import DashboardRow from "@/components/admin/dashboard/DashboardRow";
+import DashboardRightColumn from "@/components/admin/dashboard/DashboardRightColumn";
 
 const Dashboard = () => {
   return (
     <AdminLayout pageTitle="Dashboard">
       <DashboardMetrics />
-
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
+      
+      <DashboardRow>
         <BookingOverviewChart />
-
-        <div className="col-span-1 grid gap-6">
-          <SitePerformance />
-          <RecentActivities />
-        </div>
-      </div>
+        <DashboardRightColumn />
+      </DashboardRow>
     </AdminLayout>
   );
 };

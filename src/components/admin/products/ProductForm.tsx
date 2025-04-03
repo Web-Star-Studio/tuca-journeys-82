@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,22 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-
-// Product type (simplified)
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  image_url: string;
-  price: number;
-  category: string;
-  stock: number;
-  status: string;
-  weight?: number;
-  dimensions?: string;
-  gallery?: string[];
-  featured?: boolean;
-}
+import { Product } from "@/types/product";
 
 // Form schema for validation
 const productFormSchema = z.object({
@@ -187,14 +171,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     try {
       if (productId) {
         // Update existing product
-        await updateProduct({ ...formattedData, id: productId });
+        await updateProduct({ ...formattedData, id: productId } as Product);
         toast({
           title: "Sucesso",
           description: "Produto atualizado com sucesso.",
         });
       } else {
         // Create new product
-        await createProduct(formattedData);
+        await createProduct(formattedData as Product);
         toast({
           title: "Sucesso",
           description: "Novo produto criado com sucesso.",

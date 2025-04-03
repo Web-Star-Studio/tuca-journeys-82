@@ -34,6 +34,12 @@ const MetricCard = ({
         <div className="flex items-center">
           <div className="font-bold text-xl sm:text-2xl">{value}</div>
         </div>
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-1 rounded-b-lg"
+          style={{
+            background: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})`
+          }}
+        ></div>
       </CardContent>
     </Card>
   );

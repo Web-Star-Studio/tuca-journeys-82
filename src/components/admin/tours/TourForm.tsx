@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useTours } from "@/hooks/use-tours";
-import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { TourFormValues, tourFormSchema, tourCategories, difficultyLevels } from "./TourFormTypes";
 import TourBasicInfoForm from "./form/TourBasicInfoForm";
@@ -112,6 +111,13 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
       includes: data.includes ? data.includes.split("\n").map(item => item.trim()).filter(Boolean) : [],
       excludes: data.excludes ? data.excludes.split("\n").map(item => item.trim()).filter(Boolean) : [],
       notes: data.notes ? data.notes.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      // Ensure required fields are present
+      title: data.title || "Novo Passeio",
+      description: data.description || "Descrição padrão",
+      short_description: data.short_description || (data.description ? data.description.substring(0, 100) : "Descrição curta"),
+      duration: data.duration || "1 hora",
+      category: data.category || "aventura",
+      image_url: data.image_url || "/placeholder.jpg"
     };
 
     try {

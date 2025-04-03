@@ -57,7 +57,13 @@ export const ChartLegendContent = React.forwardRef<
                   }}
                 />
               )}
-              <span className="text-xs">{isMobile ? (itemConfig?.label || '').substring(0, 10) : itemConfig?.label}</span>
+              <span className="text-xs">
+                {isMobile 
+                  ? (typeof itemConfig?.label === 'string' 
+                     ? (itemConfig.label as string).substring(0, 10) 
+                     : itemConfig?.label) 
+                  : itemConfig?.label}
+              </span>
             </div>
           );
         })}

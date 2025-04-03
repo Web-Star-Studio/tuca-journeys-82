@@ -21,6 +21,9 @@ export const ChartContainer = React.forwardRef<
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
   const isMobile = useIsMobile();
 
+  // Determine minimum width based on screen size
+  const minChartWidth = isMobile ? 280 : 450;
+
   return (
     <ChartContext.Provider value={{ config }}>
       <div
@@ -36,7 +39,8 @@ export const ChartContainer = React.forwardRef<
         <RechartsPrimitive.ResponsiveContainer 
           width="100%" 
           height={height}
-          minWidth={isMobile ? 300 : 500}
+          minWidth={minChartWidth}
+          aspect={isMobile ? 1.2 : 2}
         >
           {children}
         </RechartsPrimitive.ResponsiveContainer>

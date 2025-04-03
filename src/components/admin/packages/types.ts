@@ -1,29 +1,36 @@
 
 import { z } from "zod";
 
-// Define the form schema with zod
-export const packageFormSchema = z.object({
-  title: z.string().min(5, { message: "O título deve ter pelo menos 5 caracteres" }),
-  description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
-  image: z.string().url({ message: "Informe uma URL de imagem válida" }),
-  price: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
-  days: z.coerce.number().int().positive({ message: "A duração deve ser um número inteiro positivo" }),
-  persons: z.coerce.number().int().positive({ message: "O número de pessoas deve ser um número inteiro positivo" }),
-  rating: z.coerce.number().min(0).max(5, { message: "A avaliação deve estar entre 0 e 5" }),
-  category: z.string(),
-  highlights: z.array(z.string()).optional(),
-  includes: z.array(z.string()).optional(),
-  excludes: z.array(z.string()).optional(),
-  itinerary: z
-    .array(
-      z.object({
-        day: z.coerce.number().int().positive(),
-        title: z.string().min(3),
-        description: z.string().min(10),
-      })
-    )
-    .optional(),
-  dates: z.array(z.string()).optional(),
+// Define the itinerary item schema
+const itineraryItemSchema = z.object({
+  day: z.number().int().positive(),
+  title: z.string().min(1, "O título do dia é obrigatório"),
+  description: z.string().min(1, "A descrição do dia é obrigatória"),
 });
 
+// Define the package form schema
+export const packageFormSchema = z.object({
+  title: z.string().min(3, "O título deve ter pelo menos 3 caracteres"),
+  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
+  image: z.string().url("URL da imagem inválida"),
+  price: z.coerce.number().positive("O preço deve ser positivo"),
+  days: z.coerce.number().int().positive("O número de dias deve ser positivo"),
+  persons: z.coerce.number().int().positive("O número de pessoas deve ser positivo"),
+  rating: z.coerce.number().min(0).max(5, "A avaliação deve estar entre 0 e 5"),
+  category: z.string().min(1, "A categoria é obrigatória"),
+  highlights: z.array(z.string()).min(1, "Adicione pelo menos um destaque"),
+  includes: z.array(z.string()).min(1, "Adicione pelo menos um item incluído"),
+  excludes: z.array(z.string()).min(1, "Adicione pelo menos um item não incluído"),
+  itinerary: z.array(itineraryItemSchema).min(1, "Adicione pelo menos um dia no itinerário"),
+  dates: z.array(z.string()).min(1, "Adicione pelo menos uma data disponível"),
+});
+
+// Infer types from the schema
 export type PackageFormValues = z.infer<typeof packageFormSchema>;
+
+// Itinerary item type
+export type ItineraryItem = {
+  day: number;
+  title: string;
+  description: string;
+};

@@ -52,7 +52,17 @@ const Users = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  // Handle user delete
+  // Handle user actions
+  const handleEmailClick = (user: User) => {
+    console.log("Email user:", user.email);
+    // Implement email functionality
+  };
+
+  const handleEditClick = (user: User) => {
+    console.log("Edit user:", user.id);
+    // Implement edit functionality
+  };
+
   const handleDeleteClick = (user: User) => {
     setUserToDelete(user);
     setDeleteDialogOpen(true);
@@ -80,8 +90,12 @@ const Users = () => {
       />
       
       <UsersTable 
-        users={filteredUsers} 
-        onDeleteClick={handleDeleteClick} 
+        users={filteredUsers}
+        actions={{
+          onEmailClick: handleEmailClick,
+          onEditClick: handleEditClick,
+          onDeleteClick: handleDeleteClick,
+        }}
       />
 
       <DeleteUserDialog

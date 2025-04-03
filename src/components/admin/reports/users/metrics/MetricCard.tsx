@@ -23,16 +23,16 @@ const MetricCard = ({
   gradientTo
 }: MetricCardProps) => {
   return (
-    <Card className={`border-l-4 ${borderColor} bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`}>
+    <Card className={`border-l-4 ${borderColor} shadow-sm hover:shadow-md transition-all duration-300`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
           {title}
+          <Icon className={`h-4 w-4 ml-2 ${iconColor}`} />
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="font-bold text-2xl">{value}</div>
-          <Icon className={`h-4 w-4 ${iconColor}`} />
         </div>
       </CardContent>
     </Card>

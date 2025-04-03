@@ -29,14 +29,14 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
           <Button
             id="date"
             variant={"outline"}
-            className="w-full justify-start text-left font-normal md:max-w-[300px]"
+            className="w-full justify-start text-left font-normal border border-gray-200 hover:bg-gray-50 transition-colors"
           >
-            <Calendar className="mr-2 h-4 w-4" />
+            <Calendar className="mr-2 h-4 w-4 text-tuca-ocean-blue" />
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, "PPP", { locale: ptBR })} -{" "}
-                  {format(dateRange.to, "PPP", { locale: ptBR })}
+                  {format(dateRange.from, "dd MMM", { locale: ptBR })} -{" "}
+                  {format(dateRange.to, "dd MMM, yyyy", { locale: ptBR })}
                 </>
               ) : (
                 format(dateRange.from, "PPP", { locale: ptBR })
@@ -46,7 +46,7 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 shadow-lg border border-gray-200" align="start">
           <CalendarComponent
             initialFocus
             mode="range"
@@ -64,7 +64,26 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
               }
             }}
             numberOfMonths={2}
+            locale={ptBR}
+            className="rounded-md border-0"
           />
+          <div className="p-3 border-t border-gray-100 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Set date range to current month
+                const today = new Date();
+                setDateRange({
+                  from: new Date(today.getFullYear(), today.getMonth(), 1),
+                  to: today
+                });
+              }}
+              className="text-xs h-8"
+            >
+              Mês atual
+            </Button>
+          </div>
         </PopoverContent>
       </Popover>
     </div>

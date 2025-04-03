@@ -40,20 +40,30 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
   };
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
-        <CardTitle>Tendência de Vendas</CardTitle>
-        <CardDescription>
+    <Card className="col-span-1 shadow-sm hover:shadow-md transition-all duration-300">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold">Tendência de Vendas</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Evolução das vendas nos últimos 6 meses
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <div className="h-80">
           <ChartContainer config={chartConfig}>
             <BarChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="month" 
+                tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: '#e0e0e0' }}
+                tickFormatter={(value) => `${value}`}
+              />
               <Tooltip
                 content={(props) => (
                   <ChartTooltipContent
@@ -62,8 +72,18 @@ const TrendSalesChart = ({ trendData, COLORS }: TrendSalesChartProps) => {
                   />
                 )}
               />
-              <Legend />
-              <Bar dataKey="Total" fill="#666" />
+              <Legend 
+                wrapperStyle={{ 
+                  paddingTop: 15,
+                  fontSize: '12px'
+                }}
+              />
+              <Bar 
+                dataKey="Total" 
+                fill="#666" 
+                radius={[4, 4, 0, 0]}
+                animationDuration={1000}
+              />
             </BarChart>
           </ChartContainer>
         </div>

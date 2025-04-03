@@ -23,15 +23,15 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Dispositivos</CardTitle>
-        <CardDescription>
+    <Card className="shadow-sm hover:shadow-md transition-all duration-300">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold">Dispositivos</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Distribuição por tipo de dispositivo
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="h-80 flex flex-col justify-center">
+      <CardContent className="pt-4">
+        <div className="h-[260px] flex flex-col justify-center">
           <ChartContainer config={deviceChartConfig}>
             <PieChart>
               <Pie
@@ -44,18 +44,30 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 labelLine={false}
+                animationDuration={1000}
+                animationBegin={200}
               >
                 {deviceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.color} 
+                    stroke="white"
+                    strokeWidth={2}
+                  />
                 ))}
               </Pie>
               <Tooltip 
-                content={(props) => <ChartTooltipContent {...props} formatter={(value) => [`${value}%`, 'Porcentagem']} />}
+                content={(props) => (
+                  <ChartTooltipContent 
+                    {...props} 
+                    formatter={(value) => [`${value}%`, 'Porcentagem']} 
+                  />
+                )}
               />
             </PieChart>
           </ChartContainer>
           
-          <div className="mt-4 space-y-2">
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-2">
             {deviceData.map((item) => (
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -63,7 +75,7 @@ const UserDeviceChart = ({ deviceData }: UserDeviceChartProps) => {
                     className="w-3 h-3 rounded-full mr-2" 
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  <span className="text-sm">{item.name}</span>
+                  <span className="text-sm font-medium">{item.name}</span>
                 </div>
                 <div className="text-sm font-medium">{item.value}%</div>
               </div>

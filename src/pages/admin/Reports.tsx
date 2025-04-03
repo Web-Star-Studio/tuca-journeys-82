@@ -7,8 +7,9 @@ import BookingsReportContainer from "@/components/admin/reports/bookings/Booking
 import UsersReport from "@/components/admin/reports/UsersReport";
 import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
-import { Download } from "lucide-react";
+import { Download, FileBar, Calendar, Users, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState<{
@@ -24,55 +25,69 @@ const Reports = () => {
   const handleExportReport = () => {
     // In a real application, this would generate and download 
     // a CSV or PDF file with the current report data
-    alert("Relatório exportado com sucesso!");
+    toast.success("Relatório exportado com sucesso!");
   };
 
   return (
     <AdminLayout pageTitle="Relatórios">
-      <div className="flex flex-col gap-6 pb-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">Relatórios & Análises</h1>
-            <p className="text-muted-foreground">
-              Visualize e exporte dados sobre vendas, reservas, pacotes e usuários
-            </p>
-          </div>
-          
-          <div className="flex gap-2 w-full md:w-auto">
-            <ReportFilters dateRange={dateRange} setDateRange={setDateRange} />
+      <div className="flex flex-col gap-6 pb-6 animate-fade-in">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Relatórios & Análises</h1>
+              <p className="text-muted-foreground mt-1">
+                Visualize e exporte dados sobre vendas, reservas, pacotes e usuários
+              </p>
+            </div>
             
-            <Button 
-              variant="outline" 
-              className="w-full md:w-auto" 
-              onClick={handleExportReport}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
-            </Button>
+            <div className="flex gap-3 w-full md:w-auto">
+              <ReportFilters dateRange={dateRange} setDateRange={setDateRange} />
+              
+              <Button 
+                variant="outline" 
+                className="w-full md:w-auto" 
+                onClick={handleExportReport}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </Button>
+            </div>
           </div>
         </div>
 
         <Tabs value={selectedReport} onValueChange={setSelectedReport} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="revenue">Receita</TabsTrigger>
-            <TabsTrigger value="bookings">Reservas</TabsTrigger>
-            <TabsTrigger value="packages">Pacotes</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted">
+            <TabsTrigger value="revenue" className="flex items-center gap-2 h-10">
+              <FileBar className="h-4 w-4" />
+              <span className="hidden sm:inline">Receita</span>
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="flex items-center gap-2 h-10">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Reservas</span>
+            </TabsTrigger>
+            <TabsTrigger value="packages" className="flex items-center gap-2 h-10">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Pacotes</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2 h-10">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Usuários</span>
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="revenue" className="space-y-4 pt-2">
+          <TabsContent value="revenue" className="space-y-6 pt-2">
             <RevenueReport dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="bookings" className="space-y-4 pt-2">
+          <TabsContent value="bookings" className="space-y-6 pt-2">
             <BookingsReportContainer dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="packages" className="space-y-4 pt-2">
+          <TabsContent value="packages" className="space-y-6 pt-2">
             <PackagesReport dateRange={dateRange} />
           </TabsContent>
           
-          <TabsContent value="users" className="space-y-4 pt-2">
+          <TabsContent value="users" className="space-y-6 pt-2">
             <UsersReport dateRange={dateRange} />
           </TabsContent>
         </Tabs>

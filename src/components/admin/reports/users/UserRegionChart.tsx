@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface RegionData {
   regiao: string;
@@ -26,21 +26,54 @@ interface UserRegionChartProps {
 
 const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
   return (
-    <div className="h-80">
+    <div className="h-80 pt-4">
       <ChartContainer config={chartConfig}>
-        <BarChart data={regionData} layout="vertical">
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis type="number" />
-          <YAxis type="category" dataKey="regiao" />
+        <BarChart 
+          data={regionData} 
+          layout="vertical"
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            horizontal={true}
+            stroke="#f0f0f0"
+          />
+          <XAxis 
+            type="number"
+            tickLine={false}
+            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis 
+            type="category" 
+            dataKey="regiao"
+            width={80}
+            tickLine={false}
+            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fontSize: 12 }}
+          />
           <Tooltip 
             content={(props) => (
-              <ChartTooltipContent {...props} indicator="line" />
+              <ChartTooltipContent 
+                {...props} 
+                indicator="line"
+                formatter={(value) => [`${value} usuários`, 'Total']} 
+              />
             )}
           />
           <Bar 
             dataKey="usuarios" 
             name="Usuários" 
-            fill={chartConfig.usuarios.color} 
+            fill={chartConfig.usuarios.color}
+            radius={[0, 4, 4, 0]}
+            animationDuration={1000}
+            animationBegin={200}
+            label={{ 
+              position: 'right', 
+              fill: '#666',
+              fontSize: 12,
+              formatter: (value: any) => value
+            }}
           />
         </BarChart>
       </ChartContainer>

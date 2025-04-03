@@ -27,10 +27,10 @@ interface UserRegionDistributionProps {
 
 const UserRegionDistribution = ({ regionData, chartConfig }: UserRegionDistributionProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Distribuição por Região</CardTitle>
-        <CardDescription>
+    <Card className="shadow-sm hover:shadow-md transition-all duration-300">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold">Distribuição por Região</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Número de usuários por região geográfica
         </CardDescription>
       </CardHeader>

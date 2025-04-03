@@ -31,7 +31,7 @@ const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
       }, 100);
     } catch (error) {
       console.error(`${buttonType} login error:`, error);
-      // Reset loading state since the toast is already shown in signIn function
+      // Error toast is already shown in signIn function
     } finally {
       setIsLoading(false);
       setButtonClicked(null);

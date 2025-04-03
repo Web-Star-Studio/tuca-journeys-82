@@ -60,7 +60,7 @@ export const useAuthOperations = () => {
       try {
         // Attempt Supabase auth with a shorter timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout to 5 seconds
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -84,7 +84,7 @@ export const useAuthOperations = () => {
         console.error("Login error:", error?.message || "Connection error");
         
         // Network error fallback - suggest using demo accounts or check network
-        if (error.name === "AbortError" || error.message === "Failed to fetch") {
+        if (error.name === "AbortError" || error.message === "Failed to fetch" || error.message?.includes("network")) {
           toast({
             title: "Erro de conexão",
             description: "Não foi possível conectar ao servidor. Use uma conta de demonstração ou verifique sua conexão.",

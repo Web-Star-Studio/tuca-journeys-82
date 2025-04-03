@@ -10,18 +10,7 @@ const BookingContent = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
-      {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full">
-        <SafeImage
-          src="/lovable-uploads/34dbd7a3-684b-48e2-9fbb-bd35909a80a7.png"
-          alt="Fernando de Noronha praia"
-          className="w-full h-full object-cover"
-        />
-        {/* Black overlay with 60% opacity */}
-        <div className="absolute inset-0 bg-black/60"></div>
-      </div>
-      
+    <div className="relative w-full h-full">
       {/* Content */}
       <motion.div 
         className="max-w-3xl mx-auto text-center relative z-10 py-16 px-6"

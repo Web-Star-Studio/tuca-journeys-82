@@ -8,7 +8,7 @@ const FloatingAvatars = () => {
   const teamMembers = [
     {
       name: "Karol Tuca",
-      image: "/team-karol.jpg",
+      image: "/lovable-uploads/3e37da64-d22a-4127-8447-69d6e3c61dc4.png",
       initials: "KT",
       position: "top-0 left-0",
       borderColor: "border-tuca-ocean-blue",
@@ -18,7 +18,7 @@ const FloatingAvatars = () => {
     },
     {
       name: "Rafael Oliveira",
-      image: "/team-rafael.jpg",
+      image: "/lovable-uploads/7b44c0fe-f8a4-490f-bc6d-4dd7e025c278.png",
       initials: "RO",
       position: "bottom-20 left-12",
       borderColor: "border-tuca-coral",
@@ -28,7 +28,7 @@ const FloatingAvatars = () => {
     },
     {
       name: "Marina Santos",
-      image: "/team-marina.jpg",
+      image: "/lovable-uploads/cd81e007-b687-426e-9059-a599e95ea9f8.png",
       initials: "MS",
       position: "top-10 right-0",
       borderColor: "border-tuca-light-blue",
@@ -38,7 +38,7 @@ const FloatingAvatars = () => {
     },
     {
       name: "Lucas Mendes",
-      image: "/team-lucas.jpg",
+      image: "/lovable-uploads/c8a4052e-a65d-4ff5-ade2-082544f30b82.png",
       initials: "LM",
       position: "bottom-10 right-12",
       borderColor: "border-tuca-green",

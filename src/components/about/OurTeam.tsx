@@ -8,28 +8,28 @@ const OurTeam = () => {
       name: "Karol Tuca",
       role: "Fundadora e CEO",
       description: "Apaixonada por Noronha, Karol fundou a Tuca Noronha após mais de 50 viagens ao arquipélago.",
-      image: "/team-karol.jpg",
+      image: "/lovable-uploads/3e37da64-d22a-4127-8447-69d6e3c61dc4.png",
       initials: "KT"
     },
     {
       name: "Rafael Oliveira",
       role: "Gerente de Experiências",
       description: "Especialista em passeios e atividades, Rafael conhece os melhores spots da ilha.",
-      image: "/team-rafael.jpg",
+      image: "/lovable-uploads/7b44c0fe-f8a4-490f-bc6d-4dd7e025c278.png",
       initials: "RO"
     },
     {
       name: "Marina Santos",
       role: "Consultora de Viagens",
       description: "Marina cria roteiros personalizados para cada perfil de viajante.",
-      image: "/team-marina.jpg", 
+      image: "/lovable-uploads/cd81e007-b687-426e-9059-a599e95ea9f8.png", 
       initials: "MS"
     },
     {
       name: "Lucas Mendes",
       role: "Guia Local",
       description: "Nascido e criado em Noronha, Lucas compartilha histórias e segredos da ilha.",
-      image: "/team-lucas.jpg",
+      image: "/lovable-uploads/c8a4052e-a65d-4ff5-ade2-082544f30b82.png",
       initials: "LM"
     }
   ];

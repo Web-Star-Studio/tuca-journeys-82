@@ -13,71 +13,51 @@ interface QuickAccessButtonsProps {
 const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
   const { loading, signIn } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [buttonClicked, setButtonClicked] = React.useState<string | null>(null);
 
-  const handleDemoLogin = async () => {
+  const handleLogin = async (email: string, password: string, isAdmin: boolean, buttonType: string) => {
+    setIsLoading(true);
+    setButtonClicked(buttonType);
+    
     try {
-      const demoEmail = "demo@tucanoronha.com";
-      const demoPassword = "demo123456";
+      console.log(`Attempting ${buttonType} login`);
+      await signIn(email, password);
+      console.log(`${buttonType} login successful, redirecting to ${isAdmin ? 'admin' : 'home'}`);
       
-      await signIn(demoEmail, demoPassword);
-      console.log("Demo login successful, redirecting to home");
-      toast({
-        title: "Login de demonstração",
-        description: "Redirecionando para página inicial",
-      });
-      onSuccessfulLogin(false);
+      onSuccessfulLogin(isAdmin);
     } catch (error) {
-      console.error("Demo login error:", error);
-      toast({
-        title: "Erro no login",
-        description: "Não foi possível fazer login de demonstração",
-        variant: "destructive",
-      });
+      console.error(`${buttonType} login error:`, error);
+      // The toast is already shown in the signIn function
+    } finally {
+      setIsLoading(false);
+      setButtonClicked(null);
     }
   };
 
-  const handleAdminDemoLogin = async () => {
-    try {
-      const adminEmail = "admin@tucanoronha.com";
-      const adminPassword = "admin123456";
-      
-      await signIn(adminEmail, adminPassword);
-      console.log("Admin demo login successful, redirecting to admin");
-      toast({
-        title: "Login de administrador",
-        description: "Redirecionando para painel admin",
-      });
-      onSuccessfulLogin(true);
-    } catch (error) {
-      console.error("Admin login error:", error);
-      toast({
-        title: "Erro no login",
-        description: "Não foi possível fazer login como administrador",
-        variant: "destructive",
-      });
-    }
+  const handleDemoLogin = () => {
+    const demoEmail = "demo@tucanoronha.com";
+    const demoPassword = "demo123456";
+    handleLogin(demoEmail, demoPassword, false, "demo");
   };
 
-  const handleQuickLogin = async () => {
-    try {
-      const quickEmail = "user@example.com";
-      const quickPassword = "password";
-      
-      await signIn(quickEmail, quickPassword);
-      console.log("Quick login successful, redirecting to home");
-      toast({
-        title: "Login rápido",
-        description: "Redirecionando para página inicial",
-      });
-      onSuccessfulLogin(false);
-    } catch (error) {
-      console.error("Quick login error:", error);
-      toast({
-        title: "Erro no login",
-        description: "Não foi possível fazer login rápido",
-        variant: "destructive",
-      });
+  const handleAdminDemoLogin = () => {
+    const adminEmail = "admin@tucanoronha.com";
+    const adminPassword = "admin123456";
+    handleLogin(adminEmail, adminPassword, true, "admin");
+  };
+
+  const handleQuickLogin = () => {
+    const quickEmail = "user@example.com";
+    const quickPassword = "password";
+    handleLogin(quickEmail, quickPassword, false, "quick");
+  };
+
+  const getButtonContent = (buttonType: string, label: string) => {
+    if (isLoading && buttonClicked === buttonType) {
+      return <Loader2 className="h-4 w-4 animate-spin" />;
     }
+    return label;
   };
 
   return (
@@ -90,13 +70,17 @@ const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
         variant="outline"
         className="w-full mt-2 mb-2 flex justify-between items-center"
         onClick={handleAdminDemoLogin}
-        disabled={loading}
+        disabled={isLoading || loading}
       >
         <div className="flex items-center">
           <ShieldCheck className="mr-2 h-4 w-4 text-tuca-deep-blue" />
           <span>Acessar Painel Admin</span>
         </div>
-        <span className="bg-tuca-light-blue text-tuca-deep-blue px-2 py-0.5 rounded-full text-xs">Rápido</span>
+        {isLoading && buttonClicked === "admin" ? (
+          <Loader2 className="h-4 w-4 animate-spin text-tuca-deep-blue" />
+        ) : (
+          <span className="bg-tuca-light-blue text-tuca-deep-blue px-2 py-0.5 rounded-full text-xs">Rápido</span>
+        )}
       </Button>
       
       <div className="grid grid-cols-2 gap-2 mt-2">
@@ -104,26 +88,18 @@ const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
           variant="outline"
           className="w-full"
           onClick={handleQuickLogin}
-          disabled={loading}
+          disabled={isLoading || loading}
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Login Rápido"
-          )}
+          {getButtonContent("quick", "Login Rápido")}
         </Button>
         
         <Button
           variant="outline"
           className="w-full"
           onClick={handleDemoLogin}
-          disabled={loading}
+          disabled={isLoading || loading}
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Acesso Demo"
-          )}
+          {getButtonContent("demo", "Acesso Demo")}
         </Button>
       </div>
     </div>

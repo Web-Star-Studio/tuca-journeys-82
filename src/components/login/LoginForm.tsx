@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,25 +18,23 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [redirectToAdmin, setRedirectToAdmin] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     try {
+      console.log("Form submitted, attempting login with:", email);
       await signIn(email, password);
+      
       console.log("Login successful, redirecting to", redirectToAdmin ? "admin" : "home");
-      toast({
-        title: "Login bem-sucedido",
-        description: `Redirecionando para ${redirectToAdmin ? "painel admin" : "página inicial"}`,
-      });
       onSuccessfulLogin(redirectToAdmin);
     } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Erro no login",
-        description: "Ocorreu um erro ao fazer login. Tente novamente.",
-        variant: "destructive",
-      });
+      // Error is already handled in the signIn function
+      console.error("Login form submission error:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -54,6 +52,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={isSubmitting || loading}
           />
         </div>
       </div>
@@ -76,6 +75,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isSubmitting || loading}
           />
         </div>
       </div>
@@ -87,6 +87,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
           onCheckedChange={(checked) => {
             setRedirectToAdmin(checked === true);
           }}
+          disabled={isSubmitting || loading}
         />
         <label
           htmlFor="admin"
@@ -99,9 +100,9 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       <Button
         type="submit"
         className="w-full"
-        disabled={loading}
+        disabled={isSubmitting || loading}
       >
-        {loading ? (
+        {isSubmitting || loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Entrando...

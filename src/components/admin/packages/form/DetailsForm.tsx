@@ -1,6 +1,6 @@
 
 import React from "react";
-import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
@@ -10,8 +10,16 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface DetailsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  includesArray: UseFieldArrayReturn<PackageFormValues, "includes", "id">;
-  excludesArray: UseFieldArrayReturn<PackageFormValues, "excludes", "id">;
+  includesArray: {
+    fields: any[];
+    append: (value: string) => void;
+    remove: (index: number) => void;
+  };
+  excludesArray: {
+    fields: any[];
+    append: (value: string) => void;
+    remove: (index: number) => void;
+  };
 }
 
 const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) => {

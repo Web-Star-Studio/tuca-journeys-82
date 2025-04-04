@@ -33,28 +33,28 @@ export const usePackageForm = (packageId: number | null) => {
     },
   });
 
-  // Create the field arrays with proper types
-  const highlightsArray = useFieldArray({
+  // Create the field arrays with their specific types
+  const highlightsArray = useFieldArray<PackageFormValues>({
     control: form.control,
     name: "highlights",
   });
 
-  const includesArray = useFieldArray({
+  const includesArray = useFieldArray<PackageFormValues>({
     control: form.control,
     name: "includes",
   });
 
-  const excludesArray = useFieldArray({
+  const excludesArray = useFieldArray<PackageFormValues>({
     control: form.control,
     name: "excludes",
   });
 
-  const itineraryArray = useFieldArray({
+  const itineraryArray = useFieldArray<PackageFormValues>({
     control: form.control,
     name: "itinerary",
   });
 
-  const datesArray = useFieldArray({
+  const datesArray = useFieldArray<PackageFormValues>({
     control: form.control,
     name: "dates",
   });

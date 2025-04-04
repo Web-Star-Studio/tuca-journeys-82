@@ -11,8 +11,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface HighlightsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights">;
-  datesArray: UseFieldArrayReturn<PackageFormValues, "dates">;
+  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights", "id">;
+  datesArray: UseFieldArrayReturn<PackageFormValues, "dates", "id">;
 }
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {

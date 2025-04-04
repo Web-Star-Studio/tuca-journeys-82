@@ -1,18 +1,17 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2 } from "lucide-react";
-import { UseFieldArrayReturn } from "react-hook-form";
 
 interface HighlightsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights">;
-  datesArray: UseFieldArrayReturn<PackageFormValues, "dates">;
+  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights", "id">;
+  datesArray: UseFieldArrayReturn<PackageFormValues, "dates", "id">;
 }
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {

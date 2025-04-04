@@ -33,7 +33,7 @@ export const usePackageForm = (packageId: number | null) => {
     },
   });
 
-  // Create field arrays with their specific field names
+  // Create field arrays for different fields
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",

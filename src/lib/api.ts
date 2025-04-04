@@ -1,6 +1,7 @@
 
 import { supabase } from './supabase';
 import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
+import { Package } from '@/data/types/packageTypes';
 
 // Tours API
 export const getToursFromDB = async () => {
@@ -29,6 +30,39 @@ export const getTourByIdFromDB = async (id: number) => {
   }
   
   return data as Tour;
+};
+
+// Packages API
+export const getPackagesFromDB = async (category?: string) => {
+  let query = supabase.from('packages').select('*');
+  
+  if (category) {
+    query = query.eq('category', category);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching packages:', error);
+    throw error;
+  }
+  
+  return data as Package[];
+};
+
+export const getPackageByIdFromDB = async (id: number) => {
+  const { data, error } = await supabase
+    .from('packages')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching package ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Package;
 };
 
 // Accommodations API

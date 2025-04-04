@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
-import { API } from "@/lib/api";
+import * as api from "@/lib/api";
 import { PackageFormValues } from "@/components/admin/packages/types";
 
 // Schema para validação do formulário de pacotes
@@ -82,7 +82,7 @@ export const usePackageForm = (packageId: number | null) => {
   // Obtém os dados do pacote se estiver editando
   const { data: packageData, isLoading: isLoadingPackage } = useQuery({
     queryKey: ["package", packageId],
-    queryFn: () => API.getPackageById(packageId!),
+    queryFn: () => packageId ? api.getPackageByIdFromDB(packageId) : null,
     enabled: !!packageId,
   });
 

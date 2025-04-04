@@ -1,116 +1,92 @@
 
 import React, { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { Form } from "@/components/ui/form";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger 
-} from "@/components/ui/tabs";
-
-// Import our form components
+import { UseFormReturn } from "react-hook-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PackageFormValues } from "./types";
 import BasicInfoForm from "./form/BasicInfoForm";
 import HighlightsForm from "./form/HighlightsForm";
 import DetailsForm from "./form/DetailsForm";
 import ItineraryForm from "./form/ItineraryForm";
 import FormActions from "./form/FormActions";
 
-// Import our custom hooks
-import { usePackageForm } from "@/hooks/packages/usePackageForm";
-import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
-
 interface PackageFormProps {
-  packageId: number | null;
-  onCancel: () => void;
-  onSuccess: () => void;
+  form: UseFormReturn<PackageFormValues>;
+  onSubmit: (values: PackageFormValues) => void;
+  isLoading: boolean;
+  submitLabel?: string;
+  highlightsArray: any;
+  includesArray: any;
+  excludesArray: any;
+  itineraryArray: any;
+  datesArray: any;
 }
 
-export const PackageForm = ({
-  packageId,
-  onCancel,
-  onSuccess,
+const PackageForm = ({ 
+  form, 
+  onSubmit, 
+  isLoading, 
+  submitLabel = "Salvar",
+  highlightsArray,
+  includesArray,
+  excludesArray,
+  itineraryArray,
+  datesArray
 }: PackageFormProps) => {
-  const [activeTab, setActiveTab] = useState("basic");
-  
-  // Use our custom hooks
-  const {
-    form,
-    previewUrl,
-    isLoadingPackage,
-    highlightsArray,
-    includesArray,
-    excludesArray,
-    itineraryArray,
-    datesArray
-  } = usePackageForm(packageId);
-  
-  const { handleSubmit, isSubmitting } = usePackageSubmit(packageId, onSuccess);
+  const [activeTab, setActiveTab] = useState("basic-info");
 
-  if (packageId && isLoadingPackage) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
-        <span className="ml-2">Carregando informações do pacote...</span>
-      </div>
-    );
-  }
+  const handleSubmit = (values: PackageFormValues) => {
+    onSubmit(values);
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full">
-            <TabsTrigger value="basic" className="flex-1">
-              Informações Básicas
-            </TabsTrigger>
-            <TabsTrigger value="highlights" className="flex-1">
-              Destaques
-            </TabsTrigger>
-            <TabsTrigger value="details" className="flex-1">
-              Detalhes
-            </TabsTrigger>
-            <TabsTrigger value="itinerary" className="flex-1">
-              Itinerário
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Basic Information Tab */}
-          <TabsContent value="basic" className="space-y-4 pt-4">
-            <BasicInfoForm form={form} previewUrl={previewUrl} />
-          </TabsContent>
-
-          {/* Highlights Tab */}
-          <TabsContent value="highlights" className="space-y-4 pt-4">
-            <HighlightsForm 
-              form={form}
-              highlightsArray={highlightsArray}
-              datesArray={datesArray}
-            />
-          </TabsContent>
-
-          {/* Details Tab */}
-          <TabsContent value="details" className="space-y-6 pt-4">
-            <DetailsForm 
-              form={form}
-              includesArray={includesArray}
-              excludesArray={excludesArray}
-            />
-          </TabsContent>
-
-          {/* Itinerary Tab */}
-          <TabsContent value="itinerary" className="space-y-4 pt-4">
-            <ItineraryForm form={form} itineraryArray={itineraryArray} />
-          </TabsContent>
-        </Tabs>
-
-        <FormActions 
-          isSubmitting={isSubmitting}
-          packageId={packageId}
-          onCancel={onCancel}
-        />
-      </form>
-    </Form>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="w-full grid grid-cols-4 mb-6">
+          <TabsTrigger value="basic-info">Informações</TabsTrigger>
+          <TabsTrigger value="highlights">Destaques e Datas</TabsTrigger>
+          <TabsTrigger value="details">O que Inclui/Não Inclui</TabsTrigger>
+          <TabsTrigger value="itinerary">Itinerário</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="basic-info" className="space-y-6">
+          <BasicInfoForm form={form} />
+        </TabsContent>
+        
+        <TabsContent value="highlights" className="space-y-6">
+          <HighlightsForm 
+            form={form} 
+            highlightsArray={highlightsArray}
+            datesArray={datesArray}
+          />
+        </TabsContent>
+        
+        <TabsContent value="details" className="space-y-6">
+          <DetailsForm 
+            form={form} 
+            includesArray={includesArray}
+            excludesArray={excludesArray}
+          />
+        </TabsContent>
+        
+        <TabsContent value="itinerary" className="space-y-6">
+          <ItineraryForm 
+            form={form} 
+            itineraryArray={itineraryArray}
+          />
+        </TabsContent>
+      </Tabs>
+      
+      <FormActions 
+        isLoading={isLoading} 
+        submitLabel={submitLabel} 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+    </form>
   );
 };
 

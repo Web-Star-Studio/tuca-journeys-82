@@ -1,59 +1,53 @@
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
-import * as api from "@/lib/api";
 import { PackageFormValues } from "@/components/admin/packages/types";
+import { useEffect } from "react";
+import { Package } from "@/data/types/packageTypes";
 
-// Schema para validação do formulário de pacotes
+// Define the schema
 const packageSchema = z.object({
-  title: z.string().min(3, { message: "Título deve ter no mínimo 3 caracteres" }),
-  description: z.string().min(10, { message: "Descrição deve ter no mínimo 10 caracteres" }),
-  image: z.string().optional(),
-  price: z.coerce.number().min(1, { message: "Preço deve ser maior que 0" }),
-  days: z.coerce.number().min(1, { message: "Duração deve ser pelo menos 1 dia" }),
-  persons: z.coerce.number().min(1, { message: "Capacidade deve ser pelo menos 1 pessoa" }),
-  rating: z.coerce.number().min(1).max(5).optional(),
-  category: z.string(),
-  includes: z.array(z.string()).min(1, { message: "Adicione pelo menos um item incluído" }),
-  highlights: z.array(z.string()).min(1, { message: "Adicione pelo menos um destaque" }),
-  excludes: z.array(z.string()).min(1, { message: "Adicione pelo menos um item não incluído" }),
-  itinerary: z.array(
-    z.object({
-      title: z.string().optional(),
-      description: z.string().optional(),
-      day: z.number().optional(),
-    })
-  ).optional(),
-  dates: z.array(z.string()).min(1, { message: "Adicione pelo menos uma data" }),
+  title: z.string().min(1, "O título é obrigatório"),
+  description: z.string().min(1, "A descrição é obrigatória"),
+  image: z.string().min(1, "A imagem é obrigatória"),
+  price: z.number().min(1, "O preço é obrigatório"),
+  days: z.number().min(1, "A duração é obrigatória"),
+  persons: z.number().min(1, "O número de pessoas é obrigatório"),
+  rating: z.number().min(0).max(5).optional(),
+  category: z.string().min(1, "A categoria é obrigatória"),
+  includes: z.array(z.string()).min(1, "Inclua pelo menos um item"),
+  excludes: z.array(z.string()).min(1, "Inclua pelo menos um item não incluído"),
+  highlights: z.array(z.string()).min(1, "Inclua pelo menos um destaque"),
+  itinerary: z.array(z.object({
+    day: z.number(),
+    title: z.string().min(1, "O título do dia é obrigatório"),
+    description: z.string().min(1, "A descrição do dia é obrigatória"),
+  })).min(1, "Inclua pelo menos um dia no itinerário"),
+  dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
-export const usePackageForm = (packageId: number | null) => {
-  const [previewUrl, setPreviewUrl] = useState<string>("");
-  
-  // Inicializa o formulário com valores padrão
+export function usePackageForm(initialValues?: Package) {
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      image: "",
-      price: 0,
-      days: 1,
-      persons: 1,
-      rating: 5,
-      category: "aventura",
-      includes: [""],
-      highlights: [""],
-      excludes: [""],
-      itinerary: [{ title: "", description: "", day: 1 }],
-      dates: [""],
+      title: initialValues?.title || "",
+      description: initialValues?.description || "",
+      image: initialValues?.image || "",
+      price: initialValues?.price || 0,
+      days: initialValues?.days || 1,
+      persons: initialValues?.persons || 1,
+      rating: initialValues?.rating || 5,
+      category: initialValues?.category || "adventure",
+      includes: initialValues?.includes || [""],
+      excludes: initialValues?.excludes || [""],
+      highlights: initialValues?.highlights || [""],
+      itinerary: initialValues?.itinerary || [{ day: 1, title: "", description: "" }],
+      dates: initialValues?.dates || [""],
     },
   });
 
-  // Configura arrays para campos múltiplos
+  // Field arrays
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",
@@ -79,32 +73,21 @@ export const usePackageForm = (packageId: number | null) => {
     name: "dates",
   });
 
-  // Obtém os dados do pacote se estiver editando
-  const { data: packageData, isLoading: isLoadingPackage } = useQuery({
-    queryKey: ["package", packageId],
-    queryFn: () => packageId ? api.getPackageByIdFromDB(packageId) : null,
-    enabled: !!packageId,
-  });
-
-  // Preenche o formulário com os dados do pacote quando carregados
+  // Initialize with at least one item each if empty
   useEffect(() => {
-    if (packageData) {
-      form.reset(packageData);
-      if (packageData.image) {
-        setPreviewUrl(packageData.image);
-      }
-    }
-  }, [packageData, form]);
+    if (highlightsArray.fields.length === 0) highlightsArray.append("");
+    if (includesArray.fields.length === 0) includesArray.append("");
+    if (excludesArray.fields.length === 0) excludesArray.append("");
+    if (itineraryArray.fields.length === 0) itineraryArray.append({ day: 1, title: "", description: "" });
+    if (datesArray.fields.length === 0) datesArray.append("");
+  }, []);
 
   return {
     form,
-    previewUrl,
-    setPreviewUrl,
-    isLoadingPackage,
     highlightsArray,
     includesArray,
     excludesArray,
     itineraryArray,
-    datesArray
+    datesArray,
   };
-};
+}

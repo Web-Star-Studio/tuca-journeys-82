@@ -1,11 +1,9 @@
-
 import React from "react";
 import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2 } from "lucide-react";
 
 interface HighlightsFormProps {
@@ -16,10 +14,10 @@ interface HighlightsFormProps {
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Destaques do Pacote</h3>
+          <h3 className="text-lg font-medium">Destaques</h3>
           <Button
             type="button"
             variant="outline"
@@ -30,7 +28,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             Adicionar Destaque
           </Button>
         </div>
-        
+
         <div className="space-y-3">
           {highlightsArray.fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
@@ -64,8 +62,6 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
         </div>
       </div>
 
-      <Separator className="my-6" />
-
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Datas Disponíveis</h3>
@@ -79,7 +75,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             Adicionar Data
           </Button>
         </div>
-        
+
         <div className="space-y-3">
           {datesArray.fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
@@ -91,7 +87,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="01/06/2023 - 05/06/2023"
+                        placeholder="Data disponível"
                       />
                     </FormControl>
                     <FormMessage />

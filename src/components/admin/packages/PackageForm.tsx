@@ -113,3 +113,5 @@ export const PackageForm = ({
     </Form>
   );
 };
+
+export default PackageForm;

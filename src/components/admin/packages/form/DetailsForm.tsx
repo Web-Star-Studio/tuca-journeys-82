@@ -1,7 +1,6 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
-import { UseFieldArrayReturn } from "react-hook-form";
+import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";

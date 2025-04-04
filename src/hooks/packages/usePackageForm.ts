@@ -1,21 +1,41 @@
 
-import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usePackageDetail } from "@/hooks/use-packages";
-import { packageFormSchema, PackageFormValues } from "@/components/admin/packages/types";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { API } from "@/lib/api";
+import { PackageFormValues } from "@/components/admin/packages/types";
+
+// Schema para validação do formulário de pacotes
+const packageSchema = z.object({
+  title: z.string().min(3, { message: "Título deve ter no mínimo 3 caracteres" }),
+  description: z.string().min(10, { message: "Descrição deve ter no mínimo 10 caracteres" }),
+  image: z.string().optional(),
+  price: z.coerce.number().min(1, { message: "Preço deve ser maior que 0" }),
+  days: z.coerce.number().min(1, { message: "Duração deve ser pelo menos 1 dia" }),
+  persons: z.coerce.number().min(1, { message: "Capacidade deve ser pelo menos 1 pessoa" }),
+  rating: z.coerce.number().min(1).max(5).optional(),
+  category: z.string(),
+  includes: z.array(z.string()).min(1, { message: "Adicione pelo menos um item incluído" }),
+  highlights: z.array(z.string()).min(1, { message: "Adicione pelo menos um destaque" }),
+  excludes: z.array(z.string()).min(1, { message: "Adicione pelo menos um item não incluído" }),
+  itinerary: z.array(
+    z.object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+      day: z.number().optional(),
+    })
+  ).optional(),
+  dates: z.array(z.string()).min(1, { message: "Adicione pelo menos uma data" }),
+});
 
 export const usePackageForm = (packageId: number | null) => {
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  // Fetch package data if editing
-  const { data: packageData, isLoading: isLoadingPackage } = usePackageDetail(
-    packageId || 0
-  );
   
-  // Define the form with zod resolver
+  // Inicializa o formulário com valores padrão
   const form = useForm<PackageFormValues>({
-    resolver: zodResolver(packageFormSchema),
+    resolver: zodResolver(packageSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -23,17 +43,17 @@ export const usePackageForm = (packageId: number | null) => {
       price: 0,
       days: 1,
       persons: 1,
-      rating: 4.5,
-      category: "romantic",
-      highlights: [""],
+      rating: 5,
+      category: "aventura",
       includes: [""],
+      highlights: [""],
       excludes: [""],
-      itinerary: [{ day: 1, title: "", description: "" }],
+      itinerary: [{ title: "", description: "", day: 1 }],
       dates: [""],
     },
   });
 
-  // Create field arrays for different fields
+  // Configura arrays para campos múltiplos
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",
@@ -59,68 +79,32 @@ export const usePackageForm = (packageId: number | null) => {
     name: "dates",
   });
 
-  // Load package data when editing
+  // Obtém os dados do pacote se estiver editando
+  const { data: packageData, isLoading: isLoadingPackage } = useQuery({
+    queryKey: ["package", packageId],
+    queryFn: () => API.getPackageById(packageId!),
+    enabled: !!packageId,
+  });
+
+  // Preenche o formulário com os dados do pacote quando carregados
   useEffect(() => {
     if (packageData) {
-      // Determine category based on package ID patterns or use existing category
-      const category = packageData.category || determineDefaultCategory(packageData.id);
-
-      // Set form values
-      form.reset({
-        title: packageData.title,
-        description: packageData.description,
-        image: packageData.image,
-        price: packageData.price,
-        days: packageData.days,
-        persons: packageData.persons,
-        rating: packageData.rating,
-        category,
-        highlights: packageData.highlights || [""],
-        includes: packageData.includes || [""],
-        excludes: packageData.excludes || [""],
-        itinerary: packageData.itinerary || [{ day: 1, title: "", description: "" }],
-        dates: packageData.dates || [""],
-      });
-
-      setPreviewUrl(packageData.image);
+      form.reset(packageData);
+      if (packageData.image) {
+        setPreviewUrl(packageData.image);
+      }
     }
   }, [packageData, form]);
-
-  // Helper to determine default category based on ID
-  const determineDefaultCategory = (id?: number): string => {
-    if (!id) return "romantic";
-    
-    if ((id >= 1 && id <= 2) || id === 6) {
-      return "romantic";
-    } else if (id >= 3 && id <= 4) {
-      return "adventure";
-    } else if (id === 5) {
-      return "family";
-    } else if (id === 4) {
-      return "premium";
-    }
-    
-    return "budget";
-  };
-
-  // Update image preview when URL changes
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "image") {
-        setPreviewUrl(value.image as string);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   return {
     form,
     previewUrl,
+    setPreviewUrl,
     isLoadingPackage,
     highlightsArray,
     includesArray,
     excludesArray,
     itineraryArray,
-    datesArray,
+    datesArray
   };
 };

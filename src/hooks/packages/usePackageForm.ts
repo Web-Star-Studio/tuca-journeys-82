@@ -33,28 +33,28 @@ export const usePackageForm = (packageId: number | null) => {
     },
   });
 
-  // Create field arrays with their specific names as the key
-  const highlightsArray = useFieldArray({
+  // Create field arrays with their specific field names
+  const highlightsArray = useFieldArray<PackageFormValues, "highlights", "id">({
     control: form.control,
     name: "highlights",
   });
 
-  const includesArray = useFieldArray({
+  const includesArray = useFieldArray<PackageFormValues, "includes", "id">({
     control: form.control,
     name: "includes",
   });
 
-  const excludesArray = useFieldArray({
+  const excludesArray = useFieldArray<PackageFormValues, "excludes", "id">({
     control: form.control,
     name: "excludes",
   });
 
-  const itineraryArray = useFieldArray({
+  const itineraryArray = useFieldArray<PackageFormValues, "itinerary", "id">({
     control: form.control,
     name: "itinerary",
   });
 
-  const datesArray = useFieldArray({
+  const datesArray = useFieldArray<PackageFormValues, "dates", "id">({
     control: form.control,
     name: "dates",
   });

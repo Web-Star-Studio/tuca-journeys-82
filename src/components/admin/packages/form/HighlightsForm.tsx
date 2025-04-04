@@ -7,19 +7,12 @@ import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/f
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2 } from "lucide-react";
+import { UseFieldArrayReturn } from "react-hook-form";
 
 interface HighlightsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  highlightsArray: {
-    fields: Array<{ id: string }>;
-    append: (value: string) => void;
-    remove: (index: number) => void;
-  };
-  datesArray: {
-    fields: Array<{ id: string }>;
-    append: (value: string) => void;
-    remove: (index: number) => void;
-  };
+  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights">;
+  datesArray: UseFieldArrayReturn<PackageFormValues, "dates">;
 }
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {

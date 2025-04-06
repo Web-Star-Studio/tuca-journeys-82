@@ -9,7 +9,7 @@ import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
 import { BarChart2, Calendar, Users, Package, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState<{
@@ -25,7 +25,9 @@ const Reports = () => {
   const handleExportReport = () => {
     // Em uma aplicação real, isso geraria e baixaria
     // um arquivo CSV ou PDF com os dados do relatório atual
-    toast.success("Relatório exportado com sucesso!");
+    toast({
+      title: "Relatório exportado com sucesso!"
+    });
   };
 
   return (

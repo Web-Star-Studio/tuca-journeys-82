@@ -2,6 +2,7 @@
 import React from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Dummy data for demonstration
 const bookingData = [
@@ -13,6 +14,13 @@ const bookingData = [
   { month: "Jun", passeios: 100, hospedagens: 85, pacotes: 65 },
 ];
 
+const chartContainerClass = "h-[300px] w-full";
+const barColors = {
+  passeios: "#2563eb",
+  hospedagens: "#10b981",
+  pacotes: "#f59e0b"
+};
+
 const BookingOverviewChart = () => {
   return (
     <Card className="col-span-1 h-full">
@@ -20,18 +28,26 @@ const BookingOverviewChart = () => {
         <CardTitle className="text-lg font-semibold">Visão Geral de Reservas</CardTitle>
         <CardDescription>Reservas de passeios, hospedagens e pacotes nos últimos 6 meses</CardDescription>
       </CardHeader>
-      <CardContent className="px-2 sm:px-6">
-        <div className="h-[300px] w-full">
+      <CardContent className={cn("px-2 sm:px-6")}>
+        <div className={chartContainerClass}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={bookingData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <BarChart 
+              data={bookingData}
+              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <XAxis dataKey="month" fontSize={12} />
+              <YAxis fontSize={12} />
               <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-              <Bar dataKey="passeios" name="Passeios" fill="#2563eb" />
-              <Bar dataKey="hospedagens" name="Hospedagens" fill="#10b981" />
-              <Bar dataKey="pacotes" name="Pacotes" fill="#f59e0b" />
+              <Legend 
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  fontSize: '12px'
+                }} 
+              />
+              <Bar dataKey="passeios" name="Passeios" fill={barColors.passeios} />
+              <Bar dataKey="hospedagens" name="Hospedagens" fill={barColors.hospedagens} />
+              <Bar dataKey="pacotes" name="Pacotes" fill={barColors.pacotes} />
             </BarChart>
           </ResponsiveContainer>
         </div>

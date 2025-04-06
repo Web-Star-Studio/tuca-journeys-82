@@ -1,8 +1,11 @@
-import React, { createContext, useContext } from "react";
+
+import React, { createContext, useContext, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/hooks/use-auth-state";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 type AuthContextType = {
   user: User | null;
@@ -19,6 +22,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, setLoading } = useAuthState();
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // Add token refresh failure handling
+  useEffect(() => {
+    const { data: tokenListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'TOKEN_REFRESH_FAILED') {
+        // Handle token refresh failure by logging out and redirecting
+        console.error('Failed to refresh auth token. Logging out...');
+        
+        // Clear any auth data and redirect to login
+        localStorage.removeItem("supabase-mock-session");
+        localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
+        
+        toast({
+          title: "Sessão expirada",
+          description: "Por favor, faça login novamente.",
+          variant: "destructive",
+        });
+        
+        // Use setTimeout to avoid state updates during render
+        setTimeout(() => {
+          navigate('/login');
+        }, 100);
+      }
+    });
+    
+    return () => {
+      if (tokenListener.subscription) {
+        tokenListener.subscription.unsubscribe();
+      }
+    };
+  }, [navigate, toast]);
 
   // Sign In - Modified from useAuthOperations to return void for consistency
   const signIn = async (email: string, password: string) => {
@@ -50,7 +86,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Ensure we clear all possible session data
       console.log("Clearing all session data in AuthContext");
       localStorage.removeItem("supabase-mock-session");
-      localStorage.removeItem("supabase-session");
       localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
       
       console.log("Sign out process completed in AuthContext");
@@ -59,7 +94,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Attempt to clean up even if there was an exception
       localStorage.removeItem("supabase-mock-session");
-      localStorage.removeItem("supabase-session");
       localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
     } finally {
       setLoading(false);

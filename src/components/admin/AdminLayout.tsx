@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
@@ -18,8 +18,9 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
 
   // Check authentication and redirect if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && !user) {
+      console.log("User not authenticated, redirecting to login");
       navigate("/login");
     }
   }, [user, loading, navigate]);
@@ -31,6 +32,11 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
         <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
+  }
+
+  // If still checking auth or user is null, don't render the admin layout
+  if (!user) {
+    return null; // Don't render anything while redirecting
   }
 
   return (

@@ -39,7 +39,11 @@ export const useAuthState = () => {
         }
         
         // Get the current session from Supabase
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
+        }
+        
         if (data?.session) {
           console.log("Found Supabase session, setting user state");
           setSession(data.session);
@@ -51,6 +55,11 @@ export const useAuthState = () => {
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+        // Clear all session data on error
+        localStorage.removeItem("supabase-mock-session");
+        localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
+        setSession(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -63,17 +72,30 @@ export const useAuthState = () => {
       async (event, currentSession) => {
         console.log("Auth state changed:", event);
         
-        // If we get a SIGNED_OUT event, clear ALL session data
-        if (event === 'SIGNED_OUT') {
-          console.log("Signed out event received, clearing all session data");
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          // For these events, update the state directly
+          setSession(currentSession);
+          setUser(currentSession?.user || null);
+        } else if (event === 'SIGNED_IN') {
+          // When signed in, verify the session is valid
+          setSession(currentSession);
+          setUser(currentSession?.user || null);
+        } else if (event === 'USER_DELETED') {
+          // Clear all session data
           localStorage.removeItem("supabase-mock-session");
-          localStorage.removeItem("supabase-session");
           localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
           setSession(null);
           setUser(null);
-        } else {
-          setSession(currentSession);
-          setUser(currentSession?.user || null);
+        }
+        
+        // Handle token refresh error events
+        if (event === 'TOKEN_REFRESH_FAILED') {
+          console.error("Token refresh failed, clearing session");
+          // Clear all session data
+          localStorage.removeItem("supabase-mock-session");
+          localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
+          setSession(null);
+          setUser(null);
         }
         
         setLoading(false);

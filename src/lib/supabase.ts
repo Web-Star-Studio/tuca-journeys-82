@@ -13,7 +13,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    storage: localStorage
+    storage: localStorage,
+    storageKey: 'sb-xsctqejremuwmktmchef-auth-token',
+    detectSessionInUrl: true,
+    flowType: 'implicit'
   }
 });
 

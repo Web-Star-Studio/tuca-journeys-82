@@ -32,7 +32,7 @@ export function createStringFieldArray(
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
     insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
     update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (index: number, value: string) => fieldArrayResult.replace(index, value),
+    replace: (value: string[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -56,6 +56,6 @@ export function createItineraryFieldArray(
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
     insert: (index: number, value: ItineraryItem) => fieldArrayResult.insert(index, value),
     update: (index: number, value: ItineraryItem) => fieldArrayResult.update(index, value),
-    replace: (index: number, value: ItineraryItem) => fieldArrayResult.replace(index, value),
+    replace: (value: ItineraryItem[]) => fieldArrayResult.replace(value),
   };
 }

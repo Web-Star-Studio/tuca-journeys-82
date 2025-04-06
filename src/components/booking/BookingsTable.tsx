@@ -8,10 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const BookingsTable = () => {
   const { user } = useAuth();
-  const { data: bookings, isLoading, error } = useUserBookings();
+  const { data: bookings, isLoading, error, refetch } = useUserBookings();
+  const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -46,7 +49,8 @@ const BookingsTable = () => {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Você precisa estar logado para ver suas reservas.</p>
+        <p className="text-gray-500 mb-4">Você precisa estar logado para ver suas reservas.</p>
+        <Button onClick={() => navigate("/login")}>Fazer Login</Button>
       </div>
     );
   }
@@ -64,8 +68,11 @@ const BookingsTable = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500">Erro ao carregar suas reservas. Por favor, tente novamente.</p>
-        <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
+        <p className="text-red-500">Erro ao carregar suas reservas.</p>
+        <p className="text-sm text-gray-500 mt-2 mb-4">{(error as Error).message}</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar Novamente
+        </Button>
       </div>
     );
   }
@@ -73,7 +80,20 @@ const BookingsTable = () => {
   if (!bookings || bookings.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Você ainda não tem reservas.</p>
+        <p className="text-gray-500 mb-4">Você ainda não tem reservas.</p>
+        <div className="space-x-4">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/passeios")}
+          >
+            Explorar Passeios
+          </Button>
+          <Button 
+            onClick={() => navigate("/hospedagens")}
+          >
+            Ver Hospedagens
+          </Button>
+        </div>
       </div>
     );
   }

@@ -13,7 +13,7 @@ export type ProfileData = {
   address?: string | null;
   city?: string | null;
   state?: string | null;
-  zip_code?: string | null; // Changed from zipcode to zip_code to match DB schema
+  zip_code?: string | null;
 };
 
 export const useProfile = () => {
@@ -65,30 +65,20 @@ export const useProfile = () => {
             zip_code: data.zip_code
           });
         } else {
-          console.log("No profile found, creating new profile");
-          // If no profile exists, create one with the user's metadata
-          const newProfile = {
+          // If no profile exists, we'll try to create one using application metadata
+          // instead of silently failing with database permission errors
+          console.log("No profile found, using auth metadata for profile");
+          
+          const newProfileData = {
             id: user.id,
-            name: user.user_metadata?.name || "",
-            email: user.email || "",
+            name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || "User",
+            email: user.email
           };
-
-          const { error: insertError } = await supabase
-            .from("user_profiles")
-            .insert([newProfile]);
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-            toast({
-              title: "Erro ao criar perfil",
-              description: insertError.message,
-              variant: "destructive",
-            });
-            setLoading(false);
-            return;
-          }
-
-          setProfile(newProfile as ProfileData);
+          
+          setProfile(newProfileData as ProfileData);
+          
+          // We won't immediately try to insert the profile anymore
+          // as this is causing permission issues
         }
       } catch (error: any) {
         console.error("Unexpected error fetching profile:", error);
@@ -111,19 +101,41 @@ export const useProfile = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // First check if profile exists in DB
+      const { data: existingProfile, error: checkError } = await supabase
         .from("user_profiles")
-        .update(newProfileData)
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Error updating profile:", error);
-        toast({
-          title: "Erro ao atualizar perfil",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking profile:", checkError);
+        throw checkError;
+      }
+      
+      let result;
+      
+      if (existingProfile) {
+        // Update existing profile
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .update(newProfileData)
+          .eq("id", user.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
+      } else {
+        // Insert new profile
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .insert([{ ...profile, ...newProfileData }])
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
       }
 
       // Update the local state
@@ -133,13 +145,16 @@ export const useProfile = () => {
         title: "Perfil atualizado",
         description: "Suas informações foram atualizadas com sucesso.",
       });
+      
+      return result;
     } catch (error: any) {
-      console.error("Unexpected error updating profile:", error);
+      console.error("Error updating profile:", error);
       toast({
         title: "Erro ao atualizar perfil",
         description: error.message,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setLoading(false);
     }

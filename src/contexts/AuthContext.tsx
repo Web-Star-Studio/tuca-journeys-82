@@ -3,13 +3,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 
-// Create a context for navigation
-export const NavigationContext = createContext<{
-  navigateToLogin: () => void;
-}>({
-  navigateToLogin: () => {},
-});
-
 interface AuthContextType {
   user: User | null;
   session: Session | null;

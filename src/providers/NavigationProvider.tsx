@@ -1,19 +1,40 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { NavigationContext } from "@/contexts/AuthContext";
+import React, { createContext, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
+// Create a local navigation context instead of importing from AuthContext
+export const NavigationContext = createContext<{
+  navigateToLogin: () => void;
+}>({
+  navigateToLogin: () => {},
+});
+
+export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const navigate = useNavigate();
-  
+
   const navigateToLogin = () => {
-    console.log("NavigationProvider: Navigating to login");
-    navigate("/login");
+    navigate('/login');
   };
-  
+
+  const contextValue = {
+    navigateToLogin,
+  };
+
   return (
-    <NavigationContext.Provider value={{ navigateToLogin }}>
+    <NavigationContext.Provider value={contextValue}>
       {children}
     </NavigationContext.Provider>
   );
+};
+
+export const useNavigation = () => {
+  const context = useContext(NavigationContext);
+
+  if (!context) {
+    throw new Error('useNavigation must be used within a NavigationProvider');
+  }
+
+  return context;
 };

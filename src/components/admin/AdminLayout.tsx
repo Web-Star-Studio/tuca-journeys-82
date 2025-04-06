@@ -6,6 +6,7 @@ import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -16,16 +17,51 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Check authentication and redirect if not authenticated
   useEffect(() => {
-    if (!loading && !user) {
-      console.log("User not authenticated, redirecting to login");
-      navigate("/login");
-    }
+    const checkAuth = async () => {
+      try {
+        setIsCheckingAuth(true);
+        
+        // If not loading anymore and user is null, redirect to login
+        if (!loading && !user) {
+          console.log("User not authenticated, redirecting to login");
+          toast({
+            title: "Acesso restrito",
+            description: "Você precisa estar logado para acessar esta página.",
+            variant: "destructive",
+          });
+          navigate("/login");
+        } else if (user) {
+          // Check if user has admin role (could be in metadata or email check)
+          const isAdmin = user.email === "admin@tucanoronha.com" || 
+                         (user.user_metadata && user.user_metadata.role === "admin") ||
+                         (user.app_metadata && user.app_metadata.role === "admin");
+
+          if (!isAdmin) {
+            console.log("User does not have admin permissions");
+            toast({
+              title: "Acesso restrito",
+              description: "Você não tem permissão para acessar esta área.",
+              variant: "destructive",
+            });
+            navigate("/dashboard");
+          }
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
   }, [user, loading, navigate]);
 
-  if (loading) {
+  // Show loading state while checking auth
+  if (loading || isCheckingAuth) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />

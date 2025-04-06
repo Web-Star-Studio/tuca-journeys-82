@@ -7,6 +7,7 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
   
   const navigateToLogin = () => {
+    console.log("NavigationProvider: Navigating to login");
     navigate("/login");
   };
   

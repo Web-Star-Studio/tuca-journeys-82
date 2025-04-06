@@ -7,9 +7,10 @@ import BookingsReportContainer from "@/components/admin/reports/bookings/Booking
 import UsersReport from "@/components/admin/reports/UsersReport";
 import PackagesReport from "@/components/admin/reports/PackagesReport";
 import ReportFilters from "@/components/admin/reports/ReportFilters";
-import { BarChart2, Calendar, Users, Package, Download, FileText } from "lucide-react";
+import { BarChart2, Calendar, Users, Package, Download, FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState<{
@@ -21,6 +22,7 @@ const Reports = () => {
   });
 
   const [selectedReport, setSelectedReport] = useState("revenue");
+  const [error, setError] = useState<string | null>(null);
 
   const handleExportReport = () => {
     // Em uma aplicação real, isso geraria e baixaria
@@ -28,6 +30,15 @@ const Reports = () => {
     toast({
       title: "Relatório exportado com sucesso!"
     });
+  };
+
+  const handleError = (error: Error) => {
+    console.error("Error in reports:", error);
+    setError(error.message || "Ocorreu um erro ao carregar os relatórios");
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   return (
@@ -60,10 +71,21 @@ const Reports = () => {
           </div>
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           <Tabs 
             value={selectedReport} 
-            onValueChange={setSelectedReport} 
+            onValueChange={(value) => {
+              setSelectedReport(value);
+              clearError();
+            }} 
             className="flex flex-col"
           >
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted border-b border-gray-100 rounded-none">
@@ -87,19 +109,19 @@ const Reports = () => {
             
             <div className="p-4 md:p-6">
               <TabsContent value="revenue" className="mt-0">
-                <RevenueReport dateRange={dateRange} />
+                <RevenueReport dateRange={dateRange} onError={handleError} />
               </TabsContent>
               
               <TabsContent value="bookings" className="mt-0">
-                <BookingsReportContainer dateRange={dateRange} />
+                <BookingsReportContainer dateRange={dateRange} onError={handleError} />
               </TabsContent>
               
               <TabsContent value="packages" className="mt-0">
-                <PackagesReport dateRange={dateRange} />
+                <PackagesReport dateRange={dateRange} onError={handleError} />
               </TabsContent>
               
               <TabsContent value="users" className="mt-0">
-                <UsersReport dateRange={dateRange} />
+                <UsersReport dateRange={dateRange} onError={handleError} />
               </TabsContent>
             </div>
           </Tabs>

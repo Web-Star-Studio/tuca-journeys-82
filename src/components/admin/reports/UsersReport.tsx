@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import UserMetricsCards from "./users/UserMetricsCards";
 import UserGrowthChart from "./users/UserGrowthChart";
 import UserDeviceChart from "./users/UserDeviceChart";
@@ -10,22 +10,90 @@ import {
   userDeviceData, 
   userChartConfig 
 } from "./users/UserData";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface UsersReportProps {
   dateRange: {
     from: Date | undefined;
     to: Date | undefined;
   };
+  onError?: (error: Error) => void;
 }
 
-const UsersReport = ({ dateRange }: UsersReportProps) => {
-  // In a real app, we would filter data based on the date range
-  
-  // Calculate totals
-  const totalUsers = 800;
-  const totalNewUsers = userGrowthData.reduce((sum, item) => sum + item.usuarios, 0);
-  const totalRegions = userRegionData.length;
-  const conversionRate = 28; // In percentage, would be calculated in a real app
+const UsersReport = ({ dateRange, onError }: UsersReportProps) => {
+  const [error, setError] = useState<string | null>(null);
+  const [reportData, setReportData] = useState<{
+    growthData: any[];
+    regionData: any[];
+    deviceData: any[];
+    config: any;
+    totals: {
+      totalUsers: number;
+      totalNewUsers: number;
+      totalRegions: number;
+      conversionRate: number;
+    };
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      // Check if data is available
+      if (!userGrowthData || !userRegionData || !userDeviceData) {
+        throw new Error("Dados de usuários não disponíveis");
+      }
+
+      // Calculate totals
+      const totalUsers = 800;
+      const totalNewUsers = userGrowthData.reduce((sum, item) => sum + item.usuarios, 0);
+      const totalRegions = userRegionData.length;
+      const conversionRate = 28; // In percentage, would be calculated in a real app
+      
+      setReportData({
+        growthData: userGrowthData,
+        regionData: userRegionData,
+        deviceData: userDeviceData,
+        config: userChartConfig,
+        totals: {
+          totalUsers,
+          totalNewUsers,
+          totalRegions,
+          conversionRate
+        }
+      });
+      
+      setError(null);
+    } catch (err) {
+      console.error("Error in UsersReport:", err);
+      setError(err.message || "Falha ao carregar dados de usuários");
+      if (onError && err instanceof Error) {
+        onError(err);
+      }
+    }
+  }, [dateRange, onError]);
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {error}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!reportData) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando dados de usuários...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { totalUsers, totalNewUsers, totalRegions, conversionRate } = reportData.totals;
 
   return (
     <div className="space-y-6">
@@ -38,16 +106,16 @@ const UsersReport = ({ dateRange }: UsersReportProps) => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <UserGrowthChart 
-          growthData={userGrowthData} 
-          chartConfig={userChartConfig} 
+          growthData={reportData.growthData} 
+          chartConfig={reportData.config} 
         />
         
-        <UserDeviceChart deviceData={userDeviceData} />
+        <UserDeviceChart deviceData={reportData.deviceData} />
       </div>
       
       <UserRegionDistribution 
-        regionData={userRegionData} 
-        chartConfig={userChartConfig} 
+        regionData={reportData.regionData} 
+        chartConfig={reportData.config} 
       />
     </div>
   );

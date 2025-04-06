@@ -22,7 +22,28 @@ interface CategorySalesChartProps {
 const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartProps) => {
   const isMobile = useIsMobile();
   
+  // Validate that required data is available
+  if (!categorySalesData || categorySalesData.length === 0 || !COLORS || COLORS.length === 0) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold">Vendas por Categoria</CardTitle>
+          <CardDescription>
+            Distribuição das vendas por tipo de pacote
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 sm:h-80 flex items-center justify-center">
+            <p className="text-muted-foreground">Dados não disponíveis</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   const renderLabel = ({ name, percent }: { name: string, percent: number }) => {
+    if (!name || typeof percent !== 'number') return '';
+    
     if (isMobile && name.length > 8) {
       name = name.substring(0, 8) + '..';
     }
@@ -66,7 +87,10 @@ const CategorySalesChart = ({ categorySalesData, COLORS }: CategorySalesChartPro
                 label={renderLabel}
               >
                 {categorySalesData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]} 
+                  />
                 ))}
               </Pie>
             </PieChart>

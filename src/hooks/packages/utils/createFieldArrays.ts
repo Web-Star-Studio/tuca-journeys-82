@@ -12,7 +12,7 @@ import {
 } from "../types/fieldArrayTypes";
 
 /**
- * Creates a field array for string arrays (highlights, includes, excludes, dates)
+ * Creates a field array for string fields (highlights, includes, excludes, dates)
  */
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
@@ -31,8 +31,8 @@ export function createStringFieldArray(
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
     insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    replace: (index: number, value: string) => fieldArrayResult.replace(index, value),
     update: (index: number, value: string) => fieldArrayResult.update(index, value),
+    replace: (index: number, value: string) => fieldArrayResult.replace(index, value),
   };
 }
 

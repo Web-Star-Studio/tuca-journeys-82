@@ -19,25 +19,25 @@ export function createHighlightsFieldArray(
 ): HighlightsFieldArray {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "highlights", // Using a specific string literal
+    name: "highlights",
   });
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append({ title: value }),
+    append: (value: string) => fieldArrayResult.append(value),
     prepend: (value: string | string[]) => {
       if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value.map(item => ({ title: item })));
+        fieldArrayResult.prepend(value);
       } else {
-        fieldArrayResult.prepend({ title: value });
+        fieldArrayResult.prepend(value);
       }
     },
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, { title: value }),
-    update: (index: number, value: string) => fieldArrayResult.update(index, { title: value }),
-    replace: (value: string[]) => fieldArrayResult.replace(value.map(item => ({ title: item }))),
+    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: string) => fieldArrayResult.update(index, value),
+    replace: (value: string[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -49,25 +49,25 @@ export function createIncludesFieldArray(
 ): IncludesFieldArray {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "includes", // Using a specific string literal
+    name: "includes",
   });
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append({ title: value }),
+    append: (value: string) => fieldArrayResult.append(value),
     prepend: (value: string | string[]) => {
       if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value.map(item => ({ title: item })));
+        fieldArrayResult.prepend(value);
       } else {
-        fieldArrayResult.prepend({ title: value });
+        fieldArrayResult.prepend(value);
       }
     },
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, { title: value }),
-    update: (index: number, value: string) => fieldArrayResult.update(index, { title: value }),
-    replace: (value: string[]) => fieldArrayResult.replace(value.map(item => ({ title: item }))),
+    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: string) => fieldArrayResult.update(index, value),
+    replace: (value: string[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -79,25 +79,25 @@ export function createExcludesFieldArray(
 ): ExcludesFieldArray {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "excludes", // Using a specific string literal
+    name: "excludes",
   });
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append({ title: value }),
+    append: (value: string) => fieldArrayResult.append(value),
     prepend: (value: string | string[]) => {
       if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value.map(item => ({ title: item })));
+        fieldArrayResult.prepend(value);
       } else {
-        fieldArrayResult.prepend({ title: value });
+        fieldArrayResult.prepend(value);
       }
     },
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, { title: value }),
-    update: (index: number, value: string) => fieldArrayResult.update(index, { title: value }),
-    replace: (value: string[]) => fieldArrayResult.replace(value.map(item => ({ title: item }))),
+    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: string) => fieldArrayResult.update(index, value),
+    replace: (value: string[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -109,25 +109,25 @@ export function createDatesFieldArray(
 ): DatesFieldArray {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "dates", // Using a specific string literal
+    name: "dates",
   });
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append({ title: value }),
+    append: (value: string) => fieldArrayResult.append(value),
     prepend: (value: string | string[]) => {
       if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value.map(item => ({ title: item })));
+        fieldArrayResult.prepend(value);
       } else {
-        fieldArrayResult.prepend({ title: value });
+        fieldArrayResult.prepend(value);
       }
     },
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, { title: value }),
-    update: (index: number, value: string) => fieldArrayResult.update(index, { title: value }),
-    replace: (value: string[]) => fieldArrayResult.replace(value.map(item => ({ title: item }))),
+    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: string) => fieldArrayResult.update(index, value),
+    replace: (value: string[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -137,12 +137,9 @@ export function createDatesFieldArray(
 export function createItineraryFieldArray(
   form: UseFormReturn<PackageFormValues>
 ): ItineraryFieldArrayType {
-  // Using a literal string constant with explicit type annotation to ensure type safety
-  const name = "itinerary" as const; // 'as const' ensures TypeScript treats this as a literal type
-  
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name, // This is explicitly the literal string "itinerary"
+    name: "itinerary",
   });
 
   return {

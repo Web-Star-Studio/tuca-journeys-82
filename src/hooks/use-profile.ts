@@ -1,18 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
+import { UserProfile } from "@/types/database";
 
 export type ProfileData = {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zipcode?: string;
+  name: string | null;
+  email: string | null;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipcode?: string | null;
 };
 
 export const useProfile = () => {
@@ -31,9 +32,9 @@ export const useProfile = () => {
 
       setLoading(true);
       try {
-        // First, check if the profile exists in the profiles table
+        // First, check if the profile exists in the user_profiles table (not profiles)
         const { data, error } = await supabase
-          .from("profiles")
+          .from("user_profiles")
           .select("*")
           .eq("id", user.id)
           .single();
@@ -50,7 +51,7 @@ export const useProfile = () => {
         }
 
         if (data) {
-          setProfile(data);
+          setProfile(data as ProfileData);
         } else {
           // If no profile exists, create one with the user's metadata
           const newProfile = {
@@ -60,7 +61,7 @@ export const useProfile = () => {
           };
 
           const { error: insertError } = await supabase
-            .from("profiles")
+            .from("user_profiles")
             .insert([newProfile]);
 
           if (insertError) {
@@ -73,7 +74,7 @@ export const useProfile = () => {
             return;
           }
 
-          setProfile(newProfile);
+          setProfile(newProfile as ProfileData);
         }
       } catch (error: any) {
         console.error("Unexpected error fetching profile:", error);
@@ -97,7 +98,7 @@ export const useProfile = () => {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from("user_profiles")
         .update(newProfileData)
         .eq("id", user.id);
 

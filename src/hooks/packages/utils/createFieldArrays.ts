@@ -6,7 +6,8 @@ import {
   IncludesFieldArray, 
   ExcludesFieldArray, 
   ItineraryFieldArray, 
-  DatesFieldArray 
+  DatesFieldArray,
+  ItineraryItem
 } from "../types/fieldArrayTypes";
 
 /**
@@ -47,18 +48,18 @@ export function createItineraryFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: { day: number; title: string; description: string }) => 
+    append: (value: ItineraryItem) => 
       fieldArrayResult.append(value),
-    prepend: (value: { day: number; title: string; description: string } | { day: number; title: string; description: string }[]) => 
+    prepend: (value: ItineraryItem | ItineraryItem[]) => 
       fieldArrayResult.prepend(value),
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: { day: number; title: string; description: string }) => 
+    insert: (index: number, value: ItineraryItem) => 
       fieldArrayResult.insert(index, value),
-    replace: (index: number, value: { day: number; title: string; description: string }) => 
+    replace: (index: number, value: ItineraryItem) => 
       fieldArrayResult.replace(index, value),
-    update: (index: number, value: { day: number; title: string; description: string }) => 
+    update: (index: number, value: ItineraryItem) => 
       fieldArrayResult.update(index, value),
   };
 }

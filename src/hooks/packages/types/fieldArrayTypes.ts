@@ -9,7 +9,7 @@ export type ItineraryItem = {
   description: string;
 };
 
-// Base types for the field arrays
+// Base types for the field arrays with proper generic types
 export type StringFieldArray = {
   fields: any[];
   append: (value: string) => void;

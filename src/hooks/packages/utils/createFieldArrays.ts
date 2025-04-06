@@ -44,7 +44,7 @@ export function createItineraryFieldArray(
 ): ItineraryFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "itinerary",
+    name: "itinerary", // Only using "itinerary" as the field name
   });
 
   return {

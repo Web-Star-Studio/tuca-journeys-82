@@ -27,6 +27,37 @@ const packageSchema = z.object({
   dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
+// Define types for our field arrays to make them consistent
+export type HighlightsFieldArray = {
+  fields: Array<{ id: string }>;
+  append: (value: string) => void;
+  remove: (index: number) => void;
+};
+
+export type IncludesFieldArray = {
+  fields: Array<{ id: string }>;
+  append: (value: string) => void;
+  remove: (index: number) => void;
+};
+
+export type ExcludesFieldArray = {
+  fields: Array<{ id: string }>;
+  append: (value: string) => void;
+  remove: (index: number) => void;
+};
+
+export type ItineraryFieldArray = {
+  fields: Array<{ id: string }>;
+  append: (value: { day: number; title: string; description: string }) => void;
+  remove: (index: number) => void;
+};
+
+export type DatesFieldArray = {
+  fields: Array<{ id: string }>;
+  append: (value: string) => void;
+  remove: (index: number) => void;
+};
+
 export function usePackageForm(initialValues?: Package) {
   const [previewUrl, setPreviewUrl] = useState("");
   
@@ -55,31 +86,31 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Field arrays with correct type definitions - using explicit TFieldValues parameter
+  // Field arrays with specific types
   const highlightsArray = useFieldArray({
     control: form.control,
-    name: "highlights" as const,
-  });
+    name: "highlights",
+  }) as unknown as HighlightsFieldArray;
 
   const includesArray = useFieldArray({
     control: form.control,
-    name: "includes" as const,
-  });
+    name: "includes",
+  }) as unknown as IncludesFieldArray;
 
   const excludesArray = useFieldArray({
     control: form.control,
-    name: "excludes" as const,
-  });
+    name: "excludes",
+  }) as unknown as ExcludesFieldArray;
 
   const itineraryArray = useFieldArray({
     control: form.control,
-    name: "itinerary" as const,
-  });
+    name: "itinerary",
+  }) as unknown as ItineraryFieldArray;
 
   const datesArray = useFieldArray({
     control: form.control,
-    name: "dates" as const,
-  });
+    name: "dates",
+  }) as unknown as DatesFieldArray;
 
   // Initialize with at least one item each if empty
   useEffect(() => {

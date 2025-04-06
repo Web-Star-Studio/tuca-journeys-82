@@ -1,35 +1,16 @@
 
 import React from "react";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { PackageFormValues } from "../../types";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CategorySelectProps {
   form: UseFormReturn<PackageFormValues>;
+  categories: { value: string; label: string }[];
 }
 
-const CategorySelect = ({ form }: CategorySelectProps) => {
-  const categories = [
-    { value: "romantic", label: "Romântico" },
-    { value: "adventure", label: "Aventura" },
-    { value: "family", label: "Família" },
-    { value: "premium", label: "Premium" },
-    { value: "budget", label: "Econômico" },
-  ];
-
+const CategorySelect = ({ form, categories }: CategorySelectProps) => {
   return (
     <FormField
       control={form.control}
@@ -40,11 +21,10 @@ const CategorySelect = ({ form }: CategorySelectProps) => {
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
-            value={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a categoria" />
+                <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>

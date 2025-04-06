@@ -55,7 +55,7 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Field arrays
+  // Field arrays - properly typed for each specific field
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",
@@ -88,7 +88,7 @@ export function usePackageForm(initialValues?: Package) {
     if (excludesArray.fields.length === 0) excludesArray.append("");
     if (itineraryArray.fields.length === 0) itineraryArray.append({ day: 1, title: "", description: "" });
     if (datesArray.fields.length === 0) datesArray.append("");
-  }, []);
+  }, [highlightsArray, includesArray, excludesArray, itineraryArray, datesArray]);
 
   return {
     form,

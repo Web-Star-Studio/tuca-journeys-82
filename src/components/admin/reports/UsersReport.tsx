@@ -8,7 +8,8 @@ import {
   userGrowthData, 
   userRegionData, 
   userDeviceData, 
-  userChartConfig 
+  userChartConfig,
+  getUserData
 } from "./users/UserData";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -38,22 +39,24 @@ const UsersReport = ({ dateRange, onError }: UsersReportProps) => {
 
   useEffect(() => {
     try {
-      // Check if data is available
-      if (!userGrowthData || !userRegionData || !userDeviceData) {
+      // Get user data from our data generator
+      const userData = getUserData();
+      
+      if (!userData.growthData || !userData.regionData || !userData.deviceData) {
         throw new Error("Dados de usuários não disponíveis");
       }
 
       // Calculate totals
       const totalUsers = 800;
-      const totalNewUsers = userGrowthData.reduce((sum, item) => sum + item.usuarios, 0);
-      const totalRegions = userRegionData.length;
+      const totalNewUsers = userData.growthData.reduce((sum, item) => sum + item.usuarios, 0);
+      const totalRegions = userData.regionData.length;
       const conversionRate = 28; // In percentage, would be calculated in a real app
       
       setReportData({
-        growthData: userGrowthData,
-        regionData: userRegionData,
-        deviceData: userDeviceData,
-        config: userChartConfig,
+        growthData: userData.growthData,
+        regionData: userData.regionData,
+        deviceData: userData.deviceData,
+        config: userData.config,
         totals: {
           totalUsers,
           totalNewUsers,
@@ -65,7 +68,8 @@ const UsersReport = ({ dateRange, onError }: UsersReportProps) => {
       setError(null);
     } catch (err) {
       console.error("Error in UsersReport:", err);
-      setError(err.message || "Falha ao carregar dados de usuários");
+      const errorMessage = err instanceof Error ? err.message : "Falha ao carregar dados de usuários";
+      setError(errorMessage);
       if (onError && err instanceof Error) {
         onError(err);
       }

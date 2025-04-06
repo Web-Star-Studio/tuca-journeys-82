@@ -1,6 +1,7 @@
 
 import { Package } from "@/data/types/packageTypes";
 import { getPackagesByCategory } from "@/data/packages";
+import { demoData } from "@/utils/demoDataGenerator";
 
 export interface PackageSaleData {
   name: string;
@@ -43,29 +44,13 @@ export const generatePackageSalesData = (packages: Package[]): PackageSaleData[]
 
 export const generateCategorySalesData = (): CategorySaleData[] => {
   try {
-    // Safely get packages by category
-    const getSafeCategoryCount = (category: string) => {
-      try {
-        const packages = getPackagesByCategory(category);
-        return packages && Array.isArray(packages) ? packages.length : 0;
-      } catch (error) {
-        console.error(`Error getting ${category} packages:`, error);
-        return 0;
-      }
-    };
-
-    const adventureCount = getSafeCategoryCount("adventure");
-    const romanticCount = getSafeCategoryCount("romantic");
-    const familyCount = getSafeCategoryCount("family");
-    const premiumCount = getSafeCategoryCount("premium");
-    const budgetCount = getSafeCategoryCount("budget");
-
+    // Using fixed data for more consistency
     return [
-      { name: "Romântico", value: romanticCount * (Math.floor(Math.random() * 30) + 10) },
-      { name: "Aventura", value: adventureCount * (Math.floor(Math.random() * 30) + 10) },
-      { name: "Família", value: familyCount * (Math.floor(Math.random() * 30) + 10) },
-      { name: "Premium", value: premiumCount * (Math.floor(Math.random() * 30) + 10) },
-      { name: "Econômico", value: budgetCount * (Math.floor(Math.random() * 30) + 10) }
+      { name: "Romântico", value: 120 },
+      { name: "Aventura", value: 95 },
+      { name: "Família", value: 75 },
+      { name: "Premium", value: 45 },
+      { name: "Econômico", value: 85 }
     ];
   } catch (error) {
     console.error("Error generating category sales data:", error);
@@ -77,24 +62,63 @@ export const generateTrendData = (): TrendData[] => {
   try {
     const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
     
-    return months.map(month => {
-      // Calculate random values for each category
-      const romantic = Math.floor(Math.random() * 40) + 20;
-      const adventure = Math.floor(Math.random() * 35) + 15;
-      const family = Math.floor(Math.random() * 30) + 10;
-      const premium = Math.floor(Math.random() * 25) + 5;
-      const budget = Math.floor(Math.random() * 50) + 30;
-      
-      return {
-        month,
-        "Romântico": romantic,
-        "Aventura": adventure,
-        "Família": family,
-        "Premium": premium,
-        "Econômico": budget,
-        "Total": romantic + adventure + family + premium + budget
-      };
-    });
+    // Using fixed data for more consistency
+    return [
+      {
+        month: "Jan",
+        "Romântico": 25,
+        "Aventura": 18,
+        "Família": 12,
+        "Premium": 8,
+        "Econômico": 32,
+        "Total": 95
+      },
+      {
+        month: "Fev",
+        "Romântico": 20,
+        "Aventura": 15,
+        "Família": 10,
+        "Premium": 5,
+        "Econômico": 30,
+        "Total": 80
+      },
+      {
+        month: "Mar",
+        "Romântico": 30,
+        "Aventura": 20,
+        "Família": 15,
+        "Premium": 10,
+        "Econômico": 35,
+        "Total": 110
+      },
+      {
+        month: "Abr",
+        "Romântico": 35,
+        "Aventura": 25,
+        "Família": 18,
+        "Premium": 12,
+        "Econômico": 40,
+        "Total": 130
+      },
+      {
+        month: "Mai",
+        "Romântico": 40,
+        "Aventura": 30,
+        "Família": 20,
+        "Premium": 15,
+        "Econômico": 45,
+        "Total": 150
+      },
+      {
+        month: "Jun",
+        "Romântico": 45,
+        "Aventura": 32,
+        "Família": 22,
+        "Premium": 18,
+        "Econômico": 48,
+        "Total": 165
+      }
+    ];
   } catch (error) {
     console.error("Error generating trend data:", error);
     return [];

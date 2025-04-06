@@ -51,3 +51,23 @@ export const userChartConfig = {
   norte: { label: "Norte", color: "#ec4899" },
   internacional: { label: "Internacional", color: "#6b7280" },
 };
+
+// Function to get all user data with error handling
+export const getUserData = () => {
+  try {
+    return {
+      growthData: userGrowthData,
+      regionData: userRegionData,
+      deviceData: userDeviceData,
+      config: userChartConfig,
+    };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return {
+      growthData: [],
+      regionData: [],
+      deviceData: [],
+      config: {},
+    };
+  }
+};

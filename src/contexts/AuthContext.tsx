@@ -1,250 +1,195 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
+import { demoData } from '@/utils/demoDataGenerator';
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
   isLoading: boolean;
-  loading: boolean; // Added for compatibility with existing components
-  error: Error | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  isAdmin: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error: any, data: any }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isLoading: true,
+  isAdmin: false,
+  signIn: async () => ({ error: null }),
+  signUp: async () => ({ error: null, data: null }),
+  signOut: async () => {},
+  resetPassword: async () => ({ error: null })
+});
+
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
+  // Simulate fetching session on mount
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log("Auth state changed:", event);
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+    const initAuth = async () => {
+      try {
+        // Check if we have a saved session
+        const savedSession = localStorage.getItem('demo_session');
+        
+        if (savedSession) {
+          const session = JSON.parse(savedSession);
+          setUser(session.user);
+          setIsAdmin(session.user?.user_metadata?.role === 'admin');
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+      } finally {
         setIsLoading(false);
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("Found Supabase session, setting user state");
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setIsLoading(false);
-    }).catch(error => {
-      console.error("Error getting session:", error);
-      setError(error);
-      setIsLoading(false);
-    });
-
-    // Cleanup subscription when component unmounts
-    return () => {
-      subscription.unsubscribe();
     };
+
+    initAuth();
   }, []);
 
-  const signIn = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-
+  // Simulate sign in functionality
+  const signIn = async (email: string, password: string) => {
     try {
-      // Check if using demo credentials 
-      if (
-        (email === "admin@tucanoronha.com" && password === "admin123456") ||
-        (email === "demo@tucanoronha.com" && password === "demo123456") ||
-        (email === "user@example.com" && password === "password")
-      ) {
-        console.log("Using demo credentials");
-        
-        // Use demo mode
-        const mockUser = {
-          id: "demo-user-id",
-          email: email,
-          user_metadata: {
-            name: email === "admin@tucanoronha.com" ? "Admin Demo" : "Demo User",
-            role: email === "admin@tucanoronha.com" ? "admin" : "user",
-          },
-          app_metadata: {
-            role: email === "admin@tucanoronha.com" ? "admin" : "user",
-          },
-          aud: "authenticated",
-          created_at: new Date().toISOString(),
-        } as User;
-        
-        // Create a mock session that matches the Supabase Session type
-        const mockSession = {
-          access_token: "mock-token",
-          refresh_token: "mock-refresh-token",
-          expires_in: 3600,
-          expires_at: Math.floor(Date.now() / 1000) + 3600,
-          token_type: "bearer",
-          user: mockUser
-        } as Session;
-        
-        // Store the mocked session in localStorage to persist
-        localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
-        
-        // Set the user and session state
-        setUser(mockUser);
-        setSession(mockSession);
-        
-        toast({
-          title: "Login de demonstração",
-          description: `Você está usando uma conta de demonstração como ${email === "admin@tucanoronha.com" ? 'administrador' : 'usuário'}`,
-        });
-        
-        setIsLoading(false);
-        return;
+      setIsLoading(true);
+      
+      // For demo - allow any login with basic validation
+      if (!email || !email.includes('@')) {
+        throw new Error("Email inválido");
       }
       
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (!password || password.length < 6) {
+        throw new Error("Senha deve ter pelo menos 6 caracteres");
+      }
+
+      // Check if email contains "admin" to determine role
+      const isAdminUser = email.toLowerCase().includes('admin');
       
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo de volta!",
-      });
-    } catch (error) {
-      console.error("Error signing in:", error);
-      setError(error instanceof Error ? error : new Error('Unknown error during sign-in'));
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, name: string): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signUp({
+      // Create a mock user
+      const mockUser = {
+        id: "demo-user-id",
         email,
-        password,
-        options: {
-          data: {
-            name,
-          },
+        user_metadata: {
+          name: isAdminUser ? "Administrador" : "Usuário",
+          role: isAdminUser ? "admin" : "user"
         },
-      });
-      if (error) throw error;
+        app_metadata: {
+          role: isAdminUser ? "admin" : "user"
+        },
+        aud: "authenticated",
+        created_at: new Date().toISOString()
+      };
+
+      // Create a mock session with properties expected by Supabase
+      const mockSession: Session = {
+        access_token: "mock-access-token",
+        refresh_token: "mock-refresh-token",
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        token_type: "bearer",
+        user: mockUser as any
+      };
+
+      // Save session to localStorage
+      localStorage.setItem('demo_session', JSON.stringify(mockSession));
       
-      toast({
-        title: "Conta criada com sucesso",
-        description: "Verifique seu email para confirmar seu cadastro.",
-      });
+      setUser(mockUser as any);
+      setIsAdmin(isAdminUser);
+      return { error: null };
     } catch (error) {
-      console.error("Error signing up:", error);
-      setError(error instanceof Error ? error : new Error('Unknown error during sign-up'));
-      throw error;
+      console.error("Sign in error:", error);
+      toast.error(error instanceof Error ? error.message : "Erro ao fazer login");
+      return { error };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signOut = async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-
+  // Simulate sign up functionality
+  const signUp = async (email: string, password: string, name: string) => {
     try {
-      // Check if we're using a mock session
-      const mockSessionStr = localStorage.getItem("supabase-mock-session");
-      if (mockSessionStr) {
-        console.log("Clearing mock session");
-        localStorage.removeItem("supabase-mock-session");
-        
-        // Clear user and session
-        setUser(null);
-        setSession(null);
-        
-        toast({
-          title: "Sessão encerrada",
-          description: "Você saiu com sucesso.",
-        });
-        
-        setIsLoading(false);
-        return;
+      setIsLoading(true);
+      
+      if (!email || !email.includes('@')) {
+        throw new Error("Email inválido");
       }
       
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (!password || password.length < 6) {
+        throw new Error("Senha deve ter pelo menos 6 caracteres");
+      }
+
+      if (!name) {
+        throw new Error("Nome é obrigatório");
+      }
+
+      // For demo - pretend to create user
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Clear user and session
-      setUser(null);
-      setSession(null);
+      toast.success("Conta criada com sucesso! Faça login para continuar.");
       
-      toast({
-        title: "Sessão encerrada",
-        description: "Você saiu com sucesso.",
-      });
+      return { error: null, data: { user: { email } } };
     } catch (error) {
-      console.error("Error signing out:", error);
-      setError(error instanceof Error ? error : new Error('Unknown error during sign-out'));
-      throw error;
+      console.error("Sign up error:", error);
+      toast.error(error instanceof Error ? error.message : "Erro ao criar conta");
+      return { error, data: null };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const resetPassword = async (email: string): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-
+  // Simulate sign out
+  const signOut = async () => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/reset-password-confirm",
-      });
-      if (error) throw error;
+      setIsLoading(true);
       
-      toast({
-        title: "Email enviado",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
-      });
+      // Clear local storage
+      localStorage.removeItem('demo_session');
+      
+      setUser(null);
+      setIsAdmin(false);
+      
+      toast.success("Logout realizado com sucesso");
     } catch (error) {
-      console.error("Error resetting password:", error);
-      setError(error instanceof Error ? error : new Error('Unknown error during password reset'));
-      throw error;
+      console.error("Sign out error:", error);
+      toast.error("Erro ao fazer logout");
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        isLoading,
-        loading: isLoading, // Added for compatibility with existing components
-        error,
-        signIn,
-        signUp,
-        signOut,
-        resetPassword,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  // Simulate reset password
+  const resetPassword = async (email: string) => {
+    try {
+      if (!email || !email.includes('@')) {
+        throw new Error("Email inválido");
+      }
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success("Se um usuário com este email existir, enviaremos instruções para redefinir a senha.");
+      
+      return { error: null };
+    } catch (error) {
+      console.error("Reset password error:", error);
+      toast.error(error instanceof Error ? error.message : "Erro ao solicitar redefinição de senha");
+      return { error };
+    }
+  };
 
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  const value = {
+    user,
+    isLoading,
+    isAdmin,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword
+  };
 
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

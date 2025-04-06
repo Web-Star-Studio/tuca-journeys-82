@@ -1,59 +1,47 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getUserBookings, createBooking } from '@/lib/api';
-import { useToast } from './use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Booking } from '@/types/database';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { demoData } from '@/utils/demoDataGenerator';
 
-export const useUserBookings = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-
-  return useQuery({
-    queryKey: ['bookings', user?.id],
-    queryFn: () => {
-      if (!user?.id) throw new Error("Usuário não autenticado");
-      console.log("Fetching bookings for user:", user.id);
-      return getUserBookings(user.id);
+export const useBookings = () => {
+  // Query to fetch bookings
+  const { data: bookings, isLoading, error, refetch } = useQuery({
+    queryKey: ['bookings'],
+    queryFn: async () => {
+      // In a real app, we'd fetch from an API
+      // For demo purposes, return our generated bookings
+      return demoData.bookings;
     },
-    enabled: !!user?.id,
-    retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        console.error("Error in useUserBookings:", error);
-        toast({
-          title: "Erro ao carregar reservas",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    }
   });
-};
 
-export const useCreateBooking = () => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
-      console.log("Creating booking with data:", bookingData);
-      return createBooking(bookingData);
+  // Mutation to delete a booking
+  const deleteBookingMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      // In a real app, we'd call an API
+      console.log(`Deleting booking: ${bookingId}`);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { success: true };
     },
     onSuccess: () => {
-      toast({
-        title: "Reserva criada",
-        description: "Sua reserva foi criada com sucesso.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      toast.success('Reserva cancelada com sucesso');
+      refetch();
     },
-    onError: (error: Error) => {
-      console.error("Error in useCreateBooking:", error);
-      toast({
-        title: "Erro ao criar reserva",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error) => {
+      toast.error('Erro ao cancelar a reserva');
+      console.error('Error deleting booking:', error);
     }
   });
+
+  const cancelBooking = (bookingId: string) => {
+    deleteBookingMutation.mutate(bookingId);
+  };
+
+  return {
+    bookings,
+    isLoading,
+    error,
+    cancelBooking,
+    refetch
+  };
 };

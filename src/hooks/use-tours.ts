@@ -1,152 +1,78 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Tour } from "@/types/database";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Tour } from '@/types/database';
+import { demoData } from '@/utils/demoDataGenerator';
 
 export const useTours = () => {
-  const queryClient = useQueryClient();
-
-  // Fetch all tours
-  const { data, isLoading, error } = useQuery({
+  // Query to fetch tours
+  const { data: tours, isLoading, error, refetch } = useQuery({
     queryKey: ['tours'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (error) {
-        throw new Error(`Error fetching tours: ${error.message}`);
-      }
-
-      return data as Tour[];
+      // In a real app, we'd fetch from an API
+      // For demo purposes, return our generated tours
+      return demoData.tours;
     },
   });
 
-  // Fetch a specific tour by ID
-  const getTourById = async (id: number) => {
-    const { data, error } = await supabase
-      .from('tours')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      throw new Error(`Error fetching tour with id ${id}: ${error.message}`);
-    }
-
-    return data as Tour;
-  };
-
-  // Create a new tour
-  const createTour = useMutation({
-    mutationFn: async (newTour: Omit<Tour, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('tours')
-        .insert(newTour)
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Error creating tour: ${error.message}`);
-      }
-
-      return data as Tour;
+  // Mutation to delete a tour
+  const deleteTourMutation = useMutation({
+    mutationFn: async (tourId: number) => {
+      // In a real app, we'd call an API
+      console.log(`Deleting tour: ${tourId}`);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tours'] });
-      toast.success("Passeio criado com sucesso!");
+      toast.success('Passeio excluído com sucesso');
+      refetch();
     },
     onError: (error) => {
-      toast.error(`Erro ao criar passeio: ${error.message}`);
-    },
+      toast.error('Erro ao excluir o passeio');
+      console.error('Error deleting tour:', error);
+    }
   });
 
-  // Update an existing tour
-  const updateTour = useMutation({
-    mutationFn: async (updatedTour: Partial<Tour> & { id: number }) => {
-      const { id, ...tourData } = updatedTour;
-      
-      const { data, error } = await supabase
-        .from('tours')
-        .update(tourData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Error updating tour: ${error.message}`);
-      }
-
-      return data as Tour;
+  // Mutation to create or update a tour
+  const saveTourMutation = useMutation({
+    mutationFn: async (tour: Partial<Tour>) => {
+      // In a real app, we'd call an API
+      console.log('Saving tour:', tour);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true };
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['tours'] });
-      queryClient.invalidateQueries({ queryKey: ['tours', variables.id] });
-      toast.success("Passeio atualizado com sucesso!");
+    onSuccess: () => {
+      toast.success('Passeio salvo com sucesso');
+      refetch();
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar passeio: ${error.message}`);
-    },
+      toast.error('Erro ao salvar o passeio');
+      console.error('Error saving tour:', error);
+    }
   });
 
-  // Delete a tour
-  const deleteTour = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await supabase
-        .from('tours')
-        .delete()
-        .eq('id', id);
+  const deleteTour = (tourId: number) => {
+    deleteTourMutation.mutate(tourId);
+  };
 
-      if (error) {
-        throw new Error(`Error deleting tour: ${error.message}`);
-      }
+  const saveTour = (tour: Partial<Tour>) => {
+    saveTourMutation.mutate(tour);
+  };
 
-      return id;
-    },
-    onSuccess: (id) => {
-      queryClient.invalidateQueries({ queryKey: ['tours'] });
-      toast.success("Passeio excluído com sucesso!");
-    },
-    onError: (error) => {
-      toast.error(`Erro ao excluir passeio: ${error.message}`);
-    },
-  });
+  const getTourById = (id?: number) => {
+    if (!id || !tours) return null;
+    return tours.find(tour => tour.id === id) || null;
+  };
 
   return {
-    data,
+    tours,
     isLoading,
     error,
+    deleteTour,
+    saveTour,
     getTourById,
-    createTour: createTour.mutate,
-    updateTour: updateTour.mutate,
-    deleteTour: deleteTour.mutate,
-    isPendingCreate: createTour.isPending,
-    isPendingUpdate: updateTour.isPending,
-    isPendingDelete: deleteTour.isPending,
+    refetch
   };
-};
-
-// Export a hook for a single tour by ID
-export const useTour = (id?: number) => {
-  return useQuery({
-    queryKey: ['tours', id],
-    queryFn: async () => {
-      if (!id) return null;
-      
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        throw new Error(`Error fetching tour with id ${id}: ${error.message}`);
-      }
-
-      return data as Tour;
-    },
-    enabled: !!id, // Only run the query if id is provided
-  });
 };

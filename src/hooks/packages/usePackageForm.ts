@@ -27,24 +27,29 @@ const packageSchema = z.object({
   dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
-// Define type for the field arrays
-export type HighlightsFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "highlights", "id">, "append"> & {
+// Define base type for field arrays
+type BaseFieldArrayType<T extends keyof PackageFormValues> = Omit<UseFieldArrayReturn<PackageFormValues, T, "id">, "append">;
+
+// Define type for the field arrays with string items
+export type HighlightsFieldArray = BaseFieldArrayType<"highlights"> & {
   append: (value: string) => void;
 };
 
-export type IncludesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "includes", "id">, "append"> & {
+export type IncludesFieldArray = BaseFieldArrayType<"includes"> & {
   append: (value: string) => void;
 };
 
-export type ExcludesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "excludes", "id">, "append"> & {
+export type ExcludesFieldArray = BaseFieldArrayType<"excludes"> & {
   append: (value: string) => void;
 };
 
-export type ItineraryFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "itinerary", "id">, "append"> & {
+// Define type for the itinerary field array
+export type ItineraryFieldArray = BaseFieldArrayType<"itinerary"> & {
   append: (value: { day: number; title: string; description: string }) => void;
 };
 
-export type DatesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "dates", "id">, "append"> & {
+// Define type for the dates field array
+export type DatesFieldArray = BaseFieldArrayType<"dates"> & {
   append: (value: string) => void;
 };
 
@@ -76,31 +81,57 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Field arrays with specific types
-  const highlightsArray = useFieldArray({
+  // Create field arrays with proper typing
+  const highlightsFieldArray = useFieldArray({
     control: form.control,
     name: "highlights",
-  }) as HighlightsFieldArray;
+  });
+  
+  const highlightsArray: HighlightsFieldArray = {
+    ...highlightsFieldArray,
+    append: (value: string) => highlightsFieldArray.append(value as any),
+  };
 
-  const includesArray = useFieldArray({
+  const includesFieldArray = useFieldArray({
     control: form.control,
     name: "includes",
-  }) as IncludesFieldArray;
+  });
+  
+  const includesArray: IncludesFieldArray = {
+    ...includesFieldArray,
+    append: (value: string) => includesFieldArray.append(value as any),
+  };
 
-  const excludesArray = useFieldArray({
+  const excludesFieldArray = useFieldArray({
     control: form.control,
     name: "excludes",
-  }) as ExcludesFieldArray;
+  });
+  
+  const excludesArray: ExcludesFieldArray = {
+    ...excludesFieldArray,
+    append: (value: string) => excludesFieldArray.append(value as any),
+  };
 
-  const itineraryArray = useFieldArray({
+  const itineraryFieldArray = useFieldArray({
     control: form.control,
     name: "itinerary",
-  }) as ItineraryFieldArray;
+  });
+  
+  const itineraryArray: ItineraryFieldArray = {
+    ...itineraryFieldArray,
+    append: (value: { day: number; title: string; description: string }) => 
+      itineraryFieldArray.append(value as any),
+  };
 
-  const datesArray = useFieldArray({
+  const datesFieldArray = useFieldArray({
     control: form.control,
     name: "dates",
-  }) as DatesFieldArray;
+  });
+  
+  const datesArray: DatesFieldArray = {
+    ...datesFieldArray,
+    append: (value: string) => datesFieldArray.append(value as any),
+  };
 
   // Initialize with at least one item each if empty
   useEffect(() => {

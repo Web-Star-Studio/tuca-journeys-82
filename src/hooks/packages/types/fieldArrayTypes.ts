@@ -9,17 +9,24 @@ export type ItineraryItem = {
   description: string;
 };
 
-// Generic field array type for string items
+// Define the field item type for string-based arrays
+export type FieldItem = {
+  title: string;
+  description?: string;
+  day?: number;
+};
+
+// Generic field array type for field items
 export interface StringFieldArrayType {
   fields: any[];
-  append: (value: string) => void;
-  prepend: (value: string | string[]) => void;
+  append: (value: FieldItem) => void;
+  prepend: (value: FieldItem | FieldItem[]) => void;
   remove: (index: number | number[]) => void;
   swap: (indexA: number, indexB: number) => void;
   move: (from: number, to: number) => void;
-  insert: (index: number, value: string) => void;
-  update: (index: number, value: string) => void;
-  replace: (value: string[]) => void;
+  insert: (index: number, value: FieldItem) => void;
+  update: (index: number, value: FieldItem) => void;
+  replace: (value: FieldItem[]) => void;
 }
 
 // Generic field array type for itinerary items

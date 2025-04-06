@@ -24,7 +24,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => highlightsArray.append("")}
+            onClick={() => highlightsArray.append({ title: "" })}
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Destaque
@@ -36,7 +36,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
-                name={`highlights.${index}`}
+                name={`highlights.${index}.title`}
                 render={({ field }) => (
                   <FormItem className="flex-1 mb-0">
                     <FormControl>
@@ -71,7 +71,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => datesArray.append("")}
+            onClick={() => datesArray.append({ title: "" })}
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Data
@@ -83,7 +83,7 @@ const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormPro
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
-                name={`dates.${index}`}
+                name={`dates.${index}.title`}
                 render={({ field }) => (
                   <FormItem className="flex-1 mb-0">
                     <FormControl>

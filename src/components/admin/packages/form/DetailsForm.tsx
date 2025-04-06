@@ -25,7 +25,7 @@ const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) =
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => includesArray.append("")}
+            onClick={() => includesArray.append({ title: "" })}
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Item
@@ -37,7 +37,7 @@ const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) =
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
-                name={`includes.${index}`}
+                name={`includes.${index}.title`}
                 render={({ field }) => (
                   <FormItem className="flex-1 mb-0">
                     <FormControl>
@@ -74,7 +74,7 @@ const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) =
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => excludesArray.append("")}
+            onClick={() => excludesArray.append({ title: "" })}
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Item
@@ -86,7 +86,7 @@ const DetailsForm = ({ form, includesArray, excludesArray }: DetailsFormProps) =
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
-                name={`excludes.${index}`}
+                name={`excludes.${index}.title`}
                 render={({ field }) => (
                   <FormItem className="flex-1 mb-0">
                     <FormControl>

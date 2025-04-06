@@ -1,14 +1,13 @@
 
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { PackageFormValues } from "@/components/admin/packages/types";
+import { PackageFormValues, FieldItem } from "@/components/admin/packages/types";
 import { 
   HighlightsFieldArray, 
   IncludesFieldArray, 
   ExcludesFieldArray, 
   ItineraryFieldArrayType, 
   DatesFieldArray,
-  ItineraryItem,
-  StringFieldArrayType
+  ItineraryItem
 } from "../types/fieldArrayTypes";
 
 /**
@@ -24,20 +23,14 @@ export function createHighlightsFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append(value),
-    prepend: (value: string | string[]) => {
-      if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value);
-      } else {
-        fieldArrayResult.prepend(value);
-      }
-    },
+    append: (value: FieldItem) => fieldArrayResult.append(value),
+    prepend: (value: FieldItem | FieldItem[]) => fieldArrayResult.prepend(value),
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (value: string[]) => fieldArrayResult.replace(value),
+    insert: (index: number, value: FieldItem) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: FieldItem) => fieldArrayResult.update(index, value),
+    replace: (value: FieldItem[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -54,20 +47,14 @@ export function createIncludesFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append(value),
-    prepend: (value: string | string[]) => {
-      if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value);
-      } else {
-        fieldArrayResult.prepend(value);
-      }
-    },
+    append: (value: FieldItem) => fieldArrayResult.append(value),
+    prepend: (value: FieldItem | FieldItem[]) => fieldArrayResult.prepend(value),
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (value: string[]) => fieldArrayResult.replace(value),
+    insert: (index: number, value: FieldItem) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: FieldItem) => fieldArrayResult.update(index, value),
+    replace: (value: FieldItem[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -84,20 +71,14 @@ export function createExcludesFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append(value),
-    prepend: (value: string | string[]) => {
-      if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value);
-      } else {
-        fieldArrayResult.prepend(value);
-      }
-    },
+    append: (value: FieldItem) => fieldArrayResult.append(value),
+    prepend: (value: FieldItem | FieldItem[]) => fieldArrayResult.prepend(value),
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (value: string[]) => fieldArrayResult.replace(value),
+    insert: (index: number, value: FieldItem) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: FieldItem) => fieldArrayResult.update(index, value),
+    replace: (value: FieldItem[]) => fieldArrayResult.replace(value),
   };
 }
 
@@ -114,20 +95,14 @@ export function createDatesFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append(value),
-    prepend: (value: string | string[]) => {
-      if (Array.isArray(value)) {
-        fieldArrayResult.prepend(value);
-      } else {
-        fieldArrayResult.prepend(value);
-      }
-    },
+    append: (value: FieldItem) => fieldArrayResult.append(value),
+    prepend: (value: FieldItem | FieldItem[]) => fieldArrayResult.prepend(value),
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (value: string[]) => fieldArrayResult.replace(value),
+    insert: (index: number, value: FieldItem) => fieldArrayResult.insert(index, value),
+    update: (index: number, value: FieldItem) => fieldArrayResult.update(index, value),
+    replace: (value: FieldItem[]) => fieldArrayResult.replace(value),
   };
 }
 

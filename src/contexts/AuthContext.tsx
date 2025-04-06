@@ -3,14 +3,23 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 
+// Create a context for navigation
+export const NavigationContext = createContext<{
+  navigateToLogin: () => void;
+}>({
+  navigateToLogin: () => {},
+});
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  loading: boolean; // Added for compatibility with existing components
   error: Error | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>; // Added for ResetPassword.tsx
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -109,16 +118,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/reset-password-confirm",
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during password reset'));
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         session,
         isLoading,
+        loading: isLoading, // Added for compatibility with existing components
         error,
         signIn,
         signUp,
         signOut,
+        resetPassword, // Added for ResetPassword.tsx
       }}
     >
       {children}

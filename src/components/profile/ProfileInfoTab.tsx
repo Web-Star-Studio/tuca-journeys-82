@@ -16,7 +16,7 @@ const ProfileInfoTab = () => {
     address: "",
     city: "",
     state: "",
-    zipcode: "",
+    zip_code: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -29,7 +29,7 @@ const ProfileInfoTab = () => {
         address: profile.address || "",
         city: profile.city || "",
         state: profile.state || "",
-        zipcode: profile.zipcode || "",
+        zip_code: profile.zip_code || "",
       });
     }
   }, [profile]);
@@ -52,7 +52,7 @@ const ProfileInfoTab = () => {
         address: profile.address || "",
         city: profile.city || "",
         state: profile.state || "",
-        zipcode: profile.zipcode || "",
+        zip_code: profile.zip_code || "",
       });
     }
     setEditing(false);
@@ -189,11 +189,11 @@ const ProfileInfoTab = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="zipcode">CEP</Label>
+                    <Label htmlFor="zip_code">CEP</Label>
                     <Input
-                      id="zipcode"
-                      name="zipcode"
-                      value={formData.zipcode}
+                      id="zip_code"
+                      name="zip_code"
+                      value={formData.zip_code}
                       onChange={handleChange}
                       disabled={!editing}
                       placeholder="00000-000"

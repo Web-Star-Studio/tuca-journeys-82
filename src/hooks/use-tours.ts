@@ -76,3 +76,21 @@ export const useTours = () => {
     refetch
   };
 };
+
+// Add the missing useTour hook for single tour details
+export const useTour = (tourId?: number) => {
+  return useQuery({
+    queryKey: ['tour', tourId],
+    queryFn: async () => {
+      if (!tourId) throw new Error('Tour ID is required');
+      
+      // In a real app, we'd fetch from an API endpoint for a single tour
+      // For demo, find the tour in our demo data
+      const tour = demoData.tours.find(t => t.id === tourId);
+      if (!tour) throw new Error('Tour not found');
+      
+      return tour;
+    },
+    enabled: !!tourId,
+  });
+};

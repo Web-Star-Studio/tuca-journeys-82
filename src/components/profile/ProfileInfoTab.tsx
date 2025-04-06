@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ interface ProfileFormValues {
 }
 
 const ProfileInfoTab = () => {
-  const { profile, loading, updateProfile } = useProfile();
+  const { profile, isLoading, updateProfile } = useProfile();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   
@@ -64,7 +63,7 @@ const ProfileInfoTab = () => {
     }
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />

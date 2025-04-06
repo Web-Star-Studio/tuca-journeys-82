@@ -12,7 +12,7 @@ import DeleteTourDialog from "@/components/admin/tours/DeleteTourDialog";
 import TourFormDialog from "@/components/admin/tours/TourFormDialog";
 
 const Tours = () => {
-  const { data: tours, isLoading, error, deleteTour } = useTours();
+  const { tours, isLoading, error, deleteTour } = useTours();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);

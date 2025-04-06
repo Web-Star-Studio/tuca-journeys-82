@@ -45,3 +45,26 @@ export const useBookings = () => {
     refetch
   };
 };
+
+// Add the missing useCreateBooking hook
+export const useCreateBooking = () => {
+  const { refetch } = useBookings();
+  
+  return useMutation({
+    mutationFn: async (bookingData: any) => {
+      console.log('Creating booking:', bookingData);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      // Here you would normally send the data to your API
+      return { success: true, id: 'new-booking-' + Date.now() };
+    },
+    onSuccess: () => {
+      toast.success('Reserva criada com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao criar reserva');
+      console.error('Error creating booking:', error);
+    }
+  });
+};

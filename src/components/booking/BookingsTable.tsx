@@ -1,19 +1,17 @@
-
 import React from 'react';
-import { useUserBookings } from '@/hooks/use-bookings';
+import { useBookings } from '@/hooks/use-bookings';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Spinner } from '@/components/ui/spinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const BookingsTable = () => {
   const { user } = useAuth();
-  const { data: bookings, isLoading, error, refetch } = useUserBookings();
+  const { bookings, isLoading, error, refetch } = useBookings();
   const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {

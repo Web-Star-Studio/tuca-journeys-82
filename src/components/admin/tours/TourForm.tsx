@@ -23,7 +23,7 @@ interface TourFormProps {
 export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel }) => {
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
-  const { createTour, updateTour, getTourById } = useTours();
+  const { saveTour, getTourById } = useTours();
   const [isLoading, setIsLoading] = useState(tourId ? true : false);
 
   // Initialize form
@@ -131,14 +131,14 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     try {
       if (tourId) {
         // Update existing tour
-        await updateTour({ ...formattedData, id: tourId });
+        await saveTour({ ...formattedData, id: tourId });
         toast({
           title: "Sucesso",
           description: "Passeio atualizado com sucesso.",
         });
       } else {
         // Create new tour
-        await createTour(formattedData);
+        await saveTour(formattedData);
         toast({
           title: "Sucesso",
           description: "Novo passeio criado com sucesso.",

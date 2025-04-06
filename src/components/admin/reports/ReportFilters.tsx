@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -13,15 +12,31 @@ interface ReportFiltersProps {
     from: Date | undefined;
     to: Date | undefined;
   };
-  setDateRange: React.Dispatch<
+  setDateRange?: React.Dispatch<
     React.SetStateAction<{
       from: Date | undefined;
       to: Date | undefined;
     }>
   >;
+  onDateRangeChange?: (range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) => void;
 }
 
-const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
+const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFiltersProps) => {
+  const handleDateChange = (range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) => {
+    if (setDateRange) {
+      setDateRange(range);
+    }
+    if (onDateRangeChange) {
+      onDateRangeChange(range);
+    }
+  };
+
   return (
     <div className="w-full sm:w-auto">
       <Popover>
@@ -57,7 +72,7 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
             }}
             onSelect={(range) => {
               if (range) {
-                setDateRange({
+                handleDateChange({
                   from: range.from,
                   to: range.to,
                 });
@@ -76,7 +91,7 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
                 const today = new Date();
                 const lastWeek = new Date();
                 lastWeek.setDate(today.getDate() - 7);
-                setDateRange({
+                handleDateChange({
                   from: lastWeek,
                   to: today
                 });
@@ -91,7 +106,7 @@ const ReportFilters = ({ dateRange, setDateRange }: ReportFiltersProps) => {
               onClick={() => {
                 // Set date range to current month
                 const today = new Date();
-                setDateRange({
+                handleDateChange({
                   from: new Date(today.getFullYear(), today.getMonth(), 1),
                   to: today
                 });

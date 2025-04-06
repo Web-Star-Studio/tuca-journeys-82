@@ -9,30 +9,24 @@ export type ItineraryItem = {
   description: string;
 };
 
-// Base types for the field arrays with proper generic types
-export type StringFieldArray = {
+// Generic field array type
+export interface FieldArrayBase<T> {
   fields: any[];
-  append: (value: string) => void;
-  prepend: (value: string | string[]) => void;
+  append: (value: T) => void;
+  prepend: (value: T | T[]) => void;
   remove: (index: number | number[]) => void;
   swap: (indexA: number, indexB: number) => void;
   move: (from: number, to: number) => void;
-  insert: (index: number, value: string) => void;
-  replace: (index: number, value: string) => void;
-  update: (index: number, value: string) => void;
-};
+  insert: (index: number, value: T) => void;
+  replace: (index: number, value: T) => void;
+  update: (index: number, value: T) => void;
+}
 
-export type ItineraryFieldArray = {
-  fields: any[];
-  append: (value: ItineraryItem) => void;
-  prepend: (value: ItineraryItem | ItineraryItem[]) => void;
-  remove: (index: number | number[]) => void;
-  swap: (indexA: number, indexB: number) => void;
-  move: (from: number, to: number) => void;
-  insert: (index: number, value: ItineraryItem) => void;
-  replace: (index: number, value: ItineraryItem) => void;
-  update: (index: number, value: ItineraryItem) => void;
-};
+// String field array type (for highlights, includes, excludes, dates)
+export type StringFieldArray = FieldArrayBase<string>;
+
+// Itinerary field array type
+export type ItineraryFieldArray = FieldArrayBase<ItineraryItem>;
 
 // Specific field array types
 export type HighlightsFieldArray = StringFieldArray;

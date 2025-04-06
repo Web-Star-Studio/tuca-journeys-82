@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 import { Package } from "@/data/types/packageTypes";
 import { packageSchema } from "./schema/packageSchema";
 import { 
-  createStringFieldArray, 
+  createHighlightsFieldArray, 
+  createIncludesFieldArray, 
+  createExcludesFieldArray, 
+  createDatesFieldArray,
   createItineraryFieldArray 
 } from "./utils/createFieldArrays";
 import {
@@ -53,11 +56,11 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Create field arrays with type-safe wrappers
-  const highlightsArray = createStringFieldArray(form, "highlights") as HighlightsFieldArray;
-  const includesArray = createStringFieldArray(form, "includes") as IncludesFieldArray;
-  const excludesArray = createStringFieldArray(form, "excludes") as ExcludesFieldArray;
-  const datesArray = createStringFieldArray(form, "dates") as DatesFieldArray;
+  // Create field arrays with dedicated functions for each field type
+  const highlightsArray = createHighlightsFieldArray(form);
+  const includesArray = createIncludesFieldArray(form);
+  const excludesArray = createExcludesFieldArray(form);
+  const datesArray = createDatesFieldArray(form);
   const itineraryArray = createItineraryFieldArray(form);
 
   // Initialize with at least one item each if empty

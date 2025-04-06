@@ -22,7 +22,7 @@ export type StringFieldArray = {
   update: (index: number, value: string) => void;
 };
 
-export type ItineraryItemFieldArray = {
+export type ItineraryFieldArray = {
   fields: any[];
   append: (value: ItineraryItem) => void;
   prepend: (value: ItineraryItem | ItineraryItem[]) => void;
@@ -39,4 +39,4 @@ export type HighlightsFieldArray = StringFieldArray;
 export type IncludesFieldArray = StringFieldArray;
 export type ExcludesFieldArray = StringFieldArray;
 export type DatesFieldArray = StringFieldArray;
-export type ItineraryFieldArray = ItineraryItemFieldArray;
+export type ItineraryItemFieldArray = ItineraryFieldArray;

@@ -55,7 +55,7 @@ export function createItineraryFieldArray(
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
     insert: (index: number, value: ItineraryItem) => fieldArrayResult.insert(index, value),
-    replace: (index: number, value: ItineraryItem) => fieldArrayResult.replace(index, value),
     update: (index: number, value: ItineraryItem) => fieldArrayResult.update(index, value),
+    replace: (index: number, value: ItineraryItem) => fieldArrayResult.replace(index, value),
   };
 }

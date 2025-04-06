@@ -18,8 +18,8 @@ export interface FieldArrayBase<T> {
   swap: (indexA: number, indexB: number) => void;
   move: (from: number, to: number) => void;
   insert: (index: number, value: T) => void;
-  replace: (index: number, value: T) => void;
   update: (index: number, value: T) => void;
+  replace: (index: number, value: T) => void;
 }
 
 // String field array type (for highlights, includes, excludes, dates)

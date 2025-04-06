@@ -49,13 +49,21 @@ export function createItineraryFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: ItineraryItem) => fieldArrayResult.append(value),
-    prepend: (value: ItineraryItem | ItineraryItem[]) => fieldArrayResult.prepend(value),
-    remove: (index: number | number[]) => fieldArrayResult.remove(index),
-    swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
-    move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: ItineraryItem) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: ItineraryItem) => fieldArrayResult.update(index, value),
-    replace: (value: ItineraryItem[]) => fieldArrayResult.replace(value),
+    append: (value: ItineraryItem) => 
+      fieldArrayResult.append(value),
+    prepend: (value: ItineraryItem | ItineraryItem[]) => 
+      fieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => 
+      fieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => 
+      fieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => 
+      fieldArrayResult.move(from, to),
+    insert: (index: number, value: ItineraryItem) => 
+      fieldArrayResult.insert(index, value),
+    update: (index: number, value: ItineraryItem) => 
+      fieldArrayResult.update(index, value),
+    replace: (value: ItineraryItem[]) => 
+      fieldArrayResult.replace(value),
   };
 }

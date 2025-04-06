@@ -27,30 +27,65 @@ const packageSchema = z.object({
   dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
-// Define base type for field arrays
-type BaseFieldArrayType<T extends keyof PackageFormValues> = Omit<UseFieldArrayReturn<PackageFormValues, T, "id">, "append">;
-
-// Define type for the field arrays with string items
-export type HighlightsFieldArray = BaseFieldArrayType<"highlights"> & {
+// Define custom types for each field array without using generics that cause constraints issues
+export type HighlightsFieldArray = {
+  fields: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["fields"];
   append: (value: string) => void;
+  prepend: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["prepend"];
+  remove: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["remove"];
+  swap: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["swap"];
+  move: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["move"];
+  insert: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["insert"];
+  replace: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["replace"];
+  update: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["update"];
 };
 
-export type IncludesFieldArray = BaseFieldArrayType<"includes"> & {
+export type IncludesFieldArray = {
+  fields: UseFieldArrayReturn<PackageFormValues, "includes", "id">["fields"];
   append: (value: string) => void;
+  prepend: UseFieldArrayReturn<PackageFormValues, "includes", "id">["prepend"];
+  remove: UseFieldArrayReturn<PackageFormValues, "includes", "id">["remove"];
+  swap: UseFieldArrayReturn<PackageFormValues, "includes", "id">["swap"];
+  move: UseFieldArrayReturn<PackageFormValues, "includes", "id">["move"];
+  insert: UseFieldArrayReturn<PackageFormValues, "includes", "id">["insert"];
+  replace: UseFieldArrayReturn<PackageFormValues, "includes", "id">["replace"];
+  update: UseFieldArrayReturn<PackageFormValues, "includes", "id">["update"];
 };
 
-export type ExcludesFieldArray = BaseFieldArrayType<"excludes"> & {
+export type ExcludesFieldArray = {
+  fields: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["fields"];
   append: (value: string) => void;
+  prepend: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["prepend"];
+  remove: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["remove"];
+  swap: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["swap"];
+  move: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["move"];
+  insert: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["insert"];
+  replace: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["replace"];
+  update: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["update"];
 };
 
-// Define type for the itinerary field array
-export type ItineraryFieldArray = BaseFieldArrayType<"itinerary"> & {
+export type ItineraryFieldArray = {
+  fields: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["fields"];
   append: (value: { day: number; title: string; description: string }) => void;
+  prepend: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["prepend"];
+  remove: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["remove"];
+  swap: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["swap"];
+  move: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["move"];
+  insert: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["insert"];
+  replace: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["replace"];
+  update: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["update"];
 };
 
-// Define type for the dates field array
-export type DatesFieldArray = BaseFieldArrayType<"dates"> & {
+export type DatesFieldArray = {
+  fields: UseFieldArrayReturn<PackageFormValues, "dates", "id">["fields"];
   append: (value: string) => void;
+  prepend: UseFieldArrayReturn<PackageFormValues, "dates", "id">["prepend"];
+  remove: UseFieldArrayReturn<PackageFormValues, "dates", "id">["remove"];
+  swap: UseFieldArrayReturn<PackageFormValues, "dates", "id">["swap"];
+  move: UseFieldArrayReturn<PackageFormValues, "dates", "id">["move"];
+  insert: UseFieldArrayReturn<PackageFormValues, "dates", "id">["insert"];
+  replace: UseFieldArrayReturn<PackageFormValues, "dates", "id">["replace"];
+  update: UseFieldArrayReturn<PackageFormValues, "dates", "id">["update"];
 };
 
 export function usePackageForm(initialValues?: Package) {
@@ -81,15 +116,22 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Create field arrays with proper typing
+  // Create proper field arrays using specific field names
   const highlightsFieldArray = useFieldArray({
     control: form.control,
     name: "highlights",
   });
   
   const highlightsArray: HighlightsFieldArray = {
-    ...highlightsFieldArray,
-    append: (value: string) => highlightsFieldArray.append(value as any),
+    fields: highlightsFieldArray.fields,
+    append: (value: string) => highlightsFieldArray.append(value),
+    prepend: highlightsFieldArray.prepend,
+    remove: highlightsFieldArray.remove,
+    swap: highlightsFieldArray.swap,
+    move: highlightsFieldArray.move,
+    insert: highlightsFieldArray.insert,
+    replace: highlightsFieldArray.replace,
+    update: highlightsFieldArray.update,
   };
 
   const includesFieldArray = useFieldArray({
@@ -98,8 +140,15 @@ export function usePackageForm(initialValues?: Package) {
   });
   
   const includesArray: IncludesFieldArray = {
-    ...includesFieldArray,
-    append: (value: string) => includesFieldArray.append(value as any),
+    fields: includesFieldArray.fields,
+    append: (value: string) => includesFieldArray.append(value),
+    prepend: includesFieldArray.prepend,
+    remove: includesFieldArray.remove,
+    swap: includesFieldArray.swap,
+    move: includesFieldArray.move,
+    insert: includesFieldArray.insert,
+    replace: includesFieldArray.replace,
+    update: includesFieldArray.update,
   };
 
   const excludesFieldArray = useFieldArray({
@@ -108,8 +157,15 @@ export function usePackageForm(initialValues?: Package) {
   });
   
   const excludesArray: ExcludesFieldArray = {
-    ...excludesFieldArray,
-    append: (value: string) => excludesFieldArray.append(value as any),
+    fields: excludesFieldArray.fields,
+    append: (value: string) => excludesFieldArray.append(value),
+    prepend: excludesFieldArray.prepend,
+    remove: excludesFieldArray.remove,
+    swap: excludesFieldArray.swap,
+    move: excludesFieldArray.move,
+    insert: excludesFieldArray.insert,
+    replace: excludesFieldArray.replace,
+    update: excludesFieldArray.update,
   };
 
   const itineraryFieldArray = useFieldArray({
@@ -118,9 +174,16 @@ export function usePackageForm(initialValues?: Package) {
   });
   
   const itineraryArray: ItineraryFieldArray = {
-    ...itineraryFieldArray,
+    fields: itineraryFieldArray.fields,
     append: (value: { day: number; title: string; description: string }) => 
-      itineraryFieldArray.append(value as any),
+      itineraryFieldArray.append(value),
+    prepend: itineraryFieldArray.prepend,
+    remove: itineraryFieldArray.remove,
+    swap: itineraryFieldArray.swap,
+    move: itineraryFieldArray.move,
+    insert: itineraryFieldArray.insert,
+    replace: itineraryFieldArray.replace,
+    update: itineraryFieldArray.update,
   };
 
   const datesFieldArray = useFieldArray({
@@ -129,17 +192,24 @@ export function usePackageForm(initialValues?: Package) {
   });
   
   const datesArray: DatesFieldArray = {
-    ...datesFieldArray,
-    append: (value: string) => datesFieldArray.append(value as any),
+    fields: datesFieldArray.fields,
+    append: (value: string) => datesFieldArray.append(value),
+    prepend: datesFieldArray.prepend,
+    remove: datesFieldArray.remove,
+    swap: datesFieldArray.swap,
+    move: datesFieldArray.move,
+    insert: datesFieldArray.insert,
+    replace: datesFieldArray.replace,
+    update: datesFieldArray.update,
   };
 
   // Initialize with at least one item each if empty
   useEffect(() => {
-    if (highlightsArray.fields.length === 0) highlightsArray.append("" as any);
-    if (includesArray.fields.length === 0) includesArray.append("" as any);
-    if (excludesArray.fields.length === 0) excludesArray.append("" as any);
-    if (itineraryArray.fields.length === 0) itineraryArray.append({ day: 1, title: "", description: "" } as any);
-    if (datesArray.fields.length === 0) datesArray.append("" as any);
+    if (highlightsArray.fields.length === 0) highlightsArray.append("");
+    if (includesArray.fields.length === 0) includesArray.append("");
+    if (excludesArray.fields.length === 0) excludesArray.append("");
+    if (itineraryArray.fields.length === 0) itineraryArray.append({ day: 1, title: "", description: "" });
+    if (datesArray.fields.length === 0) datesArray.append("");
   }, [highlightsArray, includesArray, excludesArray, itineraryArray, datesArray]);
 
   return {

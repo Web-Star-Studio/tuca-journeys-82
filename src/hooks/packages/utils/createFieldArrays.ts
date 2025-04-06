@@ -16,11 +16,11 @@ import {
  */
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
-  name: "highlights" | "includes" | "excludes" | "dates"
+  name: string // Changed from union type to string to avoid type conflicts
 ): StringFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name,
+    name, // Using the name parameter directly without type constraints
   });
 
   return {

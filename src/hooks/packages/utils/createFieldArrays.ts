@@ -16,7 +16,7 @@ import {
  */
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
-  name: "highlights" | "includes" | "excludes" | "dates" | "itinerary"
+  name: "highlights" | "includes" | "excludes" | "dates"
 ): StringFieldArray {
   const fieldArrayResult = useFieldArray({
     control: form.control,

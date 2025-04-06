@@ -48,8 +48,8 @@ export function createStringFieldArray(
 export function createItineraryFieldArray(
   form: UseFormReturn<PackageFormValues>
 ): ItineraryFieldArrayType {
-  // Use a literal string constant to ensure type safety
-  const name: "itinerary" = "itinerary";
+  // Using a literal string constant with explicit type annotation to ensure type safety
+  const name = "itinerary" as const; // 'as const' ensures TypeScript treats this as a literal type
   
   const fieldArrayResult = useFieldArray({
     control: form.control,

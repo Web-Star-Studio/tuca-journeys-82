@@ -47,10 +47,10 @@ import "./App.css";
 const App = () => {
   return (
     <QueryProvider>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <Router>
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
               <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -91,10 +91,10 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
-            </Router>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </Router>
     </QueryProvider>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useForm, useFieldArray, UseFieldArrayReturn } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { PackageFormValues } from "@/components/admin/packages/types";
@@ -27,65 +27,65 @@ const packageSchema = z.object({
   dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
-// Define custom types for each field array without using generics that cause constraints issues
+// Define field array return types for type safety
 export type HighlightsFieldArray = {
-  fields: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["fields"];
+  fields: any[];
   append: (value: string) => void;
-  prepend: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["prepend"];
-  remove: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["remove"];
-  swap: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["swap"];
-  move: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["move"];
-  insert: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["insert"];
-  replace: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["replace"];
-  update: UseFieldArrayReturn<PackageFormValues, "highlights", "id">["update"];
+  prepend: (value: string | string[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: string) => void;
+  replace: (index: number, value: string) => void;
+  update: (index: number, value: string) => void;
 };
 
 export type IncludesFieldArray = {
-  fields: UseFieldArrayReturn<PackageFormValues, "includes", "id">["fields"];
+  fields: any[];
   append: (value: string) => void;
-  prepend: UseFieldArrayReturn<PackageFormValues, "includes", "id">["prepend"];
-  remove: UseFieldArrayReturn<PackageFormValues, "includes", "id">["remove"];
-  swap: UseFieldArrayReturn<PackageFormValues, "includes", "id">["swap"];
-  move: UseFieldArrayReturn<PackageFormValues, "includes", "id">["move"];
-  insert: UseFieldArrayReturn<PackageFormValues, "includes", "id">["insert"];
-  replace: UseFieldArrayReturn<PackageFormValues, "includes", "id">["replace"];
-  update: UseFieldArrayReturn<PackageFormValues, "includes", "id">["update"];
+  prepend: (value: string | string[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: string) => void;
+  replace: (index: number, value: string) => void;
+  update: (index: number, value: string) => void;
 };
 
 export type ExcludesFieldArray = {
-  fields: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["fields"];
+  fields: any[];
   append: (value: string) => void;
-  prepend: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["prepend"];
-  remove: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["remove"];
-  swap: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["swap"];
-  move: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["move"];
-  insert: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["insert"];
-  replace: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["replace"];
-  update: UseFieldArrayReturn<PackageFormValues, "excludes", "id">["update"];
+  prepend: (value: string | string[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: string) => void;
+  replace: (index: number, value: string) => void;
+  update: (index: number, value: string) => void;
 };
 
 export type ItineraryFieldArray = {
-  fields: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["fields"];
+  fields: any[];
   append: (value: { day: number; title: string; description: string }) => void;
-  prepend: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["prepend"];
-  remove: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["remove"];
-  swap: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["swap"];
-  move: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["move"];
-  insert: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["insert"];
-  replace: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["replace"];
-  update: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">["update"];
+  prepend: (value: { day: number; title: string; description: string } | { day: number; title: string; description: string }[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: { day: number; title: string; description: string }) => void;
+  replace: (index: number, value: { day: number; title: string; description: string }) => void;
+  update: (index: number, value: { day: number; title: string; description: string }) => void;
 };
 
 export type DatesFieldArray = {
-  fields: UseFieldArrayReturn<PackageFormValues, "dates", "id">["fields"];
+  fields: any[];
   append: (value: string) => void;
-  prepend: UseFieldArrayReturn<PackageFormValues, "dates", "id">["prepend"];
-  remove: UseFieldArrayReturn<PackageFormValues, "dates", "id">["remove"];
-  swap: UseFieldArrayReturn<PackageFormValues, "dates", "id">["swap"];
-  move: UseFieldArrayReturn<PackageFormValues, "dates", "id">["move"];
-  insert: UseFieldArrayReturn<PackageFormValues, "dates", "id">["insert"];
-  replace: UseFieldArrayReturn<PackageFormValues, "dates", "id">["replace"];
-  update: UseFieldArrayReturn<PackageFormValues, "dates", "id">["update"];
+  prepend: (value: string | string[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: string) => void;
+  replace: (index: number, value: string) => void;
+  update: (index: number, value: string) => void;
 };
 
 export function usePackageForm(initialValues?: Package) {
@@ -116,91 +116,94 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Create proper field arrays using specific field names
-  const highlightsFieldArray = useFieldArray({
+  // Create and set up highlights field array
+  const highlightsFieldArrayResult = useFieldArray({
     control: form.control,
     name: "highlights",
   });
   
   const highlightsArray: HighlightsFieldArray = {
-    fields: highlightsFieldArray.fields,
-    append: (value: string) => highlightsFieldArray.append(value),
-    prepend: highlightsFieldArray.prepend,
-    remove: highlightsFieldArray.remove,
-    swap: highlightsFieldArray.swap,
-    move: highlightsFieldArray.move,
-    insert: highlightsFieldArray.insert,
-    replace: highlightsFieldArray.replace,
-    update: highlightsFieldArray.update,
+    fields: highlightsFieldArrayResult.fields,
+    append: (value: string) => highlightsFieldArrayResult.append(value),
+    prepend: (value: string | string[]) => highlightsFieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => highlightsFieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => highlightsFieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => highlightsFieldArrayResult.move(from, to),
+    insert: (index: number, value: string) => highlightsFieldArrayResult.insert(index, value),
+    replace: (index: number, value: string) => highlightsFieldArrayResult.replace(index, value),
+    update: (index: number, value: string) => highlightsFieldArrayResult.update(index, value),
   };
 
-  const includesFieldArray = useFieldArray({
+  // Create and set up includes field array
+  const includesFieldArrayResult = useFieldArray({
     control: form.control,
     name: "includes",
   });
   
   const includesArray: IncludesFieldArray = {
-    fields: includesFieldArray.fields,
-    append: (value: string) => includesFieldArray.append(value),
-    prepend: includesFieldArray.prepend,
-    remove: includesFieldArray.remove,
-    swap: includesFieldArray.swap,
-    move: includesFieldArray.move,
-    insert: includesFieldArray.insert,
-    replace: includesFieldArray.replace,
-    update: includesFieldArray.update,
+    fields: includesFieldArrayResult.fields,
+    append: (value: string) => includesFieldArrayResult.append(value),
+    prepend: (value: string | string[]) => includesFieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => includesFieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => includesFieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => includesFieldArrayResult.move(from, to),
+    insert: (index: number, value: string) => includesFieldArrayResult.insert(index, value),
+    replace: (index: number, value: string) => includesFieldArrayResult.replace(index, value),
+    update: (index: number, value: string) => includesFieldArrayResult.update(index, value),
   };
 
-  const excludesFieldArray = useFieldArray({
+  // Create and set up excludes field array
+  const excludesFieldArrayResult = useFieldArray({
     control: form.control,
     name: "excludes",
   });
   
   const excludesArray: ExcludesFieldArray = {
-    fields: excludesFieldArray.fields,
-    append: (value: string) => excludesFieldArray.append(value),
-    prepend: excludesFieldArray.prepend,
-    remove: excludesFieldArray.remove,
-    swap: excludesFieldArray.swap,
-    move: excludesFieldArray.move,
-    insert: excludesFieldArray.insert,
-    replace: excludesFieldArray.replace,
-    update: excludesFieldArray.update,
+    fields: excludesFieldArrayResult.fields,
+    append: (value: string) => excludesFieldArrayResult.append(value),
+    prepend: (value: string | string[]) => excludesFieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => excludesFieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => excludesFieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => excludesFieldArrayResult.move(from, to),
+    insert: (index: number, value: string) => excludesFieldArrayResult.insert(index, value),
+    replace: (index: number, value: string) => excludesFieldArrayResult.replace(index, value),
+    update: (index: number, value: string) => excludesFieldArrayResult.update(index, value),
   };
 
-  const itineraryFieldArray = useFieldArray({
+  // Create and set up itinerary field array
+  const itineraryFieldArrayResult = useFieldArray({
     control: form.control,
     name: "itinerary",
   });
   
   const itineraryArray: ItineraryFieldArray = {
-    fields: itineraryFieldArray.fields,
-    append: (value: { day: number; title: string; description: string }) => 
-      itineraryFieldArray.append(value),
-    prepend: itineraryFieldArray.prepend,
-    remove: itineraryFieldArray.remove,
-    swap: itineraryFieldArray.swap,
-    move: itineraryFieldArray.move,
-    insert: itineraryFieldArray.insert,
-    replace: itineraryFieldArray.replace,
-    update: itineraryFieldArray.update,
+    fields: itineraryFieldArrayResult.fields,
+    append: (value: { day: number; title: string; description: string }) => itineraryFieldArrayResult.append(value),
+    prepend: (value: { day: number; title: string; description: string } | { day: number; title: string; description: string }[]) => itineraryFieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => itineraryFieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => itineraryFieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => itineraryFieldArrayResult.move(from, to),
+    insert: (index: number, value: { day: number; title: string; description: string }) => itineraryFieldArrayResult.insert(index, value),
+    replace: (index: number, value: { day: number; title: string; description: string }) => itineraryFieldArrayResult.replace(index, value),
+    update: (index: number, value: { day: number; title: string; description: string }) => itineraryFieldArrayResult.update(index, value),
   };
 
-  const datesFieldArray = useFieldArray({
+  // Create and set up dates field array
+  const datesFieldArrayResult = useFieldArray({
     control: form.control,
     name: "dates",
   });
   
   const datesArray: DatesFieldArray = {
-    fields: datesFieldArray.fields,
-    append: (value: string) => datesFieldArray.append(value),
-    prepend: datesFieldArray.prepend,
-    remove: datesFieldArray.remove,
-    swap: datesFieldArray.swap,
-    move: datesFieldArray.move,
-    insert: datesFieldArray.insert,
-    replace: datesFieldArray.replace,
-    update: datesFieldArray.update,
+    fields: datesFieldArrayResult.fields,
+    append: (value: string) => datesFieldArrayResult.append(value),
+    prepend: (value: string | string[]) => datesFieldArrayResult.prepend(value),
+    remove: (index: number | number[]) => datesFieldArrayResult.remove(index),
+    swap: (indexA: number, indexB: number) => datesFieldArrayResult.swap(indexA, indexB),
+    move: (from: number, to: number) => datesFieldArrayResult.move(from, to),
+    insert: (index: number, value: string) => datesFieldArrayResult.insert(index, value),
+    replace: (index: number, value: string) => datesFieldArrayResult.replace(index, value),
+    update: (index: number, value: string) => datesFieldArrayResult.update(index, value),
   };
 
   // Initialize with at least one item each if empty

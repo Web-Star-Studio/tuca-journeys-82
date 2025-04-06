@@ -13,11 +13,14 @@ export const useUserBookings = () => {
     queryKey: ['bookings', user?.id],
     queryFn: () => {
       if (!user?.id) throw new Error("Usuário não autenticado");
+      console.log("Fetching bookings for user:", user.id);
       return getUserBookings(user.id);
     },
     enabled: !!user?.id,
+    retry: 1,
     meta: {
       onError: (error: Error) => {
+        console.error("Error in useUserBookings:", error);
         toast({
           title: "Erro ao carregar reservas",
           description: error.message,
@@ -34,6 +37,7 @@ export const useCreateBooking = () => {
 
   return useMutation({
     mutationFn: (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+      console.log("Creating booking with data:", bookingData);
       return createBooking(bookingData);
     },
     onSuccess: () => {
@@ -44,6 +48,7 @@ export const useCreateBooking = () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
     onError: (error: Error) => {
+      console.error("Error in useCreateBooking:", error);
       toast({
         title: "Erro ao criar reserva",
         description: error.message,

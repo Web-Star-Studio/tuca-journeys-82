@@ -5,6 +5,7 @@ import { Package } from '@/data/types/packageTypes';
 
 // Tours API
 export const getToursFromDB = async () => {
+  console.log("Fetching all tours");
   const { data, error } = await supabase
     .from('tours')
     .select('*');
@@ -18,6 +19,7 @@ export const getToursFromDB = async () => {
 };
 
 export const getTourByIdFromDB = async (id: number) => {
+  console.log(`Fetching tour with ID: ${id}`);
   const { data, error } = await supabase
     .from('tours')
     .select('*')
@@ -47,6 +49,7 @@ export const getPackageByIdFromDB = async (id: number) => {
 
 // Accommodations API
 export const getAccommodationsFromDB = async () => {
+  console.log("Fetching all accommodations");
   const { data, error } = await supabase
     .from('accommodations')
     .select('*');
@@ -60,6 +63,7 @@ export const getAccommodationsFromDB = async () => {
 };
 
 export const getAccommodationByIdFromDB = async (id: number) => {
+  console.log(`Fetching accommodation with ID: ${id}`);
   const { data, error } = await supabase
     .from('accommodations')
     .select('*')
@@ -76,6 +80,7 @@ export const getAccommodationByIdFromDB = async (id: number) => {
 
 // Bookings API
 export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+  console.log("Creating booking:", booking);
   const { data, error } = await supabase
     .from('bookings')
     .insert([booking])
@@ -91,6 +96,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
 };
 
 export const getUserBookings = async (userId: string) => {
+  console.log(`Fetching bookings for user: ${userId}`);
   const { data, error } = await supabase
     .from('bookings')
     .select(`
@@ -111,6 +117,7 @@ export const getUserBookings = async (userId: string) => {
 
 // User profiles
 export const getUserProfile = async (userId: string) => {
+  console.log(`Fetching profile for user: ${userId}`);
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
@@ -126,11 +133,13 @@ export const getUserProfile = async (userId: string) => {
 };
 
 export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & { id: string }) => {
+  console.log("Creating/updating user profile:", profile);
   // Check if profile exists
   const existingProfile = await getUserProfile(profile.id);
   
   if (existingProfile) {
     // Update
+    console.log("Existing profile found, updating");
     const { data, error } = await supabase
       .from('user_profiles')
       .update(profile)
@@ -146,6 +155,7 @@ export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & 
     return data as UserProfile;
   } else {
     // Create
+    console.log("No profile found, creating new profile");
     const { data, error } = await supabase
       .from('user_profiles')
       .insert([profile])

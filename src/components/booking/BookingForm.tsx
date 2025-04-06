@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,13 +45,13 @@ const BookingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Initialize form with user data if available
+  // Initialize form with default values
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
-      name: profile?.name || "",
-      email: profile?.email || "",
-      phone: profile?.phone || "",
+      name: "",
+      email: "",
+      phone: "",
       tourId: undefined,
       accommodationId: undefined,
       checkInDate: new Date(),
@@ -61,6 +61,15 @@ const BookingForm = () => {
       termsAccepted: false,
     },
   });
+
+  // Update form values when profile is loaded
+  useEffect(() => {
+    if (profile) {
+      form.setValue("name", profile.name || "");
+      form.setValue("email", profile.email || "");
+      form.setValue("phone", profile.phone || "");
+    }
+  }, [profile, form]);
 
   // Function to handle form submission
   const onSubmit = async (data: BookingFormValues) => {

@@ -1,144 +1,137 @@
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuthState } from "@/hooks/use-auth-state";
-import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
-import { useToast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
-// Create a NavigationContext for handling route changes when no Router is available
-export const NavigationContext = createContext<{
-  navigateToLogin: () => void;
-}>({
-  navigateToLogin: () => {},
-});
-
-export const useNavigation = () => {
-  return useContext(NavigationContext);
-};
-
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  supabase: typeof supabase;
-  loading: boolean;
+  session: Session | null;
+  isLoading: boolean;
+  error: Error | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-};
+}
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, setLoading } = useAuthState();
-  const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
-  const { toast } = useToast();
-  const [navigationCallback, setNavigationCallback] = useState<(() => void) | null>(null);
-  
-  // Get navigation function from context
-  const { navigateToLogin } = useNavigation();
-  
-  // Add token refresh failure handling
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
   useEffect(() => {
-    const { data: tokenListener } = supabase.auth.onAuthStateChange((event, session) => {
-      // Handle cases where session is lost or authentication fails
-      if (!session && user) {
-        console.error('Auth token issue detected. Logging out...');
-        
-        // Clear any auth data and redirect to login
-        localStorage.removeItem("supabase-mock-session");
-        localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
-        
-        toast({
-          title: "Sessão expirada",
-          description: "Por favor, faça login novamente.",
-          variant: "destructive",
-        });
-        
-        // Use setTimeout to avoid state updates during render
-        setTimeout(() => {
-          navigateToLogin();
-        }, 100);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log("Auth state changed:", event);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setIsLoading(false);
       }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Found Supabase session, setting user state");
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsLoading(false);
+    }).catch(error => {
+      console.error("Error getting session:", error);
+      setError(error);
+      setIsLoading(false);
     });
-    
+
+    // Cleanup subscription when component unmounts
     return () => {
-      if (tokenListener.subscription) {
-        tokenListener.subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
-  }, [navigateToLogin, toast, user]);
+  }, []);
 
-  // Sign In - Modified from useAuthOperations to return void for consistency
-  const signIn = async (email: string, password: string) => {
-    try {
-      await authSignIn(email, password);
-    } catch (error) {
-      console.error("Error in signIn:", error);
-    }
-  };
+  const signIn = async (email: string, password: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
 
-  // Sign Up - Modified from useAuthOperations to return void for consistency
-  const signUp = async (email: string, password: string, name: string) => {
     try {
-      await authSignUp(email, password, name);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (error) {
-      console.error("Error in signUp:", error);
-    }
-  };
-
-  // Sign Out - Modified to be more robust with error handling
-  const signOut = async () => {
-    try {
-      console.log("Starting sign out process in AuthContext...");
-      setLoading(true);
-      
-      // Call the signOut function from useAuthOperations
-      await authSignOut();
-      
-      // Ensure we clear all possible session data
-      console.log("Clearing all session data in AuthContext");
-      localStorage.removeItem("supabase-mock-session");
-      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
-      
-      console.log("Sign out process completed in AuthContext");
-    } catch (error) {
-      console.error("Error in AuthContext signOut:", error);
-      
-      // Attempt to clean up even if there was an exception
-      localStorage.removeItem("supabase-mock-session");
-      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
+      console.error("Error signing in:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during sign-in'));
+      throw error;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // Reset Password - Modified from useAuthOperations to return void for consistency
-  const resetPassword = async (email: string) => {
+  const signUp = async (email: string, password: string, name: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      await authResetPassword(email);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+      if (error) throw error;
     } catch (error) {
-      console.error("Error in resetPassword:", error);
+      console.error("Error signing up:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during sign-up'));
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const value = {
-    user,
-    supabase,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword
+  const signOut = async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // Clear user and session
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during sign-out'));
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        error,
+        signIn,
+        signUp,
+        signOut,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
+
   return context;
 };

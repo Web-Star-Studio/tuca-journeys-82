@@ -13,7 +13,7 @@ export type ProfileData = {
   address?: string | null;
   city?: string | null;
   state?: string | null;
-  zipcode?: string | null;
+  zip_code?: string | null; // Changed from zipcode to zip_code to match DB schema
 };
 
 export const useProfile = () => {
@@ -32,7 +32,8 @@ export const useProfile = () => {
 
       setLoading(true);
       try {
-        // First, check if the profile exists in the user_profiles table (not profiles)
+        console.log("Fetching profile for user:", user.id);
+        // First, check if the profile exists in the user_profiles table
         const { data, error } = await supabase
           .from("user_profiles")
           .select("*")
@@ -47,12 +48,24 @@ export const useProfile = () => {
             description: error.message,
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
 
         if (data) {
-          setProfile(data as ProfileData);
+          console.log("Profile found:", data);
+          setProfile({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            address: data.address,
+            city: data.city,
+            state: data.state,
+            zip_code: data.zip_code
+          });
         } else {
+          console.log("No profile found, creating new profile");
           // If no profile exists, create one with the user's metadata
           const newProfile = {
             id: user.id,
@@ -71,6 +84,7 @@ export const useProfile = () => {
               description: insertError.message,
               variant: "destructive",
             });
+            setLoading(false);
             return;
           }
 

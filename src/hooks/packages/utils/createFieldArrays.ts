@@ -16,12 +16,11 @@ import {
  */
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
-  name: string // Using string to handle different field names
+  name: "highlights" | "includes" | "excludes" | "dates" // Specify exact string literals
 ): StringFieldArrayType {
-  // Make sure we're only creating field arrays for allowed names
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name, // Using the name parameter directly for string fields
+    name, // Now we're using specific string literals that match the form schema
   });
 
   return {
@@ -49,10 +48,11 @@ export function createStringFieldArray(
 export function createItineraryFieldArray(
   form: UseFormReturn<PackageFormValues>
 ): ItineraryFieldArrayType {
+  // Use the literal "itinerary" string which satisfies TypeScript
+  const itineraryKey = "itinerary";
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    // Using the literal "itinerary" string to satisfy TypeScript's requirement
-    name: "itinerary" as const, // Using 'as const' to ensure it's the literal "itinerary"
+    name: itineraryKey, // TypeScript knows this is exactly "itinerary"
   });
 
   return {

@@ -25,14 +25,20 @@ export function createStringFieldArray(
 
   return {
     fields: fieldArrayResult.fields,
-    append: (value: string) => fieldArrayResult.append(value),
-    prepend: (value: string | string[]) => fieldArrayResult.prepend(value),
+    append: (value: string) => fieldArrayResult.append({ title: value }),
+    prepend: (value: string | string[]) => {
+      if (Array.isArray(value)) {
+        fieldArrayResult.prepend(value.map(item => ({ title: item })));
+      } else {
+        fieldArrayResult.prepend({ title: value });
+      }
+    },
     remove: (index: number | number[]) => fieldArrayResult.remove(index),
     swap: (indexA: number, indexB: number) => fieldArrayResult.swap(indexA, indexB),
     move: (from: number, to: number) => fieldArrayResult.move(from, to),
-    insert: (index: number, value: string) => fieldArrayResult.insert(index, value),
-    update: (index: number, value: string) => fieldArrayResult.update(index, value),
-    replace: (value: string[]) => fieldArrayResult.replace(value),
+    insert: (index: number, value: string) => fieldArrayResult.insert(index, { title: value }),
+    update: (index: number, value: string) => fieldArrayResult.update(index, { title: value }),
+    replace: (value: string[]) => fieldArrayResult.replace(value.map(item => ({ title: item }))),
   };
 }
 
@@ -44,7 +50,7 @@ export function createItineraryFieldArray(
 ): ItineraryFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "itinerary", // Only using "itinerary" as the field name
+    name: "itinerary",
   });
 
   return {

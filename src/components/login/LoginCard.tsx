@@ -12,7 +12,7 @@ import {
 import LoginForm from "./LoginForm";
 
 interface LoginCardProps {
-  onSuccessfulLogin: (redirectToAdmin: boolean) => void;
+  onSuccessfulLogin?: (redirectToAdmin: boolean) => void;
 }
 
 const LoginCard = ({ onSuccessfulLogin }: LoginCardProps) => {

@@ -80,21 +80,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
           aud: "authenticated",
           created_at: new Date().toISOString(),
-        };
+        } as User;
         
+        // Create a mock session that matches the Supabase Session type
         const mockSession = {
           access_token: "mock-token",
           refresh_token: "mock-refresh-token",
-          user: mockUser,
+          expires_in: 3600,
           expires_at: Math.floor(Date.now() / 1000) + 3600,
-        };
+          token_type: "bearer",
+          user: mockUser
+        } as Session;
         
         // Store the mocked session in localStorage to persist
         localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
         
         // Set the user and session state
-        setUser(mockUser as User);
-        setSession(mockSession as Session);
+        setUser(mockUser);
+        setSession(mockSession);
         
         toast({
           title: "Login de demonstração",

@@ -15,7 +15,11 @@ interface LoginFormValues {
   rememberMe: boolean;
 }
 
-const LoginForm = () => {
+interface LoginFormProps {
+  onSuccessfulLogin?: (redirectToAdmin: boolean) => void;
+}
+
+const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const { signIn, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   
@@ -34,6 +38,13 @@ const LoginForm = () => {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       await signIn(data.email, data.password);
+      
+      // If successful login and callback exists, call it
+      // Check if it's an admin login
+      const isAdmin = data.email === "admin@tucanoronha.com";
+      if (onSuccessfulLogin) {
+        onSuccessfulLogin(isAdmin);
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Falha no login. Verifique seu email e senha.");

@@ -15,7 +15,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { color: string, label: string }> = {
     confirmed: { color: "bg-green-500", label: "Confirmado" },
     pending: { color: "bg-yellow-500", label: "Pendente" },
-    canceled: { color: "bg-red-500", label: "Cancelado" },
+    cancelled: { color: "bg-red-500", label: "Cancelado" },
     completed: { color: "bg-blue-500", label: "Concluído" }
   };
 

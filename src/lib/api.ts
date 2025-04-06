@@ -1,5 +1,5 @@
 
-import { supabase } from './supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
 import { Package } from '@/data/types/packageTypes';
 

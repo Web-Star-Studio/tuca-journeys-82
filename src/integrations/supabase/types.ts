@@ -9,7 +9,240 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      accommodations: {
+        Row: {
+          address: string
+          amenities: string[]
+          bathrooms: number
+          bedrooms: number
+          created_at: string
+          description: string
+          gallery_images: string[]
+          id: number
+          image_url: string
+          max_guests: number
+          price_per_night: number
+          rating: number
+          short_description: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          amenities?: string[]
+          bathrooms: number
+          bedrooms: number
+          created_at?: string
+          description: string
+          gallery_images?: string[]
+          id?: number
+          image_url: string
+          max_guests: number
+          price_per_night: number
+          rating: number
+          short_description: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          amenities?: string[]
+          bathrooms?: number
+          bedrooms?: number
+          created_at?: string
+          description?: string
+          gallery_images?: string[]
+          id?: number
+          image_url?: string
+          max_guests?: number
+          price_per_night?: number
+          rating?: number
+          short_description?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          accommodation_id: number | null
+          created_at: string
+          end_date: string
+          guests: number
+          id: number
+          payment_method: string | null
+          payment_status: string
+          special_requests: string | null
+          start_date: string
+          status: string
+          total_price: number
+          tour_id: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accommodation_id?: number | null
+          created_at?: string
+          end_date: string
+          guests: number
+          id?: number
+          payment_method?: string | null
+          payment_status: string
+          special_requests?: string | null
+          start_date: string
+          status: string
+          total_price: number
+          tour_id?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accommodation_id?: number | null
+          created_at?: string
+          end_date?: string
+          guests?: number
+          id?: number
+          payment_method?: string | null
+          payment_status?: string
+          special_requests?: string | null
+          start_date?: string
+          status?: string
+          total_price?: number
+          tour_id?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_accommodation_id_fkey"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accommodations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tours: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          difficulty: string
+          duration: string
+          excludes: string[]
+          gallery_images: string[]
+          id: number
+          image_url: string
+          includes: string[]
+          max_participants: number
+          meeting_point: string | null
+          min_participants: number
+          notes: string[]
+          price: number
+          rating: number
+          schedule: string[]
+          short_description: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          difficulty: string
+          duration: string
+          excludes?: string[]
+          gallery_images?: string[]
+          id?: number
+          image_url: string
+          includes?: string[]
+          max_participants: number
+          meeting_point?: string | null
+          min_participants?: number
+          notes?: string[]
+          price: number
+          rating: number
+          schedule?: string[]
+          short_description: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          duration?: string
+          excludes?: string[]
+          gallery_images?: string[]
+          id?: number
+          image_url?: string
+          includes?: string[]
+          max_participants?: number
+          meeting_point?: string | null
+          min_participants?: number
+          notes?: string[]
+          price?: number
+          rating?: number
+          schedule?: string[]
+          short_description?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          phone: string | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

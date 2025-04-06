@@ -7,11 +7,11 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
-import { ItineraryFieldArray } from "@/hooks/packages/usePackageForm";
+import { ItineraryFieldArrayType } from "@/hooks/packages/usePackageForm";
 
 interface ItineraryFormProps {
   form: UseFormReturn<PackageFormValues>;
-  itineraryArray: ItineraryFieldArray;
+  itineraryArray: ItineraryFieldArrayType;
 }
 
 const ItineraryForm = ({ form, itineraryArray }: ItineraryFormProps) => {

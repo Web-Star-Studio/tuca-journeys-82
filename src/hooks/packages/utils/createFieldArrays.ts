@@ -8,7 +8,8 @@ import {
   ItineraryFieldArray, 
   DatesFieldArray,
   ItineraryItem,
-  StringFieldArray
+  StringFieldArrayType,
+  ItineraryFieldArrayType
 } from "../types/fieldArrayTypes";
 
 /**
@@ -17,7 +18,7 @@ import {
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
   name: "highlights" | "includes" | "excludes" | "dates"
-): StringFieldArray {
+): StringFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
     name,
@@ -41,7 +42,7 @@ export function createStringFieldArray(
  */
 export function createItineraryFieldArray(
   form: UseFormReturn<PackageFormValues>
-): ItineraryFieldArray {
+): ItineraryFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
     name: "itinerary",

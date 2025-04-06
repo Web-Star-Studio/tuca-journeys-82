@@ -9,28 +9,35 @@ export type ItineraryItem = {
   description: string;
 };
 
-// Generic field array type
-export interface FieldArrayBase<T> {
+// Generic field array type for string items
+export interface StringFieldArrayType {
   fields: any[];
-  append: (value: T) => void;
-  prepend: (value: T | T[]) => void;
+  append: (value: string) => void;
+  prepend: (value: string | string[]) => void;
   remove: (index: number | number[]) => void;
   swap: (indexA: number, indexB: number) => void;
   move: (from: number, to: number) => void;
-  insert: (index: number, value: T) => void;
-  update: (index: number, value: T) => void;
-  replace: (value: T[]) => void;
+  insert: (index: number, value: string) => void;
+  update: (index: number, value: string) => void;
+  replace: (value: string[]) => void;
 }
 
-// String field array type (for highlights, includes, excludes, dates)
-export type StringFieldArray = FieldArrayBase<string>;
-
-// Itinerary field array type
-export type ItineraryFieldArray = FieldArrayBase<ItineraryItem>;
+// Generic field array type for itinerary items
+export interface ItineraryFieldArrayType {
+  fields: any[];
+  append: (value: ItineraryItem) => void;
+  prepend: (value: ItineraryItem | ItineraryItem[]) => void;
+  remove: (index: number | number[]) => void;
+  swap: (indexA: number, indexB: number) => void;
+  move: (from: number, to: number) => void;
+  insert: (index: number, value: ItineraryItem) => void;
+  update: (index: number, value: ItineraryItem) => void;
+  replace: (value: ItineraryItem[]) => void;
+}
 
 // Specific field array types
-export type HighlightsFieldArray = StringFieldArray;
-export type IncludesFieldArray = StringFieldArray;
-export type ExcludesFieldArray = StringFieldArray;
-export type DatesFieldArray = StringFieldArray;
-export type ItineraryItemFieldArray = ItineraryFieldArray;
+export type HighlightsFieldArray = StringFieldArrayType;
+export type IncludesFieldArray = StringFieldArrayType;
+export type ExcludesFieldArray = StringFieldArrayType;
+export type DatesFieldArray = StringFieldArrayType;
+export type ItineraryItemFieldArray = ItineraryFieldArrayType;

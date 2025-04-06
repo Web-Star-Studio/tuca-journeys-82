@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -28,9 +27,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Add token refresh failure handling
   useEffect(() => {
     const { data: tokenListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'TOKEN_REFRESH_FAILED') {
-        // Handle token refresh failure by logging out and redirecting
-        console.error('Failed to refresh auth token. Logging out...');
+      // Handle cases where session is lost or authentication fails
+      if (!session && user) {
+        console.error('Auth token issue detected. Logging out...');
         
         // Clear any auth data and redirect to login
         localStorage.removeItem("supabase-mock-session");
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         tokenListener.subscription.unsubscribe();
       }
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, user]);
 
   // Sign In - Modified from useAuthOperations to return void for consistency
   const signIn = async (email: string, password: string) => {

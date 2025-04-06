@@ -80,17 +80,12 @@ export const useAuthState = () => {
           // When signed in, verify the session is valid
           setSession(currentSession);
           setUser(currentSession?.user || null);
-        } else if (event === 'USER_DELETED') {
-          // Clear all session data
-          localStorage.removeItem("supabase-mock-session");
-          localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
-          setSession(null);
-          setUser(null);
         }
         
-        // Handle token refresh error events
-        if (event === 'TOKEN_REFRESH_FAILED') {
-          console.error("Token refresh failed, clearing session");
+        // Handle session expiry or user deletion by checking if session is null
+        // but we previously had a user
+        if (!currentSession && user) {
+          console.log("Session lost, clearing user state");
           // Clear all session data
           localStorage.removeItem("supabase-mock-session");
           localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
@@ -108,7 +103,7 @@ export const useAuthState = () => {
         authListener.subscription.unsubscribe();
       }
     };
-  }, []);
+  }, [user]);
 
   return { user, session, loading, setLoading };
 };

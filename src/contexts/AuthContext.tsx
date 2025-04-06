@@ -1,10 +1,21 @@
-import React, { createContext, useContext, useEffect } from "react";
+
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/hooks/use-auth-state";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+
+// Create a NavigationContext for handling route changes when no Router is available
+export const NavigationContext = createContext<{
+  navigateToLogin: () => void;
+}>({
+  navigateToLogin: () => {},
+});
+
+export const useNavigation = () => {
+  return useContext(NavigationContext);
+};
 
 type AuthContextType = {
   user: User | null;
@@ -22,7 +33,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, setLoading } = useAuthState();
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [navigationCallback, setNavigationCallback] = useState<(() => void) | null>(null);
+  
+  // Get navigation function from context
+  const { navigateToLogin } = useNavigation();
   
   // Add token refresh failure handling
   useEffect(() => {
@@ -43,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Use setTimeout to avoid state updates during render
         setTimeout(() => {
-          navigate('/login');
+          navigateToLogin();
         }, 100);
       }
     });
@@ -53,7 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         tokenListener.subscription.unsubscribe();
       }
     };
-  }, [navigate, toast, user]);
+  }, [navigateToLogin, toast, user]);
 
   // Sign In - Modified from useAuthOperations to return void for consistency
   const signIn = async (email: string, password: string) => {

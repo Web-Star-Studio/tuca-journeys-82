@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext"; 
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { QueryProvider } from "./providers/QueryProvider";
+import { NavigationProvider } from "./providers/NavigationProvider";
 import { Toaster } from "./components/ui/toaster";
 import ScrollToTop from "./components/utils/ScrollToTop";
 import Index from "./pages/Index";
@@ -48,52 +49,54 @@ const App = () => {
   return (
     <QueryProvider>
       <Router>
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/sobre" element={<About />} />
-                <Route path="/contato" element={<Contact />} />
-                <Route path="/passeios" element={<Tours />} />
-                <Route path="/passeios/:id" element={<TourDetail />} />
-                <Route path="/hospedagens" element={<Hospedagens />} />
-                <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
-                <Route path="/pacotes" element={<Packages />} />
-                <Route path="/pacotes/:id" element={<PackageDetail />} />
-                <Route path="/loja" element={<Store />} />
-                <Route path="/loja/:id" element={<ProductDetail />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/cadastro" element={<Register />} />
-                <Route path="/recuperar-senha" element={<ResetPassword />} />
-                <Route path="/perfil" element={<Profile />} />
-                <Route path="/lista-de-desejos" element={<Wishlist />} />
-                <Route path="/reservar" element={<Booking />} />
-                <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/pagamentos" element={<Payments />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/tours" element={<AdminTours />} />
-                <Route path="/admin/accommodations" element={<AdminAccommodations />} />
-                <Route path="/admin/packages" element={<AdminPackages />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/bookings" element={<AdminBookings />} />
-                <Route path="/admin/media" element={<AdminMedia />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/reports" element={<AdminReports />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Toaster />
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
+        <NavigationProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/sobre" element={<About />} />
+                  <Route path="/contato" element={<Contact />} />
+                  <Route path="/passeios" element={<Tours />} />
+                  <Route path="/passeios/:id" element={<TourDetail />} />
+                  <Route path="/hospedagens" element={<Hospedagens />} />
+                  <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
+                  <Route path="/pacotes" element={<Packages />} />
+                  <Route path="/pacotes/:id" element={<PackageDetail />} />
+                  <Route path="/loja" element={<Store />} />
+                  <Route path="/loja/:id" element={<ProductDetail />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/cadastro" element={<Register />} />
+                  <Route path="/recuperar-senha" element={<ResetPassword />} />
+                  <Route path="/perfil" element={<Profile />} />
+                  <Route path="/lista-de-desejos" element={<Wishlist />} />
+                  <Route path="/reservar" element={<Booking />} />
+                  <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/pagamentos" element={<Payments />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/tours" element={<AdminTours />} />
+                  <Route path="/admin/accommodations" element={<AdminAccommodations />} />
+                  <Route path="/admin/packages" element={<AdminPackages />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/bookings" element={<AdminBookings />} />
+                  <Route path="/admin/media" element={<AdminMedia />} />
+                  <Route path="/admin/products" element={<AdminProducts />} />
+                  <Route path="/admin/reports" element={<AdminReports />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </NavigationProvider>
       </Router>
     </QueryProvider>
   );

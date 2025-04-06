@@ -13,7 +13,7 @@ import {
   HighlightsFieldArray,
   IncludesFieldArray,
   ExcludesFieldArray,
-  ItineraryFieldArray,
+  ItineraryFieldArrayType,
   DatesFieldArray
 } from "./types/fieldArrayTypes";
 
@@ -21,7 +21,7 @@ export type {
   HighlightsFieldArray,
   IncludesFieldArray,
   ExcludesFieldArray,
-  ItineraryFieldArray,
+  ItineraryFieldArrayType,
   DatesFieldArray
 };
 

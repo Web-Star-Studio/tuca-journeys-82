@@ -5,11 +5,10 @@ import {
   HighlightsFieldArray, 
   IncludesFieldArray, 
   ExcludesFieldArray, 
-  ItineraryFieldArray, 
+  ItineraryFieldArrayType, 
   DatesFieldArray,
   ItineraryItem,
-  StringFieldArrayType,
-  ItineraryFieldArrayType
+  StringFieldArrayType
 } from "../types/fieldArrayTypes";
 
 /**

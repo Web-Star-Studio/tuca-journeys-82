@@ -6,7 +6,7 @@ import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,10 +14,11 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { toast } = useToast();
 
   // Check authentication and redirect if not authenticated
   useEffect(() => {
@@ -26,7 +27,7 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
         setIsCheckingAuth(true);
         
         // If not loading anymore and user is null, redirect to login
-        if (!loading && !user) {
+        if (!isLoading && !user) {
           console.log("User not authenticated, redirecting to login");
           toast({
             title: "Acesso restrito",
@@ -58,10 +59,10 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
     };
 
     checkAuth();
-  }, [user, loading, navigate]);
+  }, [user, isLoading, navigate, toast]);
 
   // Show loading state while checking auth
-  if (loading || isCheckingAuth) {
+  if (isLoading || isCheckingAuth) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />

@@ -1,106 +1,131 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Mail, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const ResetPassword = () => {
-  const { resetPassword, loading } = useAuth();
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await resetPassword(email);
-    setSubmitted(true);
+  const { resetPassword, isLoading } = useAuth();
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      email: "",
+    },
+  });
+  
+  const onSubmit = async (data: { email: string }) => {
+    try {
+      await resetPassword(data.email);
+      setResetEmailSent(true);
+      toast({
+        title: "Email enviado",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+    } catch (error: any) {
+      console.error("Error in password reset:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Ocorreu um erro ao enviar o email de redefinição de senha.",
+        variant: "destructive",
+      });
+    }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-grow py-20 md:py-32 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto">
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold text-center">
-                  Recuperar Senha
-                </CardTitle>
-                <CardDescription className="text-center">
-                  Digite seu email para receber um link de recuperação de senha
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {submitted ? (
-                  <div className="text-center py-4">
-                    <h3 className="text-lg font-medium mb-2">Email Enviado!</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
-                    </p>
-                    <Link to="/login">
-                      <Button variant="outline">Voltar para Login</Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="seu@email.com"
-                          className="pl-10"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Enviando...
-                        </>
-                      ) : (
-                        "Enviar Link de Recuperação"
-                      )}
-                    </Button>
-                  </form>
-                )}
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-4">
-                <div className="text-center text-sm text-muted-foreground">
-                  Lembrou a senha?{" "}
-                  <Link to="/login" className="text-primary hover:underline">
-                    Voltar para Login
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
+  
+  if (resetEmailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">Email enviado</h1>
+            <p className="mt-2 text-gray-600">
+              Enviamos instruções para redefinir sua senha.
+              Verifique sua caixa de entrada.
+            </p>
+          </div>
+          <div className="mt-6">
+            <Button
+              className="w-full"
+              onClick={() => navigate("/login")}
+            >
+              Voltar para o login
+            </Button>
           </div>
         </div>
-      </main>
-      <Footer />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Esqueceu sua senha?</h1>
+          <p className="mt-2 text-gray-600">
+            Enviaremos um link para redefinir sua senha.
+          </p>
+        </div>
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <div className="mt-1">
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="seu@email.com"
+                {...register("email", {
+                  required: "Email é obrigatório",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Endereço de email inválido"
+                  }
+                })}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                "Enviar link de redefinição"
+              )}
+            </Button>
+          </div>
+          
+          <div className="text-center">
+            <Button
+              variant="link"
+              type="button"
+              onClick={() => navigate("/login")}
+              className="text-tuca-ocean-blue"
+            >
+              Voltar para o login
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

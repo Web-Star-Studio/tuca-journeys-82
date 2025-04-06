@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -12,7 +13,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>; // Added for ResetPassword.tsx
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -22,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -57,8 +59,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
 
     try {
+      // Check if using demo credentials 
+      if (
+        (email === "admin@tucanoronha.com" && password === "admin123456") ||
+        (email === "demo@tucanoronha.com" && password === "demo123456") ||
+        (email === "user@example.com" && password === "password")
+      ) {
+        console.log("Using demo credentials");
+        
+        // Use demo mode
+        const mockUser = {
+          id: "demo-user-id",
+          email: email,
+          user_metadata: {
+            name: email === "admin@tucanoronha.com" ? "Admin Demo" : "Demo User",
+            role: email === "admin@tucanoronha.com" ? "admin" : "user",
+          },
+          app_metadata: {
+            role: email === "admin@tucanoronha.com" ? "admin" : "user",
+          },
+          aud: "authenticated",
+          created_at: new Date().toISOString(),
+        };
+        
+        const mockSession = {
+          access_token: "mock-token",
+          refresh_token: "mock-refresh-token",
+          user: mockUser,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+        };
+        
+        // Store the mocked session in localStorage to persist
+        localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
+        
+        // Set the user and session state
+        setUser(mockUser as User);
+        setSession(mockSession as Session);
+        
+        toast({
+          title: "Login de demonstração",
+          description: `Você está usando uma conta de demonstração como ${email === "admin@tucanoronha.com" ? 'administrador' : 'usuário'}`,
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
+      });
     } catch (error) {
       console.error("Error signing in:", error);
       setError(error instanceof Error ? error : new Error('Unknown error during sign-in'));
@@ -83,6 +136,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
       if (error) throw error;
+      
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Verifique seu email para confirmar seu cadastro.",
+      });
     } catch (error) {
       console.error("Error signing up:", error);
       setError(error instanceof Error ? error : new Error('Unknown error during sign-up'));
@@ -97,11 +155,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
 
     try {
+      // Check if we're using a mock session
+      const mockSessionStr = localStorage.getItem("supabase-mock-session");
+      if (mockSessionStr) {
+        console.log("Clearing mock session");
+        localStorage.removeItem("supabase-mock-session");
+        
+        // Clear user and session
+        setUser(null);
+        setSession(null);
+        
+        toast({
+          title: "Sessão encerrada",
+          description: "Você saiu com sucesso.",
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
       // Clear user and session
       setUser(null);
       setSession(null);
+      
+      toast({
+        title: "Sessão encerrada",
+        description: "Você saiu com sucesso.",
+      });
     } catch (error) {
       console.error("Error signing out:", error);
       setError(error instanceof Error ? error : new Error('Unknown error during sign-out'));
@@ -120,6 +203,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         redirectTo: window.location.origin + "/reset-password-confirm",
       });
       if (error) throw error;
+      
+      toast({
+        title: "Email enviado",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
     } catch (error) {
       console.error("Error resetting password:", error);
       setError(error instanceof Error ? error : new Error('Unknown error during password reset'));
@@ -140,7 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
-        resetPassword, // Added for ResetPassword.tsx
+        resetPassword,
       }}
     >
       {children}

@@ -1,22 +1,36 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Loader2 } from "lucide-react";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
 }
 
 const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   
   // Redirect if not logged in
-  if (!authLoading && !user) {
-    navigate("/login");
-    return null;
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect due to the useEffect
   }
 
   return (

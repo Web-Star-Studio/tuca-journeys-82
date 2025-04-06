@@ -1,109 +1,70 @@
 
-import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-interface QuickAccessButtonsProps {
-  onSuccessfulLogin: (redirectToAdmin: boolean) => void;
-}
+const DEMO_ACCOUNTS = [
+  { email: "user@example.com", password: "password", label: "Entrar como Usuário Demo" },
+  { email: "admin@tucanoronha.com", password: "admin123456", label: "Entrar como Admin Demo" },
+];
 
-const QuickAccessButtons = ({ onSuccessfulLogin }: QuickAccessButtonsProps) => {
-  const { loading, signIn } = useAuth();
+const QuickAccessButtons = () => {
+  const { signIn, isLoading } = useAuth();
+  const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [buttonClicked, setButtonClicked] = React.useState<string | null>(null);
 
-  const handleLogin = async (email: string, password: string, isAdmin: boolean, buttonType: string) => {
-    setIsLoading(true);
-    setButtonClicked(buttonType);
-    
+  const handleDemoLogin = async (email: string, password: string) => {
+    setLoggingIn(email);
     try {
-      console.log(`Attempting ${buttonType} login with email: ${email}`);
       await signIn(email, password);
-      console.log(`${buttonType} login successful, redirecting to ${isAdmin ? 'admin' : 'dashboard'}`);
-      
-      // Slight delay to ensure state updates are processed
-      setTimeout(() => {
-        onSuccessfulLogin(isAdmin);
-      }, 100);
-    } catch (error) {
-      console.error(`${buttonType} login error:`, error);
-      // Error toast is already shown in signIn function
+      toast({
+        title: "Login de demonstração",
+        description: `Você está acessando como ${email === "admin@tucanoronha.com" ? "administrador" : "usuário"} demo.`,
+      });
+    } catch (error: any) {
+      console.error("Demo login error:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Falha no login de demonstração.",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
-      setButtonClicked(null);
+      setLoggingIn(null);
     }
-  };
-
-  const handleDemoLogin = () => {
-    const demoEmail = "demo@tucanoronha.com";
-    const demoPassword = "demo123456";
-    handleLogin(demoEmail, demoPassword, false, "demo");
-  };
-
-  const handleAdminDemoLogin = () => {
-    const adminEmail = "admin@tucanoronha.com";
-    const adminPassword = "admin123456";
-    handleLogin(adminEmail, adminPassword, true, "admin");
-  };
-
-  const handleQuickLogin = () => {
-    const quickEmail = "user@example.com";
-    const quickPassword = "password";
-    handleLogin(quickEmail, quickPassword, false, "quick");
-  };
-
-  const getButtonContent = (buttonType: string, label: string) => {
-    if (isLoading && buttonClicked === buttonType) {
-      return <Loader2 className="h-4 w-4 animate-spin" />;
-    }
-    return label;
   };
 
   return (
-    <div className="my-4">
-      <Separator className="my-4">
-        <span className="mx-2 text-xs text-muted-foreground">ACESSO RÁPIDO</span>
-      </Separator>
-      
-      <Button
-        variant="outline"
-        className="w-full mt-2 mb-2 flex justify-between items-center"
-        onClick={handleAdminDemoLogin}
-        disabled={isLoading || loading}
-      >
-        <div className="flex items-center">
-          <ShieldCheck className="mr-2 h-4 w-4 text-tuca-deep-blue" />
-          <span>Acessar Painel Admin</span>
+    <div className="space-y-3">
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-300" />
         </div>
-        {isLoading && buttonClicked === "admin" ? (
-          <Loader2 className="h-4 w-4 animate-spin text-tuca-deep-blue" />
-        ) : (
-          <span className="bg-tuca-light-blue text-tuca-deep-blue px-2 py-0.5 rounded-full text-xs">Rápido</span>
-        )}
-      </Button>
-      
-      <div className="grid grid-cols-2 gap-2 mt-2">
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleQuickLogin}
-          disabled={isLoading || loading}
-        >
-          {getButtonContent("quick", "Login Rápido")}
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleDemoLogin}
-          disabled={isLoading || loading}
-        >
-          {getButtonContent("demo", "Acesso Demo")}
-        </Button>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">Acesso rápido</span>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {DEMO_ACCOUNTS.map((account) => (
+          <Button
+            key={account.email}
+            variant="outline"
+            className="w-full"
+            disabled={isLoading || !!loggingIn}
+            onClick={() => handleDemoLogin(account.email, account.password)}
+          >
+            {loggingIn === account.email ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              account.label
+            )}
+          </Button>
+        ))}
       </div>
     </div>
   );

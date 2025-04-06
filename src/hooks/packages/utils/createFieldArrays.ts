@@ -20,7 +20,7 @@ export function createStringFieldArray(
 ): StringFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name, // Now we're using specific string literals that match the form schema
+    name, // Using the specific string literals that match the form schema
   });
 
   return {
@@ -48,11 +48,12 @@ export function createStringFieldArray(
 export function createItineraryFieldArray(
   form: UseFormReturn<PackageFormValues>
 ): ItineraryFieldArrayType {
-  // Use the literal "itinerary" string which satisfies TypeScript
-  const itineraryKey = "itinerary";
+  // Use a literal string constant to ensure type safety
+  const name: "itinerary" = "itinerary";
+  
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: itineraryKey, // TypeScript knows this is exactly "itinerary"
+    name, // This is explicitly the literal string "itinerary"
   });
 
   return {

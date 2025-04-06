@@ -8,35 +8,39 @@ import HighlightsForm from "./form/HighlightsForm";
 import DetailsForm from "./form/DetailsForm";
 import ItineraryForm from "./form/ItineraryForm";
 import FormActions from "./form/FormActions";
+import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
+import { usePackageForm } from "@/hooks/packages/usePackageForm";
+import { usePackageDetail } from "@/hooks/use-packages";
 
 interface PackageFormProps {
-  form: UseFormReturn<PackageFormValues>;
-  onSubmit: (values: PackageFormValues) => void;
-  isLoading: boolean;
-  submitLabel?: string;
-  highlightsArray: any;
-  includesArray: any;
-  excludesArray: any;
-  itineraryArray: any;
-  datesArray: any;
+  packageId: number | null;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-const PackageForm = ({ 
-  form, 
-  onSubmit, 
-  isLoading, 
-  submitLabel = "Salvar",
-  highlightsArray,
-  includesArray,
-  excludesArray,
-  itineraryArray,
-  datesArray
-}: PackageFormProps) => {
+const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
   const [activeTab, setActiveTab] = useState("basic-info");
+  
+  // Fetch package details if editing an existing package
+  const { data: packageData, isLoading: isLoadingPackage } = usePackageDetail(packageId || 0);
+  
+  // Initialize form with package data if available
+  const { 
+    form, 
+    previewUrl,
+    highlightsArray, 
+    includesArray, 
+    excludesArray, 
+    itineraryArray, 
+    datesArray 
+  } = usePackageForm(packageId && packageData ? packageData : undefined);
+  
+  // Setup submission handler
+  const { handleSubmit, isSubmitting } = usePackageSubmit(packageId, onSuccess);
 
-  const handleSubmit = (values: PackageFormValues) => {
-    onSubmit(values);
-  };
+  if (packageId && isLoadingPackage) {
+    return <div className="p-8 text-center">Carregando dados do pacote...</div>;
+  }
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -53,7 +57,7 @@ const PackageForm = ({
         </TabsList>
         
         <TabsContent value="basic-info" className="space-y-6">
-          <BasicInfoForm form={form} />
+          <BasicInfoForm form={form} previewUrl={previewUrl} />
         </TabsContent>
         
         <TabsContent value="highlights" className="space-y-6">
@@ -81,10 +85,10 @@ const PackageForm = ({
       </Tabs>
       
       <FormActions 
-        isLoading={isLoading} 
-        submitLabel={submitLabel} 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        isSubmitting={isSubmitting} 
+        packageId={packageId}
+        onCancel={onCancel}
+        submitLabel={packageId ? "Salvar Alterações" : "Criar Pacote"}
       />
     </form>
   );

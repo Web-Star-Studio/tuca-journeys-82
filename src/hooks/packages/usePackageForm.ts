@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { PackageFormValues } from "@/components/admin/packages/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Package } from "@/data/types/packageTypes";
 
 // Define the schema
@@ -28,6 +28,8 @@ const packageSchema = z.object({
 });
 
 export function usePackageForm(initialValues?: Package) {
+  const [previewUrl, setPreviewUrl] = useState("");
+  
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
     defaultValues: {
@@ -47,30 +49,36 @@ export function usePackageForm(initialValues?: Package) {
     },
   });
 
+  // Watch for image changes to update preview
+  const imageValue = form.watch("image");
+  useEffect(() => {
+    setPreviewUrl(imageValue);
+  }, [imageValue]);
+
   // Field arrays
   const highlightsArray = useFieldArray({
     control: form.control,
-    name: "highlights",
+    name: "highlights", // Correct field name
   });
 
   const includesArray = useFieldArray({
     control: form.control,
-    name: "includes",
+    name: "includes", // Correct field name
   });
 
   const excludesArray = useFieldArray({
     control: form.control,
-    name: "excludes",
+    name: "excludes", // Correct field name
   });
 
   const itineraryArray = useFieldArray({
     control: form.control,
-    name: "itinerary",
+    name: "itinerary", // This one was already correct
   });
 
   const datesArray = useFieldArray({
     control: form.control,
-    name: "dates",
+    name: "dates", // Correct field name
   });
 
   // Initialize with at least one item each if empty
@@ -84,6 +92,7 @@ export function usePackageForm(initialValues?: Package) {
 
   return {
     form,
+    previewUrl,
     highlightsArray,
     includesArray,
     excludesArray,

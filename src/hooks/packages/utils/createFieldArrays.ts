@@ -14,10 +14,11 @@ import {
 /**
  * Creates a field array for string fields (highlights, includes, excludes, dates)
  */
-export function createStringFieldArray(
+export function createStringFieldArray<T extends "highlights" | "includes" | "excludes" | "dates">(
   form: UseFormReturn<PackageFormValues>,
-  name: "highlights" | "includes" | "excludes" | "dates" // Specify exact string literals
+  name: T
 ): StringFieldArrayType {
+  // Use a type-safe approach with generics
   const fieldArrayResult = useFieldArray({
     control: form.control,
     name, // Using the specific string literals that match the form schema

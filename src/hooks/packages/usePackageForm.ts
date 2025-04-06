@@ -58,27 +58,27 @@ export function usePackageForm(initialValues?: Package) {
   // Field arrays
   const highlightsArray = useFieldArray({
     control: form.control,
-    name: "highlights", // Correct field name
+    name: "highlights",
   });
 
   const includesArray = useFieldArray({
     control: form.control,
-    name: "includes", // Correct field name
+    name: "includes",
   });
 
   const excludesArray = useFieldArray({
     control: form.control,
-    name: "excludes", // Correct field name
+    name: "excludes",
   });
 
   const itineraryArray = useFieldArray({
     control: form.control,
-    name: "itinerary", // This one was already correct
+    name: "itinerary",
   });
 
   const datesArray = useFieldArray({
     control: form.control,
-    name: "dates", // Correct field name
+    name: "dates",
   });
 
   // Initialize with at least one item each if empty

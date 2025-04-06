@@ -7,17 +7,18 @@ interface FormActionsProps {
   isSubmitting: boolean;
   packageId: number | null;
   onCancel: () => void;
-  // Add these additional props that are being passed
+  submitLabel?: string;
   activeTab?: string;
   setActiveTab?: React.Dispatch<React.SetStateAction<string>>;
-  submitLabel?: string;
 }
 
 const FormActions = ({ 
   isSubmitting, 
   packageId, 
   onCancel,
-  submitLabel = "Criar Pacote" 
+  submitLabel = "Criar Pacote",
+  activeTab,
+  setActiveTab
 }: FormActionsProps) => {
   return (
     <div className="flex justify-end gap-2 pt-4 border-t">

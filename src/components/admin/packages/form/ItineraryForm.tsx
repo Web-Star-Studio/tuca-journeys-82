@@ -1,6 +1,6 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -10,11 +10,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface ItineraryFormProps {
   form: UseFormReturn<PackageFormValues>;
-  itineraryArray: {
-    fields: any[];
-    append: (value: { day: number; title: string; description: string }) => void;
-    remove: (index: number) => void;
-  };
+  itineraryArray: UseFieldArrayReturn<PackageFormValues, "itinerary", "id">;
 }
 
 const ItineraryForm = ({ form, itineraryArray }: ItineraryFormProps) => {

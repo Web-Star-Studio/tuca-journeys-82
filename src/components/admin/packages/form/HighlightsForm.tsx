@@ -1,6 +1,6 @@
 
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
 import { PackageFormValues } from "../types";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
@@ -9,16 +9,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 interface HighlightsFormProps {
   form: UseFormReturn<PackageFormValues>;
-  highlightsArray: {
-    fields: any[];
-    append: (value: string) => void;
-    remove: (index: number) => void;
-  };
-  datesArray: {
-    fields: any[];
-    append: (value: string) => void;
-    remove: (index: number) => void;
-  };
+  highlightsArray: UseFieldArrayReturn<PackageFormValues, "highlights", "id">;
+  datesArray: UseFieldArrayReturn<PackageFormValues, "dates", "id">;
 }
 
 const HighlightsForm = ({ form, highlightsArray, datesArray }: HighlightsFormProps) => {

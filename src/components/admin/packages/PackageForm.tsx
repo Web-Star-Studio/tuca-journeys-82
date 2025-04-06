@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PackageFormValues } from "./types";
 import BasicInfoForm from "./form/BasicInfoForm";
@@ -89,6 +88,8 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
         packageId={packageId}
         onCancel={onCancel}
         submitLabel={packageId ? "Salvar Alterações" : "Criar Pacote"}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </form>
   );

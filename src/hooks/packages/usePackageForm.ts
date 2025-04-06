@@ -55,7 +55,7 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Field arrays - properly typed for each specific field
+  // Field arrays - each with the correct name and type
   const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",

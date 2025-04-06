@@ -50,6 +50,7 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
 
     try {
       await createBookingMutation.mutateAsync({
+        user_id: user.id,
         tour_id: tour.id,
         accommodation_id: null,
         start_date: selectedDate,

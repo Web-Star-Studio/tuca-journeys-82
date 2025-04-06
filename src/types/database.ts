@@ -17,7 +17,7 @@ export type Tour = {
   includes: string[];
   excludes: string[];
   notes: string[];
-  meeting_point: string;
+  meeting_point: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -54,7 +54,7 @@ export type Booking = {
   end_date: string;
   guests: number;
   total_price: number;
-  status: 'pending' | 'confirmed' | 'canceled' | 'completed';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   payment_status: 'pending' | 'paid' | 'refunded' | 'failed';
   payment_method: string | null;
   special_requests: string | null;
@@ -64,9 +64,8 @@ export type Booking = {
 
 export type UserProfile = {
   id: string;
-  user_id: string;
-  name: string;
-  email: string;
+  name: string | null;
+  email: string | null;
   phone: string | null;
   address: string | null;
   city: string | null;

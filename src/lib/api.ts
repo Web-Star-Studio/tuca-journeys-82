@@ -34,35 +34,15 @@ export const getTourByIdFromDB = async (id: number) => {
 
 // Packages API
 export const getPackagesFromDB = async (category?: string) => {
-  let query = supabase.from('packages').select('*');
-  
-  if (category) {
-    query = query.eq('category', category);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error fetching packages:', error);
-    throw error;
-  }
-  
-  return data as Package[];
+  // For packages we'll use the static data for now
+  // This is a placeholder for future database integration
+  return [] as Package[];
 };
 
 export const getPackageByIdFromDB = async (id: number) => {
-  const { data, error } = await supabase
-    .from('packages')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error(`Error fetching package ${id}:`, error);
-    throw error;
-  }
-  
-  return data as Package;
+  // For packages we'll use the static data for now
+  // This is a placeholder for future database integration
+  return {} as Package;
 };
 
 // Accommodations API
@@ -98,7 +78,7 @@ export const getAccommodationByIdFromDB = async (id: number) => {
 export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
   const { data, error } = await supabase
     .from('bookings')
-    .insert(booking)
+    .insert([booking])
     .select()
     .single();
   
@@ -134,7 +114,7 @@ export const getUserProfile = async (userId: string) => {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('user_id', userId)
+    .eq('id', userId)
     .single();
   
   if (error && error.code !== 'PGRST116') { // PGRST116 is the error for "no rows returned"
@@ -145,16 +125,16 @@ export const getUserProfile = async (userId: string) => {
   return data as UserProfile | null;
 };
 
-export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & { user_id: string }) => {
+export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & { id: string }) => {
   // Check if profile exists
-  const existingProfile = await getUserProfile(profile.user_id);
+  const existingProfile = await getUserProfile(profile.id);
   
   if (existingProfile) {
     // Update
     const { data, error } = await supabase
       .from('user_profiles')
       .update(profile)
-      .eq('user_id', profile.user_id)
+      .eq('id', profile.id)
       .select()
       .single();
     
@@ -168,7 +148,7 @@ export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & 
     // Create
     const { data, error } = await supabase
       .from('user_profiles')
-      .insert(profile)
+      .insert([profile])
       .select()
       .single();
     

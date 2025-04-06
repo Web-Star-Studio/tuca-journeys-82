@@ -31,18 +31,10 @@ export const useUserBookings = () => {
 export const useCreateBooking = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (bookingData: Omit<Booking, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      if (!user?.id) throw new Error("Usuário não autenticado");
-      
-      const booking = {
-        ...bookingData,
-        user_id: user.id,
-      };
-      
-      return createBooking(booking);
+    mutationFn: (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+      return createBooking(bookingData);
     },
     onSuccess: () => {
       toast({

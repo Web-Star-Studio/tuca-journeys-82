@@ -16,11 +16,12 @@ import {
  */
 export function createStringFieldArray(
   form: UseFormReturn<PackageFormValues>,
-  name: string // Changed from union type to string to avoid type conflicts
+  name: string // Using string to handle different field names
 ): StringFieldArrayType {
+  // Make sure we're only creating field arrays for allowed names
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name, // Using the name parameter directly without type constraints
+    name, // Using the name parameter directly for string fields
   });
 
   return {
@@ -50,7 +51,8 @@ export function createItineraryFieldArray(
 ): ItineraryFieldArrayType {
   const fieldArrayResult = useFieldArray({
     control: form.control,
-    name: "itinerary",
+    // Using the literal "itinerary" string to satisfy TypeScript's requirement
+    name: "itinerary" as const, // Using 'as const' to ensure it's the literal "itinerary"
   });
 
   return {

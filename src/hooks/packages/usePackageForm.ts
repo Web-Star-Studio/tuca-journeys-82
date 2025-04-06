@@ -55,30 +55,30 @@ export function usePackageForm(initialValues?: Package) {
     setPreviewUrl(imageValue);
   }, [imageValue]);
 
-  // Field arrays - each with the correct name and explicit type
-  const highlightsArray = useFieldArray<PackageFormValues>({
+  // Field arrays with correct type definitions - using explicit TFieldValues parameter
+  const highlightsArray = useFieldArray({
     control: form.control,
-    name: "highlights",
+    name: "highlights" as const,
   });
 
-  const includesArray = useFieldArray<PackageFormValues>({
+  const includesArray = useFieldArray({
     control: form.control,
-    name: "includes",
+    name: "includes" as const,
   });
 
-  const excludesArray = useFieldArray<PackageFormValues>({
+  const excludesArray = useFieldArray({
     control: form.control,
-    name: "excludes",
+    name: "excludes" as const,
   });
 
-  const itineraryArray = useFieldArray<PackageFormValues>({
+  const itineraryArray = useFieldArray({
     control: form.control,
-    name: "itinerary",
+    name: "itinerary" as const,
   });
 
-  const datesArray = useFieldArray<PackageFormValues>({
+  const datesArray = useFieldArray({
     control: form.control,
-    name: "dates",
+    name: "dates" as const,
   });
 
   // Initialize with at least one item each if empty

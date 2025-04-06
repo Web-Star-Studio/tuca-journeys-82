@@ -1,5 +1,5 @@
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, UseFieldArrayReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { PackageFormValues } from "@/components/admin/packages/types";
@@ -27,24 +27,24 @@ const packageSchema = z.object({
   dates: z.array(z.string()).min(1, "Inclua pelo menos uma data disponível"),
 });
 
-// Define types for our field arrays to make them consistent
-export type HighlightsFieldArray = ReturnType<typeof useFieldArray<PackageFormValues, "highlights", "id">> & {
+// Define type for the field arrays
+export type HighlightsFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "highlights", "id">, "append"> & {
   append: (value: string) => void;
 };
 
-export type IncludesFieldArray = ReturnType<typeof useFieldArray<PackageFormValues, "includes", "id">> & {
+export type IncludesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "includes", "id">, "append"> & {
   append: (value: string) => void;
 };
 
-export type ExcludesFieldArray = ReturnType<typeof useFieldArray<PackageFormValues, "excludes", "id">> & {
+export type ExcludesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "excludes", "id">, "append"> & {
   append: (value: string) => void;
 };
 
-export type ItineraryFieldArray = ReturnType<typeof useFieldArray<PackageFormValues, "itinerary", "id">> & {
+export type ItineraryFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "itinerary", "id">, "append"> & {
   append: (value: { day: number; title: string; description: string }) => void;
 };
 
-export type DatesFieldArray = ReturnType<typeof useFieldArray<PackageFormValues, "dates", "id">> & {
+export type DatesFieldArray = Omit<UseFieldArrayReturn<PackageFormValues, "dates", "id">, "append"> & {
   append: (value: string) => void;
 };
 
@@ -77,30 +77,30 @@ export function usePackageForm(initialValues?: Package) {
   }, [imageValue]);
 
   // Field arrays with specific types
-  const highlightsArray = useFieldArray<PackageFormValues>({
+  const highlightsArray = useFieldArray({
     control: form.control,
     name: "highlights",
-  });
+  }) as HighlightsFieldArray;
 
-  const includesArray = useFieldArray<PackageFormValues>({
+  const includesArray = useFieldArray({
     control: form.control,
     name: "includes",
-  });
+  }) as IncludesFieldArray;
 
-  const excludesArray = useFieldArray<PackageFormValues>({
+  const excludesArray = useFieldArray({
     control: form.control,
     name: "excludes",
-  });
+  }) as ExcludesFieldArray;
 
-  const itineraryArray = useFieldArray<PackageFormValues>({
+  const itineraryArray = useFieldArray({
     control: form.control,
     name: "itinerary",
-  });
+  }) as ItineraryFieldArray;
 
-  const datesArray = useFieldArray<PackageFormValues>({
+  const datesArray = useFieldArray({
     control: form.control,
     name: "dates",
-  });
+  }) as DatesFieldArray;
 
   // Initialize with at least one item each if empty
   useEffect(() => {

@@ -1,58 +1,65 @@
 
-import { useEffect, RefObject, MutableRefObject } from 'react';
-import mapboxgl from 'mapbox-gl';
-import { PointData } from '../utils/mapData';
+import React, { useEffect } from "react";
+import mapboxgl from "mapbox-gl";
+import { MutableRefObject } from "react";
+import { PointData } from "../utils/mapData";
 
-interface UseMapMarkersProps {
-  map: MutableRefObject<mapboxgl.Map | null>; // Changed from RefObject to MutableRefObject
-  mapToken: string | null;
-  filteredMapData: PointData[];
-  setActivePopup: (popup: { id: string; lngLat: mapboxgl.LngLat } | null) => void;
+interface ActivePopup {
+  id: string;
+  lngLat: mapboxgl.LngLat;
 }
 
-export const useMapMarkers = ({ map, mapToken, filteredMapData, setActivePopup }: UseMapMarkersProps) => {
+interface UseMapMarkersProps {
+  map: MutableRefObject<mapboxgl.Map | null>;
+  mapToken: string | null;
+  filteredMapData: PointData[];
+  setActivePopup: React.Dispatch<React.SetStateAction<ActivePopup | null>>;
+}
+
+export const useMapMarkers = ({ 
+  map, 
+  mapToken, 
+  filteredMapData, 
+  setActivePopup 
+}: UseMapMarkersProps) => {
+  // Add markers to the map
   useEffect(() => {
     if (!map.current || !mapToken) return;
 
-    // Remover todos os marcadores existentes
+    // Remove any existing markers
     const existingMarkers = document.querySelectorAll('.mapboxgl-marker');
     existingMarkers.forEach(marker => marker.remove());
-    
-    // Adicionar marcadores filtrados
+
+    // Add markers for filtered data
     filteredMapData.forEach(point => {
+      // Create a marker element
       const markerElement = document.createElement('div');
-      markerElement.className = `marker-container ${point.category}`;
-      
-      const markerIcon = document.createElement('div');
-      markerIcon.className = `
-        w-6 h-6 rounded-full flex items-center justify-center 
-        ${point.category === 'tours' ? 'bg-tuca-ocean-blue' : ''} 
-        ${point.category === 'accommodations' ? 'bg-green-500' : ''} 
-        ${point.category === 'restaurants' ? 'bg-amber-500' : ''} 
-        ${point.category === 'beaches' ? 'bg-blue-400' : ''} 
-        ${point.category === 'attractions' ? 'bg-purple-500' : ''}
-        shadow-md cursor-pointer hover:scale-110 transition-all duration-300
-      `;
-      
-      const iconElement = document.createElement('span');
-      iconElement.className = 'text-white text-xs font-bold';
-      iconElement.textContent = point.category.charAt(0).toUpperCase();
-      
-      markerIcon.appendChild(iconElement);
-      markerElement.appendChild(markerIcon);
-      
-      // Criar e adicionar o marcador
+      markerElement.className = 'marker';
+      markerElement.style.width = '24px';
+      markerElement.style.height = '24px';
+      markerElement.style.borderRadius = '50%';
+      markerElement.style.backgroundColor = point.color || '#3FB1CE';
+      markerElement.style.border = '2px solid white';
+      markerElement.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+      markerElement.style.cursor = 'pointer';
+
+      // Create the marker and add it to the map
       const marker = new mapboxgl.Marker(markerElement)
-        .setLngLat([point.lng, point.lat])
-        .addTo(map.current!);
-      
-      // Adicionar evento de clique para exibir popup
+        .setLngLat(point.coordinates)
+        .addTo(map.current);
+
+      // Add click event to show popup
       markerElement.addEventListener('click', () => {
+        const lngLat = new mapboxgl.LngLat(
+          point.coordinates[0],
+          point.coordinates[1]
+        );
+        
         setActivePopup({
           id: point.id,
-          lngLat: marker.getLngLat(),
+          lngLat: lngLat
         });
       });
     });
-  }, [filteredMapData, mapToken, map, setActivePopup]);
+  }, [map, mapToken, filteredMapData, setActivePopup]);
 };

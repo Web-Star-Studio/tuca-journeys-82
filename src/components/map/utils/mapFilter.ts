@@ -1,38 +1,55 @@
-
-import { FilterCategory, FilterPriceRange, FilterRating } from "@/contexts/MapFilterContext";
-import { PointData } from "./mapData";
-
 export interface MapFilters {
-  categories: FilterCategory[];
-  priceRange: FilterPriceRange;
-  rating: FilterRating;
-  searchQuery: string;
+  search: string;
+  category: string;
+  priceRange: [number, number];
+  rating: number;
 }
 
-export const filterMapData = (mapData: PointData[], filters: MapFilters): PointData[] => {
-  return mapData.filter(point => {
-    // Filtrar por categoria
-    if (!filters.categories.includes(point.category as any)) {
-      return false;
-    }
-    
-    // Filtrar por busca
-    if (filters.searchQuery && !point.name.toLowerCase().includes(filters.searchQuery.toLowerCase())) {
-      return false;
-    }
-    
-    // Filtrar por avaliação
-    if (filters.rating && point.rating < filters.rating) {
-      return false;
-    }
-    
-    // Filtrar por faixa de preço
-    if ('price' in point && filters.priceRange !== 'all') {
-      if (filters.priceRange === 'low' && point.price && point.price > 300) return false;
-      if (filters.priceRange === 'medium' && point.price && (point.price <= 300 || point.price > 800)) return false;
-      if (filters.priceRange === 'high' && point.price && point.price <= 800) return false;
-    }
-    
-    return true;
-  });
+export const filterMapData = (data: any[], filters: MapFilters) => {
+  // Start with all data
+  let filtered = [...data];
+
+  // Filter by search term if provided
+  if (filters.search) {
+    const searchLower = filters.search.toLowerCase();
+    filtered = filtered.filter(
+      item => 
+        (item.name && item.name.toLowerCase().includes(searchLower)) || 
+        (item.description && item.description.toLowerCase().includes(searchLower))
+    );
+  }
+
+  // Filter by category if not "all"
+  if (filters.category && filters.category !== 'all') {
+    filtered = filtered.filter(item => item.category === filters.category);
+  }
+
+  // Filter by rating if set
+  if (filters.rating > 0) {
+    // Check if the item has a rating property and if it's greater than or equal to the filter rating
+    filtered = filtered.filter(item => {
+      // Skip rating filter if the item doesn't have a rating
+      if (item.rating === undefined) return true;
+      return typeof item.rating === 'number' && item.rating >= filters.rating;
+    });
+  }
+
+  // Filter by price range
+  if (filters.priceRange && filters.priceRange.length === 2) {
+    const [min, max] = filters.priceRange;
+    filtered = filtered.filter(item => {
+      // Skip price filter if the item doesn't have a price
+      if (item.price === undefined) return true;
+      
+      // If max is set to the highest value, only check min
+      if (max === 1000) {
+        return typeof item.price === 'number' && item.price >= min;
+      } 
+      
+      // Otherwise check if price is within range
+      return typeof item.price === 'number' && item.price >= min && item.price <= max;
+    });
+  }
+
+  return filtered;
 };

@@ -4,7 +4,38 @@ export interface MapFilters {
   category: string;
   priceRange: [number, number];
   rating: number;
+  distanceFilter?: {
+    center: [number, number];
+    maxDistance: number; // in kilometers
+  };
+  dateFilter?: {
+    startDate: string;
+    endDate: string;
+  };
 }
+
+// Helper function to calculate distance between two points in kilometers
+const calculateDistance = (
+  point1: [number, number], 
+  point2: [number, number]
+): number => {
+  // Haversine formula to calculate distance between two points on Earth
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+  
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = toRadians(point2[1] - point1[1]);
+  const dLon = toRadians(point2[0] - point1[0]);
+  
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(toRadians(point1[1])) * Math.cos(toRadians(point2[1])) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c; // Distance in kilometers
+  
+  return distance;
+};
 
 export const filterMapData = (data: any[], filters: MapFilters) => {
   // Start with all data
@@ -71,6 +102,31 @@ export const filterMapData = (data: any[], filters: MapFilters) => {
       
       // Otherwise check if price is within range
       return typeof item.price === 'number' && item.price >= min && item.price <= max;
+    });
+  }
+
+  // Filter by distance if set
+  if (filters.distanceFilter && filters.distanceFilter.center && filters.distanceFilter.maxDistance > 0) {
+    filtered = filtered.filter(item => {
+      // Skip if the item doesn't have coordinates
+      if (!item.coordinates) return true;
+      
+      const distance = calculateDistance(item.coordinates, filters.distanceFilter!.center);
+      return distance <= filters.distanceFilter!.maxDistance;
+    });
+  }
+
+  // Filter by date if set (for events)
+  if (filters.dateFilter && filters.dateFilter.startDate && filters.dateFilter.endDate) {
+    const startDate = new Date(filters.dateFilter.startDate);
+    const endDate = new Date(filters.dateFilter.endDate);
+    
+    filtered = filtered.filter(item => {
+      // Only filter items that have a date property (like events)
+      if (!item.date) return true;
+      
+      const itemDate = new Date(item.date);
+      return itemDate >= startDate && itemDate <= endDate;
     });
   }
 

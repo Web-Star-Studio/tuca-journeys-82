@@ -16,7 +16,11 @@ export const accommodationsToPoints = (accommodations: Accommodation[]): PointDa
     color: "#e91e63", // Pink color for accommodations
     price: accommodation.price,
     rating: accommodation.rating,
-    url: `/hospedagens/${accommodation.id}`
+    url: `/hospedagens/${accommodation.id}`,
+    image: accommodation.image,
+    location: accommodation.location,
+    tags: accommodation.amenities,
+    featured: accommodation.featured,
   }));
 };
 
@@ -31,7 +35,11 @@ export const toursToPoints = (tours: Tour[]): PointData[] => {
     color: "#2196f3", // Blue color for tours
     price: tour.price,
     rating: tour.rating,
-    url: `/passeios/${tour.id}`
+    url: `/passeios/${tour.id}`,
+    image: tour.image_url,
+    location: tour.meeting_point || undefined,
+    tags: tour.includes || [],
+    featured: tour.featured || false,
   }));
 };
 
@@ -42,11 +50,18 @@ export const eventsToPoints = (events: Event[]): PointData[] => {
     name: event.name,
     coordinates: getApproximateCoordinates(event.location),
     category: "Evento",
-    description: `${event.date} - ${event.start_time}`,
+    description: event.description.substring(0, 100) + "...",
     color: "#4caf50", // Green color for events
     price: event.price,
     rating: null,
-    url: `/eventos/${event.id}`
+    url: `/eventos/${event.id}`,
+    image: event.image_url,
+    location: event.location,
+    date: event.date,
+    startTime: event.start_time,
+    endTime: event.end_time,
+    tags: [event.category],
+    featured: event.featured || false,
   }));
 };
 

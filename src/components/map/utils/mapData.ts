@@ -10,6 +10,14 @@ export interface PointData {
   price?: number;
   rating?: number | null;
   url?: string;
+  image?: string;
+  location?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  tags?: string[];
+  isHidden?: boolean;
+  featured?: boolean;
 }
 
 export const NORONHA_CENTER: [number, number] = [-32.426, -3.854];
@@ -24,7 +32,10 @@ export const getMapData = () => {
       description: "Considerada uma das praias mais bonitas do mundo.",
       icon: "beach",
       color: "#f44336",
-      url: "/lugares/praia-do-sancho"
+      url: "/lugares/praia-do-sancho",
+      image: "/tour-sunset.jpg",
+      location: "Costa Oeste da Ilha",
+      featured: true,
     },
     {
       id: "baia-dos-porcos",
@@ -34,7 +45,9 @@ export const getMapData = () => {
       description: "Famosa por suas piscinas naturais e vista deslumbrante.",
       icon: "beach",
       color: "#e91e63",
-      url: "/lugares/baia-dos-porcos"
+      url: "/lugares/baia-dos-porcos",
+      image: "/tour-underwater.jpg",
+      location: "Costa Oeste da Ilha",
     },
     {
       id: "forte-nossa-senhora-dos-remedios",
@@ -44,7 +57,10 @@ export const getMapData = () => {
       description: "Construção histórica com vista panorâmica.",
       icon: "castle",
       color: "#9c27b0",
-      url: "/lugares/forte-nossa-senhora-dos-remedios"
+      url: "/lugares/forte-nossa-senhora-dos-remedios",
+      image: "/hero-noronha-1.jpg",
+      location: "Vila dos Remédios",
+      tags: ["histórico", "arquitetura", "colonial"],
     },
     {
       id: "museu-do-tubarao",
@@ -54,7 +70,9 @@ export const getMapData = () => {
       description: "Informações e exposições sobre a vida marinha local.",
       icon: "museum",
       color: "#673ab7",
-      url: "/lugares/museu-do-tubarao"
+      url: "/lugares/museu-do-tubarao",
+      image: "/tour-diving.jpg",
+      location: "Vila dos Remédios",
     },
     {
       id: "cacimba-do-padre",
@@ -64,7 +82,9 @@ export const getMapData = () => {
       description: "Praia extensa com ondas propícias para o surf.",
       icon: "beach",
       color: "#3f51b5",
-      url: "/lugares/cacimba-do-padre"
+      url: "/lugares/cacimba-do-padre",
+      image: "/tour-trail.jpg",
+      location: "Costa Sul da Ilha",
     },
   ];
   return data;

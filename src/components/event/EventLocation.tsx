@@ -77,7 +77,31 @@ const EventLocation = ({ location, eventId }: EventLocationProps) => {
           .setLngLat(coords)
           .addTo(map.current);
           
+        // Add location popup
+        new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          offset: [0, -30]
+        })
+        .setLngLat(coords)
+        .setHTML(`<div class="text-xs font-medium p-1">${location}</div>`)
+        .addTo(map.current);
+          
         map.current.on('load', () => {
+          // Add 3D buildings for a nicer look
+          if (map.current?.getLayer('building')) {
+            map.current.setLayoutProperty('building', 'visibility', 'visible');
+            map.current.setPaintProperty('building', 'fill-extrusion-height', [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              15,
+              0,
+              15.05,
+              ['get', 'height']
+            ]);
+          }
+          
           setIsLoading(false);
         });
       } catch (err) {
@@ -131,7 +155,7 @@ const EventLocation = ({ location, eventId }: EventLocationProps) => {
       
       {/* View on full map link */}
       <Link 
-        to="/mapa" 
+        to={`/mapa?highlight=${eventId ? `event-${eventId}` : ''}`}
         className="absolute bottom-3 left-3 bg-white rounded-md shadow-md px-3 py-1 flex items-center gap-1 text-sm text-gray-700 hover:bg-gray-100"
       >
         <MapPin size={14} />

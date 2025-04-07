@@ -1,13 +1,15 @@
 
-// Sample data types for the users report
+import { supabase } from "@/lib/supabase";
+
 export interface UserGrowthData {
   month: string;
   usuarios: number;
 }
 
 export interface UserRegionData {
-  regiao: string;
-  usuarios: number;
+  name: string;
+  value: number;
+  percent: number;
 }
 
 export interface UserDeviceData {
@@ -16,58 +18,62 @@ export interface UserDeviceData {
   color: string;
 }
 
-// Sample data for the users report (in a real app, this would come from an API)
+export interface UserChartConfig {
+  usuarios: {
+    label: string;
+    color: string;
+  };
+}
+
+// Dados de crescimento de usuários mês a mês
 export const userGrowthData: UserGrowthData[] = [
-  { month: "Jan", usuarios: 50 },
-  { month: "Fev", usuarios: 40 },
-  { month: "Mar", usuarios: 60 },
-  { month: "Abr", usuarios: 65 },
-  { month: "Mai", usuarios: 70 },
-  { month: "Jun", usuarios: 80 },
+  { month: "Jan", usuarios: 120 },
+  { month: "Fev", usuarios: 132 },
+  { month: "Mar", usuarios: 145 },
+  { month: "Abr", usuarios: 155 },
+  { month: "Mai", usuarios: 165 },
+  { month: "Jun", usuarios: 172 },
 ];
 
+// Dados de distribuição de usuários por região
 export const userRegionData: UserRegionData[] = [
-  { regiao: "Sudeste", usuarios: 280 },
-  { regiao: "Nordeste", usuarios: 180 },
-  { regiao: "Sul", usuarios: 150 },
-  { regiao: "Centro-Oeste", usuarios: 90 },
-  { regiao: "Norte", usuarios: 60 },
-  { regiao: "Internacional", usuarios: 40 },
+  { name: "Sudeste", value: 280, percent: 35 },
+  { name: "Nordeste", value: 240, percent: 30 },
+  { name: "Sul", value: 160, percent: 20 },
+  { name: "Centro-Oeste", value: 80, percent: 10 },
+  { name: "Norte", value: 40, percent: 5 },
 ];
 
+// Dados de dispositivos utilizados pelos usuários
 export const userDeviceData: UserDeviceData[] = [
-  { name: "Desktop", value: 45, color: "#2563eb" },
-  { name: "Mobile", value: 50, color: "#f59e0b" },
-  { name: "Tablet", value: 5, color: "#10b981" },
+  { name: "Desktop", value: 42, color: "#2563eb" },
+  { name: "Mobile", value: 48, color: "#10b981" },
+  { name: "Tablet", value: 10, color: "#f59e0b" },
 ];
 
-// Chart configuration
-export const userChartConfig = {
+// Configuração do gráfico
+export const userChartConfig: UserChartConfig = {
   usuarios: { label: "Usuários", color: "#2563eb" },
-  sudeste: { label: "Sudeste", color: "#2563eb" },
-  nordeste: { label: "Nordeste", color: "#10b981" },
-  sul: { label: "Sul", color: "#f59e0b" },
-  centro: { label: "Centro-Oeste", color: "#8b5cf6" },
-  norte: { label: "Norte", color: "#ec4899" },
-  internacional: { label: "Internacional", color: "#6b7280" },
 };
 
-// Function to get all user data with error handling
-export const getUserData = () => {
+// Função para gerar dados de usuários
+export function getUserData() {
   try {
+    // Em um ambiente real, estes dados viriam da API ou banco de dados
     return {
       growthData: userGrowthData,
       regionData: userRegionData,
       deviceData: userDeviceData,
-      config: userChartConfig,
+      config: userChartConfig
     };
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Erro ao gerar dados de usuários:", error);
+    // Retornar dados de fallback em caso de erro
     return {
       growthData: [],
       regionData: [],
       deviceData: [],
-      config: {},
+      config: userChartConfig
     };
   }
-};
+}

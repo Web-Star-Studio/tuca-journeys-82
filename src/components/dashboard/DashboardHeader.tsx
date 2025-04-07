@@ -15,7 +15,7 @@ const DashboardHeader = ({ notificationCount }: DashboardHeaderProps) => {
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-6">
-      <div>
+      <div className="text-center md:text-left w-full md:w-auto">
         <h1 className="text-2xl sm:text-3xl font-medium mb-3 text-gray-800">Meu Painel</h1>
         {profile && (
           <p className="text-gray-500">
@@ -24,7 +24,7 @@ const DashboardHeader = ({ notificationCount }: DashboardHeaderProps) => {
           </p>
         )}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto">
         <Button 
           variant="outline" 
           size="icon" 

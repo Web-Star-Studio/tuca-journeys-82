@@ -2,9 +2,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart } from "lucide-react";
+import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, X } from "lucide-react";
 import AuthButtons from "../user-menu/AuthButtons";
 import { useAuth } from "@/contexts/AuthContext";
+import { SheetClose } from "../ui/sheet";
 
 interface NavigationMenuProps {
   onClose: () => void;
@@ -27,8 +28,14 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
   ];
   
   return (
-    <nav className="py-4 px-2">
-      <div className="flex flex-col space-y-1">
+    <nav className="flex flex-col h-full">
+      <div className="px-4 pb-4 flex justify-end">
+        <SheetClose className="rounded-full p-2 hover:bg-gray-100">
+          <X className="h-5 w-5" />
+        </SheetClose>
+      </div>
+      
+      <div className="flex flex-col space-y-1 px-2 overflow-y-auto flex-grow">
         {navigationItems.map((item) => {
           const isActive = item.path === "/"
             ? location.pathname === "/"
@@ -61,7 +68,7 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
         </Link>
       </div>
       
-      <div className="mt-8 border-t pt-6 px-4">
+      <div className="mt-auto border-t pt-6 px-4 mb-4">
         <Link
           to="/reservar"
           className="w-full flex items-center justify-center px-4 py-3 bg-tuca-ocean-blue text-white rounded-lg hover:bg-tuca-deep-blue transition-colors"

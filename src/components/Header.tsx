@@ -6,13 +6,13 @@ import UserMenu from "./UserMenu";
 import Logo from "./header/Logo";
 import WishlistIcon from "./header/WishlistIcon";
 import { useScrollPosition } from "./header/useScrollPosition";
-import { 
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerTrigger
-} from "./ui/drawer";
 import NavigationMenu from "./header/NavigationMenu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose
+} from "./ui/sheet";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,28 +48,19 @@ const Header = () => {
             
             <UserMenu />
             
-            <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-              <DrawerTrigger asChild>
+            <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+              <SheetTrigger asChild>
                 <button
                   className="focus:outline-none flex items-center justify-center"
                   aria-label="Open menu"
                 >
                   <Menu className="h-6 w-6" />
                 </button>
-              </DrawerTrigger>
-              <DrawerContent className="h-[85vh] max-h-[85vh]">
-                <div className="mx-auto w-full max-w-sm">
-                  <div className="p-4 flex items-center justify-end">
-                    <DrawerClose asChild>
-                      <button className="rounded-full p-1 hover:bg-gray-100">
-                        <X className="h-5 w-5" />
-                      </button>
-                    </DrawerClose>
-                  </div>
-                  <NavigationMenu onClose={() => setIsOpen(false)} />
-                </div>
-              </DrawerContent>
-            </Drawer>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] py-6 px-0">
+                <NavigationMenu onClose={() => setIsOpen(false)} />
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

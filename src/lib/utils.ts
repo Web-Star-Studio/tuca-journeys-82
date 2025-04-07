@@ -13,3 +13,10 @@ export function formatDate(dateString: string): string {
     year: 'numeric'
   });
 }
+
+export function isRouteActive(currentPath: string, routePath: string): boolean {
+  if (routePath === "/") {
+    return currentPath === "/";
+  }
+  return currentPath.startsWith(routePath);
+}

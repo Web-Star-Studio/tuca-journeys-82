@@ -3,15 +3,20 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import UserMenu from "./UserMenu";
-import DesktopNavigation from "./header/DesktopNavigation";
-import MobileNavigation from "./header/MobileNavigation";
 import Logo from "./header/Logo";
 import WishlistIcon from "./header/WishlistIcon";
 import { useScrollPosition } from "./header/useScrollPosition";
+import { 
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTrigger
+} from "./ui/drawer";
+import NavigationMenu from "./header/NavigationMenu";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { scrollPosition } = useScrollPosition(); // Destructure to get just the scrollPosition
+  const [isOpen, setIsOpen] = useState(false);
+  const { scrollPosition } = useScrollPosition();
   const location = useLocation();
   
   // Determine if we're on the homepage
@@ -20,12 +25,8 @@ const Header = () => {
   // Apply transparent header on home page when at the top
   const isTransparent = isHomePage && scrollPosition < 30;
 
-  const handleMenuToggle = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const handleCloseMenu = () => {
-    setIsMenuOpen(false);
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
   };
 
   return (
@@ -41,31 +42,37 @@ const Header = () => {
           {/* Logo */}
           <Logo />
 
-          {/* Desktop Navigation */}
-          <DesktopNavigation />
-
-          {/* User Menu and Mobile Menu Button */}
+          {/* User Menu and Burger Menu Button */}
           <div className="flex items-center space-x-4">
             <WishlistIcon isTransparent={isTransparent} />
             
             <UserMenu />
             
-            <button
-              className="md:hidden focus:outline-none"
-              onClick={handleMenuToggle}
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+            <Drawer open={isOpen} onOpenChange={handleOpenChange}>
+              <DrawerTrigger asChild>
+                <button
+                  className="focus:outline-none flex items-center justify-center"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-6 w-6" />
+                </button>
+              </DrawerTrigger>
+              <DrawerContent className="h-[85vh] max-h-[85vh]">
+                <div className="mx-auto w-full max-w-sm">
+                  <div className="p-4 flex items-center justify-end">
+                    <DrawerClose asChild>
+                      <button className="rounded-full p-1 hover:bg-gray-100">
+                        <X className="h-5 w-5" />
+                      </button>
+                    </DrawerClose>
+                  </div>
+                  <NavigationMenu onClose={() => setIsOpen(false)} />
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />
     </header>
   );
 };

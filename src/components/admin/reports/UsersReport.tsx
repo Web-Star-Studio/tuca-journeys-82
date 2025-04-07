@@ -49,8 +49,8 @@ const UsersReport = ({ dateRange, onError }: UsersReportProps) => {
 
       // Calculate totals
       const totalUsers = 800;
-      // Fixed: Add proper initial value and type parameters to reduce function
-      const totalNewUsers = userData.growthData.reduce<number>((sum: number, item: UserGrowthData) => sum + item.usuarios, 0);
+      // Fixed: Remove type parameter and use explicit types in the function
+      const totalNewUsers = userData.growthData.reduce((sum: number, item: UserGrowthData) => sum + item.usuarios, 0);
       const totalRegions = userData.regionData.length;
       const conversionRate = 28; // In percentage, would be calculated in a real app
       

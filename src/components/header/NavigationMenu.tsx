@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, X } from "lucide-react";
+import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, Map, X } from "lucide-react";
 import AuthButtons from "../user-menu/AuthButtons";
 import { useAuth } from "@/contexts/AuthContext";
 import { SheetClose } from "../ui/sheet";
@@ -22,6 +22,7 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
     { path: "/pacotes", label: "Pacotes", icon: Package },
     { path: "/loja", label: "Loja", icon: ShoppingBag },
     { path: "/eventos", label: "Eventos", icon: Calendar },
+    { path: "/mapa", label: "Mapa", icon: Map },
     { path: "/parceiros", label: "Parceiros", icon: Users },
     { path: "/sobre", label: "Sobre", icon: Info },
     { path: "/contato", label: "Contato", icon: Phone },

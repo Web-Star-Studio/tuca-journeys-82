@@ -56,6 +56,14 @@ const DesktopNavigation = () => {
         Eventos
       </Link>
       <Link
+        to="/mapa"
+        className={`hover:opacity-75 transition-opacity ${
+          location.pathname.includes("/mapa") ? "font-medium" : ""
+        }`}
+      >
+        Mapa
+      </Link>
+      <Link
         to="/parceiros"
         className={`hover:opacity-75 transition-opacity ${
           location.pathname.includes("/parceiros") ? "font-medium" : ""

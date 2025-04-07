@@ -7,9 +7,22 @@ import { tours } from "@/data/tours";
 import { accommodations } from "@/data/accommodations";
 import MapPopup from "./MapPopup";
 import MapTokenInput from "./MapTokenInput";
+import "./createRoot";
+
+// Point data interface
+interface PointData {
+  id: string;
+  name: string;
+  category: string;
+  lat: number;
+  lng: number;
+  rating: number;
+  image: string;
+  price?: number;
+}
 
 // Todos os pontos de interesse em Fernando de Noronha
-const poiData = [
+const poiData: PointData[] = [
   // Praias
   { id: "beach-1", name: "Praia do Sancho", category: "beaches", lat: -3.851389, lng: -32.442222, rating: 5, image: "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png" },
   { id: "beach-2", name: "Baía dos Porcos", category: "beaches", lat: -3.854444, lng: -32.444444, rating: 5, image: "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png" },
@@ -28,14 +41,19 @@ const poiData = [
 ];
 
 // Posição central de Fernando de Noronha
-const NORONHA_CENTER = [-32.423611, -3.8425];
+const NORONHA_CENTER: [number, number] = [-32.423611, -3.8425];
+
+interface ActivePopup {
+  id: string;
+  lngLat: mapboxgl.LngLat;
+}
 
 const MapView = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapToken, setMapToken] = useState<string | null>(localStorage.getItem('mapbox_token'));
   const { filters } = useMapFilters();
-  const [activePopup, setActivePopup] = useState<{ id: string; lngLat: mapboxgl.LngLat } | null>(null);
+  const [activePopup, setActivePopup] = useState<ActivePopup | null>(null);
 
   // Transformar dados de tours e acomodações para o formato do mapa
   const mapData = React.useMemo(() => {
@@ -84,9 +102,9 @@ const MapView = () => {
       
       // Filtrar por faixa de preço
       if ('price' in point && filters.priceRange !== 'all') {
-        if (filters.priceRange === 'low' && point.price > 300) return false;
-        if (filters.priceRange === 'medium' && (point.price <= 300 || point.price > 800)) return false;
-        if (filters.priceRange === 'high' && point.price <= 800) return false;
+        if (filters.priceRange === 'low' && point.price && point.price > 300) return false;
+        if (filters.priceRange === 'medium' && point.price && (point.price <= 300 || point.price > 800)) return false;
+        if (filters.priceRange === 'high' && point.price && point.price <= 800) return false;
       }
       
       return true;

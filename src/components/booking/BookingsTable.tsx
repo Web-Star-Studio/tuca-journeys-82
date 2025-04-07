@@ -1,173 +1,138 @@
-import React from 'react';
-import { useBookings } from '@/hooks/use-bookings';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+
+import React from "react";
+import { useBookings } from "@/hooks/use-bookings";
+import { Loader2, Calendar, Ban, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const BookingsTable = () => {
-  const { user } = useAuth();
-  const { bookings, isLoading, error, refetch } = useBookings();
-  const navigate = useNavigate();
+  const { bookings, isLoading, cancelBooking } = useBookings();
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-300';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case "confirmed":
+        return <Badge className="bg-green-500">Confirmada</Badge>;
+      case "pending":
+        return <Badge className="bg-amber-500">Pendente</Badge>;
+      case "cancelled":
+        return <Badge className="bg-red-500">Cancelada</Badge>;
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return <Badge className="bg-gray-500">Desconhecido</Badge>;
     }
   };
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'refunded':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'failed':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  if (!user) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">Você precisa estar logado para ver suas reservas.</p>
-        <Button onClick={() => navigate("/login")}>Fazer Login</Button>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-500">Erro ao carregar suas reservas.</p>
-        <p className="text-sm text-gray-500 mt-2 mb-4">{(error as Error).message}</p>
-        <Button variant="outline" onClick={() => refetch()}>
-          Tentar Novamente
-        </Button>
+      <div className="text-center py-8">
+        <Loader2 className="animate-spin h-8 w-8 mx-auto text-tuca-ocean-blue" />
+        <p className="mt-2 text-gray-500">Carregando suas reservas...</p>
       </div>
     );
   }
 
   if (!bookings || bookings.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">Você ainda não tem reservas.</p>
-        <div className="space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/passeios")}
-          >
-            Explorar Passeios
-          </Button>
-          <Button 
-            onClick={() => navigate("/hospedagens")}
-          >
-            Ver Hospedagens
-          </Button>
-        </div>
+      <div className="text-center py-12 bg-white rounded-lg border">
+        <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+        <h3 className="text-lg font-medium text-gray-700 mb-2">Nenhuma reserva encontrada</h3>
+        <p className="text-gray-500 max-w-md mx-auto mb-4">
+          Você ainda não possui nenhuma reserva. Que tal explorar nossas opções de passeios e hospedagens?
+        </p>
+        <Button 
+          onClick={() => window.location.href = '/tours'}
+          className="bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90"
+        >
+          Ver Passeios
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableCaption>Lista de suas reservas</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Reserva</TableHead>
-            <TableHead>Data</TableHead>
-            <TableHead>Pessoas</TableHead>
-            <TableHead>Valor</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Pagamento</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {bookings.map((booking: any) => {
-            // Determine the name of the reserved item (tour or accommodation)
-            let itemName = 'Desconhecido';
-            let itemType = '';
-            
-            if (booking.tour_id && booking.tours) {
-              itemName = booking.tours.title;
-              itemType = 'Passeio';
-            } else if (booking.accommodation_id && booking.accommodations) {
-              itemName = booking.accommodations.title;
-              itemType = 'Hospedagem';
-            }
-
-            return (
+    <div className="bg-white rounded-lg shadow overflow-hidden border">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead>Data</TableHead>
+              <TableHead>Valor</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bookings.map((booking) => (
               <TableRow key={booking.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{itemName}</p>
-                    <p className="text-xs text-gray-500">{itemType}</p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {format(new Date(booking.start_date), 'PP', { locale: ptBR })}
-                  {booking.end_date && booking.end_date !== booking.start_date && (
-                    <> até {format(new Date(booking.end_date), 'PP', { locale: ptBR })}</>
+                <TableCell className="font-medium">{booking.item_name}</TableCell>
+                <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
+                <TableCell>R$ {booking.price.toFixed(2)}</TableCell>
+                <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                <TableCell className="text-right space-x-2 whitespace-nowrap">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => window.open(`/booking/${booking.id}`, '_blank')}
+                    className="text-tuca-ocean-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/20"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-1" /> Ver
+                  </Button>
+                  
+                  {booking.status !== "cancelled" && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Ban className="h-4 w-4 mr-1" /> Cancelar
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar cancelamento</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja cancelar esta reserva? Esta ação não poderá ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Voltar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => cancelBooking(booking.id)}
+                            className="bg-red-500 hover:bg-red-600"
+                          >
+                            Confirmar Cancelamento
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </TableCell>
-                <TableCell>{booking.guests}</TableCell>
-                <TableCell>
-                  R$ {parseFloat(booking.total_price).toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getStatusColor(booking.status)} border`}>
-                    {booking.status === 'confirmed' && 'Confirmada'}
-                    {booking.status === 'pending' && 'Pendente'}
-                    {booking.status === 'cancelled' && 'Cancelada'}
-                    {booking.status === 'completed' && 'Concluída'}
-                    {!['confirmed', 'pending', 'cancelled', 'completed'].includes(booking.status) && booking.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getPaymentStatusColor(booking.payment_status)} border`}>
-                    {booking.payment_status === 'paid' && 'Pago'}
-                    {booking.payment_status === 'pending' && 'Pendente'}
-                    {booking.payment_status === 'refunded' && 'Reembolsado'}
-                    {booking.payment_status === 'failed' && 'Falhou'}
-                    {!['paid', 'pending', 'refunded', 'failed'].includes(booking.payment_status) && booking.payment_status}
-                  </Badge>
-                </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

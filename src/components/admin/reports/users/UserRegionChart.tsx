@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RegionData {
@@ -41,7 +41,7 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-3 border rounded-md shadow-md">
+        <div className="bg-white p-3 border rounded-md shadow-md z-50">
           <p className="font-medium">{data.displayName || data.regiao}</p>
           <p className="text-sm">{`${payload[0].value} usuários`}</p>
         </div>
@@ -51,12 +51,17 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
   };
   
   return (
-    <div className="h-64 sm:h-80 w-full overflow-hidden">
+    <div className="h-64 sm:h-80 w-full relative">
       <ChartContainer config={chartConfig} height="100%">
         <BarChart 
           data={formattedData} 
           layout="vertical"
-          margin={{ top: 5, right: 30, left: isMobile ? 70 : 90, bottom: 5 }}
+          margin={{ 
+            top: 5, 
+            right: 30, 
+            left: isMobile ? 60 : 80, 
+            bottom: 5 
+          }}
         >
           <CartesianGrid 
             strokeDasharray="3 3" 
@@ -72,7 +77,7 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
           <YAxis 
             type="category" 
             dataKey="regiao"
-            width={isMobile ? 70 : 90}
+            width={isMobile ? 60 : 80}
             tickLine={false}
             axisLine={{ stroke: '#e0e0e0' }}
             tick={{ fontSize: 10 }}

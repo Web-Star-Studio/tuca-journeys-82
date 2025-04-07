@@ -49,7 +49,7 @@ const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFil
             variant={"outline"}
             className="w-full justify-start text-left font-normal border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
           >
-            <Calendar className="mr-2 h-4 w-4 text-tuca-ocean-blue" />
+            <Calendar className="mr-2 h-4 w-4 text-primary" />
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
@@ -65,9 +65,8 @@ const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFil
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0 shadow-lg border border-gray-200" 
+          className="w-auto p-0 shadow-lg border border-gray-200 z-50" 
           align={isMobile ? "center" : "end"}
-          alignOffset={isMobile ? 0 : -15}
         >
           <CalendarComponent
             initialFocus

@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { ComposedChart, CartesianGrid, XAxis, YAxis, Bar, Legend, Line, Tooltip, ResponsiveContainer } from "recharts";
+import { ComposedChart, CartesianGrid, XAxis, YAxis, Bar, Legend, Line, Tooltip } from "recharts";
 import { revenueData, chartConfig } from "./RevenueDataGenerator";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -10,7 +10,7 @@ const RevenueCategoryChart = () => {
   const isMobile = useIsMobile();
   
   return (
-    <Card>
+    <Card className="w-full overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">Receita por Categoria</CardTitle>
         <CardDescription>
@@ -18,22 +18,31 @@ const RevenueCategoryChart = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-64 sm:h-80">
+        <div className="h-64 sm:h-80 w-full relative">
           <ChartContainer
             config={chartConfig}
             height="100%"
           >
-            <ComposedChart data={isMobile ? revenueData.slice(-6) : revenueData}>
+            <ComposedChart 
+              data={isMobile ? revenueData.slice(-6) : revenueData}
+              margin={{ 
+                top: 5, 
+                right: isMobile ? 5 : 30, 
+                left: isMobile ? 5 : 20, 
+                bottom: 5 
+              }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="month" 
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: isMobile ? 8 : 10 }}
                 tickMargin={5}
                 interval={isMobile ? 1 : 0}
               />
               <YAxis 
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: isMobile ? 8 : 10 }}
                 tickFormatter={(value) => `R$${value/1000}k`}
+                width={isMobile ? 40 : 60}
               />
               <Tooltip
                 content={
@@ -43,11 +52,11 @@ const RevenueCategoryChart = () => {
                   />
                 }
               />
-              <Legend />
-              <Bar dataKey="passeios" fill={chartConfig.passeios.color} name="Passeios" barSize={isMobile ? 15 : 20} />
-              <Bar dataKey="hospedagens" fill={chartConfig.hospedagens.color} name="Hospedagens" barSize={isMobile ? 15 : 20} />
-              <Bar dataKey="pacotes" fill={chartConfig.pacotes.color} name="Pacotes" barSize={isMobile ? 15 : 20} />
-              <Bar dataKey="produtos" fill={chartConfig.produtos.color} name="Produtos" barSize={isMobile ? 15 : 20} />
+              <Legend wrapperStyle={{ fontSize: isMobile ? 8 : 10 }} />
+              <Bar dataKey="passeios" fill={chartConfig.passeios.color} name="Passeios" barSize={isMobile ? 8 : 15} />
+              <Bar dataKey="hospedagens" fill={chartConfig.hospedagens.color} name="Hospedagens" barSize={isMobile ? 8 : 15} />
+              <Bar dataKey="pacotes" fill={chartConfig.pacotes.color} name="Pacotes" barSize={isMobile ? 8 : 15} />
+              <Bar dataKey="produtos" fill={chartConfig.produtos.color} name="Produtos" barSize={isMobile ? 8 : 15} />
               <Line
                 type="monotone"
                 dataKey="total"

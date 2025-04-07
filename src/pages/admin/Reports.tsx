@@ -38,66 +38,65 @@ const Reports = () => {
   return (
     <AdminLayout pageTitle="Relatórios">
       <div className="space-y-6">
-        <div className="flex flex-col space-y-4">
-          {/* Here we properly wrap everything in a single Tabs component */}
-          <Tabs
-            defaultValue={activeTab}
-            value={activeTab}
-            onValueChange={(value) => {
-              clearError();
-              setActiveTab(value);
-            }}
-            className="w-full overflow-hidden"
-          >
-            {/* Tabs header and date filter in one row on desktop */}
-            <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center justify-between"}`}>
-              <div className={`${isMobile ? "w-full" : "w-auto"}`}>
-                <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
-                  <TabsTrigger value="revenue">Receitas</TabsTrigger>
-                  <TabsTrigger value="bookings">Reservas</TabsTrigger>
-                  <TabsTrigger value="users">Usuários</TabsTrigger>
-                  <TabsTrigger value="packages">Pacotes</TabsTrigger>
-                </TabsList>
-              </div>
-              <div className={`${isMobile ? "w-full" : "w-auto"}`}>
-                <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
-              </div>
+        <Tabs
+          defaultValue={activeTab}
+          value={activeTab}
+          onValueChange={(value) => {
+            clearError();
+            setActiveTab(value);
+          }}
+          className="w-full"
+        >
+          {/* Tabs header and date filter in one row on desktop */}
+          <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center justify-between"} mb-4`}>
+            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
+                <TabsTrigger value="revenue">Receitas</TabsTrigger>
+                <TabsTrigger value="bookings">Reservas</TabsTrigger>
+                <TabsTrigger value="users">Usuários</TabsTrigger>
+                <TabsTrigger value="packages">Pacotes</TabsTrigger>
+              </TabsList>
             </div>
+            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+              <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
+            </div>
+          </div>
 
-            {/* Error alert */}
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            {/* Tabs content */}
-            <TabsContent value="revenue" className="mt-4 overflow-x-auto">
-              <div className="min-w-[320px]">
+          {/* Error alert */}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Tabs content */}
+          <div className="relative">
+            <TabsContent value="revenue" className="overflow-visible">
+              <div className="w-full">
                 <RevenueReport dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="bookings" className="mt-4 overflow-x-auto">
-              <div className="min-w-[320px]">
+            <TabsContent value="bookings" className="overflow-visible">
+              <div className="w-full">
                 <BookingsReportContainer dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="users" className="mt-4 overflow-x-auto">
-              <div className="min-w-[320px]">
+            <TabsContent value="users" className="overflow-visible">
+              <div className="w-full">
                 <UsersReport dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="packages" className="mt-4 overflow-x-auto">
-              <div className="min-w-[320px]">
+            <TabsContent value="packages" className="overflow-visible">
+              <div className="w-full">
                 <PackagesReport dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </div>
     </AdminLayout>
   );

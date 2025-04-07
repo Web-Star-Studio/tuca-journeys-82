@@ -52,6 +52,24 @@ const Reports = () => {
               <TabsTrigger value="users">Usuários</TabsTrigger>
               <TabsTrigger value="packages">Pacotes</TabsTrigger>
             </TabsList>
+            
+            <div className="pt-4">
+              <TabsContent value="revenue" className="mt-0">
+                <RevenueReport dateRange={dateRange} onError={handleError} />
+              </TabsContent>
+
+              <TabsContent value="bookings" className="mt-0">
+                <BookingsReportContainer dateRange={dateRange} onError={handleError} />
+              </TabsContent>
+
+              <TabsContent value="users" className="mt-0">
+                <UsersReport dateRange={dateRange} onError={handleError} />
+              </TabsContent>
+
+              <TabsContent value="packages" className="mt-0">
+                <PackagesReport dateRange={dateRange} onError={handleError} />
+              </TabsContent>
+            </div>
           </Tabs>
 
           <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
@@ -63,24 +81,6 @@ const Reports = () => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
-        <div className="pt-4">
-          <TabsContent value="revenue" className="mt-0">
-            <RevenueReport dateRange={dateRange} onError={handleError} />
-          </TabsContent>
-
-          <TabsContent value="bookings" className="mt-0">
-            <BookingsReportContainer dateRange={dateRange} onError={handleError} />
-          </TabsContent>
-
-          <TabsContent value="users" className="mt-0">
-            <UsersReport dateRange={dateRange} onError={handleError} />
-          </TabsContent>
-
-          <TabsContent value="packages" className="mt-0">
-            <PackagesReport dateRange={dateRange} onError={handleError} />
-          </TabsContent>
-        </div>
       </div>
     </AdminLayout>
   );

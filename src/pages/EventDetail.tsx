@@ -15,6 +15,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Event } from "@/types/event";
 import { events } from "@/data/events";
+import EventLocation from "@/components/event/EventLocation";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -165,95 +166,15 @@ const EventDetail = () => {
               </div>
               
               {/* Location Map (placeholder) */}
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h2 className="text-xl font-bold mb-4">Localização</h2>
-                <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <MapPin className="h-8 w-8 text-gray-400 mr-2" />
-                  <span className="text-gray-500">Mapa de {event.location}</span>
-                </div>
-              </div>
+              
             </div>
             
             {/* Reservation Card */}
-            <div>
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                <h2 className="text-xl font-bold mb-4">Reservar Ingressos</h2>
-                
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-700">Preço por ingresso:</span>
-                    <span className="font-medium">
-                      {event.price > 0 ? `R$ ${event.price.toFixed(2).replace('.', ',')}` : 'Gratuito'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-gray-700">Vagas disponíveis:</span>
-                    <span className="font-medium">{event.available_spots} de {event.capacity}</span>
-                  </div>
-                  
-                  <div className="border-t border-b py-4 mb-4">
-                    <label className="block text-gray-700 mb-2">Quantidade de ingressos:</label>
-                    <div className="flex items-center">
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={decrementQuantity}
-                        disabled={ticketQuantity <= 1}
-                        className="h-8 w-8"
-                      >
-                        -
-                      </Button>
-                      <span className="mx-4 text-lg">{ticketQuantity}</span>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={incrementQuantity}
-                        disabled={ticketQuantity >= event.available_spots}
-                        className="h-8 w-8"
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-lg font-bold">Total:</span>
-                    <span className="text-lg font-bold text-tuca-ocean-blue">
-                      {event.price > 0 ? `R$ ${totalPrice.toFixed(2).replace('.', ',')}` : 'Gratuito'}
-                    </span>
-                  </div>
-                  
-                  <Button 
-                    className="w-full py-6 bg-tuca-coral hover:bg-tuca-coral/90"
-                    disabled={event.available_spots === 0 || event.status === 'completed' || event.status === 'canceled'}
-                    onClick={() => {
-                      // Reservation functionality would go here
-                      alert(`Reserva de ${ticketQuantity} ${ticketQuantity > 1 ? 'ingressos' : 'ingresso'} para o evento: ${event.name}`);
-                    }}
-                  >
-                    {event.price > 0 ? 'Reservar Agora' : 'Garantir Vaga'}
-                  </Button>
-                </div>
-                
-                {event.available_spots === 0 && (
-                  <div className="bg-red-50 text-red-600 p-4 rounded text-center">
-                    Este evento está com vagas esgotadas.
-                  </div>
-                )}
-                
-                {event.status === 'completed' && (
-                  <div className="bg-gray-50 text-gray-600 p-4 rounded text-center">
-                    Este evento já foi realizado.
-                  </div>
-                )}
-                
-                {event.status === 'canceled' && (
-                  <div className="bg-red-50 text-red-600 p-4 rounded text-center">
-                    Este evento foi cancelado.
-                  </div>
-                )}
-              </div>
+            
+            {/* Location Map (updated) */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-xl font-bold mb-4">Localização</h2>
+              <EventLocation location={event.location} />
             </div>
           </div>
           

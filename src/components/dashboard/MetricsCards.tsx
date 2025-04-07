@@ -13,16 +13,18 @@ interface UserMetrics {
 
 const MetricsCards = ({ metrics }: { metrics: UserMetrics }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <Card>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <Card className="bg-white hover:shadow-md transition-all duration-300">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Reservas Ativas</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-tuca-ocean-blue" />
+            Reservas Ativas
+          </CardTitle>
           <CardDescription>Seus agendamentos atuais</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <span className="text-3xl font-bold">{metrics.reservasAtivas}</span>
-            <Calendar className="h-8 w-8 text-tuca-ocean-blue opacity-80" />
           </div>
           <p className="text-sm mt-2 text-gray-500">
             Próxima viagem em {metrics.diasAteProximaViagem} dias
@@ -30,15 +32,17 @@ const MetricsCards = ({ metrics }: { metrics: UserMetrics }) => {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="bg-white hover:shadow-md transition-all duration-300">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Pontos Acumulados</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-green-500" />
+            Pontos Acumulados
+          </CardTitle>
           <CardDescription>Programa de fidelidade</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <span className="text-3xl font-bold">{metrics.pontosAcumulados}</span>
-            <TrendingUp className="h-8 w-8 text-green-500 opacity-80" />
           </div>
           <p className="text-sm mt-2 text-gray-500">
             Faltam 250 pontos para o próximo nível
@@ -46,15 +50,17 @@ const MetricsCards = ({ metrics }: { metrics: UserMetrics }) => {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="bg-white hover:shadow-md transition-all duration-300 sm:col-span-2 lg:col-span-1">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Perfil</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Activity className="h-5 w-5 text-amber-500" />
+            Perfil
+          </CardTitle>
           <CardDescription>Status de preenchimento</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between mb-2">
             <span className="text-3xl font-bold">{metrics.statusPerfil}%</span>
-            <Activity className="h-8 w-8 text-amber-500 opacity-80" />
           </div>
           <Progress value={metrics.statusPerfil} className="h-2" />
           <p className="text-sm mt-2 text-gray-500">

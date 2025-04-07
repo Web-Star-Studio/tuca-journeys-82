@@ -1,7 +1,9 @@
 
 import React from "react";
-import { Bell } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { useProfile } from "@/hooks/use-profile";
+import { Button } from "@/components/ui/button";
+import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
 
 interface DashboardHeaderProps {
   notificationCount: number;
@@ -9,24 +11,36 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ notificationCount }: DashboardHeaderProps) => {
   const { profile } = useProfile();
+  const isMobile = useIsBelowBreakpoint("md");
 
   return (
-    <div className="flex flex-wrap items-center justify-between mb-8">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-3xl font-medium mb-2">Meu Painel</h1>
+        <h1 className="text-2xl sm:text-3xl font-medium mb-2 text-gray-800">Meu Painel</h1>
         {profile && (
           <p className="text-gray-500">
-            Bem-vindo, {profile.name || "Visitante"}! Veja suas atividades e recomendações.
+            Bem-vindo, <span className="font-medium">{profile.name || "Visitante"}</span>! 
+            {!isMobile && " Veja suas atividades e recomendações."}
           </p>
         )}
       </div>
-      <div className="relative">
-        <button className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors">
+      <div className="flex items-center gap-3">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="bg-white hover:bg-gray-50 transition-colors"
+          onClick={() => window.location.href = "/profile"}
+        >
+          <User className="h-5 w-5 text-gray-600" />
+        </Button>
+        <Button className="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors">
           <Bell className="h-5 w-5 text-gray-600" />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {notificationCount}
-          </span>
-        </button>
+          {notificationCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              {notificationCount}
+            </span>
+          )}
+        </Button>
       </div>
     </div>
   );

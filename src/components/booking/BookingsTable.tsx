@@ -9,9 +9,12 @@ import BookingEmptyState from "./BookingEmptyState";
 import BookingLoadingState from "./BookingLoadingState";
 import BookingRow from "./BookingRow";
 import BookingsTableHeader from "./BookingsTableHeader";
+import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
+import { Card } from "@/components/ui/card";
 
 const BookingsTable = () => {
   const { bookings, isLoading, cancelBooking } = useBookings();
+  const isMobile = useIsBelowBreakpoint("md");
 
   if (isLoading) {
     return <BookingLoadingState />;
@@ -22,7 +25,7 @@ const BookingsTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden border">
+    <Card className="bg-white rounded-lg shadow-sm overflow-hidden border">
       <div className="overflow-x-auto">
         <Table>
           <BookingsTableHeader />
@@ -31,13 +34,14 @@ const BookingsTable = () => {
               <BookingRow 
                 key={booking.id} 
                 booking={booking} 
-                cancelBooking={cancelBooking} 
+                cancelBooking={cancelBooking}
+                compact={isMobile}
               />
             ))}
           </TableBody>
         </Table>
       </div>
-    </div>
+    </Card>
   );
 };
 

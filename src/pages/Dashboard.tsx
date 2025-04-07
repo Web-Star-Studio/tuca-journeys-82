@@ -54,11 +54,11 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow py-8 md:py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
+      <main className="flex-grow w-full py-6 sm:py-8 md:py-12 lg:py-16">
+        <div className="container px-4 mx-auto">
+          <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
             <DashboardHeader notificationCount={notifications.filter(n => !n.read).length} />
             <MetricsCards metrics={userMetrics} />
             <DashboardTabs 

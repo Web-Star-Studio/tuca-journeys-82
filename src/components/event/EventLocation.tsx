@@ -5,12 +5,14 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
 import { geocodeLocation, NORONHA_CENTER } from "../map/utils/geocoding";
 import MapTokenButton from "../map/MapTokenButton";
+import { Link } from "react-router-dom";
 
 interface EventLocationProps {
   location: string;
+  eventId?: number;
 }
 
-const EventLocation = ({ location }: EventLocationProps) => {
+const EventLocation = ({ location, eventId }: EventLocationProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number]>(NORONHA_CENTER);
@@ -56,7 +58,22 @@ const EventLocation = ({ location }: EventLocationProps) => {
         );
         
         // Add a marker
-        new mapboxgl.Marker()
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker flex items-center justify-center';
+        markerElement.style.width = '36px';
+        markerElement.style.height = '36px';
+        markerElement.style.transform = 'translate(-50%, -100%)';
+        
+        // Create pin with green color for events
+        markerElement.innerHTML = `
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 3C12.477 3 8 7.477 8 13C8 19.793 18 33 18 33C18 33 28 19.793 28 13C28 7.477 23.523 3 18 3Z" 
+                  fill="#4caf50" stroke="white" stroke-width="2"/>
+            <circle cx="18" cy="13" r="4.5" fill="white"/>
+          </svg>
+        `;
+        
+        new mapboxgl.Marker(markerElement)
           .setLngLat(coords)
           .addTo(map.current);
           
@@ -111,6 +128,15 @@ const EventLocation = ({ location }: EventLocationProps) => {
           <MapTokenButton onUpdateToken={handleUpdateToken} />
         </div>
       )}
+      
+      {/* View on full map link */}
+      <Link 
+        to="/mapa" 
+        className="absolute bottom-3 left-3 bg-white rounded-md shadow-md px-3 py-1 flex items-center gap-1 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        <MapPin size={14} />
+        Ver no mapa completo
+      </Link>
       
       {/* Always show token update button */}
       <MapTokenButton onUpdateToken={handleUpdateToken} />

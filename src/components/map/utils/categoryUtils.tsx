@@ -1,35 +1,57 @@
 
+import React from "react";
+import { MapPin, Compass, Hotel, Calendar, Home, Umbrella, Museum, Building, Coffee, GraduationCap } from "lucide-react";
 import { FilterCategory } from "@/contexts/MapFilterContext";
-import { Bed, LandPlot, MapPin, Palmtree, UtensilsCrossed } from "lucide-react";
 
-export const getCategoryIcon = (category: FilterCategory) => {
-  switch(category) {
-    case "tours": return <MapPin size={16} />;
-    case "accommodations": return <Bed size={16} />;
-    case "restaurants": return <UtensilsCrossed size={16} />;
-    case "beaches": return <Palmtree size={16} />;
-    case "attractions": return <LandPlot size={16} />;
-  }
-};
+export const allCategories: FilterCategory[] = [
+  "tours", 
+  "accommodations", 
+  "events", 
+  "beaches", 
+  "attractions",
+  "restaurants",
+  "museums",
+  "historical"
+];
 
-export const getCategoryColor = (category: FilterCategory) => {
-  switch(category) {
-    case "tours": return "bg-tuca-ocean-blue text-white";
-    case "accommodations": return "bg-green-500 text-white";
-    case "restaurants": return "bg-amber-500 text-white";
-    case "beaches": return "bg-blue-400 text-white";
-    case "attractions": return "bg-purple-500 text-white";
-  }
-};
-
-export const getCategoryLabel = (category: FilterCategory) => {
+export const getCategoryLabel = (category: FilterCategory): string => {
   switch(category) {
     case "tours": return "Passeios";
     case "accommodations": return "Hospedagens";
-    case "restaurants": return "Restaurantes";
+    case "events": return "Eventos";
     case "beaches": return "Praias";
     case "attractions": return "Atrações";
+    case "restaurants": return "Restaurantes";
+    case "museums": return "Museus";
+    case "historical": return "Histórico";
+    default: return category;
   }
 };
 
-export const allCategories: FilterCategory[] = ["tours", "accommodations", "restaurants", "beaches", "attractions"];
+export const getCategoryIcon = (category: FilterCategory) => {
+  switch(category) {
+    case "tours": return <Compass size={16} />;
+    case "accommodations": return <Hotel size={16} />;
+    case "events": return <Calendar size={16} />;
+    case "beaches": return <Umbrella size={16} />;
+    case "attractions": return <MapPin size={16} />;
+    case "restaurants": return <Coffee size={16} />;
+    case "museums": return <Museum size={16} />;
+    case "historical": return <Building size={16} />;
+    default: return <Home size={16} />;
+  }
+};
+
+export const getCategoryColor = (category: FilterCategory): string => {
+  switch(category) {
+    case "tours": return "bg-blue-500 text-white";
+    case "accommodations": return "bg-pink-500 text-white";
+    case "events": return "bg-green-500 text-white";
+    case "beaches": return "bg-cyan-500 text-white";
+    case "attractions": return "bg-purple-500 text-white";
+    case "restaurants": return "bg-amber-500 text-white";
+    case "museums": return "bg-indigo-500 text-white";
+    case "historical": return "bg-rose-500 text-white";
+    default: return "bg-gray-500 text-white";
+  }
+};

@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import { MutableRefObject } from "react";
 import { PointData } from "../utils/mapData";
+import { getCategoryIcon } from "../utils/dataToMapPoints";
 
 interface ActivePopup {
   id: string;
@@ -34,14 +35,25 @@ export const useMapMarkers = ({
     filteredMapData.forEach(point => {
       // Create a marker element
       const markerElement = document.createElement('div');
-      markerElement.className = 'marker';
-      markerElement.style.width = '24px';
-      markerElement.style.height = '24px';
-      markerElement.style.borderRadius = '50%';
-      markerElement.style.backgroundColor = point.color || '#3FB1CE';
-      markerElement.style.border = '2px solid white';
-      markerElement.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+      markerElement.className = 'marker flex items-center justify-center';
+      markerElement.style.width = '36px';
+      markerElement.style.height = '36px';
+      markerElement.style.transform = 'translate(-50%, -100%)';
+      
+      // Create SVG for marker (pin shape)
+      const color = point.color || '#3FB1CE';
+      
+      // Create pin with category icon if available
+      markerElement.innerHTML = `
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 3C12.477 3 8 7.477 8 13C8 19.793 18 33 18 33C18 33 28 19.793 28 13C28 7.477 23.523 3 18 3Z" 
+                fill="${color}" stroke="white" stroke-width="2"/>
+          <circle cx="18" cy="13" r="4.5" fill="white"/>
+        </svg>
+      `;
+      
       markerElement.style.cursor = 'pointer';
+      markerElement.style.pointerEvents = 'auto';
 
       // Create the marker and add it to the map
       const marker = new mapboxgl.Marker(markerElement)

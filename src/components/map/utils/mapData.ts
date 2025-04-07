@@ -1,3 +1,4 @@
+
 export interface PointData {
   id: string;
   name: string;
@@ -6,6 +7,9 @@ export interface PointData {
   description?: string;
   icon?: string;
   color?: string;
+  price?: number;
+  rating?: number | null;
+  url?: string;
 }
 
 export const NORONHA_CENTER: [number, number] = [-32.426, -3.854];
@@ -20,6 +24,7 @@ export const getMapData = () => {
       description: "Considerada uma das praias mais bonitas do mundo.",
       icon: "beach",
       color: "#f44336",
+      url: "/lugares/praia-do-sancho"
     },
     {
       id: "baia-dos-porcos",
@@ -29,6 +34,7 @@ export const getMapData = () => {
       description: "Famosa por suas piscinas naturais e vista deslumbrante.",
       icon: "beach",
       color: "#e91e63",
+      url: "/lugares/baia-dos-porcos"
     },
     {
       id: "forte-nossa-senhora-dos-remedios",
@@ -38,6 +44,7 @@ export const getMapData = () => {
       description: "Construção histórica com vista panorâmica.",
       icon: "castle",
       color: "#9c27b0",
+      url: "/lugares/forte-nossa-senhora-dos-remedios"
     },
     {
       id: "museu-do-tubarao",
@@ -47,6 +54,7 @@ export const getMapData = () => {
       description: "Informações e exposições sobre a vida marinha local.",
       icon: "museum",
       color: "#673ab7",
+      url: "/lugares/museu-do-tubarao"
     },
     {
       id: "cacimba-do-padre",
@@ -56,6 +64,7 @@ export const getMapData = () => {
       description: "Praia extensa com ondas propícias para o surf.",
       icon: "beach",
       color: "#3f51b5",
+      url: "/lugares/cacimba-do-padre"
     },
   ];
   return data;

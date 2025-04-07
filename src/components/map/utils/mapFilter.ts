@@ -1,3 +1,4 @@
+
 export interface MapFilters {
   search: string;
   category: string;
@@ -21,7 +22,29 @@ export const filterMapData = (data: any[], filters: MapFilters) => {
 
   // Filter by category if not "all"
   if (filters.category && filters.category !== 'all') {
-    filtered = filtered.filter(item => item.category === filters.category);
+    // Handle specific category mappings
+    let categoryToFilter = filters.category;
+    
+    // Map our FilterCategory types to the actual data categories
+    const categoryMappings: Record<string, string[]> = {
+      'tours': ['Passeio'],
+      'accommodations': ['Hospedagem'],
+      'beaches': ['Praia'],
+      'events': ['Evento'],
+      'attractions': ['Atração'],
+      'restaurants': ['Restaurante', 'Gastronomia'],
+      'museums': ['Museu'],
+      'historical': ['História', 'Histórico']
+    };
+    
+    const matchingCategories = categoryMappings[filters.category] || [filters.category];
+    
+    filtered = filtered.filter(item => {
+      if (!item.category) return false;
+      return matchingCategories.some(cat => 
+        item.category.toLowerCase() === cat.toLowerCase()
+      );
+    });
   }
 
   // Filter by rating if set
@@ -29,7 +52,7 @@ export const filterMapData = (data: any[], filters: MapFilters) => {
     // Check if the item has a rating property and if it's greater than or equal to the filter rating
     filtered = filtered.filter(item => {
       // Skip rating filter if the item doesn't have a rating
-      if (item.rating === undefined) return true;
+      if (item.rating === undefined || item.rating === null) return true;
       return typeof item.rating === 'number' && item.rating >= filters.rating;
     });
   }

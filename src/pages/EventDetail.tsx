@@ -56,7 +56,7 @@ const EventDetail = () => {
             
             {/* Location Map */}
             <div>
-              <EventLocationSection location={event.location} />
+              <EventLocationSection location={event.location} eventId={event.id} />
             </div>
           </div>
           

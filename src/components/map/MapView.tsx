@@ -13,8 +13,11 @@ import { useMapInitialization } from "./hooks/useMapInitialization";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { useMapPopup } from "./hooks/useMapPopup";
 import { events } from "@/data/events";
-import { convertEventsToPoints } from "./MapEventPoints";
+import { accommodations } from "@/data/accommodations";
 import { adaptFiltersForMap } from "./utils/mapFilterAdapter";
+import { getAllMapPoints } from "./utils/dataToMapPoints";
+import { useToast } from "@/components/ui/use-toast";
+import { useTours } from "@/hooks/use-tours";
 
 interface ActivePopup {
   id: string;
@@ -26,13 +29,41 @@ const MapView = () => {
   const [mapToken, setMapToken] = useState<string | null>(localStorage.getItem('mapbox_token'));
   const { filters } = useMapFilters();
   const [activePopup, setActivePopup] = useState<ActivePopup | null>(null);
+  const { toast } = useToast();
+  
+  // Get tours data using the existing hook
+  const { data: tours, isError } = useTours();
 
-  // Get all map data including events
+  // Get all map data including base locations, events, accommodations, and tours
   const mapData = useMemo(() => {
     const baseMapData = getMapData();
-    const eventPoints = convertEventsToPoints(events);
-    return [...baseMapData, ...eventPoints];
-  }, []);
+    
+    // Combine all data sources
+    let allPoints: PointData[] = [...baseMapData];
+    
+    try {
+      if (tours) {
+        allPoints = getAllMapPoints(accommodations, tours, events);
+      } else {
+        // If tours aren't loaded yet, just use what we have
+        allPoints = getAllMapPoints(accommodations, [], events);
+      }
+    } catch (error) {
+      console.error("Error combining map data:", error);
+    }
+    
+    return allPoints;
+  }, [tours]);
+  
+  useEffect(() => {
+    if (isError) {
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar todos os dados para o mapa.",
+        variant: "destructive"
+      });
+    }
+  }, [isError, toast]);
   
   // Filter map data based on applied filters
   const filteredMapData = useMemo(() => {
@@ -44,6 +75,10 @@ const MapView = () => {
   const handleTokenSubmit = (token: string) => {
     localStorage.setItem('mapbox_token', token);
     setMapToken(token);
+    toast({
+      title: "Token atualizado",
+      description: "O token do Mapbox foi atualizado com sucesso.",
+    });
   };
 
   if (!mapToken) {

@@ -10,6 +10,7 @@ import PackagesReport from "@/components/admin/reports/PackagesReport";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
@@ -18,6 +19,7 @@ const Reports = () => {
   });
   const [activeTab, setActiveTab] = useState("revenue");
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
     setDateRange(range);
@@ -36,7 +38,31 @@ const Reports = () => {
   return (
     <AdminLayout pageTitle="Relatórios">
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col space-y-4">
+          {/* Tabs header and date filter in one row on desktop */}
+          <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center justify-between"}`}>
+            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
+                <TabsTrigger value="revenue" onClick={() => setActiveTab("revenue")}>Receitas</TabsTrigger>
+                <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}>Reservas</TabsTrigger>
+                <TabsTrigger value="users" onClick={() => setActiveTab("users")}>Usuários</TabsTrigger>
+                <TabsTrigger value="packages" onClick={() => setActiveTab("packages")}>Pacotes</TabsTrigger>
+              </TabsList>
+            </div>
+            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+              <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
+            </div>
+          </div>
+
+          {/* Error alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Tabs content */}
           <Tabs
             defaultValue={activeTab}
             value={activeTab}
@@ -44,43 +70,33 @@ const Reports = () => {
               clearError();
               setActiveTab(value);
             }}
-            className="w-full"
+            className="w-full overflow-hidden"
           >
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
-              <TabsTrigger value="revenue">Receitas</TabsTrigger>
-              <TabsTrigger value="bookings">Reservas</TabsTrigger>
-              <TabsTrigger value="users">Usuários</TabsTrigger>
-              <TabsTrigger value="packages">Pacotes</TabsTrigger>
-            </TabsList>
-            
-            <div className="pt-4">
-              <TabsContent value="revenue" className="mt-0">
+            <TabsContent value="revenue" className="mt-2 overflow-x-auto">
+              <div className="min-w-[320px]">
                 <RevenueReport dateRange={dateRange} onError={handleError} />
-              </TabsContent>
+              </div>
+            </TabsContent>
 
-              <TabsContent value="bookings" className="mt-0">
+            <TabsContent value="bookings" className="mt-2 overflow-x-auto">
+              <div className="min-w-[320px]">
                 <BookingsReportContainer dateRange={dateRange} onError={handleError} />
-              </TabsContent>
+              </div>
+            </TabsContent>
 
-              <TabsContent value="users" className="mt-0">
+            <TabsContent value="users" className="mt-2 overflow-x-auto">
+              <div className="min-w-[320px]">
                 <UsersReport dateRange={dateRange} onError={handleError} />
-              </TabsContent>
+              </div>
+            </TabsContent>
 
-              <TabsContent value="packages" className="mt-0">
+            <TabsContent value="packages" className="mt-2 overflow-x-auto">
+              <div className="min-w-[320px]">
                 <PackagesReport dateRange={dateRange} onError={handleError} />
-              </TabsContent>
-            </div>
+              </div>
+            </TabsContent>
           </Tabs>
-
-          <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
       </div>
     </AdminLayout>
   );

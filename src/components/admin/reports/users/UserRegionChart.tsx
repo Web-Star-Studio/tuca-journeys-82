@@ -31,15 +31,18 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
   // Reduce text length for mobile
   const formattedData = regionData.map(item => ({
     ...item,
-    regiao: isMobile && item.regiao.length > 8 ? item.regiao.substring(0, 8) + '..' : item.regiao
+    regiao: isMobile && item.regiao.length > 8 ? item.regiao.substring(0, 8) + '..' : item.regiao,
+    // Add display name for tooltip
+    displayName: item.regiao
   }));
 
   // Custom tooltip to fix type errors
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
+      const data = payload[0].payload;
       return (
         <div className="bg-white p-3 border rounded-md shadow-md">
-          <p className="font-medium">{payload[0].payload.regiao}</p>
+          <p className="font-medium">{data.displayName || data.regiao}</p>
           <p className="text-sm">{`${payload[0].value} usuários`}</p>
         </div>
       );
@@ -48,12 +51,12 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
   };
   
   return (
-    <div className="h-64 sm:h-80 pt-4">
+    <div className="h-64 sm:h-80 w-full overflow-hidden">
       <ChartContainer config={chartConfig} height="100%">
         <BarChart 
           data={formattedData} 
           layout="vertical"
-          margin={{ top: 5, right: 20, left: isMobile ? 50 : 70, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: isMobile ? 70 : 90, bottom: 5 }}
         >
           <CartesianGrid 
             strokeDasharray="3 3" 
@@ -69,7 +72,7 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
           <YAxis 
             type="category" 
             dataKey="regiao"
-            width={isMobile ? 50 : 70}
+            width={isMobile ? 70 : 90}
             tickLine={false}
             axisLine={{ stroke: '#e0e0e0' }}
             tick={{ fontSize: 10 }}
@@ -86,7 +89,7 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
               position: 'right', 
               fill: '#666',
               fontSize: 10,
-              formatter: (value: any) => isMobile ? value : value
+              formatter: (value: any) => value
             }}
           />
         </BarChart>

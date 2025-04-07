@@ -23,22 +23,23 @@ export const ChartContainer = React.forwardRef<
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
   const isMobile = useIsMobile();
 
-  // Determine minimum width based on screen size
-  const minChartWidth = isMobile ? 280 : 450;
+  // Determine dimensions based on screen size
+  const minChartWidth = isMobile ? 280 : 350;
   const chartAspect = isMobile ? 1.2 : 2;
+  const chartHeight = typeof height === "number" ? height : "100%";
 
   return (
     <ChartContext.Provider value={{ config }}>
       <div
         data-chart={chartId}
         ref={ref}
-        className={cn(chartClasses, className)}
+        className={cn(chartClasses, "overflow-visible max-w-full", className)}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
         <RechartsPrimitive.ResponsiveContainer 
           width="100%" 
-          height={height}
+          height={chartHeight}
           minWidth={minChartWidth}
           aspect={chartAspect}
         >

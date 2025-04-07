@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ReportFiltersProps {
   dateRange: {
@@ -25,6 +26,8 @@ interface ReportFiltersProps {
 }
 
 const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFiltersProps) => {
+  const isMobile = useIsMobile();
+
   const handleDateChange = (range: {
     from: Date | undefined;
     to: Date | undefined;
@@ -38,7 +41,7 @@ const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFil
   };
 
   return (
-    <div className="w-full sm:w-auto">
+    <div className="w-full">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -61,7 +64,11 @@ const ReportFilters = ({ dateRange, setDateRange, onDateRangeChange }: ReportFil
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 shadow-lg border border-gray-200" align="start">
+        <PopoverContent 
+          className="w-auto p-0 shadow-lg border border-gray-200" 
+          align={isMobile ? "center" : "end"}
+          alignOffset={isMobile ? 0 : -15}
+        >
           <CalendarComponent
             initialFocus
             mode="range"

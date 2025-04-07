@@ -1,11 +1,10 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type FilterCategory = "tours" | "accommodations" | "restaurants" | "beaches" | "attractions";
 export type FilterPriceRange = "all" | "low" | "medium" | "high";
 export type FilterRating = 1 | 2 | 3 | 4 | 5 | null;
 
-interface MapFiltersState {
+export interface MapFiltersState {
   categories: FilterCategory[];
   priceRange: FilterPriceRange;
   rating: FilterRating;

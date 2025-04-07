@@ -23,7 +23,7 @@ const EventLocation = ({ location }: EventLocationProps) => {
     
     // For demonstration purposes, we're using a default location for Fernando de Noronha
     // In a production app, you would geocode the location string to get coordinates
-    const coordinates = [-32.426, -3.854]; // Fernando de Noronha approximate coordinates
+    const coordinates: [number, number] = [-32.426, -3.854]; // Fernando de Noronha approximate coordinates
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,

@@ -56,7 +56,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow w-full py-6 sm:py-8 md:py-12 lg:py-16">
+      <main className="flex-grow w-full pt-20 py-6 sm:py-8 md:py-12 lg:py-16">
         <div className="container px-4 mx-auto">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
             <DashboardHeader notificationCount={notifications.filter(n => !n.read).length} />

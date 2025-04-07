@@ -14,9 +14,9 @@ const DashboardHeader = ({ notificationCount }: DashboardHeaderProps) => {
   const isMobile = useIsBelowBreakpoint("md");
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-medium mb-2 text-gray-800">Meu Painel</h1>
+        <h1 className="text-2xl sm:text-3xl font-medium mb-3 text-gray-800">Meu Painel</h1>
         {profile && (
           <p className="text-gray-500">
             Bem-vindo, <span className="font-medium">{profile.name || "Visitante"}</span>! 

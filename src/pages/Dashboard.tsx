@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +17,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   
-  // Simulação de dados para métricas do usuário
   const userMetrics = {
     reservasAtivas: 2,
     pontosAcumulados: 750,
@@ -26,27 +24,23 @@ const Dashboard = () => {
     statusPerfil: 70
   };
   
-  // Simulação de notificações do usuário
   const notifications = [
     { id: 1, title: "Reserva confirmada", message: "Seu passeio para o dia 22/08 foi confirmado", date: "Hoje", read: false },
     { id: 2, title: "Novo passeio disponível", message: "Conheça nosso novo passeio de caiaque", date: "Ontem", read: true },
     { id: 3, title: "Oferta especial", message: "Aproveite 15% OFF em hospedagens", date: "3 dias atrás", read: true }
   ];
   
-  // Simulação de recomendações personalizadas
   const recommendations = [
     { id: 1, title: "Passeio de Barco", image: "/tour-sunset.jpg", score: 98 },
     { id: 2, title: "Mergulho", image: "/tour-diving.jpg", score: 87 },
     { id: 3, title: "Trilha Ecológica", image: "/tour-trail.jpg", score: 85 }
   ];
 
-  // Simulação do progresso de carregamento
   useEffect(() => {
     const timer = setTimeout(() => setProgress(100), 500);
     return () => clearTimeout(timer);
   }, []);
   
-  // Redirect if not logged in
   useEffect(() => {
     if (!isLoading && !user) {
       navigate("/login");
@@ -206,7 +200,7 @@ const Dashboard = () => {
                           <li key={i} className="text-sm flex justify-between border-b pb-2">
                             <span>{booking.item_name}</span>
                             <span className="text-gray-500">
-                              {new Date(booking.date).toLocaleDateString()}
+                              {new Date(booking.start_date).toLocaleDateString()}
                             </span>
                           </li>
                         ))}

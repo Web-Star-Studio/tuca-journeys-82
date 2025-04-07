@@ -84,8 +84,8 @@ const BookingsTable = () => {
             {bookings.map((booking) => (
               <TableRow key={booking.id}>
                 <TableCell className="font-medium">{booking.item_name}</TableCell>
-                <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
-                <TableCell>R$ {booking.price.toFixed(2)}</TableCell>
+                <TableCell>{new Date(booking.start_date).toLocaleDateString()}</TableCell>
+                <TableCell>R$ {booking.total_price.toFixed(2)}</TableCell>
                 <TableCell>{getStatusBadge(booking.status)}</TableCell>
                 <TableCell className="text-right space-x-2 whitespace-nowrap">
                   <Button 

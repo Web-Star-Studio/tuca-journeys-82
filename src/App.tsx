@@ -30,6 +30,10 @@ import Wishlist from "./pages/Wishlist";
 import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
+import Partners from "./pages/Partners";
+import PartnerDetail from "./pages/PartnerDetail";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -66,6 +70,10 @@ const App = () => {
                   <Route path="/pacotes/:id" element={<PackageDetail />} />
                   <Route path="/loja" element={<Store />} />
                   <Route path="/loja/:id" element={<ProductDetail />} />
+                  <Route path="/eventos" element={<Events />} />
+                  <Route path="/eventos/:id" element={<EventDetail />} />
+                  <Route path="/parceiros" element={<Partners />} />
+                  <Route path="/parceiros/:id" element={<PartnerDetail />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/cadastro" element={<Register />} />
                   <Route path="/recuperar-senha" element={<ResetPassword />} />

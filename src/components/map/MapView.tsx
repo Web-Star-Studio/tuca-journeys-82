@@ -1,20 +1,36 @@
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useMapFilters } from "@/contexts/MapFilterContext";
 import MapTokenInput from "./MapTokenInput";
 import "./createRoot";
-import { getMapData } from "./utils/mapData";
+import { getMapData, PointData } from "./utils/mapData";
 import { filterMapData } from "./utils/mapFilter";
 import { useMapInitialization } from "./hooks/useMapInitialization";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { useMapPopup } from "./hooks/useMapPopup";
+import { events } from "@/data/events";
+import { Event } from "@/types/event";
 
 interface ActivePopup {
   id: string;
   lngLat: mapboxgl.LngLat;
 }
+
+// Convert events to map point data
+const convertEventsToPoints = (events: Event[]): PointData[] => {
+  return events.map(event => ({
+    id: `event-${event.id}`,
+    name: event.name,
+    category: event.category,
+    description: `${event.date} - ${event.start_time}`,
+    // For demonstration, we're using approximate coordinates
+    // In a real app, these would come from geocoding or a database
+    coordinates: [-32.426 + (Math.random() * 0.02 - 0.01), -3.854 + (Math.random() * 0.02 - 0.01)] as [number, number],
+    color: '#4caf50' // Green color for events
+  }));
+};
 
 const MapView = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -23,8 +39,12 @@ const MapView = () => {
   const { filters } = useMapFilters();
   const [activePopup, setActivePopup] = useState<ActivePopup | null>(null);
 
-  // Get all map data
-  const mapData = React.useMemo(() => getMapData(), []);
+  // Get all map data including events
+  const mapData = React.useMemo(() => {
+    const baseMapData = getMapData();
+    const eventPoints = convertEventsToPoints(events);
+    return [...baseMapData, ...eventPoints];
+  }, []);
   
   // Filter map data based on applied filters
   const filteredMapData = React.useMemo(

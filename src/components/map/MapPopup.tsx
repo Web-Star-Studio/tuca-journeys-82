@@ -20,7 +20,7 @@ const MapPopup = ({ point, onClose }: MapPopupProps) => {
         </button>
       </div>
       
-      <p className="text-xs text-gray-600 mb-2">{point.category}</p>
+      <p className="text-xs text-gray-600 mb-2">{point.description || point.category}</p>
       
       {point.category && (
         <div className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full inline-block">

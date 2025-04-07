@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import { createRoot } from "react-dom/client";
 import MapPopup from "../MapPopup";
 import { MutableRefObject } from "react";
+import { PointData } from "../utils/mapData";
 
 interface ActivePopup {
   id: string;
@@ -11,9 +12,9 @@ interface ActivePopup {
 }
 
 interface MapPopupProps {
-  map: MutableRefObject<mapboxgl.Map | null>; // Changed from RefObject to MutableRefObject
+  map: MutableRefObject<mapboxgl.Map | null>;
   activePopup: ActivePopup | null;
-  mapData: any[];
+  mapData: PointData[];
   setActivePopup: React.Dispatch<React.SetStateAction<ActivePopup | null>>;
 }
 

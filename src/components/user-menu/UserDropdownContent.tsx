@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, User as UserIcon, CreditCard, LogOut, LayoutDashboard } from "lucide-react";
+import { BookOpen, User as UserIcon, CreditCard, LogOut, LayoutDashboard, Settings } from "lucide-react";
 
 interface UserDropdownContentProps {
   user: User;
@@ -16,6 +16,7 @@ interface UserDropdownContentProps {
 
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   const displayName = user?.user_metadata?.name || user?.email || "";
+  const isAdmin = user?.user_metadata?.role === 'admin' || user?.app_metadata?.role === 'admin';
   
   return (
     <DropdownMenuContent align="end" className="w-56 shadow-lg border-tuca-light-blue/20">
@@ -52,6 +53,15 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
             <span>Meus Pagamentos</span>
           </Link>
         </DropdownMenuItem>
+        
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Painel Admin</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
       </div>
       
       <DropdownMenuSeparator />

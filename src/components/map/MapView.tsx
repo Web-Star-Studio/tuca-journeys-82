@@ -32,7 +32,7 @@ const MapView = () => {
   const { toast } = useToast();
   
   // Get tours data using the existing hook
-  const { data: tours, isError } = useTours();
+  const { tours, isLoading, error } = useTours();
 
   // Get all map data including base locations, events, accommodations, and tours
   const mapData = useMemo(() => {
@@ -56,14 +56,14 @@ const MapView = () => {
   }, [tours]);
   
   useEffect(() => {
-    if (isError) {
+    if (error) {
       toast({
         title: "Erro ao carregar dados",
         description: "Não foi possível carregar todos os dados para o mapa.",
         variant: "destructive"
       });
     }
-  }, [isError, toast]);
+  }, [error, toast]);
   
   // Filter map data based on applied filters
   const filteredMapData = useMemo(() => {

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { MapPin, Compass, Hotel, Calendar, Home, Umbrella, Museum, Building, Coffee, GraduationCap } from "lucide-react";
+import { MapPin, Compass, Hotel, Calendar, Home, Umbrella, Landmark, Building, Coffee, GraduationCap } from "lucide-react";
 import { FilterCategory } from "@/contexts/MapFilterContext";
 
 export const allCategories: FilterCategory[] = [
@@ -36,7 +36,7 @@ export const getCategoryIcon = (category: FilterCategory) => {
     case "beaches": return <Umbrella size={16} />;
     case "attractions": return <MapPin size={16} />;
     case "restaurants": return <Coffee size={16} />;
-    case "museums": return <Museum size={16} />;
+    case "museums": return <Landmark size={16} />; // Changed from Museum to Landmark
     case "historical": return <Building size={16} />;
     default: return <Home size={16} />;
   }

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,108 +14,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Event } from "@/types/event";
-
-// Sample events data (same as in Events.tsx)
-const events: Event[] = [
-  {
-    id: 1,
-    name: "Festival de Gastronomia e Cultura",
-    description: "Um festival com os melhores pratos da culinária local de Fernando de Noronha, apresentações culturais e música ao vivo. Durante o evento, chefs renomados de todo o Brasil apresentarão pratos exclusivos que destacam os ingredientes locais e a riqueza gastronômica da região. Além da gastronomia, o festival contará com apresentações de músicos locais, exposições de artesanato e demonstrações culturais que celebram a rica herança de Fernando de Noronha. Os ingressos incluem degustações de todos os pratos apresentados no festival, assim como uma bebida de boas-vindas.",
-    image_url: "/hero-noronha-2.jpg",
-    date: "2024-08-15",
-    start_time: "18:00",
-    end_time: "23:00",
-    location: "Praia do Porto",
-    price: 60.00,
-    category: "Gastronomia",
-    capacity: 200,
-    available_spots: 120,
-    status: "scheduled",
-    organizer: "Secretaria de Turismo de Fernando de Noronha",
-    featured: true
-  },
-  {
-    id: 2,
-    name: "Corrida Ecológica de Noronha",
-    description: "Corrida de 10km pelas trilhas e praias do arquipélago, promovendo conscientização ambiental e bem-estar. O percurso passará por algumas das paisagens mais deslumbrantes da ilha, incluindo a famosa Baía dos Porcos e o mirante do Morro Dois Irmãos. Todos os participantes receberão um kit contendo camiseta feita de material reciclável, número de peito, e um brinde especial produzido por artesãos locais. Parte do valor arrecadado será destinado a projetos de conservação ambiental em Fernando de Noronha.",
-    image_url: "/tour-trail.jpg",
-    date: "2024-09-10",
-    start_time: "07:00",
-    end_time: "10:30",
-    location: "Porto de Santo Antônio",
-    price: 85.00,
-    category: "Esporte",
-    capacity: 150,
-    available_spots: 82,
-    status: "scheduled",
-    organizer: "Associação de Atletas de Fernando de Noronha"
-  },
-  {
-    id: 3,
-    name: "Workshop de Fotografia Submarina",
-    description: "Aprenda técnicas de fotografia submarina com profissionais experientes em um dos locais com maior biodiversidade marinha do Brasil. Este workshop intensivo combinará aulas teóricas sobre fotografia subaquática com sessões práticas de mergulho em locais selecionados ao redor da ilha. Os participantes aprenderão sobre configurações de câmera, iluminação subaquática, técnicas de composição e edição de imagens. O workshop é adequado tanto para fotógrafos iniciantes quanto para intermediários que desejam aprimorar suas habilidades. É necessário ter experiência prévia em mergulho autônomo e trazer seu próprio equipamento fotográfico à prova d'água.",
-    image_url: "/tour-underwater.jpg",
-    date: "2024-07-25",
-    start_time: "09:00",
-    end_time: "16:00",
-    location: "Marina do Sueste",
-    price: 350.00,
-    category: "Workshop",
-    capacity: 20,
-    available_spots: 12,
-    status: "scheduled",
-    organizer: "Instituto Marinho de Noronha"
-  },
-  {
-    id: 4,
-    name: "Observação de Tartarugas Marinhas",
-    description: "Evento especial para observação da desova de tartarugas marinhas com biólogos especializados. Fernando de Noronha é um dos principais locais de desova de tartarugas-verdes no Brasil, e esta é uma oportunidade única de testemunhar este fascinante evento natural. Biólogos do Projeto TAMAR guiarão os participantes pela praia, compartilhando informações sobre o ciclo de vida das tartarugas, os desafios para sua conservação e o importante trabalho realizado para proteger estas espécies ameaçadas. O evento ocorrerá à noite, quando as tartarugas tipicamente vêm à praia para desovar, e os participantes devem seguir rigorosas diretrizes para minimizar a perturbação dos animais.",
-    image_url: "/tour-turtles.jpg",
-    date: "2024-09-22",
-    start_time: "19:00",
-    end_time: "22:00",
-    location: "Praia do Leão",
-    price: 120.00,
-    category: "Ecoturismo",
-    capacity: 30,
-    available_spots: 15,
-    status: "scheduled",
-    organizer: "Projeto TAMAR",
-    featured: true
-  },
-  {
-    id: 5,
-    name: "Sunset Yoga na Praia",
-    description: "Sessão de yoga ao pôr do sol em uma das mais belas praias do arquipélago. Esta sessão especial será conduzida por um instrutor certificado e oferecerá uma prática suave adequada para todos os níveis, desde iniciantes até praticantes experientes. À medida que o sol se põe sobre o oceano Atlântico, os participantes serão guiados através de uma sequência de asanas (posturas), pranayama (exercícios de respiração) e meditação, tudo isso ao som das ondas quebrando suavemente na praia. A combinação da prática de yoga com o cenário natural deslumbrante cria uma experiência verdadeiramente única e enriquecedora para corpo, mente e espírito.",
-    image_url: "/tour-sunset.jpg",
-    date: "2024-08-05",
-    start_time: "17:30",
-    end_time: "19:00",
-    location: "Praia do Sancho",
-    price: 50.00,
-    category: "Bem-estar",
-    capacity: 25,
-    available_spots: 8,
-    status: "scheduled",
-    organizer: "Centro de Yoga Noronha"
-  },
-  {
-    id: 6,
-    name: "Palestra: Preservação dos Recifes de Coral",
-    description: "Palestra educativa sobre a importância e os desafios da preservação dos recifes de coral em Fernando de Noronha. Apresentada por especialistas em biologia marinha do ICMBio, esta palestra abordará o ecossistema único dos recifes de coral que circundam o arquipélago, sua importância para a biodiversidade marinha e os crescentes desafios que enfrentam, incluindo mudanças climáticas, acidificação dos oceanos e pressão turística. Os palestrantes compartilharão os resultados de pesquisas recentes conduzidas na região e discutirão estratégias de conservação que estão sendo implementadas para proteger estes frágeis ecossistemas. A entrada é gratuita, mas os lugares são limitados, por isso é recomendável chegar cedo para garantir um assento.",
-    image_url: "/tour-diving.jpg",
-    date: "2024-07-18",
-    start_time: "19:00",
-    end_time: "21:00",
-    location: "Centro de Visitantes do ICMBio",
-    price: 0.00,
-    category: "Educação Ambiental",
-    capacity: 80,
-    available_spots: 35,
-    status: "scheduled",
-    organizer: "ICMBio - Fernando de Noronha"
-  }
-];
+import { events } from "@/data/events";
 
 const EventDetail = () => {
   const { id } = useParams();

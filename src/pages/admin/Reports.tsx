@@ -39,30 +39,7 @@ const Reports = () => {
     <AdminLayout pageTitle="Relatórios">
       <div className="space-y-6">
         <div className="flex flex-col space-y-4">
-          {/* Tabs header and date filter in one row on desktop */}
-          <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center justify-between"}`}>
-            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
-              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
-                <TabsTrigger value="revenue" onClick={() => setActiveTab("revenue")}>Receitas</TabsTrigger>
-                <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}>Reservas</TabsTrigger>
-                <TabsTrigger value="users" onClick={() => setActiveTab("users")}>Usuários</TabsTrigger>
-                <TabsTrigger value="packages" onClick={() => setActiveTab("packages")}>Pacotes</TabsTrigger>
-              </TabsList>
-            </div>
-            <div className={`${isMobile ? "w-full" : "w-auto"}`}>
-              <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
-            </div>
-          </div>
-
-          {/* Error alert */}
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          {/* Tabs content */}
+          {/* Here we properly wrap everything in a single Tabs component */}
           <Tabs
             defaultValue={activeTab}
             value={activeTab}
@@ -72,25 +49,49 @@ const Reports = () => {
             }}
             className="w-full overflow-hidden"
           >
-            <TabsContent value="revenue" className="mt-2 overflow-x-auto">
+            {/* Tabs header and date filter in one row on desktop */}
+            <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center justify-between"}`}>
+              <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+                <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-xl">
+                  <TabsTrigger value="revenue">Receitas</TabsTrigger>
+                  <TabsTrigger value="bookings">Reservas</TabsTrigger>
+                  <TabsTrigger value="users">Usuários</TabsTrigger>
+                  <TabsTrigger value="packages">Pacotes</TabsTrigger>
+                </TabsList>
+              </div>
+              <div className={`${isMobile ? "w-full" : "w-auto"}`}>
+                <ReportFilters dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
+              </div>
+            </div>
+
+            {/* Error alert */}
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            {/* Tabs content */}
+            <TabsContent value="revenue" className="mt-4 overflow-x-auto">
               <div className="min-w-[320px]">
                 <RevenueReport dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="bookings" className="mt-2 overflow-x-auto">
+            <TabsContent value="bookings" className="mt-4 overflow-x-auto">
               <div className="min-w-[320px]">
                 <BookingsReportContainer dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="users" className="mt-2 overflow-x-auto">
+            <TabsContent value="users" className="mt-4 overflow-x-auto">
               <div className="min-w-[320px]">
                 <UsersReport dateRange={dateRange} onError={handleError} />
               </div>
             </TabsContent>
 
-            <TabsContent value="packages" className="mt-2 overflow-x-auto">
+            <TabsContent value="packages" className="mt-4 overflow-x-auto">
               <div className="min-w-[320px]">
                 <PackagesReport dateRange={dateRange} onError={handleError} />
               </div>

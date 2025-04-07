@@ -1,11 +1,11 @@
 
-import { useEffect, RefObject } from 'react';
+import { useEffect, RefObject, MutableRefObject } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { NORONHA_CENTER } from '../utils/mapData';
 
 interface UseMapInitializationProps {
   mapContainer: RefObject<HTMLDivElement>;
-  map: RefObject<mapboxgl.Map | null>;
+  map: MutableRefObject<mapboxgl.Map | null>; // Changed from RefObject to MutableRefObject
   mapToken: string | null;
 }
 

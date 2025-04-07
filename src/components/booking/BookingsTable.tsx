@@ -84,8 +84,12 @@ const BookingsTable = () => {
             {bookings.map((booking) => (
               <TableRow key={booking.id}>
                 <TableCell className="font-medium">{booking.item_name}</TableCell>
-                <TableCell>{new Date(booking.start_date).toLocaleDateString()}</TableCell>
-                <TableCell>R$ {booking.total_price.toFixed(2)}</TableCell>
+                <TableCell>{booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Data não disponível'}</TableCell>
+                <TableCell>
+                  {typeof booking.total_price === 'number' 
+                    ? `R$ ${booking.total_price.toFixed(2)}` 
+                    : 'Valor não disponível'}
+                </TableCell>
                 <TableCell>{getStatusBadge(booking.status)}</TableCell>
                 <TableCell className="text-right space-x-2 whitespace-nowrap">
                   <Button 

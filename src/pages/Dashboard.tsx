@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -200,7 +201,7 @@ const Dashboard = () => {
                           <li key={i} className="text-sm flex justify-between border-b pb-2">
                             <span>{booking.item_name}</span>
                             <span className="text-gray-500">
-                              {new Date(booking.start_date).toLocaleDateString()}
+                              {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Data não disponível'}
                             </span>
                           </li>
                         ))}

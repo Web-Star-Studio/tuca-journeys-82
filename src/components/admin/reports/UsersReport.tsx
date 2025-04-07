@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import UserMetricsCards from "./users/UserMetricsCards";
 import UserGrowthChart from "./users/UserGrowthChart";
 import UserDeviceChart from "./users/UserDeviceChart";
-import UserRegionDistribution from "./users/UserRegionDistribution";
+import UserRegionDistribution from "./UserRegionDistribution";
 import { 
   userGrowthData, 
   userRegionData, 
@@ -49,8 +48,8 @@ const UsersReport = ({ dateRange, onError }: UsersReportProps) => {
 
       // Calculate totals
       const totalUsers = 800;
-      // Fixed: Remove type parameter and use explicit types in the function
-      const totalNewUsers = userData.growthData.reduce((sum: number, item: UserGrowthData) => sum + item.usuarios, 0);
+      // Fixed: Properly specify the generic type for the reduce function
+      const totalNewUsers = userData.growthData.reduce<number>((sum, item) => sum + item.usuarios, 0);
       const totalRegions = userData.regionData.length;
       const conversionRate = 28; // In percentage, would be calculated in a real app
       

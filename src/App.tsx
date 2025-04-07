@@ -34,6 +34,7 @@ import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import Partners from "./pages/Partners";
 import PartnerDetail from "./pages/PartnerDetail";
+import Mapa from "./pages/Mapa";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -85,6 +86,7 @@ const App = () => {
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
                   <Route path="/pagamentos" element={<Payments />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/mapa" element={<Mapa />} />
                   
                   {/* Admin Routes */}
                   <Route path="/admin" element={<AdminDashboard />} />

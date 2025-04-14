@@ -16,9 +16,9 @@ export const publicRoutes = (
   <>
     <Route path="/" element={<Home />} />
     <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route path="/forgot-password" element={<ResetPassword />} />
-    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/cadastro" element={<Register />} />
+    <Route path="/esqueci-senha" element={<ResetPassword />} />
+    <Route path="/redefinir-senha" element={<ResetPassword />} />
     <Route path="/tours" element={<Tours />} />
     <Route path="/tours/:id" element={<TourDetail />} />
     <Route path="/packages" element={<Packages />} />

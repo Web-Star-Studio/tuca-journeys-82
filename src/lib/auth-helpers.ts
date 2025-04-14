@@ -1,3 +1,4 @@
+
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -99,28 +100,32 @@ export const checkAdminAccess = async (userId: string, email?: string): Promise<
 /**
  * Add protection to admin routes by redirecting non-admin users
  */
-export const withAdminProtection = (component: React.ComponentType, navigate: Function) => {
-  const { user, isAdmin, isLoading } = useAuth();
-  
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        navigate('/login');
-      } else if (!isAdmin) {
-        navigate('/dashboard');
+export const withAdminProtection = (Component: React.ComponentType, navigate: Function) => {
+  return () => {
+    const { user, isAdmin, isLoading } = useAuth();
+    
+    useEffect(() => {
+      if (!isLoading) {
+        if (!user) {
+          navigate('/login');
+        } else if (!isAdmin) {
+          navigate('/dashboard');
+        }
       }
-    }
-  }, [user, isAdmin, isLoading, navigate]);
+    }, [user, isAdmin, isLoading, navigate]);
 
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
-    </div>;
-  }
-  
-  if (!user || !isAdmin) {
-    return null; // Will redirect due to the useEffect
-  }
-  
-  return component;
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+        </div>
+      );
+    }
+    
+    if (!user || !isAdmin) {
+      return null; // Will redirect due to the useEffect
+    }
+    
+    return <Component />;
+  };
 };

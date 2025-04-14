@@ -12,7 +12,7 @@ import { UserForm } from "./UserForm";
 interface UserFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId?: number;
+  userId?: string;
   onSuccess: () => void;
 }
 

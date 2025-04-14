@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Booking } from '@/types/bookings';
+import { Booking as DatabaseBooking } from '@/types/database';
 import { toast } from 'sonner';
-import { createBooking } from '@/lib/api';
 
 export const useBookings = () => {
   const { user } = useAuth();
@@ -76,7 +76,7 @@ export const useCreateBooking = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: (bookingData: Omit<DatabaseBooking, 'id' | 'created_at' | 'updated_at'>) => {
       return createBooking(bookingData);
     },
     onSuccess: () => {
@@ -88,4 +88,17 @@ export const useCreateBooking = () => {
       toast.error('Erro ao criar reserva');
     }
   });
+};
+
+// Helper function to create a booking
+const createBooking = async (booking: Omit<DatabaseBooking, 'id' | 'created_at' | 'updated_at'>) => {
+  console.log("Creating booking:", booking);
+  const { data, error } = await supabase
+    .from('bookings')
+    .insert([booking])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
 };

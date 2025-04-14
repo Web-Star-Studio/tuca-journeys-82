@@ -41,7 +41,7 @@ const userFormSchema = z.object({
 type UserFormValues = z.infer<typeof userFormSchema>;
 
 interface UserFormProps {
-  userId?: number;
+  userId?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -69,11 +69,11 @@ export const UserForm: React.FC<UserFormProps> = ({
   });
 
   // Mock function to get user
-  const getUser = async (id: number): Promise<User | null> => {
+  const getUser = async (id: string): Promise<User | null> => {
     // In a real app, this would be a database call
     const users = [
       {
-        id: 1,
+        id: "1",
         name: "Maria Silva",
         email: "maria@example.com",
         role: "customer",
@@ -82,7 +82,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         avatar: null,
       },
       {
-        id: 2,
+        id: "2",
         name: "João Oliveira",
         email: "joao@example.com",
         role: "customer",
@@ -91,7 +91,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         avatar: null,
       },
       {
-        id: 3,
+        id: "3",
         name: "Ana Souza",
         email: "ana@example.com",
         role: "admin",
@@ -109,11 +109,15 @@ export const UserForm: React.FC<UserFormProps> = ({
   const createUser = async (user: Omit<User, "id" | "created_at">) => {
     // In a real app, this would be a database call
     console.log("Creating user:", user);
-    return { ...user, id: Math.floor(Math.random() * 1000), created_at: new Date().toISOString() };
+    return { 
+      ...user, 
+      id: Math.floor(Math.random() * 1000).toString(), 
+      created_at: new Date().toISOString() 
+    };
   };
 
   // Mock function to update user
-  const updateUser = async (user: Partial<User> & { id: number }) => {
+  const updateUser = async (user: Partial<User> & { id: string }) => {
     // In a real app, this would be a database call
     console.log("Updating user:", user);
     return user;
@@ -169,7 +173,7 @@ export const UserForm: React.FC<UserFormProps> = ({
     try {
       if (userId) {
         // Update existing user
-        const updateData: Partial<User> & { id: number } = {
+        const updateData: Partial<User> & { id: string } = {
           id: userId,
           name: data.name,
           email: data.email,

@@ -9,3 +9,7 @@ export interface User {
   created_at: string;
   avatar: string | null;
 }
+
+// Add the missing UserRole and UserStatus types
+export type UserRole = 'admin' | 'customer';
+export type UserStatus = 'active' | 'inactive';

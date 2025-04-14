@@ -156,11 +156,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   // Form submission
   const onSubmit = async (data: ProductFormValues) => {
     try {
+      // Ensure all required fields are present
+      const productData = {
+        name: data.name,
+        description: data.description,
+        image_url: data.image_url,
+        price: data.price,
+        category: data.category,
+        stock: data.stock,
+        status: data.status,
+        weight: data.weight,
+        dimensions: data.dimensions,
+        gallery: data.gallery,
+        featured: data.featured
+      };
+      
       if (productId) {
         // Update existing product
         const { error } = await supabase
           .from('products')
-          .update(data)
+          .update(productData)
           .eq('id', productId);
           
         if (error) throw error;
@@ -173,7 +188,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         // Create new product
         const { error } = await supabase
           .from('products')
-          .insert(data);
+          .insert(productData);
           
         if (error) throw error;
         

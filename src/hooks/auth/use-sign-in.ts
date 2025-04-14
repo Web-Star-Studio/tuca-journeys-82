@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { isAdminEmail } from "@/lib/auth-helpers";
+import { Session } from "@supabase/supabase-js";
 
 export const useSignIn = () => {
   const { toast } = useToast();
@@ -31,11 +32,14 @@ export const useSignIn = () => {
           created_at: new Date().toISOString(),
         };
         
-        const mockSession = {
+        // Create a mock session that matches the Session type
+        const mockSession: Session = {
           access_token: "mock-token",
           refresh_token: "mock-refresh-token",
           user: mockUser,
           expires_at: Math.floor(Date.now() / 1000) + 3600,
+          expires_in: 3600,  // 1 hour in seconds
+          token_type: "bearer"
         };
         
         // Store the mocked session in localStorage to persist

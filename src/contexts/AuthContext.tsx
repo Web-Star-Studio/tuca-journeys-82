@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -62,10 +61,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr) {
           try {
-            const mockSession = JSON.parse(mockSessionStr);
+            const mockSessionData = JSON.parse(mockSessionStr);
             // Check if mock session is expired
-            if (mockSession.expires_at > Math.floor(Date.now() / 1000)) {
+            if (mockSessionData.expires_at > Math.floor(Date.now() / 1000)) {
               console.log("Found valid mock session, setting user state");
+              // Create a proper Session object with all required fields
+              const mockSession: Session = {
+                access_token: mockSessionData.access_token,
+                refresh_token: mockSessionData.refresh_token,
+                user: mockSessionData.user,
+                expires_at: mockSessionData.expires_at,
+                expires_in: mockSessionData.expires_at - Math.floor(Date.now() / 1000),
+                token_type: "bearer"
+              };
+              
               setSession(mockSession);
               setUser(mockSession.user);
               checkAdminStatus(mockSession.user);

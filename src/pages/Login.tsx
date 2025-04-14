@@ -1,16 +1,18 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginForm from "@/components/login/LoginForm";
 import { Loader2 } from "lucide-react";
 
 const Login = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
+    setIsRedirecting(true);
     if (redirectToAdmin) {
       navigate("/admin");
     } else {
@@ -21,21 +23,16 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      // Check if user is admin
-      const isAdmin = 
-        user.email === "admin@tucanoronha.com" || 
-        (user.user_metadata && user.user_metadata.role === "admin") ||
-        (user.app_metadata && user.app_metadata.role === "admin");
-      
+      setIsRedirecting(true);
       if (isAdmin) {
         navigate("/admin");
       } else {
         navigate("/dashboard");
       }
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, navigate]);
   
-  if (isLoading) {
+  if (isLoading || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />

@@ -20,7 +20,29 @@ export const useSignIn = () => {
         (email === "user@example.com" && password === "password")
       ) {
         console.log("Using demo credentials, creating mock session");
-        // Use demo mode
+        
+        try {
+          // Try to sign in with Supabase first (if user exists in Supabase)
+          const { data: supabaseData, error: supabaseError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (!supabaseError) {
+            console.log("Demo user exists in Supabase, using that session");
+            
+            toast({
+              title: "Login realizado com sucesso",
+              description: `Bem-vindo de volta ${isAdminLogin ? '(administrador)' : ''}!`,
+            });
+            
+            return { data: supabaseData, error: null };
+          }
+        } catch (innerError) {
+          console.log("Supabase auth failed for demo user, falling back to mock session");
+        }
+        
+        // Use demo mode fallback
         const mockUser = {
           id: "demo-user-id",
           email: email,

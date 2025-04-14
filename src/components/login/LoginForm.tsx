@@ -22,6 +22,7 @@ interface LoginFormProps {
 const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const { signIn, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     register,
@@ -36,8 +37,15 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    setError(null);
+    setIsSubmitting(true);
+    
     try {
-      await signIn(data.email, data.password);
+      const result = await signIn(data.email, data.password);
+      
+      if (result.error) {
+        throw result.error;
+      }
       
       // If successful login and callback exists, call it
       // Check if it's an admin login
@@ -48,6 +56,8 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Falha no login. Verifique seu email e senha.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -132,8 +142,8 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
         </div>
 
         <div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
+          <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+            {isLoading || isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Entrando...

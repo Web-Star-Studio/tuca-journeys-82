@@ -10,6 +10,17 @@ export const useAuthState = () => {
 
   // Initialize the auth state
   useEffect(() => {
+    // Set up the auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event);
+        
+        setSession(currentSession);
+        setUser(currentSession?.user || null);
+        setLoading(false);
+      }
+    );
+    
     // Get the initial session
     const initializeAuth = async () => {
       setLoading(true);
@@ -57,7 +68,6 @@ export const useAuthState = () => {
         console.error("Error initializing auth:", error);
         // Clear all session data on error
         localStorage.removeItem("supabase-mock-session");
-        localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
         setSession(null);
         setUser(null);
       } finally {
@@ -67,43 +77,13 @@ export const useAuthState = () => {
 
     initializeAuth();
     
-    // Set up the auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event);
-        
-        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-          // For these events, update the state directly
-          setSession(currentSession);
-          setUser(currentSession?.user || null);
-        } else if (event === 'SIGNED_IN') {
-          // When signed in, verify the session is valid
-          setSession(currentSession);
-          setUser(currentSession?.user || null);
-        }
-        
-        // Handle session expiry or user deletion by checking if session is null
-        // but we previously had a user
-        if (!currentSession && user) {
-          console.log("Session lost, clearing user state");
-          // Clear all session data
-          localStorage.removeItem("supabase-mock-session");
-          localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
-          setSession(null);
-          setUser(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-    
     // Cleanup
     return () => {
       if (authListener?.subscription) {
         authListener.subscription.unsubscribe();
       }
     };
-  }, [user]);
+  }, []);
 
   return { user, session, loading, setLoading };
 };

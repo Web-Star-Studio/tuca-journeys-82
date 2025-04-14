@@ -45,11 +45,6 @@ export const useSignOut = () => {
         console.log("No active session found, just cleaning up local storage");
       }
       
-      // Clear all possible session data regardless of whether API call succeeded
-      console.log("Clearing all session data");
-      localStorage.removeItem("supabase-session");
-      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
-      
       toast({
         title: "Sessão encerrada",
         description: "Você saiu com sucesso.",
@@ -58,11 +53,6 @@ export const useSignOut = () => {
       return { error: null };
     } catch (error: any) {
       console.error("Error during sign out:", error);
-      
-      // Still attempt to clear all session data on error
-      localStorage.removeItem("supabase-mock-session");
-      localStorage.removeItem("supabase-session");
-      localStorage.removeItem("sb-xsctqejremuwmktmchef-auth-token");
       
       toast({
         title: "Erro ao sair",

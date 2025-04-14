@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 import { publicRoutes } from './routes/publicRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { adminRoutes } from './routes/adminRoutes';
@@ -19,14 +20,16 @@ const App: React.FC = () => {
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <Router>
-              <Routes>
-                {publicRoutes}
-                {protectedRoutes}
-                {adminRoutes}
-              </Routes>
-            </Router>
-            <Toaster position="top-center" richColors closeButton />
+            <WishlistProvider>
+              <Router>
+                <Routes>
+                  {publicRoutes}
+                  {protectedRoutes}
+                  {adminRoutes}
+                </Routes>
+              </Router>
+              <Toaster position="top-center" richColors closeButton />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>

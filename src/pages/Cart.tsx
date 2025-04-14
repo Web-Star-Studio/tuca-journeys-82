@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
-  const { cart, updateQuantity, removeItem } = useCart();
+  const { cartItems, updateQuantity, removeItem } = useCart();
   const navigate = useNavigate();
   
-  const totalPrice = cart.reduce((total, item) => {
+  const totalPrice = cartItems.reduce((total, item) => {
     return total + (item.price * item.quantity);
   }, 0);
   
@@ -31,7 +31,7 @@ const Cart = () => {
               Revise seus itens antes de prosseguir para o checkout
             </p>
             
-            {cart.length === 0 ? (
+            {cartItems.length === 0 ? (
               <div className="bg-white p-8 rounded-xl shadow-md text-center">
                 <h2 className="text-xl font-medium mb-4">Seu carrinho está vazio</h2>
                 <p className="text-muted-foreground mb-6">
@@ -55,7 +55,7 @@ const Cart = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {cart.map((item) => (
+                      {cartItems.map((item) => (
                         <tr key={item.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">

@@ -20,6 +20,7 @@ import BookingsReport from '@/components/admin/reports/BookingsReport';
 import PackagesReport from '@/components/admin/reports/PackagesReport';
 import AccommodationsReport from '@/components/admin/reports/AccommodationsReport';
 import UsersReport from '@/components/admin/reports/UsersReport';
+import BookingsReportContainer from '@/components/admin/reports/bookings/BookingsReportContainer';
 
 export const adminRoutes = (
   <>
@@ -33,8 +34,8 @@ export const adminRoutes = (
     <Route path="/admin/accommodations/new" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
     <Route path="/admin/accommodations/:id" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
     <Route path="/admin/packages" element={<AdminPackages />} />
-    <Route path="/admin/packages/new" element={<PackageForm onCancel={() => {}} onSuccess={() => {}} />} />
-    <Route path="/admin/packages/:id" element={<PackageForm onCancel={() => {}} onSuccess={() => {}} />} />
+    <Route path="/admin/packages/new" element={<PackageForm packageId={null} onCancel={() => {}} onSuccess={() => {}} />} />
+    <Route path="/admin/packages/:id" element={<PackageForm packageId={0} onCancel={() => {}} onSuccess={() => {}} />} />
     <Route path="/admin/bookings" element={<AdminBookings />} />
     <Route path="/admin/users" element={<AdminUsers />} />
     <Route path="/admin/products" element={<AdminProducts />} />
@@ -44,7 +45,7 @@ export const adminRoutes = (
     
     {/* Reports */}
     <Route path="/admin/reports/revenue" element={<RevenueReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/bookings" element={<BookingsReport />} />
+    <Route path="/admin/reports/bookings" element={<BookingsReportContainer dateRange={{from: undefined, to: undefined}} />} />
     <Route path="/admin/reports/packages" element={<PackagesReport dateRange={{from: undefined, to: undefined}} />} />
     <Route path="/admin/reports/accommodations" element={<AccommodationsReport dateRange={{from: undefined, to: undefined}} />} />
     <Route path="/admin/reports/users" element={<UsersReport dateRange={{from: undefined, to: undefined}} />} />

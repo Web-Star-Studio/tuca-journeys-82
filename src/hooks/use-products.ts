@@ -128,7 +128,7 @@ export function useProducts(filters?: ProductFilters) {
   };
   
   return {
-    products: data,
+    products: data as Product[],
     error,
     isLoading,
     createProduct,

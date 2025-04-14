@@ -132,6 +132,57 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          dimensions: string | null
+          featured: boolean | null
+          gallery: string[] | null
+          id: number
+          image_url: string
+          name: string
+          price: number
+          status: string
+          stock: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          dimensions?: string | null
+          featured?: boolean | null
+          gallery?: string[] | null
+          id?: number
+          image_url: string
+          name: string
+          price: number
+          status?: string
+          stock?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          dimensions?: string | null
+          featured?: boolean | null
+          gallery?: string[] | null
+          id?: number
+          image_url?: string
+          name?: string
+          price?: number
+          status?: string
+          stock?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       tours: {
         Row: {
           category: string
@@ -240,6 +291,30 @@ export type Database = {
           state?: string | null
           updated_at?: string
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

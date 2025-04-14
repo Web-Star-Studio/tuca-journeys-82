@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -222,13 +221,15 @@ const MapViewContent: React.FC<MapViewContentProps> = ({
   return (
     <>
       <div ref={mapContainer} className="h-full w-full rounded-lg shadow-xl" />
-      <style jsx>{`
+      <style>
+        {`
         .user-location-marker {
           width: 20px;
           height: 20px;
           z-index: 100;
         }
-      `}</style>
+        `}
+      </style>
     </>
   );
 };

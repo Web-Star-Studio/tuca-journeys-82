@@ -39,7 +39,7 @@ export const toursToPoints = (tours: Tour[]): PointData[] => {
     image: tour.image_url,
     location: tour.meeting_point || undefined,
     tags: tour.includes || [],
-    featured: tour.featured || false,
+    featured: false, // Set a default value since it doesn't exist in the Tour type
   }));
 };
 

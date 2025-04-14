@@ -3,6 +3,7 @@ import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Check if the current user has a specific role
@@ -101,7 +102,7 @@ export const checkAdminAccess = async (userId: string, email?: string): Promise<
  * Add protection to admin routes by redirecting non-admin users
  */
 export const withAdminProtection = (Component: React.ComponentType) => {
-  return (props: any) => {
+  const ProtectedComponent = (props: any) => {
     const { user, isAdmin, isLoading } = useAuth();
     const navigate = props.navigate;
     
@@ -129,4 +130,6 @@ export const withAdminProtection = (Component: React.ComponentType) => {
     
     return <Component {...props} />;
   };
+  
+  return ProtectedComponent;
 };

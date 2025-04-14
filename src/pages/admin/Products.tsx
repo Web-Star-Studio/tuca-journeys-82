@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search, Plus, Edit, Trash2, Filter, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -34,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Product } from "@/types/product";
+import SafeImage from "@/components/ui/safe-image";
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -230,13 +230,11 @@ const Products = () => {
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.id}</TableCell>
                   <TableCell>
-                    <img
+                    <SafeImage
                       src={product.image_url || "/placeholder.svg"}
                       alt={product.name}
                       className="h-10 w-16 object-cover rounded"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.svg";
-                      }}
+                      fallbackSrc="/placeholder.svg"
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>

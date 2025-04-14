@@ -26,19 +26,21 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
 import { supabase } from "@/lib/supabase";
+import ImageUpload from "@/components/ui/image-upload";
+import GalleryUpload from "@/components/ui/gallery-upload";
 
 // Form schema for validation
 const productFormSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres" }),
-  image_url: z.string().url({ message: "Forneça uma URL válida para a imagem" }),
+  image_url: z.string().min(1, { message: "A imagem é obrigatória" }),
   price: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
   category: z.string().min(1, { message: "A categoria é obrigatória" }),
   stock: z.coerce.number().int().min(0, { message: "Estoque não pode ser negativo" }),
   status: z.enum(["active", "out_of_stock", "discontinued"]),
   weight: z.coerce.number().optional(),
   dimensions: z.string().optional(),
-  gallery: z.string().optional(),
+  gallery: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
 });
 
@@ -72,7 +74,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   onSuccess, 
   onCancel 
 }) => {
-  const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(productId ? true : false);
 
@@ -89,7 +90,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       status: "active",
       weight: undefined,
       dimensions: "",
-      gallery: "",
+      gallery: [],
       featured: false,
     },
   });
@@ -115,17 +116,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             form.reset({
               name: productData.name,
               description: productData.description,
-              image_url: productData.image_url,
+              image_url: productData.image_url || "",
               price: productData.price,
               category: productData.category,
               stock: productData.stock,
               status: productData.status as "active" | "out_of_stock" | "discontinued",
               weight: productData.weight,
               dimensions: productData.dimensions || "",
-              gallery: productData.gallery?.join("\n") || "",
+              gallery: productData.gallery || [],
               featured: productData.featured || false,
             });
-            setPreviewUrl(productData.image_url);
           }
         } catch (error) {
           console.error("Error loading product:", error);
@@ -143,39 +143,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     loadProductData();
   }, [productId, form, toast]);
 
-  // Update image preview
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (value.image_url) {
-        setPreviewUrl(value.image_url);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
+  // Handle image upload
+  const handleImageUploaded = (url: string) => {
+    form.setValue("image_url", url);
+  };
+
+  // Handle gallery images changes
+  const handleGalleryChange = (urls: string[]) => {
+    form.setValue("gallery", urls);
+  };
 
   // Form submission
   const onSubmit = async (data: ProductFormValues) => {
-    // Convert string lists to arrays
-    const formattedData = {
-      name: data.name,
-      description: data.description,
-      image_url: data.image_url,
-      price: data.price,
-      category: data.category,
-      stock: data.stock,
-      status: data.status,
-      weight: data.weight,
-      dimensions: data.dimensions,
-      gallery: data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [],
-      featured: data.featured
-    };
-
     try {
       if (productId) {
         // Update existing product
         const { error } = await supabase
           .from('products')
-          .update(formattedData)
+          .update(data)
           .eq('id', productId);
           
         if (error) throw error;
@@ -188,7 +173,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         // Create new product
         const { error } = await supabase
           .from('products')
-          .insert(formattedData);
+          .insert(data);
           
         if (error) throw error;
         
@@ -360,22 +345,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="image_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL da Imagem Principal</FormLabel>
+                  <FormLabel>Imagem Principal</FormLabel>
                   <FormControl>
-                    <Input placeholder="URL da imagem principal" {...field} />
+                    <ImageUpload
+                      onImageUploaded={handleImageUploaded}
+                      currentImageUrl={field.value}
+                    />
                   </FormControl>
                   <FormMessage />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="rounded-md h-40 object-cover"
-                        onError={() => setPreviewUrl("")}
-                      />
-                    </div>
-                  )}
                 </FormItem>
               )}
             />
@@ -385,16 +362,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="gallery"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Galeria de Imagens (uma URL por linha)</FormLabel>
+                  <FormLabel>Galeria de Imagens</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="https://exemplo.com/imagem1.jpg&#10;https://exemplo.com/imagem2.jpg&#10;..."
-                      className="min-h-[120px]"
-                      {...field}
+                    <GalleryUpload
+                      onImagesChange={handleGalleryChange}
+                      initialImages={field.value || []}
+                      maxImages={5}
                     />
                   </FormControl>
                   <FormDescription>
-                    Adicione URLs de imagens adicionais para a galeria, uma por linha
+                    Adicione até 5 imagens adicionais para a galeria
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

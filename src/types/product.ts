@@ -12,4 +12,6 @@ export interface Product {
   dimensions?: string;
   gallery?: string[];
   featured?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

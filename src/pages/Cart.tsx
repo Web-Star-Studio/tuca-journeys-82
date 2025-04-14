@@ -68,7 +68,9 @@ const Cart = () => {
                               )}
                               <div>
                                 <div className="font-medium text-gray-900">{item.name}</div>
-                                <div className="text-sm text-gray-500">{item.type}</div>
+                                {item.variation && (
+                                  <div className="text-sm text-gray-500">Variação: {item.variation}</div>
+                                )}
                               </div>
                             </div>
                           </td>

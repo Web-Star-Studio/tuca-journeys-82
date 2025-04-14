@@ -1,4 +1,5 @@
 
+import React from 'react'; // Add React import for JSX
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -102,9 +103,9 @@ export const checkAdminAccess = async (userId: string, email?: string): Promise<
  * Add protection to admin routes by redirecting non-admin users
  */
 export const withAdminProtection = (Component: React.ComponentType) => {
-  const ProtectedComponent = (props: any) => {
+  const ProtectedComponent: React.FC<any> = (props) => { // Use React.FC for functional component
     const { user, isAdmin, isLoading } = useAuth();
-    const navigate = props.navigate;
+    const navigate = useNavigate(); // Use useNavigate hook instead of props.navigate
     
     useEffect(() => {
       if (!isLoading) {

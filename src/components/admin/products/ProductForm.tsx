@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +50,23 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
+interface ProductData {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  category: string;
+  stock: number;
+  status: string;
+  weight?: number;
+  dimensions?: string;
+  gallery?: string[];
+  featured?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export const ProductForm: React.FC<ProductFormProps> = ({ 
   productId, 
   onSuccess, 
@@ -93,20 +111,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           }
           
           if (product) {
+            const productData = product as ProductData;
             form.reset({
-              name: product.name,
-              description: product.description,
-              image_url: product.image_url,
-              price: product.price,
-              category: product.category,
-              stock: product.stock,
-              status: product.status as "active" | "out_of_stock" | "discontinued",
-              weight: product.weight,
-              dimensions: product.dimensions || "",
-              gallery: product.gallery?.join("\n") || "",
-              featured: product.featured || false,
+              name: productData.name,
+              description: productData.description,
+              image_url: productData.image_url,
+              price: productData.price,
+              category: productData.category,
+              stock: productData.stock,
+              status: productData.status as "active" | "out_of_stock" | "discontinued",
+              weight: productData.weight,
+              dimensions: productData.dimensions || "",
+              gallery: productData.gallery?.join("\n") || "",
+              featured: productData.featured || false,
             });
-            setPreviewUrl(product.image_url);
+            setPreviewUrl(productData.image_url);
           }
         } catch (error) {
           console.error("Error loading product:", error);

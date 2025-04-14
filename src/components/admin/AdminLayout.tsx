@@ -7,6 +7,7 @@ import AdminHeader from "./AdminHeader";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { hasRole, isAdminEmail } from "@/lib/auth-helpers";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
 
   // Check authentication and redirect if not authenticated
@@ -43,23 +44,11 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
         // Store the user
         setUser(session.user);
         
-        // Check if user has admin role
-        const { data: userRoles, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id);
-          
-        if (roleError) {
-          console.error("Error fetching user roles:", roleError);
-          throw roleError;
-        }
+        // Check if user has admin role or admin email
+        const isAdmin = await hasRole(session.user.id, 'admin');
+        const isEmailAdmin = isAdminEmail(session.user.email);
         
-        const isAdmin = userRoles?.some(r => r.role === 'admin') || false;
-        
-        // For demo, also consider admin email as admin
-        const isAdminEmail = session.user.email === "admin@tucanoronha.com";
-        
-        if (!isAdmin && !isAdminEmail) {
+        if (!isAdmin && !isEmailAdmin) {
           console.log("User does not have admin permissions");
           toast({
             title: "Acesso restrito",

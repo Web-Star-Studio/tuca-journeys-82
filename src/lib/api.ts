@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
 import { Package } from '@/data/types/packageTypes';
 
@@ -168,5 +168,34 @@ export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & 
     }
     
     return data as UserProfile;
+  }
+};
+
+// Get user roles
+export const getUserRoles = async (userId: string) => {
+  console.log(`Fetching roles for user: ${userId}`);
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+  
+  if (error) {
+    console.error('Error fetching user roles:', error);
+    throw error;
+  }
+  
+  return data.map(item => item.role);
+};
+
+// Check if user has specific role
+export const hasRole = async (userId: string, roleName: string): Promise<boolean> => {
+  if (!userId) return false;
+  
+  try {
+    const roles = await getUserRoles(userId);
+    return roles.includes(roleName);
+  } catch (error) {
+    console.error('Error checking user role:', error);
+    return false;
   }
 };

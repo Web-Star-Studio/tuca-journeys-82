@@ -36,14 +36,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
 
-  // Check if user has admin role - simplified for demo mode
+  // Check if user has admin role
   const checkAdminStatus = (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
       return;
     }
     
-    // In demo mode, check admin from user metadata or email
+    // Check admin status from user metadata or email
     const adminFromMetadata = 
       currentUser.user_metadata?.role === 'admin' ||
       currentUser.app_metadata?.role === 'admin';
@@ -81,10 +81,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
         
-        // No valid mock session
-        setSession(null);
-        setUser(null);
-        setIsLoading(false);
+        // Check for real Supabase session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          throw sessionError;
+        }
+        
+        if (sessionData?.session) {
+          setSession(sessionData.session);
+          setUser(sessionData.session.user);
+          checkAdminStatus(sessionData.session.user);
+        } else {
+          // No valid session
+          setSession(null);
+          setUser(null);
+        }
       } catch (error) {
         console.error("Error initializing auth:", error);
       } finally {
@@ -94,14 +105,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initAuth();
     
-    // Set up auth state listener - simplified for demo mode
-    // Fix: Access subscription correctly from the returned object
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    // Set up auth state listener
+    const { data } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log("Auth state changed:", event);
+      
       if (event === "SIGNED_OUT") {
         localStorage.removeItem("supabase-mock-session");
         setSession(null);
         setUser(null);
         setIsAdmin(false);
+      } else if (currentSession) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+        checkAdminStatus(currentSession.user);
       }
     });
     
@@ -117,6 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const result = await authSignIn(email, password);
       if (result.data?.user) {
+        setUser(result.data.user);
+        setSession(result.data.session);
         checkAdminStatus(result.data.user);
       }
       return result;

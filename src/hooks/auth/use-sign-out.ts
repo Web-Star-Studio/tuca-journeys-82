@@ -1,16 +1,22 @@
 
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 export const useSignOut = () => {
   const { toast } = useToast();
 
-  // Sign out function - simplified for demo mode
+  // Sign out function with Supabase integration
   const signOut = async () => {
     try {
       console.log("Starting sign out process...");
       
-      // Just clear the mock session from localStorage
+      // Clear the mock session if it exists
       localStorage.removeItem("supabase-mock-session");
+      
+      // Also sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
       
       toast({
         title: "Sessão encerrada",

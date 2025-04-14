@@ -10,9 +10,9 @@ export const useAuthState = () => {
 
   // Initialize the auth state
   useEffect(() => {
-    // Set up the auth state change listener
+    // Set up the auth state change listener first (best practice)
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log("Auth state changed:", event);
         
         setSession(currentSession);
@@ -26,7 +26,7 @@ export const useAuthState = () => {
       setLoading(true);
       
       try {
-        // Check for a mock session first
+        // Check for a mock session first for development mode
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr) {
           try {
@@ -79,9 +79,7 @@ export const useAuthState = () => {
     
     // Cleanup
     return () => {
-      if (authListener?.subscription) {
-        authListener.subscription.unsubscribe();
-      }
+      authListener?.subscription.unsubscribe();
     };
   }, []);
 

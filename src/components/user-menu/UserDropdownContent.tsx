@@ -1,13 +1,31 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
 import {
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, User as UserIcon, CreditCard, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import {
+  User as UserIcon,
+  Settings,
+  CreditCard,
+  Heart,
+  LogOut,
+  LayoutDashboard,
+  LucideIcon
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface UserDropdownItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  onClick?: () => void;
+}
 
 interface UserDropdownContentProps {
   user: User;
@@ -15,66 +33,64 @@ interface UserDropdownContentProps {
 }
 
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
-  const displayName = user?.user_metadata?.name || user?.email || "";
-  const isAdmin = user?.user_metadata?.role === 'admin' || user?.app_metadata?.role === 'admin';
+  const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   
+  const commonMenuItems: UserDropdownItem[] = [
+    { label: "Meu Perfil", href: "/perfil", icon: UserIcon },
+    { label: "Meu Painel", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
+    { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
+    { label: "Configurações", href: "/configuracoes", icon: Settings },
+  ];
+  
+  // Add admin dashboard link for admin users
+  const menuItems = isAdmin 
+    ? [{ label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard }, ...commonMenuItems]
+    : commonMenuItems;
+
+  const handleNavigation = (href: string) => {
+    navigate(href);
+  };
+
+  const handleSignOut = async () => {
+    await onSignOut();
+  };
+
+  const truncateEmail = (email: string) => {
+    if (!email) return "";
+    if (email.length <= 20) return email;
+    return email.substring(0, 17) + "...";
+  };
+
   return (
-    <DropdownMenuContent align="end" className="w-56 shadow-lg border-tuca-light-blue/20">
-      <div className="px-3 py-2.5 border-b border-tuca-light-blue/10">
-        <div className="font-medium text-tuca-deep-blue">{displayName}</div>
-        <div className="text-xs text-muted-foreground">{user?.email}</div>
-      </div>
-      
-      <div className="p-1">
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/reservar" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>Minhas Reservas</span>
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/perfil" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Meu Perfil</span>
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/pagamentos" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Meus Pagamentos</span>
-          </Link>
-        </DropdownMenuItem>
-        
-        {isAdmin && (
-          <DropdownMenuItem asChild>
-            <Link to="/admin" className="flex cursor-pointer hover:bg-tuca-light-blue hover:text-tuca-deep-blue transition-colors rounded-md">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Painel Admin</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-      </div>
-      
+    <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuLabel className="font-normal">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm font-medium leading-none">{user?.user_metadata?.name || "Usuário"}</p>
+          <p className="text-xs leading-none text-muted-foreground">
+            {truncateEmail(user?.email || "")}
+          </p>
+        </div>
+      </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      
-      <div className="p-1">
-        <DropdownMenuItem 
-          onClick={onSignOut} 
-          className="cursor-pointer hover:bg-red-50 hover:text-red-600 transition-colors rounded-md"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
-      </div>
+      <DropdownMenuGroup>
+        {menuItems.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            className="cursor-pointer"
+            onClick={() => item.onClick ? item.onClick() : handleNavigation(item.href)}
+          >
+            <item.icon className="mr-2 h-4 w-4" />
+            <span>{item.label}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
+        <LogOut className="mr-2 h-4 w-4" />
+        <span>Sair</span>
+      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 };

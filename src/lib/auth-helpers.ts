@@ -1,5 +1,7 @@
-
 import { supabase } from "./supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 /**
  * Check if the current user has a specific role
@@ -76,4 +78,49 @@ export const setAdminRole = async (userId: string): Promise<boolean> => {
     console.error('Error setting admin role:', error);
     return false;
   }
+};
+
+/**
+ * Check if the current user has admin access, checking both session data and custom claims
+ */
+export const checkAdminAccess = async (userId: string, email?: string): Promise<boolean> => {
+  // First try to check via user_roles table
+  try {
+    const hasAdminRole = await hasRole(userId, 'admin');
+    if (hasAdminRole) return true;
+  } catch (error) {
+    console.error('Error checking admin role:', error);
+  }
+  
+  // Fallback to checking email (for demo purposes)
+  return isAdminEmail(email);
+};
+
+/**
+ * Add protection to admin routes by redirecting non-admin users
+ */
+export const withAdminProtection = (component: React.ComponentType, navigate: Function) => {
+  const { user, isAdmin, isLoading } = useAuth();
+  
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        navigate('/login');
+      } else if (!isAdmin) {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, isAdmin, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+    </div>;
+  }
+  
+  if (!user || !isAdmin) {
+    return null; // Will redirect due to the useEffect
+  }
+  
+  return component;
 };

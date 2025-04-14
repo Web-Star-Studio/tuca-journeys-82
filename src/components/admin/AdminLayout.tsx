@@ -1,14 +1,10 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import React, { useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
-import { isAdminEmail } from "@/lib/auth-helpers";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -16,54 +12,15 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
-  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
-
-  // Check authentication and redirect if not authenticated
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setIsCheckingAuth(true);
-        
-        // Using Auth context instead of direct Supabase check
-        if (!user) {
-          console.log("User not authenticated, redirecting to login");
-          toast({
-            title: "Acesso restrito",
-            description: "Você precisa estar logado para acessar esta página.",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
-        
-        // Check if user is admin
-        if (!isAdmin) {
-          console.log("User does not have admin permissions");
-          toast({
-            title: "Acesso restrito",
-            description: "Você não tem permissão para acessar esta área.",
-            variant: "destructive",
-          });
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        // On error, redirect to login
-        navigate("/login");
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
-
-    checkAuth();
-  }, [user, isAdmin, navigate, toast]);
-
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
+  
+  // Protect admin routes
+  const { isLoading, isAuthenticated, isAdmin } = useAuthRedirect({
+    requiredAuth: true,
+    requiredAdmin: true
+  });
+  
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
@@ -72,9 +29,10 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
     );
   }
 
-  // If still checking auth or user is null, don't render the admin layout
-  if (!user || !isAdmin) {
-    return null; // Don't render anything while redirecting
+  // If not authenticated or not admin, don't render the admin layout
+  // The useAuthRedirect hook will handle the redirect
+  if (!isAuthenticated || !isAdmin) {
+    return null;
   }
 
   return (

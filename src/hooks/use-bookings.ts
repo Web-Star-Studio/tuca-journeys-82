@@ -1,70 +1,70 @@
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { Booking } from '@/types/bookings';
 import { toast } from 'sonner';
-import { demoData } from '@/utils/demoDataGenerator';
 
 export const useBookings = () => {
-  // Query to fetch bookings
-  const { data: bookings, isLoading, error, refetch } = useQuery({
-    queryKey: ['bookings'],
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  // Fetch user's bookings
+  const { data: bookings, isLoading, error } = useQuery({
+    queryKey: ['bookings', user?.id],
     queryFn: async () => {
-      // In a real app, we'd fetch from an API
-      // For demo purposes, return our generated bookings
-      return demoData.bookings;
+      if (!user) return [];
+      
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            tours(*),
+            accommodations(*)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        throw error;
+      }
     },
+    enabled: !!user,
   });
 
-  // Mutation to delete a booking
-  const deleteBookingMutation = useMutation({
-    mutationFn: async (bookingId: string) => {
-      // In a real app, we'd call an API
-      console.log(`Deleting booking: ${bookingId}`);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return { success: true };
+  // Cancel booking mutation
+  const cancelBookingMutation = useMutation({
+    mutationFn: async (bookingId: number) => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingId)
+        .eq('user_id', user?.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['bookings', user?.id] });
       toast.success('Reserva cancelada com sucesso');
-      refetch();
     },
     onError: (error) => {
+      console.error('Error cancelling booking:', error);
       toast.error('Erro ao cancelar a reserva');
-      console.error('Error deleting booking:', error);
     }
   });
-
-  const cancelBooking = (bookingId: string) => {
-    deleteBookingMutation.mutate(bookingId);
-  };
 
   return {
     bookings,
     isLoading,
     error,
-    cancelBooking,
-    refetch
+    cancelBooking: (id: number) => cancelBookingMutation.mutate(id)
   };
-};
-
-// Add the missing useCreateBooking hook
-export const useCreateBooking = () => {
-  const { refetch } = useBookings();
-  
-  return useMutation({
-    mutationFn: async (bookingData: any) => {
-      console.log('Creating booking:', bookingData);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      // Here you would normally send the data to your API
-      return { success: true, id: 'new-booking-' + Date.now() };
-    },
-    onSuccess: () => {
-      toast.success('Reserva criada com sucesso');
-      refetch();
-    },
-    onError: (error) => {
-      toast.error('Erro ao criar reserva');
-      console.error('Error creating booking:', error);
-    }
-  });
 };

@@ -1,14 +1,23 @@
 
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginForm from "@/components/login/LoginForm";
 import { Loader2 } from "lucide-react";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const Login = () => {
-  const { user, isLoading, isAdmin } = useAuth();
-  const navigate = useNavigate();
+  const { isLoading } = useAuthRedirect({
+    redirectAuthenticatedTo: '/dashboard'
+  });
+  
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get redirect URL from query params if available
+  const searchParams = new URLSearchParams(location.search);
+  const returnTo = searchParams.get('returnTo') || '/dashboard';
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
@@ -16,21 +25,10 @@ const Login = () => {
     if (redirectToAdmin) {
       navigate("/admin");
     } else {
-      navigate("/dashboard");
+      // Use the returnTo query param or default to dashboard
+      navigate(returnTo);
     }
   };
-  
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      setIsRedirecting(true);
-      if (isAdmin) {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
-    }
-  }, [user, isAdmin, navigate]);
   
   if (isLoading || isRedirecting) {
     return (

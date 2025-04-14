@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Booking } from '@/types/bookings';
 import { toast } from 'sonner';
+import { createBooking } from '@/lib/api';
 
 export const useBookings = () => {
   const { user } = useAuth();
@@ -67,4 +68,24 @@ export const useBookings = () => {
     error,
     cancelBooking: (id: number) => cancelBookingMutation.mutate(id)
   };
+};
+
+// Add the missing useCreateBooking hook
+export const useCreateBooking = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+      return createBooking(bookingData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings', user?.id] });
+      toast.success('Reserva criada com sucesso');
+    },
+    onError: (error) => {
+      console.error('Error creating booking:', error);
+      toast.error('Erro ao criar reserva');
+    }
+  });
 };

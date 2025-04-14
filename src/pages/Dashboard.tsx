@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { useProfile } from "@/hooks/use-profile";
 import { useBookings } from "@/hooks/use-bookings";
+import { Booking } from "@/types/bookings";
 
 const Dashboard = () => {
   // Redirect if user is not authenticated
@@ -19,7 +20,28 @@ const Dashboard = () => {
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
-  const { bookings, isLoading: bookingsLoading } = useBookings();
+  const { bookings: rawBookings, isLoading: bookingsLoading } = useBookings();
+  
+  // Transform raw bookings data to match Booking type
+  const bookings: Booking[] = React.useMemo(() => {
+    if (!rawBookings) return [];
+    
+    return rawBookings.map(booking => ({
+      id: booking.id.toString(),
+      user_name: profile?.name || 'User',
+      user_email: profile?.email || '',
+      item_type: booking.tour_id ? 'tour' : booking.accommodation_id ? 'accommodation' : 'package',
+      item_name: booking.tours ? booking.tours.title : 
+                 booking.accommodations ? booking.accommodations.title : 'Booking',
+      start_date: booking.start_date,
+      end_date: booking.end_date,
+      guests: booking.guests,
+      total_price: booking.total_price,
+      status: booking.status as 'confirmed' | 'pending' | 'cancelled',
+      payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
+      created_at: booking.created_at
+    }));
+  }, [rawBookings, profile]);
   
   // Calculate user metrics from real data
   const calculateUserMetrics = () => {

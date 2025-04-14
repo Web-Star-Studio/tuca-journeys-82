@@ -16,7 +16,7 @@ const Users = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<number | undefined>(undefined);
+  const [userToEdit, setUserToEdit] = useState<string | undefined>(undefined);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -86,7 +86,7 @@ const Users = () => {
   };
 
   const handleEditClick = (user: User) => {
-    setUserToEdit(Number(user.id));
+    setUserToEdit(user.id);
     setFormDialogOpen(true);
   };
 

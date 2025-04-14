@@ -71,17 +71,23 @@ const BookingsTable = () => {
     }
   };
 
-  const getItemTypeName = (type: string) => {
-    switch (type) {
-      case 'tour':
-        return 'Passeio';
-      case 'accommodation':
-        return 'Hospedagem';
-      case 'package':
-        return 'Pacote';
-      default:
-        return type;
+  const getItemTypeName = (booking: any) => {
+    if (booking.tour_id) return 'Passeio';
+    if (booking.accommodation_id) return 'Hospedagem';
+    return 'Reserva';
+  };
+
+  const getItemName = (booking: any) => {
+    if (booking.tours) return booking.tours.title;
+    if (booking.accommodations) return booking.accommodations.title;
+    return 'Reserva';
+  };
+
+  const getMeetingPoint = (booking: any) => {
+    if (booking.tours && booking.tours.meeting_point) {
+      return booking.tours.meeting_point;
     }
+    return null;
   };
 
   const formatDate = (dateString: string) => {
@@ -108,17 +114,17 @@ const BookingsTable = () => {
             <TableRow key={booking.id}>
               <TableCell>
                 <div>
-                  <p className="font-medium">{booking.item_name}</p>
+                  <p className="font-medium">{getItemName(booking)}</p>
                   <div className="flex items-center text-xs text-muted-foreground mt-1">
                     <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs mr-2">
-                      {getItemTypeName(booking.item_type)}
+                      {getItemTypeName(booking)}
                     </span>
                     <Users className="h-3 w-3 mr-1" />
                     <span className="mr-2">{booking.guests} pessoas</span>
-                    {booking.tour?.meeting_point && (
+                    {getMeetingPoint(booking) && (
                       <span className="flex items-center">
                         <MapPin className="h-3 w-3 mr-1" />
-                        {booking.tour.meeting_point}
+                        {getMeetingPoint(booking)}
                       </span>
                     )}
                   </div>

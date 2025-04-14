@@ -95,7 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
     
     // Set up auth state listener - simplified for demo mode
-    const authListener = supabase.auth.onAuthStateChange((event) => {
+    // Fix: Access subscription correctly from the returned object
+    const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         localStorage.removeItem("supabase-mock-session");
         setSession(null);
@@ -103,11 +104,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdmin(false);
       }
     });
-
+    
+    // Properly handle unsubscribing
     return () => {
-      if (authListener) {
-        authListener.subscription.unsubscribe();
-      }
+      data?.subscription.unsubscribe();
     };
   }, []);
 

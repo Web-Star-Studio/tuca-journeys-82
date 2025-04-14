@@ -11,15 +11,16 @@ export const useSignIn = () => {
       console.log("Attempting to sign in with:", email);
       
       // Determine if it's an admin login
-      const isAdminLogin = email === "admin@tucanoronha.com";
+      const isAdminLogin = email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
       
       // Check if using demo credentials first
       if (
         (email === "admin@tucanoronha.com" && password === "admin123456") ||
         (email === "demo@tucanoronha.com" && password === "demo123456") ||
-        (email === "user@example.com" && password === "password")
+        (email === "user@example.com" && password === "password") ||
+        (email === "felipe@webstar.studio" && password === "Client@123")
       ) {
-        console.log("Using demo credentials, creating mock session");
+        console.log("Using demo or predefined credentials, creating mock session");
         
         try {
           // Try to sign in with Supabase first (if user exists in Supabase)
@@ -29,7 +30,7 @@ export const useSignIn = () => {
           });
           
           if (!supabaseError) {
-            console.log("Demo user exists in Supabase, using that session");
+            console.log("User exists in Supabase, using that session");
             
             toast({
               title: "Login realizado com sucesso",
@@ -39,7 +40,7 @@ export const useSignIn = () => {
             return { data: supabaseData, error: null };
           }
         } catch (innerError) {
-          console.log("Supabase auth failed for demo user, falling back to mock session");
+          console.log("Supabase auth failed for user, falling back to mock session");
         }
         
         // Use demo mode fallback
@@ -47,7 +48,7 @@ export const useSignIn = () => {
           id: "demo-user-id",
           email: email,
           user_metadata: {
-            name: isAdminLogin ? "Admin Demo" : "Demo User",
+            name: email === "felipe@webstar.studio" ? "Felipe Admin" : (isAdminLogin ? "Admin Demo" : "Demo User"),
             role: isAdminLogin ? "admin" : "user",
           },
           app_metadata: {

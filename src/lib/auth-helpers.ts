@@ -35,5 +35,5 @@ export const hasRole = async (userId: string, role: string): Promise<boolean> =>
  * This is a fallback for demo purposes
  */
 export const isAdminEmail = (email: string | undefined): boolean => {
-  return email === "admin@tucanoronha.com";
+  return email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
 };

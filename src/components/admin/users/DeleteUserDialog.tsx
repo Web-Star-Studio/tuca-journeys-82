@@ -9,16 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  created_at: string;
-  avatar: string | null;
-}
+import { User } from "@/components/admin/users/types";
 
 interface DeleteUserDialogProps {
   open: boolean;

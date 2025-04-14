@@ -178,7 +178,7 @@ const Users = () => {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         user={userToDelete}
-        onSuccess={confirmDelete}
+        onConfirmDelete={confirmDelete}
       />
 
       <UserFormDialog 

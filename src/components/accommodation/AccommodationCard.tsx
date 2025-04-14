@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,7 @@ const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
             <span className="text-sm">Por noite</span>
             <p className="text-xl font-medium">R$ {accommodation.price.toLocaleString('pt-BR')}</p>
           </div>
-          <Link to={`/hospedagens/${accommodation.id}`}>
+          <Link to={`/hospedagem/${accommodation.id}`}>
             <Button className="rounded-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90">
               Ver Detalhes
             </Button>

@@ -119,9 +119,9 @@ export const withAdminProtection = (Component: React.ComponentType) => {
 
     if (isLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
-        </div>
+        React.createElement("div", { className: "min-h-screen flex items-center justify-center" },
+          React.createElement(Loader2, { className: "h-12 w-12 animate-spin text-tuca-ocean-blue" })
+        )
       );
     }
     
@@ -129,7 +129,7 @@ export const withAdminProtection = (Component: React.ComponentType) => {
       return null; // Will redirect due to the useEffect
     }
     
-    return <Component {...props} />;
+    return React.createElement(Component, props);
   };
   
   return ProtectedComponent;

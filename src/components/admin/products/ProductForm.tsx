@@ -157,8 +157,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValues) => {
     // Convert string lists to arrays
     const formattedData = {
-      ...data,
+      name: data.name,
+      description: data.description,
+      image_url: data.image_url,
+      price: data.price,
+      category: data.category,
+      stock: data.stock,
+      status: data.status,
+      weight: data.weight,
+      dimensions: data.dimensions,
       gallery: data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [],
+      featured: data.featured
     };
 
     try {

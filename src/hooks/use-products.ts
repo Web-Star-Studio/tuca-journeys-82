@@ -112,17 +112,20 @@ export function useProducts(filters?: ProductFilters) {
     return useQuery({
       queryKey: ['product-categories'],
       queryFn: async () => {
+        // Use the select with distinct extension from PostgreSQL
         const { data, error } = await supabase
           .from('products')
           .select('category')
-          .distinct();
+          .order('category');
         
         if (error) {
           console.error('Error fetching product categories:', error);
           throw error;
         }
         
-        return data?.map(item => item.category) || [];
+        // Extract unique categories
+        const uniqueCategories = Array.from(new Set(data?.map(item => item.category)));
+        return uniqueCategories || [];
       }
     });
   };

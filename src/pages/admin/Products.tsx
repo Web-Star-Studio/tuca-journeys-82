@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Plus, Edit, Trash2, Filter, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -23,90 +23,79 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
-
-// Sample product data
-const dummyProducts = [
-  {
-    id: 1,
-    name: "Camiseta Noronha",
-    image_url: "/product-tshirt.jpg",
-    category: "Vestuário",
-    price: 89.90,
-    stock: 45,
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Chapéu de Palha",
-    image_url: "/product-hat.jpg",
-    category: "Acessórios",
-    price: 59.90,
-    stock: 30,
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Caneca Noronha",
-    image_url: "/product-mug.jpg",
-    category: "Souvenirs",
-    price: 39.90,
-    stock: 65,
-    status: "active",
-  },
-  {
-    id: 4,
-    name: "Guia Fernando de Noronha",
-    image_url: "/product-book.jpg",
-    category: "Livros",
-    price: 79.90,
-    stock: 18,
-    status: "active",
-  },
-  {
-    id: 5,
-    name: "Toalha de Praia",
-    image_url: "/placeholder.svg",
-    category: "Praia",
-    price: 99.90,
-    stock: 0,
-    status: "out_of_stock",
-  },
-  {
-    id: 6,
-    name: "Protetor Solar",
-    image_url: "/placeholder.svg",
-    category: "Praia",
-    price: 45.90,
-    stock: 5,
-    status: "active",
-  }
-];
+import { useProducts } from "@/hooks/use-products";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Product } from "@/types/product";
 
 const Products = () => {
-  const [products, setProducts] = useState(dummyProducts);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<typeof dummyProducts[0] | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<number | undefined>(undefined);
+  const [filters, setFilters] = useState({
+    category: "",
+    status: ""
+  });
+  
+  // Use the products hook with search query as filter
+  const { products, isLoading, error, deleteProduct, useProductCategories } = useProducts({
+    search: searchQuery,
+    ...filters
+  });
+  
+  // Get product categories for filter
+  const { data: categories } = useProductCategories();
+  
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erro ao carregar produtos",
+        description: "Não foi possível carregar os produtos. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
+  }, [error, toast]);
 
   // Handle product edit
-  const handleEditClick = (product: typeof dummyProducts[0]) => {
+  const handleEditClick = (product: Product) => {
     setProductToEdit(product.id);
     setFormDialogOpen(true);
   };
 
   // Handle product delete
-  const handleDeleteClick = (product: typeof dummyProducts[0]) => {
+  const handleDeleteClick = (product: Product) => {
     setProductToDelete(product);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (productToDelete) {
-      setProducts(products.filter(p => p.id !== productToDelete.id));
-      setDeleteDialogOpen(false);
-      setProductToDelete(null);
+      try {
+        await deleteProduct.mutateAsync(productToDelete.id);
+        setDeleteDialogOpen(false);
+        setProductToDelete(null);
+        toast({
+          title: "Produto excluído",
+          description: "O produto foi excluído com sucesso."
+        });
+      } catch (error) {
+        toast({
+          title: "Erro ao excluir produto",
+          description: "Não foi possível excluir o produto. Por favor, tente novamente.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -118,16 +107,18 @@ const Products = () => {
 
   // Handle form success
   const handleFormSuccess = () => {
-    // Refresh product data
-    console.log("Product saved successfully");
+    toast({
+      title: productToEdit ? "Produto atualizado" : "Produto criado",
+      description: productToEdit 
+        ? "O produto foi atualizado com sucesso." 
+        : "O produto foi criado com sucesso."
+    });
   };
-
-  // Filter products based on search query
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
 
   return (
     <AdminLayout pageTitle="Gerenciar Produtos">
@@ -142,9 +133,62 @@ const Products = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <div className="p-2">
+                <h4 className="mb-2 text-sm font-medium">Categoria</h4>
+                <div className="space-y-1">
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleFilterChange("category", "")}
+                  >
+                    Todas
+                  </DropdownMenuItem>
+                  {categories?.map((category) => (
+                    <DropdownMenuItem
+                      key={category}
+                      className="cursor-pointer"
+                      onClick={() => handleFilterChange("category", category)}
+                    >
+                      {category}
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+                <h4 className="mb-2 mt-4 text-sm font-medium">Status</h4>
+                <div className="space-y-1">
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleFilterChange("status", "")}
+                  >
+                    Todos
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleFilterChange("status", "active")}
+                  >
+                    Ativo
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleFilterChange("status", "out_of_stock")}
+                  >
+                    Sem estoque
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleFilterChange("status", "discontinued")}
+                  >
+                    Descontinuado
+                  </DropdownMenuItem>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <Button className="gap-1" onClick={handleAddNewProduct}>
           <Plus className="h-4 w-4" />
@@ -167,66 +211,88 @@ const Products = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.id}</TableCell>
-                <TableCell>
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="h-10 w-16 object-cover rounded"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{product.category}</Badge>
-                </TableCell>
-                <TableCell>R$ {product.price.toFixed(2)}</TableCell>
-                <TableCell>{product.stock}</TableCell>
-                <TableCell>
-                  {product.status === "active" ? (
-                    <Badge variant="outline" className="border-green-500 text-green-600">
-                      Ativo
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-red-500 text-red-600">
-                      Sem estoque
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      className="h-8 w-8"
-                    >
-                      <Link to={`/loja/${product.id}`} target="_blank">
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-blue-600"
-                      onClick={() => handleEditClick(product)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-red-600"
-                      onClick={() => handleDeleteClick(product)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filteredProducts.length === 0 && (
+            {isLoading ? (
+              // Loading state
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={`loading-${index}`}>
+                  <TableCell><Skeleton className="h-5 w-8" /></TableCell>
+                  <TableCell><Skeleton className="h-10 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-10" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : products && products.length > 0 ? (
+              products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">{product.id}</TableCell>
+                  <TableCell>
+                    <img
+                      src={product.image_url || "/placeholder.svg"}
+                      alt={product.name}
+                      className="h-10 w-16 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{product.category}</Badge>
+                  </TableCell>
+                  <TableCell>{formatCurrency(product.price)}</TableCell>
+                  <TableCell>{product.stock}</TableCell>
+                  <TableCell>
+                    {product.status === "active" ? (
+                      <Badge variant="outline" className="border-green-500 text-green-600">
+                        Ativo
+                      </Badge>
+                    ) : product.status === "out_of_stock" ? (
+                      <Badge variant="outline" className="border-red-500 text-red-600">
+                        Sem estoque
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-gray-500 text-gray-600">
+                        Descontinuado
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        asChild
+                        className="h-8 w-8"
+                      >
+                        <Link to={`/loja/${product.id}`} target="_blank">
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600"
+                        onClick={() => handleEditClick(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-600"
+                        onClick={() => handleDeleteClick(product)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center">
                   Nenhum produto encontrado.
@@ -257,8 +323,9 @@ const Products = () => {
             <Button
               variant="destructive"
               onClick={confirmDelete}
+              disabled={deleteProduct.isPending}
             >
-              Excluir
+              {deleteProduct.isPending ? "Excluindo..." : "Excluir"}
             </Button>
           </DialogFooter>
         </DialogContent>

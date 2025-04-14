@@ -6,8 +6,9 @@ import {
   Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { useSignOut } from "@/hooks/auth/use-sign-out";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminSidebarProps {
   collapsed: boolean;
@@ -23,7 +24,8 @@ interface SidebarItem {
 
 const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut } = useSignOut();
+  const { toast } = useToast();
 
   const sidebarItems: SidebarItem[] = [
     { title: "Dashboard", icon: LayoutDashboard, path: "/admin" },
@@ -37,6 +39,23 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
     { title: "Relatórios", icon: BarChart2, path: "/admin/reports" },
     { title: "Configurações", icon: Settings, path: "/admin/settings" },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso."
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível realizar o logout.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div
@@ -97,7 +116,7 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
             "flex w-full items-center justify-start px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600",
             collapsed && "justify-center"
           )}
-          onClick={signOut}
+          onClick={handleSignOut}
         >
           <LogOut size={20} className="shrink-0" />
           {!collapsed && <span className="ml-4 text-sm font-medium">Sair</span>}

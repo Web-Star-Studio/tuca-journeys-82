@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
+import { supabase } from "@/lib/supabase";
 
 // Form schema for validation
 const productFormSchema = z.object({
@@ -75,49 +76,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     },
   });
 
-  // Mock function to get product
-  const getProduct = async (id: number) => {
-    // In a real app, this would be a database call
-    const products = [
-      {
-        id: 1,
-        name: "Camiseta Noronha",
-        image_url: "/product-tshirt.jpg",
-        description: "Camiseta 100% algodão com estampa de Fernando de Noronha",
-        category: "Vestuário",
-        price: 89.90,
-        stock: 45,
-        status: "active",
-        weight: 0.3,
-        dimensions: "30x20x5",
-        gallery: ["/product-tshirt-back.jpg", "/product-tshirt-detail.jpg"],
-        featured: true
-      }
-    ];
-    
-    return products.find(p => p.id === id);
-  };
-  
-  // Mock function to create product
-  const createProduct = async (product: Omit<Product, "id">) => {
-    // In a real app, this would be a database call
-    console.log("Creating product:", product);
-    return { ...product, id: Math.floor(Math.random() * 1000) };
-  };
-  
-  // Mock function to update product
-  const updateProduct = async (product: Product) => {
-    // In a real app, this would be a database call
-    console.log("Updating product:", product);
-    return product;
-  };
-
   // Fetch product data when editing
   useEffect(() => {
     const loadProductData = async () => {
       if (productId) {
         try {
-          const product = await getProduct(productId);
+          setIsLoading(true);
+          const { data: product, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+            
+          if (error) {
+            throw error;
+          }
+          
           if (product) {
             form.reset({
               name: product.name,
@@ -128,9 +102,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               stock: product.stock,
               status: product.status as "active" | "out_of_stock" | "discontinued",
               weight: product.weight,
-              dimensions: product.dimensions,
+              dimensions: product.dimensions || "",
               gallery: product.gallery?.join("\n") || "",
-              featured: product.featured,
+              featured: product.featured || false,
             });
             setPreviewUrl(product.image_url);
           }
@@ -171,14 +145,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     try {
       if (productId) {
         // Update existing product
-        await updateProduct({ ...formattedData, id: productId } as Product);
+        const { error } = await supabase
+          .from('products')
+          .update(formattedData)
+          .eq('id', productId);
+          
+        if (error) throw error;
+        
         toast({
           title: "Sucesso",
           description: "Produto atualizado com sucesso.",
         });
       } else {
         // Create new product
-        await createProduct(formattedData as Product);
+        const { error } = await supabase
+          .from('products')
+          .insert(formattedData);
+          
+        if (error) throw error;
+        
         toast({
           title: "Sucesso",
           description: "Novo produto criado com sucesso.",

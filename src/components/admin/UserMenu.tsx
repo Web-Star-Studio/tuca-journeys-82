@@ -1,8 +1,8 @@
 
 import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { LogOut, Settings, User, LayoutDashboard } from "lucide-react";
+import { Link } from "react-router-dom";
+import { User, LogOut, Settings, UserCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,73 +11,88 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSignOut } from "@/hooks/auth/use-sign-out";
+import { useToast } from "@/hooks/use-toast";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface UserMenuProps {
-  user: any;
+  user: SupabaseUser | null;
 }
 
-const UserMenu = ({ user }: UserMenuProps) => {
-  const { signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/login");
-  };
-
-  const handleSettings = () => {
-    navigate("/admin/settings");
-  };
-
-  const handleProfile = () => {
-    navigate("/perfil");
+const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
+  const { signOut } = useSignOut();
+  const { toast } = useToast();
+  
+  if (!user) return null;
+  
+  // Get user display name, use email if no name is available
+  const displayName = user.user_metadata?.name || user.email || "Usuário";
+  
+  // Get user initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split("@")[0] // Remove domain part if it's an email
+      .substring(0, 2)
+      .toUpperCase();
   };
   
-  const handleDashboard = () => {
-    navigate("/dashboard");
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso."
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível realizar o logout.",
+        variant: "destructive"
+      });
+    }
   };
-
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    const name = user?.user_metadata?.name || user?.email || "";
-    return name
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center space-x-2 rounded-full focus:outline-none focus:ring-2 focus:ring-tuca-light-blue focus:ring-offset-2">
-          <Avatar className="h-8 w-8 cursor-pointer">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
+        <button className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-tuca-ocean-blue">
+          <Avatar className="h-8 w-8">
+            <AvatarImage 
+              src={user.user_metadata?.avatar_url}
+              alt={displayName}
+            />
             <AvatarFallback className="bg-tuca-light-blue text-tuca-deep-blue">
-              {getUserInitials()}
+              {getInitials(displayName)}
             </AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-xs text-gray-500">{user.email}</span>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDashboard} className="cursor-pointer">
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          <span>Dashboard</span>
+        <DropdownMenuItem asChild>
+          <Link to="/admin/profile" className="flex items-center cursor-pointer">
+            <UserCircle className="mr-2 h-4 w-4" />
+            <span>Perfil</span>
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleProfile} className="cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
-          <span>Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Configurações</span>
+        <DropdownMenuItem asChild>
+          <Link to="/admin/settings" className="flex items-center cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configurações</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
+        <DropdownMenuItem 
+          className="text-red-600 focus:text-red-600 cursor-pointer"
+          onClick={handleSignOut}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

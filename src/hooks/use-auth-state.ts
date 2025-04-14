@@ -26,29 +26,6 @@ export const useAuthState = () => {
       setLoading(true);
       
       try {
-        // Check for a mock session first for development mode
-        const mockSessionStr = localStorage.getItem("supabase-mock-session");
-        if (mockSessionStr) {
-          try {
-            const mockSession = JSON.parse(mockSessionStr);
-            // Check if mock session is expired
-            if (mockSession.expires_at > Math.floor(Date.now() / 1000)) {
-              console.log("Found valid mock session, setting user state");
-              setSession(mockSession);
-              setUser(mockSession.user);
-              setLoading(false);
-              return;
-            } else {
-              // Clear expired mock session
-              console.log("Mock session expired, removing it");
-              localStorage.removeItem("supabase-mock-session");
-            }
-          } catch (error) {
-            console.error("Error parsing mock session:", error);
-            localStorage.removeItem("supabase-mock-session");
-          }
-        }
-        
         // Get the current session from Supabase
         const { data, error } = await supabase.auth.getSession();
         if (error) {
@@ -66,8 +43,6 @@ export const useAuthState = () => {
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        // Clear all session data on error
-        localStorage.removeItem("supabase-mock-session");
         setSession(null);
         setUser(null);
       } finally {

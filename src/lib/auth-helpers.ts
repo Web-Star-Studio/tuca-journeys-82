@@ -1,5 +1,5 @@
 
-import React from 'react'; // Add React import for JSX
+import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -37,15 +37,9 @@ export const hasRole = async (userId: string, role: string): Promise<boolean> =>
 
 /**
  * Check if a user is an admin by checking the user_roles table
- * and also checking against known admin emails as fallback
  */
-export const isUserAdmin = async (userId: string, email?: string): Promise<boolean> => {
-  // First check the user_roles table
-  const hasAdminRole = await hasRole(userId, 'admin');
-  if (hasAdminRole) return true;
-  
-  // Fallback to checking email (for demo/development)
-  return isAdminEmail(email);
+export const isUserAdmin = async (userId: string): Promise<boolean> => {
+  return await hasRole(userId, 'admin');
 };
 
 /**
@@ -53,7 +47,8 @@ export const isUserAdmin = async (userId: string, email?: string): Promise<boole
  * This is a fallback for demo purposes
  */
 export const isAdminEmail = (email: string | undefined): boolean => {
-  return email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
+  // In production, we only rely on user_roles table for admin access
+  return false;
 };
 
 /**
@@ -86,26 +81,17 @@ export const setAdminRole = async (userId: string): Promise<boolean> => {
 /**
  * Check if the current user has admin access, checking both session data and custom claims
  */
-export const checkAdminAccess = async (userId: string, email?: string): Promise<boolean> => {
-  // First try to check via user_roles table
-  try {
-    const hasAdminRole = await hasRole(userId, 'admin');
-    if (hasAdminRole) return true;
-  } catch (error) {
-    console.error('Error checking admin role:', error);
-  }
-  
-  // Fallback to checking email (for demo purposes)
-  return isAdminEmail(email);
+export const checkAdminAccess = async (userId: string): Promise<boolean> => {
+  return await isUserAdmin(userId);
 };
 
 /**
  * Add protection to admin routes by redirecting non-admin users
  */
 export const withAdminProtection = (Component: React.ComponentType) => {
-  const ProtectedComponent: React.FC<any> = (props) => { // Use React.FC for functional component
+  const ProtectedComponent: React.FC<any> = (props) => {
     const { user, isAdmin, isLoading } = useAuth();
-    const navigate = useNavigate(); // Use useNavigate hook instead of props.navigate
+    const navigate = useNavigate();
     
     useEffect(() => {
       if (!isLoading) {

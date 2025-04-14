@@ -10,10 +10,7 @@ export const useSignOut = () => {
     try {
       console.log("Starting sign out process...");
       
-      // Clear the mock session if it exists
-      localStorage.removeItem("supabase-mock-session");
-      
-      // Also sign out from Supabase
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;

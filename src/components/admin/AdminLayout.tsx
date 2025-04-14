@@ -7,7 +7,8 @@ import AdminHeader from "./AdminHeader";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { hasRole, isAdminEmail } from "@/lib/auth-helpers";
+import { isAdminEmail } from "@/lib/auth-helpers";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,8 +19,8 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
 
   // Check authentication and redirect if not authenticated
   useEffect(() => {
@@ -27,10 +28,8 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
       try {
         setIsCheckingAuth(true);
         
-        // Get the current session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
+        // Using Auth context instead of direct Supabase check
+        if (!user) {
           console.log("User not authenticated, redirecting to login");
           toast({
             title: "Acesso restrito",
@@ -41,14 +40,8 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
           return;
         }
         
-        // Store the user
-        setUser(session.user);
-        
-        // Check if user has admin role or admin email
-        const isAdmin = await hasRole(session.user.id, 'admin');
-        const isEmailAdmin = isAdminEmail(session.user.email);
-        
-        if (!isAdmin && !isEmailAdmin) {
+        // Check if user is admin
+        if (!isAdmin) {
           console.log("User does not have admin permissions");
           toast({
             title: "Acesso restrito",
@@ -67,24 +60,7 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
     };
 
     checkAuth();
-    
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          navigate("/login");
-        } else if (!session) {
-          navigate("/login");
-        } else {
-          setUser(session.user);
-        }
-      }
-    );
-    
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, [navigate, toast]);
+  }, [user, isAdmin, navigate, toast]);
 
   // Show loading state while checking auth
   if (isCheckingAuth) {
@@ -97,7 +73,7 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   }
 
   // If still checking auth or user is null, don't render the admin layout
-  if (!user) {
+  if (!user || !isAdmin) {
     return null; // Don't render anything while redirecting
   }
 

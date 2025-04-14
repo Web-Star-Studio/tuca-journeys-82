@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
-import { isAdminEmail, hasRole } from "@/lib/auth-helpers";
+import { isAdminEmail } from "@/lib/auth-helpers";
 
 interface AuthContextType {
   user: User | null;
@@ -36,49 +36,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
 
-  // Check if user has admin role
-  const checkAdminStatus = async (currentUser: User | null) => {
+  // Check if user has admin role - simplified for demo mode
+  const checkAdminStatus = (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
       return;
     }
     
-    // Check admin status from different sources
+    // In demo mode, check admin from user metadata or email
     const adminFromMetadata = 
       currentUser.user_metadata?.role === 'admin' ||
       currentUser.app_metadata?.role === 'admin';
       
     const adminFromEmail = isAdminEmail(currentUser.email);
     
-    // Check admin role in database if we have a real user ID (not a demo)
-    let adminFromDb = false;
-    if (currentUser.id && currentUser.id !== 'demo-user-id') {
-      adminFromDb = await hasRole(currentUser.id, 'admin');
-    }
-    
-    setIsAdmin(adminFromMetadata || adminFromEmail || adminFromDb);
+    setIsAdmin(adminFromMetadata || adminFromEmail);
   };
 
   // Initialize auth state when component mounts
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event);
-        
-        // Update session and user state
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
-        
-        // Check admin status when auth state changes
-        await checkAdminStatus(currentSession?.user || null);
-      }
-    );
-
-    // Then check for existing session
+    // First check for mock session
     const initAuth = async () => {
       try {
-        // Check for mock session first
+        // Check for mock session
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr) {
           try {
@@ -88,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.log("Found valid mock session, setting user state");
               setSession(mockSession);
               setUser(mockSession.user);
-              await checkAdminStatus(mockSession.user);
+              checkAdminStatus(mockSession.user);
               setIsLoading(false);
               return;
             } else {
@@ -101,13 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
         
-        // Get real session from Supabase if no mock session
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user || null);
-        
-        // Check admin status
-        await checkAdminStatus(data.session?.user || null);
+        // No valid mock session
+        setSession(null);
+        setUser(null);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error initializing auth:", error);
       } finally {
@@ -116,10 +93,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initAuth();
+    
+    // Set up auth state listener - simplified for demo mode
+    const authListener = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        localStorage.removeItem("supabase-mock-session");
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
+      }
+    });
 
-    // Cleanup subscription when component unmounts
     return () => {
-      subscription.unsubscribe();
+      if (authListener) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
 
@@ -128,6 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const result = await authSignIn(email, password);
+      if (result.data?.user) {
+        checkAdminStatus(result.data.user);
+      }
       return result;
     } finally {
       setIsLoading(false);
@@ -148,6 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authSignOut();
+      setUser(null);
+      setSession(null);
       setIsAdmin(false);
     } finally {
       setIsLoading(false);

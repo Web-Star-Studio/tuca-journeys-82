@@ -49,7 +49,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       
       // If successful login and callback exists, call it
       // Check if it's an admin login
-      const isAdmin = data.email === "admin@tucanoronha.com";
+      const isAdmin = data.email === "admin@tucanoronha.com" || data.email === "felipe@webstar.studio";
       if (onSuccessfulLogin) {
         onSuccessfulLogin(isAdmin);
       }

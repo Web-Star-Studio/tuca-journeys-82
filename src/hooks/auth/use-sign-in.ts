@@ -1,6 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { isAdminEmail, setAdminRole } from "@/lib/auth-helpers";
 
 export const useSignIn = () => {
   const { toast } = useToast();
@@ -11,7 +12,7 @@ export const useSignIn = () => {
       console.log("Attempting to sign in with:", email);
       
       // Determine if it's an admin login
-      const isAdminLogin = email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
+      const isAdminLogin = isAdminEmail(email);
       
       // Check if using demo credentials first
       if (
@@ -31,6 +32,13 @@ export const useSignIn = () => {
           
           if (!supabaseError) {
             console.log("User exists in Supabase, using that session");
+            
+            // If it's a known admin email but user might not have role yet
+            if (isAdminLogin && supabaseData.session && supabaseData.user) {
+              // Check if we need to set admin role for this user
+              // This will ensure the user has the admin role in the database
+              await setAdminRole(supabaseData.user.id);
+            }
             
             toast({
               title: "Login realizado com sucesso",
@@ -81,9 +89,9 @@ export const useSignIn = () => {
       }
       
       try {
-        // Attempt Supabase auth with a shorter timeout
+        // Attempt Supabase auth with a shorter timeout for regular login (non-demo)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout to 5 seconds
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -95,6 +103,11 @@ export const useSignIn = () => {
         if (error) {
           console.warn("Supabase auth error:", error.message);
           throw error;
+        }
+
+        // If this is a first login for an admin user, set the admin role
+        if (isAdminLogin && data.session && data.user) {
+          await setAdminRole(data.user.id);
         }
 
         toast({

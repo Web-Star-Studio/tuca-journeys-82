@@ -8,12 +8,12 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
 
 // Pages
-import Home from './pages/Home';
+import Home from './pages/Index';  // Changed from './pages/Home'
 import NotFound from './pages/NotFound';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
+import Login from './pages/Login';  // Adjusted path for Login
+import Register from './pages/Register';  // Adjusted path for Register
+import ForgotPassword from './pages/ResetPassword';  // Using existing file
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
@@ -24,32 +24,32 @@ import PackageDetail from './pages/PackageDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Profile from './pages/Profile';
-import Bookings from './pages/Bookings';
+import Bookings from './pages/Booking';  // Adjusted path
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import PaymentConfirmation from './pages/PaymentConfirmation';
+import PaymentConfirmation from './pages/CheckoutSuccess';  // Adjusted path
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminTours from './pages/admin/Tours';
-import AdminTourForm from './pages/admin/TourForm';
+import AdminTourForm from './components/admin/tours/TourForm';  // Adjusted path
 import AdminAccommodations from './pages/admin/Accommodations';
-import AdminAccommodationForm from './pages/admin/AccommodationForm';
+import AdminAccommodationForm from './components/admin/accommodations/AccommodationForm';  // Adjusted path
 import AdminPackages from './pages/admin/Packages';
-import AdminPackageForm from './pages/admin/PackageForm';
+import AdminPackageForm from './components/admin/packages/PackageForm';  // Adjusted path
 import AdminBookings from './pages/admin/Bookings';
 import AdminBookingDetail from './pages/admin/BookingDetail';
 import AdminUsers from './pages/admin/Users';
 import AdminProducts from './pages/admin/Products';
-import AdminProductForm from './pages/admin/ProductForm';
+import AdminProductForm from './components/admin/products/ProductForm';  // Adjusted path
 import AdminSettings from './pages/admin/Settings';
 
 // Reports
-import RevenueReport from './pages/admin/reports/Revenue';
-import BookingsReport from './pages/admin/reports/Bookings';
-import PackagesReport from './pages/admin/reports/Packages';
-import AccommodationsReport from './pages/admin/reports/Accommodations';
-import UsersReport from './pages/admin/reports/Users';
+import RevenueReport from './components/admin/reports/revenue/RevenueReport';  // Adjusted path
+import BookingsReport from './components/admin/reports/bookings/BookingsReport';  // Adjusted path
+import PackagesReport from './components/admin/reports/packages/PackagesReport';  // Adjusted path
+import AccommodationsReport from './components/admin/reports/accommodations/AccommodationsReport';  // Adjusted path
+import UsersReport from './components/admin/reports/users/UsersReport';  // Adjusted path
 
 // Setup
 import { InitialSetup } from './components/setup/InitialSetup';
@@ -131,3 +131,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

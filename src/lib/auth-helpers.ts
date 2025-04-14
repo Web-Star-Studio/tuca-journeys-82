@@ -100,9 +100,10 @@ export const checkAdminAccess = async (userId: string, email?: string): Promise<
 /**
  * Add protection to admin routes by redirecting non-admin users
  */
-export const withAdminProtection = (Component: React.ComponentType, navigate: Function) => {
-  return () => {
+export const withAdminProtection = (Component: React.ComponentType) => {
+  return (props: any) => {
     const { user, isAdmin, isLoading } = useAuth();
+    const navigate = props.navigate;
     
     useEffect(() => {
       if (!isLoading) {
@@ -126,6 +127,6 @@ export const withAdminProtection = (Component: React.ComponentType, navigate: Fu
       return null; // Will redirect due to the useEffect
     }
     
-    return <Component />;
+    return <Component {...props} />;
   };
 };

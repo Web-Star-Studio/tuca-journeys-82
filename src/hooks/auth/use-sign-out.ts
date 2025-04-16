@@ -1,37 +1,43 @@
 
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 export const useSignOut = () => {
   const { toast } = useToast();
 
-  // Sign out function with Supabase integration
   const signOut = async () => {
     try {
-      console.log("Starting sign out process...");
+      // Check if we have a mock session
+      const mockSessionStr = localStorage.getItem("supabase-mock-session");
+      if (mockSessionStr) {
+        // Remove mock session
+        localStorage.removeItem("supabase-mock-session");
+        
+        toast({
+          title: "Logout realizado com sucesso",
+          description: "Você saiu da sessão de demonstração.",
+        });
+        
+        return;
+      }
       
-      // Sign out from Supabase
+      // Real Supabase signout
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
       
       toast({
-        title: "Sessão encerrada",
-        description: "Você saiu com sucesso.",
+        title: "Logout realizado com sucesso",
+        description: "Você saiu da sua conta.",
       });
       
-      return { error: null };
     } catch (error: any) {
-      console.error("Error during sign out:", error);
-      
+      console.error("Error during logout:", error);
       toast({
         title: "Erro ao sair",
-        description: error.message || "Falha ao encerrar a sessão.",
+        description: error.message || "Ocorreu um erro ao fazer logout. Tente novamente.",
         variant: "destructive",
       });
-      
-      // Return the error but don't block the sign out process
-      return { error };
     }
   };
 

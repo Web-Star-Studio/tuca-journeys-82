@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,8 +46,14 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
  * This is a fallback for demo purposes
  */
 export const isAdminEmail = (email: string | undefined): boolean => {
-  // In production, we only rely on user_roles table for admin access
-  return false;
+  if (!email) return false;
+  
+  const adminEmails = [
+    'admin@tucanoronha.com',
+    'felipe@webstar.studio'
+  ];
+  
+  return adminEmails.includes(email);
 };
 
 /**

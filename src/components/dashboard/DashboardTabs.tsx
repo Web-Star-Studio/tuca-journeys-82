@@ -4,10 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BookingsTable from "@/components/booking/BookingsTable";
 import NotificationsTab from "./NotificationsTab";
 import RecommendationsTab from "./RecommendationsTab";
+import PreferencesQuestionnaire from "./PreferencesQuestionnaire";
 import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Badge } from "@/components/ui/badge";
-import PreferencesQuestionnaire from "./PreferencesQuestionnaire";
 
 interface Recommendation {
   id: number;
@@ -27,12 +27,12 @@ const DashboardTabs = ({ recommendations }: DashboardTabsProps) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border p-1 sm:p-4">
       <Tabs defaultValue="reservas" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 mb-4">
+        <TabsList className="w-full grid grid-cols-4 mb-4">
           <TabsTrigger value="reservas" className="text-sm sm:text-base">
             {isMobile ? "Reservas" : "Minhas Reservas"}
           </TabsTrigger>
           <TabsTrigger value="notificacoes" className="text-sm sm:text-base relative">
-            {isMobile ? "Notificações" : "Notificações"}
+            {isMobile ? "Alertas" : "Notificações"}
             {unreadCount > 0 && (
               <Badge 
                 variant="destructive" 
@@ -42,8 +42,11 @@ const DashboardTabs = ({ recommendations }: DashboardTabsProps) => {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="preferencias" className="text-sm sm:text-base">
+            {isMobile ? "Perfil" : "Preferências"}
+          </TabsTrigger>
           <TabsTrigger value="recomendacoes" className="text-sm sm:text-base">
-            {isMobile ? "Para Você" : "Para Você"}
+            {isMobile ? "Para Você" : "Recomendações"}
           </TabsTrigger>
         </TabsList>
         
@@ -53,6 +56,10 @@ const DashboardTabs = ({ recommendations }: DashboardTabsProps) => {
         
         <TabsContent value="notificacoes">
           <NotificationsTab notifications={notifications} />
+        </TabsContent>
+
+        <TabsContent value="preferencias">
+          <PreferencesQuestionnaire />
         </TabsContent>
         
         <TabsContent value="recomendacoes">

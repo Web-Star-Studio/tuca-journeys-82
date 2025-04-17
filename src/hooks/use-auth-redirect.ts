@@ -30,7 +30,8 @@ export const useAuthRedirect = (options: AuthRedirectOptions = {}) => {
     if (isLoading) return;
     
     if (requiredAuth && !user) {
-      navigate(redirectTo);
+      const currentPath = window.location.pathname;
+      navigate(`${redirectTo}${currentPath !== '/' ? `?returnTo=${currentPath}` : ''}`);
       setHasRedirected(true);
       return;
     }

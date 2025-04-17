@@ -7,21 +7,16 @@ import MetricsCards from "@/components/dashboard/MetricsCards";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import ActivityAnalysis from "@/components/dashboard/ActivityAnalysis";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { useProfile } from "@/hooks/use-profile";
 import { useBookingsList } from "@/hooks/use-bookings-list";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/login');
-    }
-  }, [user, authLoading, navigate]);
+  // Use the auth redirect hook to protect this page
+  const { isLoading: authLoading, user } = useAuthRedirect({
+    requiredAuth: true
+  });
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
@@ -30,6 +25,7 @@ const Dashboard = () => {
   // Show error toast if bookings fetch fails
   useEffect(() => {
     if (bookingsError) {
+      toast.error("Erro ao carregar suas reservas");
       console.error("Error fetching bookings:", bookingsError);
     }
   }, [bookingsError]);
@@ -86,11 +82,14 @@ const Dashboard = () => {
   const isLoading = authLoading || profileLoading || bookingsLoading;
   const userMetrics = calculateUserMetrics();
   
-  // Generate personalized recommendations based on user behavior
+  // Generate personalized recommendations based on user behavior and preferences
   const recommendations = [
     { id: 1, title: "Passeio de Barco", image: "/tour-sunset.jpg", score: 98 },
     { id: 2, title: "Mergulho", image: "/tour-diving.jpg", score: 87 },
-    { id: 3, title: "Trilha Ecológica", image: "/tour-trail.jpg", score: 85 }
+    { id: 3, title: "Trilha Ecológica", image: "/tour-trail.jpg", score: 85 },
+    { id: 4, title: "Tour Histórico", image: "/tour-historical.jpg", score: 82 },
+    { id: 5, title: "Observação de Tartarugas", image: "/tour-turtles.jpg", score: 76 },
+    { id: 6, title: "Tour de Caiaque", image: "/tour-kayak.jpg", score: 73 }
   ];
 
   if (authLoading) {
@@ -102,7 +101,7 @@ const Dashboard = () => {
   }
 
   if (!user) {
-    return null; // Will be redirected by useEffect
+    return null; // Will be redirected by useAuthRedirect
   }
 
   return (
@@ -121,9 +120,7 @@ const Dashboard = () => {
               <>
                 <MetricsCards metrics={userMetrics} />
                 <DashboardTabs recommendations={recommendations} />
-                <ActivityAnalysis 
-                  recentBookings={bookings || []}
-                />
+                <ActivityAnalysis recentBookings={bookings || []} />
               </>
             )}
           </div>

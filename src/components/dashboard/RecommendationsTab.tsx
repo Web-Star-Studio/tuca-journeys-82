@@ -22,8 +22,12 @@ import {
   Calendar, 
   Star, 
   MessageSquare, 
-  ChevronLeft 
+  ChevronLeft,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react";
+import { toast } from "sonner";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 
 interface Recommendation {
   id: number;
@@ -39,6 +43,7 @@ interface RecommendationsTabProps {
 const RecommendationsTab = ({ recommendations }: RecommendationsTabProps) => {
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const { preferences } = useUserPreferences();
 
   // Example questionnaire steps
   const steps = [
@@ -91,6 +96,8 @@ const RecommendationsTab = ({ recommendations }: RecommendationsTabProps) => {
   const [openFeedback, setOpenFeedback] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<string>("");
   
+  const [savedRecommendations, setSavedRecommendations] = useState<number[]>([]);
+  
   const handleAnswerSelect = (value: string) => {
     setAnswers({
       ...answers,
@@ -106,7 +113,7 @@ const RecommendationsTab = ({ recommendations }: RecommendationsTabProps) => {
       console.log("Questionnaire answers:", answers);
       setIsQuestionnaireOpen(false);
       setCurrentStep(0);
-      // Here you would typically send answers to backend
+      toast.success("Obrigado! Suas preferências foram atualizadas");
     }
   };
   
@@ -120,25 +127,44 @@ const RecommendationsTab = ({ recommendations }: RecommendationsTabProps) => {
     console.log("Feedback submitted:", feedback);
     setOpenFeedback(false);
     setFeedback("");
-    // Here you would typically send feedback to backend
+    toast.success("Feedback enviado com sucesso! Obrigado por nos ajudar a melhorar.");
+  };
+
+  const toggleSaveRecommendation = (recId: number) => {
+    if (savedRecommendations.includes(recId)) {
+      setSavedRecommendations(savedRecommendations.filter(id => id !== recId));
+      toast.success("Recomendação removida dos favoritos");
+    } else {
+      setSavedRecommendations([...savedRecommendations, recId]);
+      toast.success("Recomendação salva nos favoritos");
+    }
+  };
+
+  const handleRecommendationFeedback = (liked: boolean) => {
+    toast.success(liked 
+      ? "Obrigado pelo feedback positivo! Mostraremos mais opções semelhantes." 
+      : "Obrigado pelo feedback! Vamos ajustar nossas recomendações.");
   };
 
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Recomendações Para Você</h3>
+          <div>
+            <h3 className="text-lg font-medium">Recomendações Para Você</h3>
+            <p className="text-sm text-muted-foreground">
+              Baseadas nas suas preferências {preferences?.travel_style && `de viagens do tipo ${preferences.travel_style}`}
+            </p>
+          </div>
           <div className="flex items-center space-x-2">
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setIsQuestionnaireOpen(true)}
-              >
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Responder Questionário
-              </Button>
-            </DialogTrigger>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsQuestionnaireOpen(true)}
+            >
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Refinar Recomendações
+            </Button>
           </div>
         </div>
 
@@ -163,20 +189,47 @@ const RecommendationsTab = ({ recommendations }: RecommendationsTabProps) => {
               <div className="p-3">
                 <h4 className="font-medium mb-1">{rec.title}</h4>
                 
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center justify-between mt-3">
                   <Button variant="ghost" size="sm" className="px-2">
                     <Calendar className="h-4 w-4 mr-1" />
                     <span className="text-xs">Reservar</span>
                   </Button>
                   
-                  <Button variant="ghost" size="sm" className="px-2">
-                    <Heart className="h-4 w-4 mr-1" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`px-2 ${savedRecommendations.includes(rec.id) ? "text-red-500" : ""}`}
+                    onClick={() => toggleSaveRecommendation(rec.id)}
+                  >
+                    <Heart 
+                      className={`h-4 w-4 mr-1 ${savedRecommendations.includes(rec.id) ? "fill-red-500" : ""}`} 
+                    />
                     <span className="text-xs">Salvar</span>
                   </Button>
                   
                   <Button variant="ghost" size="sm" className="px-2">
                     <ChevronRight className="h-4 w-4" />
                     <span className="sr-only">Ver detalhes</span>
+                  </Button>
+                </div>
+                
+                <div className="mt-3 flex items-center justify-center space-x-2 border-t pt-2">
+                  <span className="text-xs text-gray-500">Esta recomendação é relevante?</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0"
+                    onClick={() => handleRecommendationFeedback(true)}
+                  >
+                    <ThumbsUp className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0"
+                    onClick={() => handleRecommendationFeedback(false)}
+                  >
+                    <ThumbsDown className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

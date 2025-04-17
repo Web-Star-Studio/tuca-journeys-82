@@ -10,7 +10,6 @@ import { ArrowLeft, CalendarDays, Users, CreditCard, Clock } from 'lucide-react'
 import { Loader2 } from 'lucide-react';
 import BookingDetailSkeleton from '@/components/booking/BookingDetailSkeleton';
 import BookingDetailError from '@/components/booking/BookingDetailError';
-import { toast } from 'sonner';
 
 /**
  * BookingDetail displays the details of a specific booking
@@ -20,8 +19,8 @@ const BookingDetail = () => {
   const navigate = useNavigate();
   const { bookings, isLoading, error, cancelBooking, isCancelling } = useBookings();
   
-  // Find the specific booking - convert id to string for comparison
-  const booking = bookings?.find(b => b.id.toString() === id);
+  // Find the specific booking - compare id as string
+  const booking = bookings?.find(b => b.id === id);
   
   // Handle cancellation request
   const handleCancelBooking = async () => {
@@ -74,9 +73,6 @@ const BookingDetail = () => {
     }
   };
 
-  // Get item name from the booking
-  const itemName = booking.tours?.title || booking.accommodations?.title || "Reserva";
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -104,7 +100,7 @@ const BookingDetail = () => {
             <CardContent className="pt-6">
               <div className="space-y-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-medium mb-4">{itemName}</h3>
+                  <h3 className="text-lg font-medium mb-4">{booking.item_name}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start">
                       <CalendarDays className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />

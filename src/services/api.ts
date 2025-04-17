@@ -1,6 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
-import { Booking, Tour, Accommodation, UserProfile } from '@/types';
+import { Booking, BookingDB, CreateBookingDTO, Tour, Accommodation, UserProfile } from '@/types';
 import { Package } from '@/data/types/packageTypes';
 
 /**
@@ -66,7 +66,7 @@ class ApiService {
   }
 
   // Bookings
-  async getUserBookings(userId: string): Promise<any[]> {
+  async getUserBookings(userId: string): Promise<Booking[]> {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -82,10 +82,11 @@ class ApiService {
       throw error;
     }
     
-    return data || [];
+    // Transform database bookings into the application booking model
+    return (data || []).map((bookingDB: BookingDB) => this.mapBookingFromDB(bookingDB));
   }
 
-  async createBooking(bookingData: Partial<Booking>): Promise<Booking> {
+  async createBooking(bookingData: CreateBookingDTO): Promise<Booking> {
     const { data, error } = await supabase
       .from('bookings')
       .insert([bookingData])
@@ -97,7 +98,7 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    return this.mapBookingFromDB(data as BookingDB);
   }
 
   async cancelBooking(bookingId: number, userId: string): Promise<Booking> {
@@ -114,7 +115,33 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    return this.mapBookingFromDB(data as BookingDB);
+  }
+
+  // Helper method to map database booking to application booking model
+  private mapBookingFromDB(bookingDB: BookingDB): Booking {
+    return {
+      id: bookingDB.id.toString(),
+      user_id: bookingDB.user_id,
+      user_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'User',
+      user_email: '',  // This would ideally come from user profiles
+      item_type: bookingDB.tour_id ? 'tour' : bookingDB.accommodation_id ? 'accommodation' : 'package',
+      item_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'Booking',
+      start_date: bookingDB.start_date,
+      end_date: bookingDB.end_date,
+      guests: bookingDB.guests,
+      total_price: bookingDB.total_price,
+      status: bookingDB.status as 'confirmed' | 'pending' | 'cancelled',
+      payment_status: bookingDB.payment_status as 'paid' | 'pending' | 'refunded',
+      payment_method: bookingDB.payment_method,
+      special_requests: bookingDB.special_requests,
+      created_at: bookingDB.created_at,
+      updated_at: bookingDB.updated_at,
+      tour_id: bookingDB.tour_id,
+      accommodation_id: bookingDB.accommodation_id,
+      tours: bookingDB.tours,
+      accommodations: bookingDB.accommodations
+    };
   }
 
   // User profiles

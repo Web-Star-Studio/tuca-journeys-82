@@ -7,6 +7,7 @@ import BookingEmptyState from "./BookingEmptyState";
 import BookingLoadingState from "./BookingLoadingState";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Booking } from "@/types";
 
 /**
  * BookingsTable displays a user's bookings in a tabular format.
@@ -42,15 +43,6 @@ const BookingsTable: React.FC = () => {
     return <BookingEmptyState />;
   }
 
-  // Format booking data for the BookingRow component
-  const formattedBookings = bookings.map(booking => ({
-    id: booking.id.toString(),
-    item_name: booking.tours?.title || booking.accommodations?.title || "Reserva",
-    start_date: booking.start_date,
-    total_price: booking.total_price,
-    status: booking.status
-  }));
-
   // Data loaded successfully
   return (
     <div className="overflow-x-auto">
@@ -58,7 +50,7 @@ const BookingsTable: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200 bg-white">
           <BookingsTableHeader />
           <tbody className="divide-y divide-gray-200">
-            {formattedBookings.map((booking) => (
+            {bookings.map((booking) => (
               <BookingRow 
                 key={booking.id} 
                 booking={booking}

@@ -6,13 +6,23 @@ import BookingOverviewChart from "@/components/admin/dashboard/BookingOverviewCh
 import DashboardRow from "@/components/admin/dashboard/DashboardRow";
 import DashboardRightColumn from "@/components/admin/dashboard/DashboardRightColumn";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   // Ensure only admin users can access this page
-  useAuthRedirect({
+  const { isLoading, isAdmin, isAuthenticated } = useAuthRedirect({
     requiredAuth: true,
     requiredAdmin: true
   });
+
+  // Show feedback if there's an issue with authentication
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast.error("Você precisa estar autenticado para acessar esta página");
+    } else if (!isLoading && !isAdmin) {
+      toast.error("Você não tem permissão para acessar esta página");
+    }
+  }, [isLoading, isAuthenticated, isAdmin]);
 
   // State for date range filtering if needed
   const [dateRange, setDateRange] = useState({

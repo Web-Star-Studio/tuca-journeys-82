@@ -1,66 +1,52 @@
 
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Hook to handle authentication redirects
-export const useAuthRedirect = (options: {
+interface AuthRedirectOptions {
   requiredAuth?: boolean;
   requiredAdmin?: boolean;
-  redirectAuthenticatedTo?: string;
-  redirectUnauthenticatedTo?: string;
-  redirectNonAdminTo?: string;
-} = {}) => {
-  const {
-    requiredAuth = false,
-    requiredAdmin = false,
-    redirectAuthenticatedTo,
-    redirectUnauthenticatedTo = '/login',
-    redirectNonAdminTo = '/dashboard'
+  redirectTo?: string;
+}
+
+/**
+ * Hook for redirecting users based on authentication state
+ * 
+ * @param options Configuration options
+ * @returns Authentication state
+ */
+export const useAuthRedirect = (options: AuthRedirectOptions = {}) => {
+  const { 
+    requiredAuth = false, 
+    requiredAdmin = false, 
+    redirectTo = '/login' 
   } = options;
-
-  const { user, isAdmin, isLoading } = useAuth();
+  
+  const { user, isLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
+  const [hasRedirected, setHasRedirected] = useState(false);
+  
   useEffect(() => {
     if (isLoading) return;
-
-    // Handle authenticated user redirects
-    if (user) {
-      // Redirect authenticated users away from auth pages
-      if (redirectAuthenticatedTo && (
-         location.pathname === '/login' || 
-         location.pathname === '/cadastro' || 
-         location.pathname === '/recuperar-senha'
-        )) {
-        navigate(redirectAuthenticatedTo);
-        return;
-      }
-      
-      // Handle admin-protected routes
-      if (requiredAdmin && !isAdmin) {
-        navigate(redirectNonAdminTo);
-        return;
-      }
-    } 
-    // Handle unauthenticated user redirects for protected pages
-    else if (requiredAuth) {
-      const returnUrl = encodeURIComponent(location.pathname + location.search);
-      navigate(`${redirectUnauthenticatedTo}?returnTo=${returnUrl}`);
+    
+    if (requiredAuth && !user) {
+      navigate(redirectTo);
+      setHasRedirected(true);
+      return;
     }
-  }, [
-    user,
+    
+    if (requiredAdmin && !isAdmin) {
+      navigate('/dashboard');
+      setHasRedirected(true);
+      return;
+    }
+    
+  }, [user, isAdmin, isLoading, requiredAuth, requiredAdmin, navigate, redirectTo]);
+  
+  return {
+    isAuthenticated: !!user,
     isAdmin,
-    isLoading,
-    requiredAuth,
-    requiredAdmin,
-    redirectAuthenticatedTo,
-    redirectUnauthenticatedTo,
-    redirectNonAdminTo,
-    navigate,
-    location
-  ]);
-
-  return { isLoading, isAuthenticated: !!user, isAdmin };
+    isLoading: isLoading || hasRedirected,
+    user
+  };
 };

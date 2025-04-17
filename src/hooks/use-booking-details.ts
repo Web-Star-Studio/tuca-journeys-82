@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService } from '@/services';
 import { UIBooking } from '@/types';
+import { toast } from 'sonner';
 
 /**
  * Hook to fetch details for a specific booking
@@ -20,11 +21,19 @@ export const useBookingDetails = (id: string | undefined) => {
   } = useQuery({
     queryKey: ['booking', id],
     queryFn: async () => {
-      if (!user || !id) return null;
-      const bookings = await bookingService.getUserBookings(user.id);
-      return bookings.find(booking => booking.id === id) || null;
+      if (!user?.id || !id) return null;
+      
+      try {
+        const bookings = await bookingService.getUserBookings(user.id);
+        return bookings.find(booking => booking.id === id) || null;
+      } catch (err) {
+        console.error(`Error fetching booking ${id}:`, err);
+        toast.error("Erro ao carregar detalhes da reserva");
+        return null;
+      }
     },
-    enabled: !!user && !!id,
+    enabled: !!user?.id && !!id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
   return {

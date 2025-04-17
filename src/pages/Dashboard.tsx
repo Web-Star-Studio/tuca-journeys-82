@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,8 +10,6 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
 import { useBookingsList } from "@/hooks/use-bookings-list";
-import { Booking } from "@/types/bookings";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
@@ -26,36 +25,14 @@ const Dashboard = () => {
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
-  const { bookings: rawBookings, isLoading: bookingsLoading, error: bookingsError } = useBookingsList();
+  const { bookings = [], isLoading: bookingsLoading, error: bookingsError } = useBookingsList();
   
   // Show error toast if bookings fetch fails
   useEffect(() => {
     if (bookingsError) {
       console.error("Error fetching bookings:", bookingsError);
-      toast.error("Não foi possível carregar as reservas");
     }
   }, [bookingsError]);
-  
-  // Transform raw bookings data to match Booking type
-  const bookings: Booking[] = React.useMemo(() => {
-    if (!rawBookings) return [];
-    
-    return rawBookings.map(booking => ({
-      id: booking.id.toString(),
-      user_name: profile?.name || 'User',
-      user_email: profile?.email || '',
-      item_type: booking.tour_id ? 'tour' : booking.accommodation_id ? 'accommodation' : 'package',
-      item_name: booking.tours ? booking.tours.title : 
-                 booking.accommodations ? booking.accommodations.title : 'Booking',
-      start_date: booking.start_date,
-      end_date: booking.end_date,
-      guests: booking.guests,
-      total_price: booking.total_price,
-      status: booking.status as 'confirmed' | 'pending' | 'cancelled',
-      payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
-      created_at: booking.created_at
-    }));
-  }, [rawBookings, profile]);
   
   // Calculate user metrics from real data
   const calculateUserMetrics = () => {

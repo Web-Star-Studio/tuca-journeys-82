@@ -17,7 +17,8 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   // Protect admin routes
   const { isLoading, isAuthenticated, isAdmin } = useAuthRedirect({
     requiredAuth: true,
-    requiredAdmin: true
+    requiredAdmin: true,
+    redirectTo: '/login?redirectTo=/admin/dashboard'
   });
   
   if (isLoading) {
@@ -32,7 +33,13 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
   // If not authenticated or not admin, don't render the admin layout
   // The useAuthRedirect hook will handle the redirect
   if (!isAuthenticated || !isAdmin) {
-    return null;
+    return (
+      <div className="flex h-screen w-full items-center justify-center flex-col">
+        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue mb-4" />
+        <span className="text-lg">Verificando permissões...</span>
+        <p className="text-sm text-gray-500 mt-2">Você será redirecionado em instantes</p>
+      </div>
+    );
   }
 
   return (

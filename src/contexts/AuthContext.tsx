@@ -1,8 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
-import { isAdminEmail } from "@/lib/auth-helpers";
+import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
 
 interface AuthContextType {
   user: User | null;
@@ -36,25 +37,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
 
   // Check if user has admin role
-  const checkAdminStatus = (currentUser: User | null) => {
+  const checkAdminStatus = async (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
       return;
     }
     
-    // Check admin status from user metadata or email
-    const adminFromMetadata = 
-      currentUser.user_metadata?.role === 'admin' ||
-      currentUser.app_metadata?.role === 'admin';
+    try {
+      // First check admin status from user metadata or email
+      const adminFromMetadata = 
+        currentUser.user_metadata?.role === 'admin' ||
+        currentUser.app_metadata?.role === 'admin';
+        
+      const adminFromEmail = isAdminEmail(currentUser.email);
       
-    const adminFromEmail = isAdminEmail(currentUser.email);
-    
-    setIsAdmin(adminFromMetadata || adminFromEmail);
+      // If not admin by metadata or email, check in database
+      let isDbAdmin = false;
+      if (!adminFromMetadata && !adminFromEmail) {
+        isDbAdmin = await isUserAdmin(currentUser.id);
+      }
+      
+      setIsAdmin(adminFromMetadata || adminFromEmail || isDbAdmin);
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      setIsAdmin(false);
+    }
   };
 
   // Initialize auth state when component mounts
   useEffect(() => {
-    // First check for mock session
     const initAuth = async () => {
       try {
         // Check for mock session
@@ -77,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               
               setSession(mockSession);
               setUser(mockSession.user);
-              checkAdminStatus(mockSession.user);
+              await checkAdminStatus(mockSession.user);
               setIsLoading(false);
               return;
             } else {
@@ -99,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (sessionData?.session) {
           setSession(sessionData.session);
           setUser(sessionData.session.user);
-          checkAdminStatus(sessionData.session.user);
+          await checkAdminStatus(sessionData.session.user);
         } else {
           // No valid session
           setSession(null);
@@ -115,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
     
     // Set up auth state listener
-    const { data } = supabase.auth.onAuthStateChange((event, currentSession) => {
+    const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (event === "SIGNED_OUT") {
@@ -126,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (currentSession) {
         setSession(currentSession);
         setUser(currentSession.user);
-        checkAdminStatus(currentSession.user);
+        await checkAdminStatus(currentSession.user);
       }
     });
     
@@ -144,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (result.data?.user) {
         setUser(result.data.user);
         setSession(result.data.session);
-        checkAdminStatus(result.data.user);
+        await checkAdminStatus(result.data.user);
       }
       return result;
     } finally {

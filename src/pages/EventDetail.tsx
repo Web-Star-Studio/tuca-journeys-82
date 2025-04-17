@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
@@ -18,7 +17,7 @@ const EventDetail = () => {
   
   // Find the event by ID
   const event = events.find(e => e.id === Number(id));
-  const inWishlist = event ? isInWishlist?.(event.id) : false;
+  const inWishlist = event ? isInWishlist(event.id) : false;
   
   // Scroll to top on page load
   useEffect(() => {

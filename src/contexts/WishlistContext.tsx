@@ -4,16 +4,18 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface WishlistItem {
   id: number;
-  type: 'tour' | 'accommodation' | 'package' | 'product';
+  type: 'tour' | 'accommodation' | 'package' | 'product' | 'event'; // Added 'event' type
   name: string;
   image: string;
+  price?: number;
+  description?: string;
 }
 
 interface WishlistContextType {
   wishlistItems: WishlistItem[];
   addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: number, type: string) => void;
-  isInWishlist: (id: number, type: string) => boolean;
+  removeFromWishlist: (id: number) => void;
+  isInWishlist: (id: number) => boolean;
   clearWishlist: () => void;
 }
 
@@ -64,15 +66,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const removeFromWishlist = (id: number, type: string) => {
+  const removeFromWishlist = (id: number) => {
     setWishlistItems((prevItems) => {
-      const removedItem = prevItems.find(
-        (item) => item.id === id && item.type === type
-      );
+      const removedItem = prevItems.find((item) => item.id === id);
       
-      const updatedItems = prevItems.filter(
-        (item) => !(item.id === id && item.type === type)
-      );
+      const updatedItems = prevItems.filter((item) => item.id !== id);
       
       if (removedItem) {
         toast({
@@ -85,8 +83,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const isInWishlist = (id: number, type: string) => {
-    return wishlistItems.some(item => item.id === id && item.type === type);
+  const isInWishlist = (id: number) => {
+    return wishlistItems.some(item => item.id === id);
   };
 
   const clearWishlist = () => {

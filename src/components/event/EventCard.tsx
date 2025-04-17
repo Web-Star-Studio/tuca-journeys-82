@@ -2,10 +2,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Users, Heart } from "lucide-react";
 import { Event } from "@/types/event";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { Heart } from "lucide-react";
 
 interface EventCardProps {
   event: Event;
@@ -14,7 +13,7 @@ interface EventCardProps {
 const EventCard = ({ event }: EventCardProps) => {
   const navigate = useNavigate();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const inWishlist = isInWishlist?.(event.id);
+  const inWishlist = isInWishlist(event.id);
   
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();

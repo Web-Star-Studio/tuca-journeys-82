@@ -81,9 +81,26 @@ export const getAccommodationByIdFromDB = async (id: number) => {
 // Bookings API
 export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
   console.log("Creating booking:", booking);
+  
+  // Create a booking object that matches the database schema
+  // Map number_of_guests to guests as required by the database
+  const dbBooking = {
+    user_id: booking.user_id,
+    tour_id: booking.tour_id,
+    accommodation_id: booking.accommodation_id,
+    start_date: booking.start_date,
+    end_date: booking.end_date,
+    guests: booking.number_of_guests, // Map from number_of_guests to guests
+    total_price: booking.total_price,
+    status: booking.status,
+    payment_status: booking.status === 'confirmed' ? 'paid' : 'pending',
+    payment_method: booking.payment_method || null,
+    special_requests: booking.special_requests || null
+  };
+  
   const { data, error } = await supabase
     .from('bookings')
-    .insert([booking])
+    .insert([dbBooking])
     .select()
     .single();
   
@@ -92,7 +109,23 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     throw error;
   }
   
-  return data as Booking;
+  // Map the response back to the Booking interface expected by the app
+  const responseBooking: Booking = {
+    id: data.id.toString(),
+    user_id: data.user_id,
+    tour_id: data.tour_id,
+    accommodation_id: data.accommodation_id,
+    start_date: data.start_date,
+    end_date: data.end_date,
+    number_of_guests: data.guests, // Map from guests to number_of_guests
+    total_price: data.total_price,
+    status: data.status,
+    notes: data.special_requests || undefined,
+    created_at: data.created_at,
+    updated_at: data.updated_at
+  };
+  
+  return responseBooking;
 };
 
 export const getUserBookings = async (userId: string) => {
@@ -112,7 +145,25 @@ export const getUserBookings = async (userId: string) => {
     throw error;
   }
   
-  return data;
+  // Map the database bookings to the Booking interface
+  const bookings: Booking[] = data.map(dbBooking => ({
+    id: dbBooking.id.toString(),
+    user_id: dbBooking.user_id,
+    tour_id: dbBooking.tour_id,
+    accommodation_id: dbBooking.accommodation_id,
+    start_date: dbBooking.start_date,
+    end_date: dbBooking.end_date,
+    number_of_guests: dbBooking.guests, // Map from guests to number_of_guests
+    total_price: dbBooking.total_price,
+    status: dbBooking.status,
+    notes: dbBooking.special_requests || undefined,
+    created_at: dbBooking.created_at,
+    updated_at: dbBooking.updated_at,
+    tours: dbBooking.tours,
+    accommodations: dbBooking.accommodations
+  }));
+  
+  return bookings;
 };
 
 // User profiles

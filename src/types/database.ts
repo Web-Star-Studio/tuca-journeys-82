@@ -62,6 +62,10 @@ export interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled';
   notes?: string;
   updated_at?: string;
+  payment_method?: string;
+  special_requests?: string;
+  tours?: Tour;
+  accommodations?: Accommodation;
 }
 
 export interface UserProfile {

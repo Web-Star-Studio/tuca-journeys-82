@@ -5,10 +5,14 @@ import BookingRow from "./BookingRow";
 import BookingsTableHeader from "./BookingsTableHeader";
 import BookingEmptyState from "./BookingEmptyState";
 import BookingLoadingState from "./BookingLoadingState";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const BookingsTable = () => {
+/**
+ * BookingsTable displays a user's bookings in a tabular format.
+ * Handles loading, error and empty states internally.
+ */
+const BookingsTable: React.FC = () => {
   const { bookings, isLoading, error } = useBookings();
 
   // Loading state
@@ -38,6 +42,15 @@ const BookingsTable = () => {
     return <BookingEmptyState />;
   }
 
+  // Format booking data for the BookingRow component
+  const formattedBookings = bookings.map(booking => ({
+    id: booking.id.toString(),
+    item_name: booking.tours?.title || booking.accommodations?.title || "Reserva",
+    start_date: booking.start_date,
+    total_price: booking.total_price,
+    status: booking.status
+  }));
+
   // Data loaded successfully
   return (
     <div className="overflow-x-auto">
@@ -45,14 +58,11 @@ const BookingsTable = () => {
         <table className="min-w-full divide-y divide-gray-200 bg-white">
           <BookingsTableHeader />
           <tbody className="divide-y divide-gray-200">
-            {bookings.map((booking) => (
-              <BookingRow key={booking.id} booking={{
-                id: booking.id.toString(),
-                item_name: booking.tours?.title || booking.accommodations?.title || "Reserva",
-                start_date: booking.start_date,
-                total_price: booking.total_price,
-                status: booking.status
-              }} />
+            {formattedBookings.map((booking) => (
+              <BookingRow 
+                key={booking.id} 
+                booking={booking}
+              />
             ))}
           </tbody>
         </table>

@@ -8,58 +8,44 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, CalendarDays, Users, CreditCard, Clock } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import BookingDetailSkeleton from '@/components/booking/BookingDetailSkeleton';
+import BookingDetailError from '@/components/booking/BookingDetailError';
+import { toast } from 'sonner';
 
+/**
+ * BookingDetail displays the details of a specific booking
+ */
 const BookingDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { bookings, isLoading, error } = useBookings();
+  const { bookings, isLoading, error, cancelBooking, isCancelling } = useBookings();
   
   // Find the specific booking - convert id to string for comparison
   const booking = bookings?.find(b => b.id.toString() === id);
   
+  // Handle cancellation request
+  const handleCancelBooking = async () => {
+    if (booking && window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
+      cancelBooking(booking.id);
+      // Navigate back after success
+      setTimeout(() => navigate('/dashboard'), 1500);
+    }
+  };
+  
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
-      </div>
-    );
+    return <BookingDetailSkeleton />;
   }
   
   if (error || !booking) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow pt-20 py-12">
-          <div className="container mx-auto px-4">
-            <Button 
-              variant="ghost" 
-              className="mb-6" 
-              onClick={() => navigate('/dashboard')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para o dashboard
-            </Button>
-            
-            <Card className="max-w-3xl mx-auto">
-              <CardContent className="p-10 text-center">
-                <h2 className="text-xl font-medium mb-2">
-                  {error ? "Erro ao carregar reserva" : "Reserva não encontrada"}
-                </h2>
-                <p className="text-gray-500 mb-4">
-                  {error 
-                    ? "Ocorreu um erro ao carregar os detalhes desta reserva. Por favor, tente novamente mais tarde."
-                    : "A reserva que você está procurando não foi encontrada ou pode ter sido removida."
-                  }
-                </p>
-                <Button onClick={() => navigate('/dashboard')}>
-                  Voltar para minhas reservas
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <BookingDetailError 
+        error={error ? "Erro ao carregar reserva" : "Reserva não encontrada"} 
+        message={error 
+          ? "Ocorreu um erro ao carregar os detalhes desta reserva. Por favor, tente novamente mais tarde."
+          : "A reserva que você está procurando não foi encontrada ou pode ter sido removida."
+        }
+        onBack={() => navigate('/dashboard')}
+      />
     );
   }
   
@@ -187,7 +173,18 @@ const BookingDetail = () => {
             <CardFooter className="border-t pt-4 flex justify-end space-x-2">
               <Button variant="outline">Entrar em contato</Button>
               {booking.status === 'confirmed' && (
-                <Button variant="destructive">Cancelar reserva</Button>
+                <Button 
+                  variant="destructive"
+                  onClick={handleCancelBooking}
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Cancelando...
+                    </>
+                  ) : 'Cancelar reserva'}
+                </Button>
               )}
             </CardFooter>
           </Card>

@@ -1,38 +1,27 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Booking } from '@/types/bookings';
-import { Booking as DatabaseBooking } from '@/types/database';
 import { toast } from 'sonner';
+import { apiService } from '@/services/api';
 
+/**
+ * Hook to manage user bookings
+ * Provides methods to fetch, create and cancel bookings
+ */
 export const useBookings = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
   // Fetch user's bookings
-  const { data: bookings, isLoading, error } = useQuery({
+  const { 
+    data: bookings = [], 
+    isLoading, 
+    error 
+  } = useQuery({
     queryKey: ['bookings', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
-      try {
-        const { data, error } = await supabase
-          .from('bookings')
-          .select(`
-            *,
-            tours(*),
-            accommodations(*)
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-          
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-        throw error;
-      }
+      return await apiService.getUserBookings(user.id);
     },
     enabled: !!user,
   });
@@ -40,16 +29,8 @@ export const useBookings = () => {
   // Cancel booking mutation
   const cancelBookingMutation = useMutation({
     mutationFn: async (bookingId: number) => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', bookingId)
-        .eq('user_id', user?.id)
-        .select()
-        .single();
-        
-      if (error) throw error;
-      return data;
+      if (!user) throw new Error('User not authenticated');
+      return await apiService.cancelBooking(bookingId, user.id);
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -62,22 +43,31 @@ export const useBookings = () => {
     }
   });
 
+  // Function to cancel a booking
+  const cancelBooking = (id: string | number) => {
+    const bookingId = typeof id === 'string' ? parseInt(id, 10) : id;
+    cancelBookingMutation.mutate(bookingId);
+  };
+
   return {
     bookings,
     isLoading,
     error,
-    cancelBooking: (id: number) => cancelBookingMutation.mutate(id)
+    cancelBooking,
+    isCancelling: cancelBookingMutation.isPending
   };
 };
 
-// Add the missing useCreateBooking hook
+/**
+ * Hook to create a new booking
+ */
 export const useCreateBooking = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (bookingData: Omit<DatabaseBooking, 'id' | 'created_at' | 'updated_at'>) => {
-      return createBooking(bookingData);
+    mutationFn: (bookingData: any) => {
+      return apiService.createBooking(bookingData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings', user?.id] });
@@ -88,17 +78,4 @@ export const useCreateBooking = () => {
       toast.error('Erro ao criar reserva');
     }
   });
-};
-
-// Helper function to create a booking
-const createBooking = async (booking: Omit<DatabaseBooking, 'id' | 'created_at' | 'updated_at'>) => {
-  console.log("Creating booking:", booking);
-  const { data, error } = await supabase
-    .from('bookings')
-    .insert([booking])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
 };

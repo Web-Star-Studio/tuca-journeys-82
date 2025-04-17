@@ -1,37 +1,34 @@
 
 import React from "react";
 import { Calendar } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const BookingEmptyState = () => {
-  const navigate = useNavigate();
-
+const BookingEmptyState: React.FC = () => {
   return (
-    <div className="text-center py-12 bg-white rounded-lg border">
-      <div className="rounded-full bg-tuca-light-blue/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-        <Calendar className="h-8 w-8 text-tuca-ocean-blue" />
-      </div>
-      <h3 className="text-lg font-medium text-gray-700 mb-2">Nenhuma reserva encontrada</h3>
-      <p className="text-gray-500 max-w-md mx-auto mb-6 px-4">
-        Você ainda não possui nenhuma reserva. Que tal explorar nossas opções de passeios e hospedagens?
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Button 
-          onClick={() => navigate('/tours')}
-          className="bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90"
-        >
-          Ver Passeios
-        </Button>
-        <Button 
-          onClick={() => navigate('/hospedagens')}
-          variant="outline"
-          className="border-tuca-ocean-blue text-tuca-ocean-blue hover:bg-tuca-light-blue/50"
-        >
-          Ver Hospedagens
-        </Button>
-      </div>
-    </div>
+    <Card>
+      <CardContent className="p-6 text-center">
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="bg-tuca-light-blue rounded-full p-4 mb-4">
+            <Calendar className="h-8 w-8 text-tuca-ocean-blue" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">Nenhuma reserva encontrada</h3>
+          <p className="text-gray-500 mb-4 max-w-md mx-auto">
+            Você ainda não possui reservas. Explore nossos passeios e hospedagens 
+            para começar a planejar sua viagem.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button asChild>
+              <Link to="/passeios">Ver Passeios</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/hospedagens">Ver Hospedagens</Link>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

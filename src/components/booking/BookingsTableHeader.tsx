@@ -1,21 +1,18 @@
 
 import React from "react";
-import { TableHeader, TableRow, TableHead } from "@/components/ui/table";
-import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
+import { TableHead } from "@/components/ui/table";
 
-const BookingsTableHeader = () => {
-  const isMobile = useIsBelowBreakpoint("md");
-  
+const BookingsTableHeader: React.FC = () => {
   return (
-    <TableHeader>
-      <TableRow>
-        <TableHead>Item</TableHead>
+    <thead className="bg-gray-50">
+      <tr>
+        <TableHead className="py-3">Item</TableHead>
         <TableHead>Data</TableHead>
-        {!isMobile && <TableHead>Valor</TableHead>}
+        <TableHead>Valor</TableHead>
         <TableHead>Status</TableHead>
         <TableHead className="text-right">Ações</TableHead>
-      </TableRow>
-    </TableHeader>
+      </tr>
+    </thead>
   );
 };
 

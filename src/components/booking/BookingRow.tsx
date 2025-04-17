@@ -2,7 +2,7 @@
 import React from "react";
 import { ExternalLink, Ban, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TableRow, TableCell } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { 
   AlertDialog,
@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface BookingRowProps {
   booking: {
@@ -25,11 +26,13 @@ interface BookingRowProps {
     total_price?: number;
     status: string;
   };
-  cancelBooking: (id: string) => void;
+  cancelBooking?: (id: string) => void;
   compact?: boolean;
 }
 
 const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps) => {
+  const navigate = useNavigate();
+  
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -44,16 +47,18 @@ const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps
   };
 
   const handleViewBooking = () => {
-    window.open(`/booking/${booking.id}`, '_blank');
+    navigate(`/bookings/${booking.id}`);
   };
 
   const handleCancel = () => {
-    cancelBooking(booking.id);
-    toast.success('Reserva cancelada com sucesso');
+    if (cancelBooking) {
+      cancelBooking(booking.id);
+      toast.success('Reserva cancelada com sucesso');
+    }
   };
 
   return (
-    <TableRow className="hover:bg-gray-50">
+    <tr className="hover:bg-gray-50">
       <TableCell className="font-medium">{booking.item_name}</TableCell>
       <TableCell>
         {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Data não disponível'}
@@ -86,7 +91,7 @@ const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps
               <ExternalLink className="h-4 w-4 mr-1" /> Ver
             </Button>
             
-            {booking.status !== "cancelled" && (
+            {booking.status !== "cancelled" && cancelBooking && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
@@ -119,7 +124,7 @@ const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps
           </>
         )}
       </TableCell>
-    </TableRow>
+    </tr>
   );
 };
 

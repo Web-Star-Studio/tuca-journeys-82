@@ -46,7 +46,13 @@ const BookingsTable = () => {
           <BookingsTableHeader />
           <tbody className="divide-y divide-gray-200">
             {bookings.map((booking) => (
-              <BookingRow key={booking.id} booking={booking} />
+              <BookingRow key={booking.id} booking={{
+                id: booking.id.toString(),
+                item_name: booking.tours?.title || booking.accommodations?.title || "Reserva",
+                start_date: booking.start_date,
+                total_price: booking.total_price,
+                status: booking.status
+              }} />
             ))}
           </tbody>
         </table>

@@ -14,8 +14,8 @@ const BookingDetail = () => {
   const navigate = useNavigate();
   const { bookings, isLoading, error } = useBookings();
   
-  // Find the specific booking
-  const booking = bookings?.find(b => b.id === id);
+  // Find the specific booking - convert id to string for comparison
+  const booking = bookings?.find(b => b.id.toString() === id);
   
   if (isLoading) {
     return (
@@ -88,6 +88,9 @@ const BookingDetail = () => {
     }
   };
 
+  // Get item name from the booking
+  const itemName = booking.tours?.title || booking.accommodations?.title || "Reserva";
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -115,7 +118,7 @@ const BookingDetail = () => {
             <CardContent className="pt-6">
               <div className="space-y-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-medium mb-4">{booking.item_name}</h3>
+                  <h3 className="text-lg font-medium mb-4">{itemName}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start">
                       <CalendarDays className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />

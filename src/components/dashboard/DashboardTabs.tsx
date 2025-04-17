@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BookingsTable from "@/components/booking/BookingsTable";
 import NotificationsTab from "./NotificationsTab";
 import RecommendationsTab from "./RecommendationsTab";
-import PreferencesQuestionnaire from "./PreferencesQuestionnaire";
 import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Badge } from "@/components/ui/badge";

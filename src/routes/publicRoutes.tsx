@@ -11,6 +11,8 @@ import Packages from '@/pages/Packages';
 import PackageDetail from '@/pages/PackageDetail';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Events from '@/pages/Events';
+import EventDetail from '@/pages/EventDetail';
 
 export const publicRoutes = (
   <>
@@ -25,6 +27,8 @@ export const publicRoutes = (
     <Route path="/packages/:id" element={<PackageDetail />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
+    <Route path="/eventos" element={<Events />} />
+    <Route path="/eventos/:id" element={<EventDetail />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

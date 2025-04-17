@@ -6,9 +6,9 @@ export const events: Event[] = [
   {
     id: 1,
     name: "Festival de Gastronomia e Cultura",
-    description: "Um festival com os melhores pratos da culinária local de Fernando de Noronha, apresentações culturais e música ao vivo.",
+    description: "Um festival com os melhores pratos da culinária local de Fernando de Noronha, apresentações culturais e música ao vivo. Venha experimentar iguarias preparadas pelos melhores chefs da ilha e apreciar apresentações de música e dança locais.",
     image_url: "/hero-noronha-2.jpg",
-    date: "2024-08-15",
+    date: "2025-08-15",
     start_time: "18:00",
     end_time: "23:00",
     location: "Praia do Porto",
@@ -23,9 +23,9 @@ export const events: Event[] = [
   {
     id: 2,
     name: "Corrida Ecológica de Noronha",
-    description: "Corrida de 10km pelas trilhas e praias do arquipélago, promovendo conscientização ambiental e bem-estar.",
+    description: "Corrida de 10km pelas trilhas e praias do arquipélago, promovendo conscientização ambiental e bem-estar. Os participantes terão a oportunidade de correr por algumas das paisagens mais deslumbrantes do Brasil enquanto apoiam causas ambientais locais.",
     image_url: "/tour-trail.jpg",
-    date: "2024-09-10",
+    date: "2025-09-10",
     start_time: "07:00",
     end_time: "10:30",
     location: "Porto de Santo Antônio",
@@ -39,9 +39,9 @@ export const events: Event[] = [
   {
     id: 3,
     name: "Workshop de Fotografia Submarina",
-    description: "Aprenda técnicas de fotografia submarina com profissionais experientes em um dos locais com maior biodiversidade marinha do Brasil.",
+    description: "Aprenda técnicas de fotografia submarina com profissionais experientes em um dos locais com maior biodiversidade marinha do Brasil. Este workshop prático inclui sessões teóricas e mergulhos guiados para aplicar as técnicas aprendidas.",
     image_url: "/tour-underwater.jpg",
-    date: "2024-07-25",
+    date: "2025-07-25",
     start_time: "09:00",
     end_time: "16:00",
     location: "Marina do Sueste",
@@ -55,9 +55,9 @@ export const events: Event[] = [
   {
     id: 4,
     name: "Observação de Tartarugas Marinhas",
-    description: "Evento especial para observação da desova de tartarugas marinhas com biólogos especializados.",
+    description: "Evento especial para observação da desova de tartarugas marinhas com biólogos especializados. Aprenda sobre o ciclo de vida das tartarugas, os desafios de conservação que enfrentam e como o Projeto TAMAR trabalha para protegê-las.",
     image_url: "/tour-turtles.jpg",
-    date: "2024-09-22",
+    date: "2025-09-22",
     start_time: "19:00",
     end_time: "22:00",
     location: "Praia do Leão",
@@ -72,9 +72,9 @@ export const events: Event[] = [
   {
     id: 5,
     name: "Sunset Yoga na Praia",
-    description: "Sessão de yoga ao pôr do sol em uma das mais belas praias do arquipélago.",
+    description: "Sessão de yoga ao pôr do sol em uma das mais belas praias do arquipélago. Equilibre corpo e mente enquanto o sol se põe no horizonte, criando um cenário espetacular para sua prática de yoga. Adequado para todos os níveis.",
     image_url: "/tour-sunset.jpg",
-    date: "2024-08-05",
+    date: "2025-08-05",
     start_time: "17:30",
     end_time: "19:00",
     location: "Praia do Sancho",
@@ -88,9 +88,9 @@ export const events: Event[] = [
   {
     id: 6,
     name: "Palestra: Preservação dos Recifes de Coral",
-    description: "Palestra educativa sobre a importância e os desafios da preservação dos recifes de coral em Fernando de Noronha.",
+    description: "Palestra educativa sobre a importância e os desafios da preservação dos recifes de coral em Fernando de Noronha. Especialistas discutirão o estado atual dos recifes, as ameaças que enfrentam e as iniciativas de conservação em andamento.",
     image_url: "/tour-diving.jpg",
-    date: "2024-07-18",
+    date: "2025-07-18",
     start_time: "19:00",
     end_time: "21:00",
     location: "Centro de Visitantes do ICMBio",
@@ -100,8 +100,66 @@ export const events: Event[] = [
     available_spots: 35,
     status: "scheduled",
     organizer: "ICMBio - Fernando de Noronha"
+  },
+  {
+    id: 7,
+    name: "Festival de Música na Praia",
+    description: "Uma noite de música ao vivo na praia, com artistas locais e convidados especiais tocando uma mistura de estilos brasileiros. Traga sua cadeira de praia e aproveite uma noite de música, dança e diversão sob as estrelas.",
+    image_url: "/lovable-uploads/cd81e007-b687-426e-9059-a599e95ea9f8.png",
+    date: "2025-08-20",
+    start_time: "19:00",
+    end_time: "23:00",
+    location: "Praia da Conceição",
+    price: 40.00,
+    category: "Música",
+    capacity: 250,
+    available_spots: 180,
+    status: "scheduled",
+    organizer: "Associação Cultural de Noronha"
+  },
+  {
+    id: 8,
+    name: "Workshop de Artesanato Local",
+    description: "Aprenda a criar peças de artesanato únicas inspiradas na natureza de Fernando de Noronha. Este workshop prático é conduzido por artesãos locais que compartilharão técnicas tradicionais e contemporâneas.",
+    image_url: "/lovable-uploads/3e37da64-d22a-4127-8447-69d6e3c61dc4.png",
+    date: "2025-07-30",
+    start_time: "14:00",
+    end_time: "17:00",
+    location: "Centro Cultural",
+    price: 75.00,
+    category: "Workshop",
+    capacity: 15,
+    available_spots: 9,
+    status: "scheduled",
+    organizer: "Cooperativa de Artesãos de Fernando de Noronha"
+  },
+  {
+    id: 9,
+    name: "Tour Histórico: Fortes e Ruínas",
+    description: "Um passeio guiado pelos fortes históricos e ruínas de Fernando de Noronha, revelando a rica história militar e colonial da ilha. Um historiador local compartilhará histórias fascinantes sobre o passado da ilha.",
+    image_url: "/tour-historical.jpg",
+    date: "2025-09-05",
+    start_time: "09:00",
+    end_time: "12:00",
+    location: "Forte de Nossa Senhora dos Remédios",
+    price: 65.00,
+    category: "História",
+    capacity: 30,
+    available_spots: 22,
+    status: "scheduled",
+    organizer: "Instituto Histórico de Fernando de Noronha"
   }
 ];
 
 // Available event categories
-export const categories = ["Todas", "Gastronomia", "Esporte", "Workshop", "Ecoturismo", "Bem-estar", "Educação Ambiental"];
+export const categories = [
+  "Todas", 
+  "Gastronomia", 
+  "Esporte", 
+  "Workshop", 
+  "Ecoturismo", 
+  "Bem-estar", 
+  "Educação Ambiental",
+  "Música",
+  "História"
+];

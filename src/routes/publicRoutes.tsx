@@ -16,8 +16,8 @@ import EventDetail from '@/pages/EventDetail';
 import Mapa from '@/pages/Mapa';
 import Hospedagens from '@/pages/Hospedagens';
 import Wishlist from '@/pages/Wishlist';
-import Loja from '@/pages/Store';
-import ProductDetail from '@/pages/ProductDetail';
+import Loja from '@/pages/Loja';
+import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
 
 export const publicRoutes = (
@@ -42,7 +42,7 @@ export const publicRoutes = (
     <Route path="/mapa" element={<Mapa />} />
     <Route path="/parceiros" element={<Partners />} />
     <Route path="/loja" element={<Loja />} />
-    <Route path="/loja/:id" element={<ProductDetail />} />
+    <Route path="/loja/:id" element={<ProductDetails />} />
     <Route path="/lista-de-desejos" element={<Wishlist />} />
     
     {/* English Routes (for backward compatibility) */}
@@ -53,7 +53,7 @@ export const publicRoutes = (
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/store" element={<Loja />} />
-    <Route path="/store/:id" element={<ProductDetail />} />
+    <Route path="/store/:id" element={<ProductDetails />} />
     
     <Route path="*" element={<NotFound />} />
   </>

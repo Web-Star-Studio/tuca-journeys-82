@@ -1,97 +1,88 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface Notification {
-  id: number;
+  id: string;
   title: string;
   message: string;
-  date: string;
+  type: 'booking' | 'promo' | 'recommendation' | 'system';
   read: boolean;
-  type: 'booking' | 'promo' | 'system' | 'recommendation';
+  date: string;
   link?: string;
 }
 
 export const useNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: "Reserva confirmada",
-      message: "Sua reserva para o passeio de mergulho foi confirmada",
-      date: "10/04/2023",
-      read: false,
-      type: "booking",
-      link: "/account/bookings/123"
-    },
-    {
-      id: 2,
-      title: "Promoção imperdível",
-      message: "Aproveite 20% de desconto em passeios de barco",
-      date: "08/04/2023",
-      read: true,
-      type: "promo",
-      link: "/tours"
-    },
-    {
-      id: 3,
-      title: "Novo passeio disponível",
-      message: "Conheça nossa nova trilha ecológica",
-      date: "05/04/2023",
-      read: false,
-      type: "recommendation",
-      link: "/tours/new-eco-trail"
-    },
-    {
-      id: 4,
-      title: "Atualização de perfil",
-      message: "Complete seu perfil para desbloquear benefícios",
-      date: "01/04/2023",
-      read: true,
-      type: "system",
-      link: "/profile"
-    }
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const { user } = useAuth();
 
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // Calculate unread notifications count
+  // Load mock notifications
   useEffect(() => {
-    const count = notifications.filter(notification => !notification.read).length;
-    setUnreadCount(count);
-  }, [notifications]);
+    if (user) {
+      // Mock data - in a real app, this would come from an API
+      const mockNotifications: Notification[] = [
+        {
+          id: '1',
+          title: 'Reserva confirmada',
+          message: 'Sua reserva para o passeio de barco foi confirmada.',
+          type: 'booking',
+          read: false,
+          date: '2025-04-16',
+          link: '/bookings/123'
+        },
+        {
+          id: '2',
+          title: 'Oferta especial',
+          message: '20% de desconto em passeios para o próximo mês.',
+          type: 'promo',
+          read: false,
+          date: '2025-04-15',
+          link: '/tours'
+        },
+        {
+          id: '3',
+          title: 'Recomendação de passeio',
+          message: 'Baseado em suas preferências, você pode gostar do passeio de mergulho.',
+          type: 'recommendation',
+          read: true,
+          date: '2025-04-14',
+          link: '/tours/456'
+        }
+      ];
 
-  // Mark notification as read
-  const markAsRead = (id: number) => {
-    setNotifications(
-      notifications.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
+      setNotifications(mockNotifications);
+      setUnreadCount(mockNotifications.filter(n => !n.read).length);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  }, [user]);
+
+  // Mark a notification as read
+  const markAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id 
+          ? { ...notification, read: true } 
+          : notification
       )
     );
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   // Mark all notifications as read
   const markAllAsRead = () => {
-    setNotifications(
-      notifications.map(notification => ({ ...notification, read: true }))
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
     );
-  };
-
-  // Add a new notification
-  const addNotification = (notification: Omit<Notification, 'id'>) => {
-    const newId = notifications.length > 0 
-      ? Math.max(...notifications.map(n => n.id)) + 1 
-      : 1;
-    
-    setNotifications([
-      { ...notification, id: newId },
-      ...notifications
-    ]);
+    setUnreadCount(0);
   };
 
   return {
     notifications,
     unreadCount,
     markAsRead,
-    markAllAsRead,
-    addNotification
+    markAllAsRead
   };
 };

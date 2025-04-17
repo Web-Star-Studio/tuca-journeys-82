@@ -1,86 +1,91 @@
 
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useBookings } from '@/hooks/use-bookings';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, Calendar, MapPin, Users, Clock, AlertCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useBookings } from '@/hooks/use-bookings';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, CalendarDays, Users, CreditCard, Clock } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const BookingDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { bookings, isLoading } = useBookings();
+  const navigate = useNavigate();
+  const { bookings, isLoading, error } = useBookings();
   
-  const booking = bookings?.find(b => b.id.toString() === id);
-
+  // Find the specific booking
+  const booking = bookings?.find(b => b.id === id);
+  
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow pt-20 py-12">
-          <div className="container mx-auto px-4 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4">Carregando detalhes da reserva...</p>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
       </div>
     );
   }
-
-  if (!booking) {
+  
+  if (error || !booking) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow pt-20 py-12">
-          <div className="container mx-auto px-4 text-center">
-            <AlertCircle className="h-16 w-16 mx-auto text-red-500 mb-4" />
-            <h1 className="text-3xl font-bold mb-4">Reserva não encontrada</h1>
-            <p className="mb-6 text-gray-600">
-              A reserva que você está procurando não existe ou foi removida.
-            </p>
-            <Button asChild>
-              <Link to="/dashboard">Voltar para o Dashboard</Link>
+          <div className="container mx-auto px-4">
+            <Button 
+              variant="ghost" 
+              className="mb-6" 
+              onClick={() => navigate('/dashboard')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar para o dashboard
             </Button>
+            
+            <Card className="max-w-3xl mx-auto">
+              <CardContent className="p-10 text-center">
+                <h2 className="text-xl font-medium mb-2">
+                  {error ? "Erro ao carregar reserva" : "Reserva não encontrada"}
+                </h2>
+                <p className="text-gray-500 mb-4">
+                  {error 
+                    ? "Ocorreu um erro ao carregar os detalhes desta reserva. Por favor, tente novamente mais tarde."
+                    : "A reserva que você está procurando não foi encontrada ou pode ter sido removida."
+                  }
+                </p>
+                <Button onClick={() => navigate('/dashboard')}>
+                  Voltar para minhas reservas
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </main>
         <Footer />
       </div>
     );
   }
-
+  
+  // Format dates
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+  
+  // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
-
+  
+  // Get payment status color
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'refunded':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'refunded': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR').format(date);
   };
 
   return (
@@ -88,154 +93,101 @@ const BookingDetail = () => {
       <Header />
       <main className="flex-grow pt-20 py-12">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <Button variant="ghost" asChild className="mb-4">
-              <Link to="/dashboard">
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Voltar para o Dashboard
-              </Link>
-            </Button>
-            
-            <h1 className="text-3xl font-bold">Detalhes da Reserva</h1>
-          </div>
+          <Button 
+            variant="ghost" 
+            className="mb-6" 
+            onClick={() => navigate('/dashboard')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar para o dashboard
+          </Button>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl">Informações da Reserva</CardTitle>
-                    <div className="flex space-x-2">
-                      <Badge className={getStatusColor(booking.status)}>
-                        {booking.status === 'confirmed' ? 'Confirmada' : 
-                         booking.status === 'pending' ? 'Pendente' : 'Cancelada'}
-                      </Badge>
-                      <Badge className={getPaymentStatusColor(booking.payment_status)}>
-                        {booking.payment_status === 'paid' ? 'Pago' : 
-                         booking.payment_status === 'pending' ? 'Pagamento Pendente' : 'Reembolsado'}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">
-                      {booking.tours?.title || booking.accommodations?.title || 'Reserva'}
-                    </h3>
-                    
-                    {booking.tours && (
-                      <p className="text-gray-600">{booking.tours.short_description}</p>
-                    )}
-                    
-                    {booking.accommodations && (
-                      <p className="text-gray-600">{booking.accommodations.short_description}</p>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-start space-x-2">
-                      <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+          <Card className="max-w-3xl mx-auto">
+            <CardHeader className="border-b">
+              <div className="flex justify-between items-center">
+                <CardTitle>Detalhes da Reserva #{booking.id}</CardTitle>
+                <span className={`text-sm px-3 py-1 rounded-full ${getStatusColor(booking.status)}`}>
+                  {booking.status === 'confirmed' ? 'Confirmada' : 
+                   booking.status === 'pending' ? 'Pendente' : 'Cancelada'}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium mb-4">{booking.item_name}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start">
+                      <CalendarDays className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                       <div>
-                        <p className="font-medium">Data de início</p>
-                        <p className="text-gray-600">{formatDate(booking.start_date)}</p>
+                        <p className="text-sm text-gray-500">Data de início</p>
+                        <p className="font-medium">{formatDate(booking.start_date)}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start space-x-2">
-                      <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+                    <div className="flex items-start">
+                      <CalendarDays className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                       <div>
-                        <p className="font-medium">Data de término</p>
-                        <p className="text-gray-600">{formatDate(booking.end_date)}</p>
+                        <p className="text-sm text-gray-500">Data de término</p>
+                        <p className="font-medium">{formatDate(booking.end_date)}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start space-x-2">
-                      <Users className="h-5 w-5 text-gray-500 mt-0.5" />
+                    <div className="flex items-start">
+                      <Users className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                       <div>
-                        <p className="font-medium">Número de hóspedes</p>
-                        <p className="text-gray-600">{booking.guests} pessoa{booking.guests !== 1 ? 's' : ''}</p>
+                        <p className="text-sm text-gray-500">Hóspedes</p>
+                        <p className="font-medium">{booking.guests} pessoas</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start space-x-2">
-                      <Clock className="h-5 w-5 text-gray-500 mt-0.5" />
+                    <div className="flex items-start">
+                      <CreditCard className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                       <div>
-                        <p className="font-medium">Data da reserva</p>
-                        <p className="text-gray-600">{formatDate(booking.created_at)}</p>
+                        <p className="text-sm text-gray-500">Status do pagamento</p>
+                        <p className={`inline-block px-2 py-1 rounded text-xs ${getPaymentStatusColor(booking.payment_status)}`}>
+                          {booking.payment_status === 'paid' ? 'Pago' : 
+                           booking.payment_status === 'pending' ? 'Pendente' : 'Reembolsado'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              {booking.accommodations && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Detalhes da Acomodação</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Endereço</p>
-                        <p className="text-gray-600">{booking.accommodations.address}</p>
-                      </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Resumo do pedido</h3>
+                  <div className="border rounded-md">
+                    <div className="border-b px-4 py-3 flex justify-between">
+                      <span>Subtotal</span>
+                      <span>R$ {(booking.total_price * 0.9).toFixed(2)}</span>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="font-medium">Quartos</p>
-                        <p className="text-gray-600">{booking.accommodations.bedrooms}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Banheiros</p>
-                        <p className="text-gray-600">{booking.accommodations.bathrooms}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Capacidade máxima</p>
-                        <p className="text-gray-600">{booking.accommodations.max_guests} pessoas</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Tipo</p>
-                        <p className="text-gray-600">{booking.accommodations.type}</p>
-                      </div>
+                    <div className="border-b px-4 py-3 flex justify-between">
+                      <span>Taxas</span>
+                      <span>R$ {(booking.total_price * 0.1).toFixed(2)}</span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="px-4 py-3 flex justify-between font-medium">
+                      <span>Total</span>
+                      <span>R$ {booking.total_price.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Informações adicionais</h3>
+                  <div className="flex items-start">
+                    <Clock className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-gray-500">Reserva criada em</p>
+                      <p className="font-medium">{formatDate(booking.created_at)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="border-t pt-4 flex justify-end space-x-2">
+              <Button variant="outline">Entrar em contato</Button>
+              {booking.status === 'confirmed' && (
+                <Button variant="destructive">Cancelar reserva</Button>
               )}
-            </div>
-            
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Resumo da Reserva</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Valor total</span>
-                    <span className="font-semibold">R$ {booking.total_price.toFixed(2)}</span>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-2">
-                    <Button className="w-full" disabled={booking.status === 'cancelled'}>
-                      {booking.status === 'pending' ? 'Confirmar Pagamento' : 
-                       booking.status === 'cancelled' ? 'Reserva Cancelada' : 'Fazer uma nova reserva'}
-                    </Button>
-                    
-                    {booking.status !== 'cancelled' && (
-                      <Button variant="outline" className="w-full">
-                        {booking.status === 'confirmed' ? 'Cancelar Reserva' : 'Modificar Reserva'}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
         </div>
       </main>
       <Footer />

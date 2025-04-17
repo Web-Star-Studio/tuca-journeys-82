@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -7,20 +7,35 @@ import MetricsCards from "@/components/dashboard/MetricsCards";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import ActivityAnalysis from "@/components/dashboard/ActivityAnalysis";
 import { Loader2 } from "lucide-react";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
 import { useBookings } from "@/hooks/use-bookings";
 import { Booking } from "@/types/bookings";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  // Redirect if user is not authenticated
-  const { isLoading: authLoading, isAuthenticated } = useAuthRedirect({
-    requiredAuth: true
-  });
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login');
+    }
+  }, [user, authLoading, navigate]);
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
-  const { bookings: rawBookings, isLoading: bookingsLoading } = useBookings();
+  const { bookings: rawBookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
+  
+  // Show error toast if bookings fetch fails
+  useEffect(() => {
+    if (bookingsError) {
+      console.error("Error fetching bookings:", bookingsError);
+      toast.error("Não foi possível carregar as reservas");
+    }
+  }, [bookingsError]);
   
   // Transform raw bookings data to match Booking type
   const bookings: Booking[] = React.useMemo(() => {
@@ -102,12 +117,16 @@ const Dashboard = () => {
     { id: 3, title: "Trilha Ecológica", image: "/tour-trail.jpg", score: 85 }
   ];
 
-  if (isLoading || !isAuthenticated) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will be redirected by useEffect
   }
 
   return (
@@ -117,11 +136,20 @@ const Dashboard = () => {
         <div className="container px-4 mx-auto">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
             <DashboardHeader notificationCount={0} />
-            <MetricsCards metrics={userMetrics} />
-            <DashboardTabs recommendations={recommendations} />
-            <ActivityAnalysis 
-              recentBookings={bookings || []}
-            />
+            
+            {isLoading ? (
+              <div className="py-12 flex justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
+              </div>
+            ) : (
+              <>
+                <MetricsCards metrics={userMetrics} />
+                <DashboardTabs recommendations={recommendations} />
+                <ActivityAnalysis 
+                  recentBookings={bookings || []}
+                />
+              </>
+            )}
           </div>
         </div>
       </main>

@@ -16,6 +16,12 @@ import {
   Heart,
   LogOut,
   LayoutDashboard,
+  CalendarDays,
+  ShoppingBag,
+  Ticket,
+  BadgePercent,
+  Bell,
+  FileText,
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,18 +42,24 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   
-  const commonMenuItems: UserDropdownItem[] = [
-    { label: "Meu Perfil", href: "/perfil", icon: UserIcon },
+  const menuItems: UserDropdownItem[] = [
     { label: "Meu Painel", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Meu Perfil", href: "/profile", icon: UserIcon },
+    { label: "Minhas Reservas", href: "/bookings", icon: CalendarDays },
+    { label: "Minhas Compras", href: "/orders", icon: ShoppingBag },
     { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
+    { label: "Documentos de Viagem", href: "/profile?tab=documents", icon: FileText },
+    { label: "Cupons e Descontos", href: "/cupons", icon: Ticket },
+    { label: "Programa de Pontos", href: "/pontos", icon: BadgePercent },
+    { label: "Notificações", href: "/notificacoes", icon: Bell },
     { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
     { label: "Configurações", href: "/configuracoes", icon: Settings },
   ];
   
   // Add admin dashboard link for admin users
-  const menuItems = isAdmin 
-    ? [{ label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard }, ...commonMenuItems]
-    : commonMenuItems;
+  if (isAdmin) {
+    menuItems.unshift({ label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard });
+  }
 
   const handleNavigation = (href: string) => {
     navigate(href);
@@ -74,7 +86,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuGroup>
+      <DropdownMenuGroup className="max-h-[400px] overflow-y-auto">
         {menuItems.map((item, index) => (
           <DropdownMenuItem
             key={index}

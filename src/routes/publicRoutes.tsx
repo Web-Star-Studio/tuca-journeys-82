@@ -43,6 +43,7 @@ export const publicRoutes = (
     <Route path="/parceiros" element={<Partners />} />
     <Route path="/loja" element={<Loja />} />
     <Route path="/loja/:id" element={<ProductDetails />} />
+    <Route path="/produto/:id" element={<ProductDetails />} />
     <Route path="/lista-de-desejos" element={<Wishlist />} />
     
     {/* English Routes (for backward compatibility) */}

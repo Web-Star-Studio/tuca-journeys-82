@@ -4,15 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BookingsTable from "@/components/booking/BookingsTable";
 import NotificationsTab from "./NotificationsTab";
 import RecommendationsTab from "./RecommendationsTab";
+import PreferencesQuestionnaire from "./PreferencesQuestionnaire";
 import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
-
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  date: string;
-  read: boolean;
-}
+import { useNotifications } from "@/hooks/use-notifications";
+import { Badge } from "@/components/ui/badge";
 
 interface Recommendation {
   id: number;
@@ -22,12 +17,12 @@ interface Recommendation {
 }
 
 interface DashboardTabsProps {
-  notifications: Notification[];
   recommendations: Recommendation[];
 }
 
-const DashboardTabs = ({ notifications, recommendations }: DashboardTabsProps) => {
+const DashboardTabs = ({ recommendations }: DashboardTabsProps) => {
   const isMobile = useIsBelowBreakpoint("sm");
+  const { notifications, unreadCount } = useNotifications();
   
   return (
     <div className="bg-white rounded-lg shadow-sm border p-1 sm:p-4">
@@ -36,8 +31,16 @@ const DashboardTabs = ({ notifications, recommendations }: DashboardTabsProps) =
           <TabsTrigger value="reservas" className="text-sm sm:text-base">
             {isMobile ? "Reservas" : "Minhas Reservas"}
           </TabsTrigger>
-          <TabsTrigger value="notificacoes" className="text-sm sm:text-base">
+          <TabsTrigger value="notificacoes" className="text-sm sm:text-base relative">
             {isMobile ? "Notificações" : "Notificações"}
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {unreadCount}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="recomendacoes" className="text-sm sm:text-base">
             {isMobile ? "Para Você" : "Para Você"}

@@ -10,6 +10,7 @@ import { WishlistProvider } from './contexts/WishlistContext';
 import { publicRoutes } from './routes/publicRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { adminRoutes } from './routes/adminRoutes';
+import ScrollToTop from './components/utils/ScrollToTop';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <CartProvider>
             <WishlistProvider>
               <Router>
+                <ScrollToTop />
                 <Routes>
                   {publicRoutes}
                   {protectedRoutes}

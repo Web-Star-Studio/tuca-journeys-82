@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { Heart } from "lucide-react";
 
 interface WishlistIconProps {
   isTransparent: boolean;
@@ -10,17 +10,23 @@ interface WishlistIconProps {
 
 const WishlistIcon = ({ isTransparent }: WishlistIconProps) => {
   const { wishlistItems } = useWishlist();
-  
+  const hasItems = wishlistItems.length > 0;
+
   return (
-    <Link 
+    <Link
       to="/lista-de-desejos"
-      className={`relative hover:opacity-75 transition-opacity ${
-        isTransparent ? "text-white" : "text-gray-900"
-      }`}
+      className="relative flex items-center justify-center"
+      aria-label="Lista de Desejos"
     >
-      <Heart className="h-6 w-6" />
-      {wishlistItems.length > 0 && (
-        <span className="absolute -top-2 -right-2 bg-tuca-ocean-blue text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+      <Heart
+        className={`h-6 w-6 ${
+          isTransparent ? "text-white hover:text-white/80" : "text-gray-800 hover:text-gray-600"
+        } transition-colors`}
+      />
+      {hasItems && (
+        <span
+          className={`absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-tuca-coral text-white text-xs font-medium`}
+        >
           {wishlistItems.length}
         </span>
       )}

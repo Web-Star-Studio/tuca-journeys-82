@@ -61,7 +61,11 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
         
         <Link
           to="/lista-de-desejos"
-          className="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+          className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+            location.pathname.includes("/lista-de-desejos") 
+              ? "bg-tuca-light-blue text-tuca-ocean-blue font-medium" 
+              : "hover:bg-gray-100"
+          }`}
           onClick={onClose}
         >
           <Heart className="h-5 w-5 mr-3" />

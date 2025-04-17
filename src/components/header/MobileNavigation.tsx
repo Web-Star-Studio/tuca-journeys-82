@@ -46,11 +46,32 @@ const MobileNavigation = ({ isOpen, onClose }: MobileNavigationProps) => {
           Pacotes
         </Link>
         <Link
+          to="/loja"
+          className="px-4 py-2 rounded hover:bg-gray-100"
+          onClick={onClose}
+        >
+          Loja
+        </Link>
+        <Link
+          to="/eventos"
+          className="px-4 py-2 rounded hover:bg-gray-100"
+          onClick={onClose}
+        >
+          Eventos
+        </Link>
+        <Link
           to="/mapa"
           className="px-4 py-2 rounded hover:bg-gray-100"
           onClick={onClose}
         >
           Mapa
+        </Link>
+        <Link
+          to="/parceiros"
+          className="px-4 py-2 rounded hover:bg-gray-100"
+          onClick={onClose}
+        >
+          Parceiros
         </Link>
         <Link
           to="/sobre"

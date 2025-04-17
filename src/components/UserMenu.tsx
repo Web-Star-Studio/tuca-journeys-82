@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { FaUser } from 'react-icons/fa';
+import { User } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { FiLogOut, FiUser, FiSettings, FiHeart, FiShoppingBag } from 'react-icons/fi';
+import { LogOut, Settings, Heart, ShoppingBag } from 'lucide-react';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -47,7 +48,7 @@ const UserMenu = () => {
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
             <AvatarFallback className="bg-tuca-ocean-blue text-white">
-              {user.displayName ? getInitials(user.displayName) : <FaUser />}
+              {user.user_metadata?.name ? getInitials(user.user_metadata.name) : <User />}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -55,7 +56,7 @@ const UserMenu = () => {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
-            <p className="font-medium">{user.displayName || 'Usuário'}</p>
+            <p className="font-medium">{user.user_metadata?.name || 'Usuário'}</p>
             <p className="w-[200px] truncate text-sm text-muted-foreground">
               {user.email}
             </p>
@@ -64,31 +65,31 @@ const UserMenu = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/dashboard" className="cursor-pointer flex w-full items-center">
-            <FiUser className="mr-2" />
+            <User className="mr-2 h-4 w-4" />
             Painel do Usuário
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/profile" className="cursor-pointer flex w-full items-center">
-            <FiSettings className="mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             Perfil
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/wishlist" className="cursor-pointer flex w-full items-center">
-            <FiHeart className="mr-2" />
+            <Heart className="mr-2 h-4 w-4" />
             Favoritos
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/orders" className="cursor-pointer flex w-full items-center">
-            <FiShoppingBag className="mr-2" />
+            <ShoppingBag className="mr-2 h-4 w-4" />
             Pedidos
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-          <FiLogOut className="mr-2" />
+          <LogOut className="mr-2 h-4 w-4" />
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>

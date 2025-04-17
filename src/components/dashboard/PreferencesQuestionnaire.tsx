@@ -1,160 +1,208 @@
 
-import React, { useState } from 'react';
-import { useUserPreferences } from '@/hooks/use-user-preferences';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { Loader2 } from 'lucide-react';
+import { UserPreferences } from '@/types/database';
 
 const PreferencesQuestionnaire = () => {
-  const { preferences, updatePreferences, isLoading } = useUserPreferences();
-  const [step, setStep] = useState(0);
-  
-  // Questions to ask the user to refine recommendations
-  const questions = [
-    {
-      title: "Qual é seu estilo de viagem preferido?",
-      type: "radio",
-      field: "travel_style",
-      options: [
-        { label: "Aventura", value: "adventure" },
-        { label: "Relaxamento", value: "relaxation" },
-        { label: "Cultural", value: "cultural" },
-        { label: "Romântico", value: "romantic" },
-        { label: "Familiar", value: "family" }
-      ]
-    },
-    {
-      title: "Quais atividades você gosta durante uma viagem?",
-      type: "checkbox",
-      field: "activities",
-      options: [
-        { label: "Trilhas", value: "hiking" },
-        { label: "Mergulho", value: "diving" },
-        { label: "Praia", value: "beach" },
-        { label: "Passeios culturais", value: "cultural_tours" },
-        { label: "Gastronomia", value: "food" },
-        { label: "Vida noturna", value: "nightlife" }
-      ]
-    },
-    {
-      title: "Qual é sua frequência de viagens?",
-      type: "radio",
-      field: "travel_frequency",
-      options: [
-        { label: "Mensal", value: "monthly" },
-        { label: "Trimestral", value: "quarterly" },
-        { label: "Semestral", value: "biannually" },
-        { label: "Anual", value: "yearly" },
-        { label: "Raramente", value: "rarely" }
-      ]
+  const { preferences, isLoading, updatePreferences } = useUserPreferences();
+  const [formData, setFormData] = React.useState<Partial<UserPreferences>>({
+    travel_style: '',
+    activities: [],
+    accommodation_types: [],
+    budget_range: '',
+    travel_frequency: '',
+  });
+
+  React.useEffect(() => {
+    if (preferences) {
+      setFormData({
+        travel_style: preferences.travel_style || '',
+        activities: preferences.activities || [],
+        accommodation_types: preferences.accommodation_types || [],
+        budget_range: preferences.budget_range || '',
+        travel_frequency: preferences.travel_frequency || '',
+      });
     }
-  ];
-  
-  const currentQuestion = questions[step];
-  
-  const handleRadioChange = (value: string) => {
-    if (currentQuestion.field === "travel_style" || currentQuestion.field === "travel_frequency") {
-      updatePreferences({ [currentQuestion.field]: value });
-    }
+  }, [preferences]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updatePreferences(formData);
   };
-  
-  const handleCheckboxChange = (checked: boolean, value: string) => {
-    if (currentQuestion.field === "activities") {
-      const currentActivities = preferences?.activities || [];
-      let updatedActivities;
-      
-      if (checked) {
-        updatedActivities = [...currentActivities, value];
-      } else {
-        updatedActivities = currentActivities.filter(item => item !== value);
-      }
-      
-      updatePreferences({ activities: updatedActivities });
-    }
+
+  const handleActivityChange = (checked: boolean, activity: string) => {
+    setFormData(prev => ({
+      ...prev,
+      activities: checked 
+        ? [...(prev.activities || []), activity]
+        : (prev.activities || []).filter(a => a !== activity)
+    }));
   };
-  
-  const nextQuestion = () => {
-    if (step < questions.length - 1) {
-      setStep(step + 1);
-    }
+
+  const handleAccommodationChange = (checked: boolean, type: string) => {
+    setFormData(prev => ({
+      ...prev,
+      accommodation_types: checked 
+        ? [...(prev.accommodation_types || []), type]
+        : (prev.accommodation_types || []).filter(t => t !== type)
+    }));
   };
-  
-  const prevQuestion = () => {
-    if (step > 0) {
-      setStep(step - 1);
-    }
-  };
-  
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
+      </div>
+    );
+  }
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Refine suas recomendações</CardTitle>
+        <CardTitle>Suas preferências de viagem</CardTitle>
         <CardDescription>
-          Responda algumas perguntas para recebermos sugestões mais personalizadas para você.
+          Ajude-nos a personalizar sua experiência respondendo algumas perguntas sobre suas preferências de viagem
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="mb-6">
-            <h3 className="text-lg font-medium">{currentQuestion.title}</h3>
-          </div>
-          
-          {currentQuestion.type === "radio" && (
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <h3 className="font-medium">Qual é o seu estilo de viagem favorito?</h3>
             <RadioGroup 
-              value={
-                currentQuestion.field === "travel_style" 
-                  ? preferences?.travel_style 
-                  : preferences?.travel_frequency
-              } 
-              onValueChange={handleRadioChange}
+              value={formData.travel_style} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, travel_style: value }))}
+              className="flex flex-col space-y-2"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {currentQuestion.options.map((option) => (
-                  <div key={option.value} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option.value} id={option.value} />
-                    <Label htmlFor={option.value}>{option.label}</Label>
-                  </div>
-                ))}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="adventure" id="adventure" />
+                <Label htmlFor="adventure">Aventura</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="relaxation" id="relaxation" />
+                <Label htmlFor="relaxation">Relaxamento</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cultural" id="cultural" />
+                <Label htmlFor="cultural">Cultural</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="gastronomy" id="gastronomy" />
+                <Label htmlFor="gastronomy">Gastronomia</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="ecotourism" id="ecotourism" />
+                <Label htmlFor="ecotourism">Ecoturismo</Label>
               </div>
             </RadioGroup>
-          )}
+          </div>
           
-          {currentQuestion.type === "checkbox" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {currentQuestion.options.map((option) => (
-                <div key={option.value} className="flex items-center space-x-2">
+          <div className="space-y-3">
+            <h3 className="font-medium">Quais atividades você prefere?</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {['hiking', 'diving', 'beach', 'city tours', 'historical sites', 'nightlife'].map(activity => (
+                <div key={activity} className="flex items-center space-x-2">
                   <Checkbox 
-                    id={option.value}
-                    checked={preferences?.activities?.includes(option.value)}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange(checked as boolean, option.value)
-                    }
+                    id={`activity-${activity}`}
+                    checked={(formData.activities || []).includes(activity)}
+                    onCheckedChange={(checked) => handleActivityChange(!!checked, activity)}
                   />
-                  <Label htmlFor={option.value}>{option.label}</Label>
+                  <Label htmlFor={`activity-${activity}`}>
+                    {activity === 'hiking' ? 'Trilhas' :
+                     activity === 'diving' ? 'Mergulho' :
+                     activity === 'beach' ? 'Praia' :
+                     activity === 'city tours' ? 'Passeios na cidade' :
+                     activity === 'historical sites' ? 'Sítios históricos' :
+                     'Vida noturna'}
+                  </Label>
                 </div>
               ))}
             </div>
-          )}
-          
-          <div className="flex justify-between mt-6">
-            <Button 
-              variant="outline" 
-              onClick={prevQuestion}
-              disabled={step === 0}
-            >
-              Anterior
-            </Button>
-            <Button 
-              onClick={nextQuestion}
-              disabled={step === questions.length - 1 || isLoading}
-            >
-              {isLoading ? "Salvando..." : "Próxima"}
-            </Button>
           </div>
-        </div>
-      </CardContent>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">Quais tipos de acomodação você prefere?</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {['hotel', 'pousada', 'resort', 'hostel', 'apartment'].map(type => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`accommodation-${type}`}
+                    checked={(formData.accommodation_types || []).includes(type)}
+                    onCheckedChange={(checked) => handleAccommodationChange(!!checked, type)}
+                  />
+                  <Label htmlFor={`accommodation-${type}`}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">Qual é sua faixa de orçamento?</h3>
+            <RadioGroup 
+              value={formData.budget_range} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, budget_range: value }))}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="economy" id="economy" />
+                <Label htmlFor="economy">Econômico</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="medium" id="medium" />
+                <Label htmlFor="medium">Médio</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="premium" id="premium" />
+                <Label htmlFor="premium">Premium</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="luxury" id="luxury" />
+                <Label htmlFor="luxury">Luxo</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">Com que frequência você viaja?</h3>
+            <RadioGroup 
+              value={formData.travel_frequency} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, travel_frequency: value }))}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="monthly" id="monthly" />
+                <Label htmlFor="monthly">Mensalmente</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="quarterly" id="quarterly" />
+                <Label htmlFor="quarterly">Trimestralmente</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="biannual" id="biannual" />
+                <Label htmlFor="biannual">Semestralmente</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="annual" id="annual" />
+                <Label htmlFor="annual">Anualmente</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </CardContent>
+        
+        <CardFooter className="flex justify-end">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Salvar Preferências
+          </Button>
+        </CardFooter>
+      </form>
     </Card>
   );
 };

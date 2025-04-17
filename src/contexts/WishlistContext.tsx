@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface WishlistItem {
   id: number;
-  type: 'tour' | 'accommodation' | 'package' | 'product' | 'event'; // Added 'event' type
+  type: 'tour' | 'accommodation' | 'package' | 'product' | 'event'; 
   name: string;
   image: string;
   price?: number;

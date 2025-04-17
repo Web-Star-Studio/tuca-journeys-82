@@ -1,8 +1,5 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 
 export interface Notification {
   id: number;
@@ -15,123 +12,86 @@ export interface Notification {
 }
 
 export const useNotifications = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  
-  // Query to fetch notifications
-  const { 
-    data: notifications = [], 
-    isLoading, 
-    error,
-    refetch 
-  } = useQuery({
-    queryKey: ['notifications', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      
-      // In a real app, we would fetch from the API
-      // For this demo, we'll return mock data
-      return [
-        { 
-          id: 1, 
-          title: "Reserva confirmada", 
-          message: "Seu passeio para o dia 22/08 foi confirmado", 
-          date: "Hoje", 
-          read: false,
-          type: 'booking',
-          link: '/bookings' 
-        },
-        { 
-          id: 2, 
-          title: "Novo passeio disponível", 
-          message: "Conheça nosso novo passeio de caiaque", 
-          date: "Ontem", 
-          read: true,
-          type: 'recommendation',
-          link: '/passeios' 
-        },
-        { 
-          id: 3, 
-          title: "Oferta especial", 
-          message: "Aproveite 15% OFF em hospedagens", 
-          date: "3 dias atrás", 
-          read: true,
-          type: 'promo',
-          link: '/hospedagens' 
-        }
-      ] as Notification[];
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: 1,
+      title: "Reserva confirmada",
+      message: "Sua reserva para o passeio de mergulho foi confirmada",
+      date: "10/04/2023",
+      read: false,
+      type: "booking",
+      link: "/account/bookings/123"
     },
-    enabled: !!user,
-  });
+    {
+      id: 2,
+      title: "Promoção imperdível",
+      message: "Aproveite 20% de desconto em passeios de barco",
+      date: "08/04/2023",
+      read: true,
+      type: "promo",
+      link: "/tours"
+    },
+    {
+      id: 3,
+      title: "Novo passeio disponível",
+      message: "Conheça nossa nova trilha ecológica",
+      date: "05/04/2023",
+      read: false,
+      type: "recommendation",
+      link: "/tours/new-eco-trail"
+    },
+    {
+      id: 4,
+      title: "Atualização de perfil",
+      message: "Complete seu perfil para desbloquear benefícios",
+      date: "01/04/2023",
+      read: true,
+      type: "system",
+      link: "/profile"
+    }
+  ]);
 
-  // Count unread notifications
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Calculate unread notifications count
+  useEffect(() => {
+    const count = notifications.filter(notification => !notification.read).length;
+    setUnreadCount(count);
+  }, [notifications]);
 
   // Mark notification as read
-  const markAsReadMutation = useMutation({
-    mutationFn: async (notificationId: number) => {
-      if (!user) throw new Error("User not authenticated");
-      
-      // In a real app, we would update the database
-      console.log(`Marking notification ${notificationId} as read`);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      return { success: true };
-    },
-    onSuccess: (_, notificationId) => {
-      // Update the cache optimistically
-      queryClient.setQueryData(
-        ['notifications', user?.id],
-        (oldData: Notification[] = []) => 
-          oldData.map(n => 
-            n.id === notificationId 
-              ? { ...n, read: true } 
-              : n
-          )
-      );
-    },
-    onError: () => {
-      toast.error('Erro ao marcar notificação como lida');
-    }
-  });
+  const markAsRead = (id: number) => {
+    setNotifications(
+      notifications.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+  };
 
   // Mark all notifications as read
-  const markAllAsReadMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("User not authenticated");
-      
-      // In a real app, we would update the database
-      console.log('Marking all notifications as read');
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      return { success: true };
-    },
-    onSuccess: () => {
-      // Update the cache optimistically
-      queryClient.setQueryData(
-        ['notifications', user?.id],
-        (oldData: Notification[] = []) => 
-          oldData.map(n => ({ ...n, read: true }))
-      );
-      
-      toast.success('Todas as notificações foram marcadas como lidas');
-    },
-    onError: () => {
-      toast.error('Erro ao marcar notificações como lidas');
-    }
-  });
+  const markAllAsRead = () => {
+    setNotifications(
+      notifications.map(notification => ({ ...notification, read: true }))
+    );
+  };
+
+  // Add a new notification
+  const addNotification = (notification: Omit<Notification, 'id'>) => {
+    const newId = notifications.length > 0 
+      ? Math.max(...notifications.map(n => n.id)) + 1 
+      : 1;
+    
+    setNotifications([
+      { ...notification, id: newId },
+      ...notifications
+    ]);
+  };
 
   return {
     notifications,
     unreadCount,
-    isLoading,
-    error,
-    refetch,
-    markAsRead: (id: number) => markAsReadMutation.mutate(id),
-    markAllAsRead: () => markAllAsReadMutation.mutate()
+    markAsRead,
+    markAllAsRead,
+    addNotification
   };
 };

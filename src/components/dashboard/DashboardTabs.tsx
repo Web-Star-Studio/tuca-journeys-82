@@ -8,6 +8,7 @@ import { useIsBelowBreakpoint } from "@/hooks/use-mobile";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Badge } from "@/components/ui/badge";
 import { Notification } from "@/hooks/use-notifications";
+import PreferencesQuestionnaire from "./PreferencesQuestionnaire";
 
 interface Recommendation {
   id: number;

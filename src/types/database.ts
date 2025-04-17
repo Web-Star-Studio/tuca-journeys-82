@@ -51,6 +51,29 @@ export interface NotificationPreferences {
   booking_updates?: boolean;
 }
 
+export interface Accommodation {
+  id: number;
+  title: string;
+  short_description: string;
+  description: string;
+  type: string;
+  address: string;
+  price_per_night: number;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  amenities: string[];
+  image_url: string;
+  gallery_images: string[];
+  rating: number;
+  created_at: string;
+  updated_at: string;
+  // Add the fields that were causing errors
+  capacity?: number;
+  location?: string;
+  gallery?: string[];
+}
+
 export interface Booking {
   id: number;
   user_id: string;
@@ -92,27 +115,4 @@ export interface Tour {
   rating: number;
   created_at: string;
   updated_at: string;
-}
-
-export interface Accommodation {
-  id: number;
-  title: string;
-  short_description: string;
-  description: string;
-  type: string;
-  address: string;
-  price_per_night: number;
-  bedrooms: number;
-  bathrooms: number;
-  max_guests: number;
-  amenities: string[];
-  image_url: string;
-  gallery_images: string[];
-  rating: number;
-  created_at: string;
-  updated_at: string;
-  // Add the missing fields that are being used in the code
-  capacity?: number;
-  location?: string;
-  gallery?: string[];
 }

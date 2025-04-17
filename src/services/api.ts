@@ -5,7 +5,19 @@ import { BookingDB, CreateBookingDTO } from '@/types/bookings';
 import { Package } from '@/data/types/packageTypes';
 
 /**
+ * @deprecated This file is deprecated. Please use the individual service modules:
+ * - import { tourService } from '@/services';
+ * - import { accommodationService } from '@/services';
+ * - import { bookingService } from '@/services';
+ * - import { userService } from '@/services';
+ * 
+ * Or import the unified API from the index file:
+ * - import { apiService } from '@/services';
+ */
+
+/**
  * Base API service for interacting with Supabase
+ * @deprecated Use individual service modules instead
  */
 class ApiService {
   // Tours
@@ -154,7 +166,7 @@ class ApiService {
 
   // User profiles
   async getUserProfile(userId: string): Promise<UserProfile | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
@@ -175,7 +187,7 @@ class ApiService {
       
       if (existingProfile) {
         // Update
-        const { data, error } = await supabase
+        const { data, error } = await this.supabase
           .from('user_profiles')
           .update(profile)
           .eq('id', profile.id)
@@ -189,7 +201,7 @@ class ApiService {
         return data;
       } else {
         // Create
-        const { data, error } = await supabase
+        const { data, error } = await this.supabase
           .from('user_profiles')
           .insert([profile])
           .select()
@@ -209,7 +221,7 @@ class ApiService {
 
   // User roles
   async getUserRoles(userId: string): Promise<string[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId);

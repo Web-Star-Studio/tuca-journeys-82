@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { UIBooking } from "@/types";
+import { useBookings } from "@/hooks/use-bookings";
 
 interface BookingRowProps {
   booking: UIBooking;
@@ -25,8 +26,16 @@ interface BookingRowProps {
   compact?: boolean;
 }
 
-const BookingRow: React.FC<BookingRowProps> = ({ booking, cancelBooking, compact = false }) => {
+const BookingRow: React.FC<BookingRowProps> = ({ 
+  booking, 
+  cancelBooking: propsCancelBooking, 
+  compact = false 
+}) => {
   const navigate = useNavigate();
+  const { cancelBooking: hookCancelBooking } = useBookings();
+  
+  // Use the cancelBooking function from props if provided, otherwise use the one from the hook
+  const cancelBooking = propsCancelBooking || hookCancelBooking;
   
   const getStatusBadge = (status: string) => {
     switch (status) {

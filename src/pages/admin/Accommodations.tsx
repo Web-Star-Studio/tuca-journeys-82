@@ -140,7 +140,7 @@ const AdminAccommodations = () => {
                       <TableRow key={accommodation.id}>
                         <TableCell className="font-medium">{accommodation.title}</TableCell>
                         <TableCell className="capitalize">{accommodation.type}</TableCell>
-                        <TableCell>{accommodation.address || accommodation.location}</TableCell>
+                        <TableCell>{accommodation.address}</TableCell>
                         <TableCell className="text-right">
                           R$ {accommodation.price_per_night.toFixed(2)}
                         </TableCell>

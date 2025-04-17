@@ -3,6 +3,26 @@ import { useState } from 'react';
 import { Accommodation } from '@/types/database';
 import { getAccommodationsFromDB, getAccommodationByIdFromDB } from '@/lib/api';
 
+interface AccommodationCreate {
+  title: string;
+  description: string;
+  short_description: string;
+  price_per_night: number;
+  image_url: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  address: string;
+  amenities: string[];
+  gallery_images: string[];
+  rating: number;
+}
+
+interface AccommodationUpdate extends Partial<AccommodationCreate> {
+  id: number;
+}
+
 export const useAccommodations = () => {
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,11 +52,7 @@ export const useAccommodations = () => {
     }
   };
 
-  const createAccommodation = async (accommodation: Omit<Accommodation, "id" | "created_at" | "updated_at" | "short_description" | "max_guests" | "gallery_images" | "address"> & { 
-    location?: string;
-    capacity?: number;
-    gallery?: string[];
-  }) => {
+  const createAccommodation = async (accommodation: AccommodationCreate) => {
     // In a real application, this would make an API call
     console.log('Creating accommodation:', accommodation);
     // Convert the accommodation object to match the database structure
@@ -45,34 +61,31 @@ export const useAccommodations = () => {
       id: Math.floor(Math.random() * 1000),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      short_description: accommodation.description?.substring(0, 100) || '',
-      max_guests: accommodation.capacity || 2,
-      gallery_images: accommodation.gallery || [],
-      address: accommodation.location || '',
     } as Accommodation;
     
     setAccommodations([...accommodations, newAccommodation]);
     return newAccommodation;
   };
 
-  const updateAccommodation = async (accommodation: Partial<Accommodation> & { 
-    id: number;
-    location?: string;
-    capacity?: number;
-    gallery?: string[];
-  }) => {
+  const updateAccommodation = async (accommodation: AccommodationUpdate) => {
     // In a real application, this would make an API call
     console.log('Updating accommodation:', accommodation);
-    // Convert the accommodation object to match the database structure
+    
+    // Find the existing accommodation
+    const existingAccommodation = accommodations.find(acc => acc.id === accommodation.id);
+    
+    if (!existingAccommodation) {
+      throw new Error(`Accommodation with ID ${accommodation.id} not found`);
+    }
+    
+    // Merge the updated fields with the existing accommodation
     const updatedAccommodation = {
+      ...existingAccommodation,
       ...accommodation,
-      updated_at: new Date().toISOString(),
-      short_description: accommodation.description?.substring(0, 100) || '',
-      max_guests: accommodation.capacity || 2,
-      gallery_images: accommodation.gallery || [],
-      address: accommodation.location || '',
+      updated_at: new Date().toISOString()
     } as Accommodation;
     
+    // Update the local state
     setAccommodations(accommodations.map(acc => 
       acc.id === accommodation.id ? updatedAccommodation : acc
     ));

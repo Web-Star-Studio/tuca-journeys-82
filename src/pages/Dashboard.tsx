@@ -95,15 +95,6 @@ const Dashboard = () => {
   const isLoading = authLoading || profileLoading || bookingsLoading;
   const userMetrics = calculateUserMetrics();
   
-  // Get unread notifications count (simplified example)
-  const notifications = [
-    { id: 1, title: "Reserva confirmada", message: "Seu passeio para o dia 22/08 foi confirmado", date: "Hoje", read: false },
-    { id: 2, title: "Novo passeio disponível", message: "Conheça nosso novo passeio de caiaque", date: "Ontem", read: true },
-    { id: 3, title: "Oferta especial", message: "Aproveite 15% OFF em hospedagens", date: "3 dias atrás", read: true }
-  ];
-  
-  const unreadCount = notifications.filter(n => !n.read).length;
-  
   // Generate personalized recommendations based on user behavior
   const recommendations = [
     { id: 1, title: "Passeio de Barco", image: "/tour-sunset.jpg", score: 98 },
@@ -125,12 +116,9 @@ const Dashboard = () => {
       <main className="flex-grow w-full pt-20 py-6 sm:py-8 md:py-12 lg:py-16">
         <div className="container px-4 mx-auto">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-            <DashboardHeader notificationCount={unreadCount} />
+            <DashboardHeader notificationCount={0} />
             <MetricsCards metrics={userMetrics} />
-            <DashboardTabs 
-              notifications={notifications} 
-              recommendations={recommendations} 
-            />
+            <DashboardTabs recommendations={recommendations} />
             <ActivityAnalysis 
               recentBookings={bookings || []}
             />

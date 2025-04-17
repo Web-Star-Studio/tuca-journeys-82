@@ -111,4 +111,8 @@ export interface Accommodation {
   rating: number;
   created_at: string;
   updated_at: string;
+  // Add the missing fields that are being used in the code
+  capacity?: number;
+  location?: string;
+  gallery?: string[];
 }

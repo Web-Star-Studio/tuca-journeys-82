@@ -184,9 +184,7 @@ export function generateDemoData(): DemoData {
       ],
       address: "Praia do Sueste, s/n",
       created_at: "2023-03-10T14:20:00Z",
-      updated_at: "2023-08-01T11:45:00Z",
-      capacity: 2,
-      location: "Praia do Sueste"
+      updated_at: "2023-08-01T11:45:00Z"
     },
     {
       id: 2,
@@ -207,9 +205,7 @@ export function generateDemoData(): DemoData {
       ],
       address: "Vila dos Remédios, 123",
       created_at: "2023-02-15T09:10:00Z",
-      updated_at: "2023-07-20T16:30:00Z",
-      capacity: 6,
-      location: "Vila dos Remédios"
+      updated_at: "2023-07-20T16:30:00Z"
     }
   ];
 

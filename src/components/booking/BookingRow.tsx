@@ -2,7 +2,7 @@
 import React from "react";
 import { ExternalLink, Ban, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TableCell } from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { 
   AlertDialog,
@@ -17,20 +17,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { UIBooking } from "@/types";
 
 interface BookingRowProps {
-  booking: {
-    id: string;
-    item_name: string;
-    start_date?: string;
-    total_price?: number;
-    status: string;
-  };
+  booking: UIBooking;
   cancelBooking?: (id: string) => void;
   compact?: boolean;
 }
 
-const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps) => {
+const BookingRow: React.FC<BookingRowProps> = ({ booking, cancelBooking, compact = false }) => {
   const navigate = useNavigate();
   
   const getStatusBadge = (status: string) => {
@@ -58,7 +53,7 @@ const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps
   };
 
   return (
-    <tr className="hover:bg-gray-50">
+    <TableRow className="hover:bg-gray-50">
       <TableCell className="font-medium">{booking.item_name}</TableCell>
       <TableCell>
         {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Data não disponível'}
@@ -124,7 +119,7 @@ const BookingRow = ({ booking, cancelBooking, compact = false }: BookingRowProps
           </>
         )}
       </TableCell>
-    </tr>
+    </TableRow>
   );
 };
 

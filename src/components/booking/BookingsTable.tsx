@@ -7,7 +7,7 @@ import BookingEmptyState from "./BookingEmptyState";
 import BookingLoadingState from "./BookingLoadingState";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Booking } from "@/types";
+import { UIBooking } from "@/types";
 
 /**
  * BookingsTable displays a user's bookings in a tabular format.
@@ -50,7 +50,7 @@ const BookingsTable: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200 bg-white">
           <BookingsTableHeader />
           <tbody className="divide-y divide-gray-200">
-            {bookings.map((booking) => (
+            {bookings.map((booking: UIBooking) => (
               <BookingRow 
                 key={booking.id} 
                 booking={booking}

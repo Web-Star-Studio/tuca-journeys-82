@@ -1,6 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
-import { Booking, BookingDB, CreateBookingDTO, Tour, Accommodation, UserProfile } from '@/types';
+import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
+import { BookingDB, CreateBookingDTO } from '@/types/bookings';
 import { Package } from '@/data/types/packageTypes';
 
 /**
@@ -66,7 +67,7 @@ class ApiService {
   }
 
   // Bookings
-  async getUserBookings(userId: string): Promise<Booking[]> {
+  async getUserBookings(userId: string): Promise<UIBooking[]> {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -86,7 +87,7 @@ class ApiService {
     return (data || []).map((bookingDB: BookingDB) => this.mapBookingFromDB(bookingDB));
   }
 
-  async createBooking(bookingData: CreateBookingDTO): Promise<Booking> {
+  async createBooking(bookingData: CreateBookingDTO): Promise<UIBooking> {
     const { data, error } = await supabase
       .from('bookings')
       .insert([bookingData])
@@ -101,7 +102,7 @@ class ApiService {
     return this.mapBookingFromDB(data as BookingDB);
   }
 
-  async cancelBooking(bookingId: number, userId: string): Promise<Booking> {
+  async cancelBooking(bookingId: string, userId: string): Promise<UIBooking> {
     const { data, error } = await supabase
       .from('bookings')
       .update({ status: 'cancelled' })
@@ -119,7 +120,7 @@ class ApiService {
   }
 
   // Helper method to map database booking to application booking model
-  private mapBookingFromDB(bookingDB: BookingDB): Booking {
+  private mapBookingFromDB(bookingDB: BookingDB): UIBooking {
     return {
       id: bookingDB.id.toString(),
       user_id: bookingDB.user_id,

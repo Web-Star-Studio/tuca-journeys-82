@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { apiService } from '@/services/api';
-import { Booking } from '@/types';
+import { UIBooking } from '@/types';
+import { CreateBookingDTO } from '@/types/bookings';
 
 /**
  * Hook to manage user bookings
@@ -31,7 +32,7 @@ export const useBookings = () => {
   const cancelBookingMutation = useMutation({
     mutationFn: async (bookingId: string) => {
       if (!user) throw new Error('User not authenticated');
-      return await apiService.cancelBooking(Number(bookingId), user.id);
+      return await apiService.cancelBooking(bookingId, user.id);
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -66,7 +67,7 @@ export const useCreateBooking = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (bookingData: any) => {
+    mutationFn: (bookingData: CreateBookingDTO) => {
       return apiService.createBooking(bookingData);
     },
     onSuccess: () => {

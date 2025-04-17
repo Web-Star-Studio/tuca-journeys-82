@@ -1,27 +1,52 @@
+
 // Supabase types
 export interface Tour {
   id: number;
   created_at: string;
-  name: string;
+  updated_at?: string;
+  name?: string;
+  title: string;
   description: string;
+  short_description: string;
   duration: string;
   price: number;
   image_url: string;
-  location: string;
-  is_available: boolean;
+  location?: string;
+  meeting_point?: string;
+  is_available?: boolean;
   category: string;
+  max_participants: number;
+  min_participants: number;
+  difficulty?: string;
+  rating: number;
+  schedule: string[];
+  includes: string[];
+  excludes: string[];
+  notes: string[];
+  gallery_images: string[];
 }
 
 export interface Accommodation {
   id: number;
   created_at: string;
-  name: string;
+  updated_at?: string;
+  name?: string;
+  title: string;
   description: string;
+  short_description: string;
   price_per_night: number;
   image_url: string;
-  location: string;
-  is_available: boolean;
-  category: string;
+  location?: string;
+  address: string;
+  is_available?: boolean;
+  category?: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  amenities: string[];
+  gallery_images: string[];
+  rating: number;
 }
 
 export interface Booking {

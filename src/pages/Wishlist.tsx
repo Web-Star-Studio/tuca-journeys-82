@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, X, ShoppingCart } from "lucide-react";
@@ -140,7 +139,7 @@ const Wishlist = () => {
                     />
                     <div className="absolute top-3 right-3 flex space-x-2">
                       <button
-                        onClick={() => removeFromWishlist(item.id, item.type)}
+                        onClick={() => removeFromWishlist(item.id)}
                         className="bg-white/90 hover:bg-white rounded-full p-1.5 text-gray-700 hover:text-red-500 transition-colors"
                         aria-label="Remover da lista de desejos"
                       >

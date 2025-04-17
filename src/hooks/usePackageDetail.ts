@@ -29,7 +29,7 @@ export const usePackageDetail = (id: string | undefined) => {
     if (!packageData) return;
 
     if (isInWishlist) {
-      removeFromWishlist(packageData.id, "package");
+      removeFromWishlist(packageData.id);
       toast({
         title: "Removido da lista de desejos",
         description: `${packageData.title} foi removido da sua lista de desejos.`,

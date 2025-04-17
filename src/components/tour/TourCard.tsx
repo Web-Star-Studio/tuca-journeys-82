@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,8 +20,8 @@ const TourCard = ({ tour }: TourCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isInWishlist(tour.id, 'tour')) {
-      removeFromWishlist(tour.id, 'tour');
+    if (isInWishlist(tour.id)) {
+      removeFromWishlist(tour.id);
     } else {
       addToWishlist({
         id: tour.id,
@@ -33,7 +32,7 @@ const TourCard = ({ tour }: TourCardProps) => {
     }
   };
 
-  const isWishlisted = isInWishlist(tour.id, 'tour');
+  const isWishlisted = isInWishlist(tour.id);
 
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">

@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Users, Star } from "lucide-react";
 import { Tour } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateBooking } from "@/hooks/use-bookings";
+import { useCreateBooking } from "@/hooks/use-create-booking";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 

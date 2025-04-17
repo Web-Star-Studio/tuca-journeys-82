@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,7 +8,7 @@ import ActivityAnalysis from "@/components/dashboard/ActivityAnalysis";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
-import { useBookings } from "@/hooks/use-bookings";
+import { useBookingsList } from "@/hooks/use-bookings-list";
 import { Booking } from "@/types/bookings";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +26,7 @@ const Dashboard = () => {
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
-  const { bookings: rawBookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
+  const { bookings: rawBookings, isLoading: bookingsLoading, error: bookingsError } = useBookingsList();
   
   // Show error toast if bookings fetch fails
   useEffect(() => {

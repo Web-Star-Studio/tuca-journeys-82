@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useBookings } from '@/hooks/use-bookings';
+import { useBookingDetails, useCancelBooking } from '@/hooks/use-bookings';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,8 @@ import BookingDetailError from '@/components/booking/BookingDetailError';
 const BookingDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { bookings, isLoading, error, cancelBooking, isCancelling } = useBookings();
-  
-  // Find the specific booking - compare id as string
-  const booking = bookings?.find(b => b.id === id);
+  const { booking, isLoading, error } = useBookingDetails(id);
+  const { cancelBooking, isCancelling } = useCancelBooking();
   
   // Handle cancellation request
   const handleCancelBooking = async () => {

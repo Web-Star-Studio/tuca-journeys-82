@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useBookings } from "@/hooks/use-bookings";
+import { useBookingsList } from "@/hooks/use-bookings-list";
 import BookingRow from "./BookingRow";
 import BookingsTableHeader from "./BookingsTableHeader";
 import BookingEmptyState from "./BookingEmptyState";
@@ -14,7 +14,7 @@ import { UIBooking } from "@/types";
  * Handles loading, error and empty states internally.
  */
 const BookingsTable: React.FC = () => {
-  const { bookings, isLoading, error } = useBookings();
+  const { bookings, isLoading, error } = useBookingsList();
 
   // Loading state
   if (isLoading) {

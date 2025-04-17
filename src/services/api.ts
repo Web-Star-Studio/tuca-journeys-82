@@ -20,9 +20,12 @@ import { Package } from '@/data/types/packageTypes';
  * @deprecated Use individual service modules instead
  */
 class ApiService {
+  // Add supabase instance
+  protected supabase = supabase;
+  
   // Tours
   async getTours(): Promise<Tour[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('tours')
       .select('*');
     
@@ -35,7 +38,7 @@ class ApiService {
   }
 
   async getTourById(id: number): Promise<Tour> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('tours')
       .select('*')
       .eq('id', id)
@@ -51,7 +54,7 @@ class ApiService {
 
   // Accommodations
   async getAccommodations(): Promise<Accommodation[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('accommodations')
       .select('*');
     
@@ -64,7 +67,7 @@ class ApiService {
   }
 
   async getAccommodationById(id: number): Promise<Accommodation> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('accommodations')
       .select('*')
       .eq('id', id)
@@ -80,7 +83,7 @@ class ApiService {
 
   // Bookings
   async getUserBookings(userId: string): Promise<UIBooking[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('bookings')
       .select(`
         *,
@@ -100,7 +103,7 @@ class ApiService {
   }
 
   async createBooking(bookingData: CreateBookingDTO): Promise<UIBooking> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('bookings')
       .insert([bookingData])
       .select()
@@ -122,7 +125,7 @@ class ApiService {
       throw new Error('Invalid booking ID format');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('bookings')
       .update({ status: 'cancelled' })
       .eq('id', numericBookingId)

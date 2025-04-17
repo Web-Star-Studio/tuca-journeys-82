@@ -103,10 +103,17 @@ class ApiService {
   }
 
   async cancelBooking(bookingId: string, userId: string): Promise<UIBooking> {
+    // Convert bookingId to number since the database expects a number
+    const numericBookingId = parseInt(bookingId, 10);
+    
+    if (isNaN(numericBookingId)) {
+      throw new Error('Invalid booking ID format');
+    }
+    
     const { data, error } = await supabase
       .from('bookings')
       .update({ status: 'cancelled' })
-      .eq('id', bookingId)
+      .eq('id', numericBookingId)
       .eq('user_id', userId)
       .select()
       .single();

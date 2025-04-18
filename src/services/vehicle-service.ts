@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Vehicle, VehicleBooking } from '@/types/vehicle';
 
@@ -19,7 +18,7 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Vehicle[];
   }
 
   /**
@@ -37,7 +36,7 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Vehicle;
   }
 
   /**
@@ -54,7 +53,7 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Vehicle[];
   }
 
   /**
@@ -72,7 +71,7 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Vehicle;
   }
 
   /**
@@ -91,7 +90,7 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Vehicle;
   }
 
   /**
@@ -124,7 +123,11 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return {
+      ...data,
+      status: data.status as VehicleBooking['status'],
+      payment_status: data.payment_status as VehicleBooking['payment_status']
+    } as VehicleBooking;
   }
 
   /**
@@ -145,7 +148,11 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data.map(booking => ({
+      ...booking,
+      status: booking.status as VehicleBooking['status'],
+      payment_status: booking.payment_status as VehicleBooking['payment_status']
+    })) as unknown as VehicleBooking[];
   }
 
   /**
@@ -166,7 +173,11 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data.map(booking => ({
+      ...booking,
+      status: booking.status as VehicleBooking['status'],
+      payment_status: booking.payment_status as VehicleBooking['payment_status']
+    })) as unknown as VehicleBooking[];
   }
 
   /**
@@ -176,8 +187,8 @@ export class VehicleService extends BaseApiService {
     const { data, error } = await this.supabase
       .from('vehicle_bookings')
       .update({ 
-        status: 'cancelled',
-        payment_status: 'refunded'
+        status: 'cancelled' as const,
+        payment_status: 'refunded' as const
       })
       .eq('id', bookingId)
       .select()
@@ -188,7 +199,11 @@ export class VehicleService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return {
+      ...data,
+      status: data.status as VehicleBooking['status'],
+      payment_status: data.payment_status as VehicleBooking['payment_status']
+    } as VehicleBooking;
   }
 }
 

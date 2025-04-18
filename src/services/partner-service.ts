@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Partner } from '@/types/partner';
 
@@ -19,8 +18,11 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    // Cast the response to the Partner type
-    return data as Partner[];
+    // Cast the response to the Partner type with type validation for business_type
+    return (data as any[]).map(partner => ({
+      ...partner,
+      business_type: partner.business_type as Partner['business_type']
+    })) as Partner[];
   }
 
   /**
@@ -38,8 +40,11 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    // Cast the response to the Partner type
-    return data as Partner;
+    // Cast the response to the Partner type with type validation
+    return {
+      ...data,
+      business_type: (data as any).business_type as Partner['business_type']
+    } as Partner;
   }
 
   /**
@@ -58,13 +63,16 @@ export class PartnerService extends BaseApiService {
     }
     
     // Cast the response to the Partner type
-    return data as Partner | null;
+    return data ? {
+      ...data,
+      business_type: (data as any).business_type as Partner['business_type']
+    } as Partner : null;
   }
 
   /**
    * Create a new partner
    */
-  async createPartner(partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {
+  async createPartner(partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'is_active' | 'user_id'>): Promise<Partner> {
     const { data, error } = await this.supabase
       .from('partners')
       .insert([partnerData])
@@ -77,7 +85,10 @@ export class PartnerService extends BaseApiService {
     }
     
     // Cast the response to the Partner type
-    return data as Partner;
+    return {
+      ...data,
+      business_type: (data as any).business_type as Partner['business_type']
+    } as Partner;
   }
 
   /**
@@ -97,7 +108,10 @@ export class PartnerService extends BaseApiService {
     }
     
     // Cast the response to the Partner type
-    return data as Partner;
+    return {
+      ...data,
+      business_type: (data as any).business_type as Partner['business_type']
+    } as Partner;
   }
 
   /**

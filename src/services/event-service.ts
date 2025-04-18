@@ -124,7 +124,11 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data as EventBooking;
+    return {
+      ...data,
+      status: data.status as EventBooking['status'],
+      payment_status: data.payment_status as EventBooking['payment_status']
+    } as EventBooking;
   }
 
   /**
@@ -145,7 +149,11 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data as unknown as EventBooking[];
+    return data.map(booking => ({
+      ...booking,
+      status: booking.status as EventBooking['status'],
+      payment_status: booking.payment_status as EventBooking['payment_status']
+    })) as unknown as EventBooking[];
   }
 
   /**
@@ -166,7 +174,11 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data as unknown as EventBooking[];
+    return data.map(booking => ({
+      ...booking,
+      status: booking.status as EventBooking['status'],
+      payment_status: booking.payment_status as EventBooking['payment_status']
+    })) as unknown as EventBooking[];
   }
 
   /**

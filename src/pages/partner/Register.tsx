@@ -56,6 +56,7 @@ const PartnerRegister = () => {
     setIsSubmitting(true);
     try {
       await createPartner.mutateAsync({
+        user_id: user.id,
         business_name: data.business_name,
         business_type: data.business_type,
         description: data.description,
@@ -63,6 +64,8 @@ const PartnerRegister = () => {
         contact_phone: data.contact_phone,
         website: data.website,
         address: data.address,
+        is_verified: false,
+        is_active: true
       });
       
       toast.success("Cadastro de parceiro realizado com sucesso!");

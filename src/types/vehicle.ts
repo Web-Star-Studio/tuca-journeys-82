@@ -1,20 +1,20 @@
 
 export interface Vehicle {
   id: number;
-  partner_id: string;
   name: string;
+  type: string;
   description: string;
   short_description: string;
-  type: string;
-  price_per_day: number;
   image_url: string;
-  gallery_images: string[];
+  gallery_images?: string[];
+  price_per_day: number;
+  features?: string[];
   available_quantity: number;
-  features: string[];
   is_available: boolean;
-  rating: number;
-  created_at: string;
-  updated_at: string;
+  rating?: number;
+  created_at?: string;
+  updated_at?: string;
+  partner_id?: string;
 }
 
 export interface VehicleBooking {
@@ -25,10 +25,10 @@ export interface VehicleBooking {
   end_date: string;
   guests: number;
   total_price: number;
+  special_requests?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'refunded';
   payment_method?: string;
-  special_requests?: string;
   created_at: string;
   updated_at: string;
 }

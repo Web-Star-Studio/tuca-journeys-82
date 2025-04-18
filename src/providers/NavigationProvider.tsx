@@ -1,43 +1,48 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-// Create a local navigation context instead of importing from AuthContext
-export const NavigationContext = createContext<{
-  navigateToLogin: () => void;
-}>({
-  navigateToLogin: () => {},
+type NavigationContextType = {
+  previousPath: string | null;
+  setPreviousPath: (path: string) => void;
+  isMaintenanceModeActive: boolean;
+  toggleMaintenanceMode: () => void;
+};
+
+const NavigationContext = createContext<NavigationContextType>({
+  previousPath: null,
+  setPreviousPath: () => {},
+  isMaintenanceModeActive: false,
+  toggleMaintenanceMode: () => {},
 });
 
-export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const navigate = useNavigate();
+export const useNavigation = () => useContext(NavigationContext);
 
-  const navigateToLogin = () => {
-    navigate('/login');
+export const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
+  const [previousPath, setPreviousPath] = useState<string | null>(null);
+  const [isMaintenanceModeActive, setIsMaintenanceModeActive] = useState(false);
+  const location = useLocation();
+
+  const toggleMaintenanceMode = () => {
+    setIsMaintenanceModeActive(!isMaintenanceModeActive);
   };
 
-  const contextValue = {
-    navigateToLogin,
-  };
+  React.useEffect(() => {
+    setPreviousPath(location.pathname);
+  }, [location]);
 
   return (
-    <NavigationContext.Provider value={contextValue}>
+    <NavigationContext.Provider
+      value={{
+        previousPath,
+        setPreviousPath,
+        isMaintenanceModeActive,
+        toggleMaintenanceMode,
+      }}
+    >
       {children}
     </NavigationContext.Provider>
   );
 };
 
-export const useNavigation = () => {
-  const context = useContext(NavigationContext);
-
-  if (!context) {
-    throw new Error('useNavigation must be used within a NavigationProvider');
-  }
-
-  return context;
-};
-
-// Add default export
 export default NavigationProvider;

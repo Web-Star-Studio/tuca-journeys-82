@@ -119,10 +119,11 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     end_date: data.end_date,
     number_of_guests: data.guests, // Map from guests to number_of_guests
     total_price: data.total_price,
-    status: data.status,
+    status: data.status as 'pending' | 'confirmed' | 'cancelled',
     notes: data.special_requests || undefined,
     created_at: data.created_at,
-    updated_at: data.updated_at
+    updated_at: data.updated_at,
+    payment_method: data.payment_method
   };
   
   return responseBooking;
@@ -155,12 +156,13 @@ export const getUserBookings = async (userId: string) => {
     end_date: dbBooking.end_date,
     number_of_guests: dbBooking.guests, // Map from guests to number_of_guests
     total_price: dbBooking.total_price,
-    status: dbBooking.status,
+    status: dbBooking.status as 'pending' | 'confirmed' | 'cancelled',
     notes: dbBooking.special_requests || undefined,
     created_at: dbBooking.created_at,
     updated_at: dbBooking.updated_at,
     tours: dbBooking.tours,
-    accommodations: dbBooking.accommodations
+    accommodations: dbBooking.accommodations,
+    payment_method: dbBooking.payment_method
   }));
   
   return bookings;

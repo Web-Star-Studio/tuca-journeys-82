@@ -65,7 +65,6 @@ const getMockBookingsData = (): UIBooking[] => {
       start_date: new Date(Date.now() + 86400000 * 5).toISOString(), // 5 days from now
       end_date: new Date(Date.now() + 86400000 * 5).toISOString(),
       guests: 2,
-      number_of_guests: 2,
       total_price: 350,
       status: 'confirmed',
       payment_status: 'paid',
@@ -85,7 +84,6 @@ const getMockBookingsData = (): UIBooking[] => {
       start_date: new Date(Date.now() + 86400000 * 15).toISOString(), // 15 days from now
       end_date: new Date(Date.now() + 86400000 * 20).toISOString(), // 5 day stay
       guests: 2,
-      number_of_guests: 2,
       total_price: 1250,
       status: 'pending',
       payment_status: 'pending',
@@ -105,7 +103,6 @@ const getMockBookingsData = (): UIBooking[] => {
       start_date: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
       end_date: new Date(Date.now() - 86400000 * 10).toISOString(),
       guests: 1,
-      number_of_guests: 1,
       total_price: 120,
       status: 'cancelled',
       payment_status: 'refunded',

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 const DEMO_ACCOUNTS = [
   { email: "user@example.com", password: "password", label: "Entrar como Usuário Demo" },
   { email: "admin@tucanoronha.com", password: "admin123456", label: "Entrar como Admin Demo" },
+  { email: "partner@demo.com", password: "partner123", label: "Entrar como Parceiro Demo" },
   { email: "felipe@webstar.studio", password: "Client@123", label: "Entrar como Admin Felipe" }
 ];
 
@@ -22,7 +23,13 @@ const QuickAccessButtons = () => {
       await signIn(email, password);
       toast({
         title: "Login de demonstração",
-        description: `Você está acessando como ${email.includes("admin") || email === "felipe@webstar.studio" ? "administrador" : "usuário"} demo.`,
+        description: `Você está acessando como ${
+          email.includes("admin") || email === "felipe@webstar.studio"
+            ? "administrador"
+            : email.includes("partner")
+            ? "parceiro"
+            : "usuário"
+        } demo.`,
       });
     } catch (error: any) {
       console.error("Demo login error:", error);

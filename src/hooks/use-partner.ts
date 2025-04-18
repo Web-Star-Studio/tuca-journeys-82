@@ -37,12 +37,11 @@ export const useCreatePartner = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (partnerData: Omit<Partner, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_verified' | 'is_active'>) => {
+    mutationFn: (partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'is_active' | 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
       
       return partnerService.createPartner({
         ...partnerData,
-        user_id: user.id,
         is_verified: false,
         is_active: true
       });

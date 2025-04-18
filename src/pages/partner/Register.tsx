@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,7 +55,6 @@ const PartnerRegister = () => {
     setIsSubmitting(true);
     try {
       await createPartner.mutateAsync({
-        user_id: user.id,
         business_name: data.business_name,
         business_type: data.business_type,
         description: data.description,

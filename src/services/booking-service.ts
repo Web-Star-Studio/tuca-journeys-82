@@ -11,6 +11,11 @@ export class BookingService extends BaseApiService {
    * Get all bookings for a user
    */
   async getUserBookings(userId: string): Promise<UIBooking[]> {
+    // Check if this is a demo user - if so, this should be handled by the hook
+    if (userId.startsWith('demo-')) {
+      throw new Error('Demo users should be handled at the hook level');
+    }
+
     const { data, error } = await this.supabase
       .from('bookings')
       .select(`
@@ -34,6 +39,11 @@ export class BookingService extends BaseApiService {
    * Create a new booking
    */
   async createBooking(bookingData: CreateBookingDTO): Promise<UIBooking> {
+    // Check if this is a demo user - if so, return mock data
+    if (bookingData.user_id.startsWith('demo-')) {
+      return this.createMockBooking(bookingData);
+    }
+
     const { data, error } = await this.supabase
       .from('bookings')
       .insert([bookingData])
@@ -52,6 +62,11 @@ export class BookingService extends BaseApiService {
    * Cancel a booking
    */
   async cancelBooking(bookingId: string, userId: string): Promise<UIBooking> {
+    // Check if this is a demo booking - if so, return mock data
+    if (bookingId.startsWith('demo-') || userId.startsWith('demo-')) {
+      return this.cancelMockBooking(bookingId);
+    }
+    
     // Convert bookingId to number since the database expects a number
     const numericBookingId = parseInt(bookingId, 10);
     
@@ -89,6 +104,7 @@ export class BookingService extends BaseApiService {
       start_date: bookingDB.start_date,
       end_date: bookingDB.end_date,
       guests: bookingDB.guests,
+      number_of_guests: bookingDB.guests,
       total_price: bookingDB.total_price,
       status: bookingDB.status as 'confirmed' | 'pending' | 'cancelled',
       payment_status: bookingDB.payment_status as 'paid' | 'pending' | 'refunded',
@@ -100,6 +116,61 @@ export class BookingService extends BaseApiService {
       accommodation_id: bookingDB.accommodation_id,
       tours: bookingDB.tours,
       accommodations: bookingDB.accommodations
+    };
+  }
+
+  /**
+   * Create a mock booking for demo users
+   */
+  private createMockBooking(bookingData: CreateBookingDTO): UIBooking {
+    const mockId = `demo-${Date.now()}`;
+    const now = new Date().toISOString();
+    
+    return {
+      id: mockId,
+      user_id: bookingData.user_id,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      item_type: bookingData.tour_id ? 'tour' : bookingData.accommodation_id ? 'accommodation' : 'package',
+      item_name: "Demo Booking",
+      start_date: bookingData.start_date,
+      end_date: bookingData.end_date,
+      guests: bookingData.guests,
+      number_of_guests: bookingData.guests,
+      total_price: bookingData.total_price,
+      status: bookingData.status as 'confirmed' | 'pending' | 'cancelled',
+      payment_status: bookingData.payment_status as 'paid' | 'pending' | 'refunded',
+      payment_method: bookingData.payment_method || undefined,
+      special_requests: bookingData.special_requests,
+      created_at: now,
+      updated_at: now,
+      tour_id: bookingData.tour_id,
+      accommodation_id: bookingData.accommodation_id
+    };
+  }
+
+  /**
+   * Cancel a mock booking for demo users
+   */
+  private cancelMockBooking(bookingId: string): UIBooking {
+    return {
+      id: bookingId,
+      user_id: "demo-user",
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      item_type: "tour",
+      item_name: "Demo Booking",
+      start_date: new Date().toISOString(),
+      end_date: new Date().toISOString(),
+      guests: 2,
+      number_of_guests: 2,
+      total_price: 100,
+      status: 'cancelled',
+      payment_status: 'refunded',
+      payment_method: "credit_card",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      tour_id: 1
     };
   }
 }

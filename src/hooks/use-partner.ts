@@ -37,13 +37,19 @@ export const useCreatePartner = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    mutationFn: (partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_verified' | 'is_active'>) => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      return partnerService.createPartner({
+      // Create the full partner data to pass to the service
+      const fullPartnerData = {
         ...partnerData,
-        user_id: user.id
-      });
+        user_id: user.id,
+        is_verified: false,
+        is_active: true
+      };
+      
+      // Pass this data to the partner service
+      return partnerService.createPartner(fullPartnerData);
     },
     onSuccess: () => {
       toast.success('Perfil de parceiro criado com sucesso!');

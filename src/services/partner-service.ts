@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Partner } from '@/types/partner';
 
@@ -72,7 +73,7 @@ export class PartnerService extends BaseApiService {
   /**
    * Create a new partner
    */
-  async createPartner(partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'is_active' | 'user_id'>): Promise<Partner> {
+  async createPartner(partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {
     const { data, error } = await this.supabase
       .from('partners')
       .insert([partnerData])

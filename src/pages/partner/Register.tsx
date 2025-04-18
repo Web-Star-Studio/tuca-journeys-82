@@ -54,6 +54,7 @@ const PartnerRegister = () => {
 
     setIsSubmitting(true);
     try {
+      // This is where the mutation happens
       await createPartner.mutateAsync({
         business_name: data.business_name,
         business_type: data.business_type,
@@ -62,8 +63,6 @@ const PartnerRegister = () => {
         contact_phone: data.contact_phone,
         website: data.website,
         address: data.address,
-        is_verified: false,
-        is_active: true
       });
       
       toast.success("Cadastro de parceiro realizado com sucesso!");

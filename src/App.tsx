@@ -7,6 +7,7 @@ import { CartProvider } from './contexts/CartContext';
 import { publicRoutes } from './routes/publicRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { adminRoutes } from './routes/adminRoutes';
+import { partnerRoutes } from './routes/partnerRoutes';
 import ScrollToTop from './components/utils/ScrollToTop';
 import GlobalLoading from './components/utils/GlobalLoading';
 
@@ -20,6 +21,7 @@ const App: React.FC = () => {
             {publicRoutes}
             {protectedRoutes}
             {adminRoutes}
+            {partnerRoutes}
           </Routes>
         </Suspense>
         <Toaster position="top-center" richColors closeButton />

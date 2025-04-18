@@ -1,5 +1,5 @@
-
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -13,11 +13,20 @@ import { useBookingsList } from "@/hooks/use-bookings-list";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-  // Use the auth redirect hook to protect this page
-  const { isLoading: authLoading, user } = useAuthRedirect({
+  const navigate = useNavigate();
+  const { isLoading: authLoading, user, isAdmin } = useAuthRedirect({
     requiredAuth: true
   });
   
+  // Redirect admins and partners to their respective dashboards
+  useEffect(() => {
+    if (user?.user_metadata?.role === 'admin' || user?.app_metadata?.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user?.user_metadata?.role === 'partner' || user?.app_metadata?.role === 'partner') {
+      navigate('/parceiro/dashboard');
+    }
+  }, [user, navigate]);
+
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
   const { bookings = [], isLoading: bookingsLoading, error: bookingsError } = useBookingsList();
@@ -79,7 +88,7 @@ const Dashboard = () => {
     return metrics;
   };
 
-  const isLoading = authLoading || profileLoading || bookingsLoading;
+  const isLoading = authLoading;
   const userMetrics = calculateUserMetrics();
   
   // Generate personalized recommendations based on user behavior and preferences
@@ -100,8 +109,9 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) {
-    return null; // Will be redirected by useAuthRedirect
+  // Only render if the user is a regular user (not admin or partner)
+  if (!user || user?.user_metadata?.role === 'admin' || user?.user_metadata?.role === 'partner') {
+    return null;
   }
 
   return (

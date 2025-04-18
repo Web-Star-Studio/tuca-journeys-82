@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,31 +6,34 @@ import { Loader2 } from "lucide-react";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const Login = () => {
-  // Use the hook without the invalid prop
-  const { isLoading: authRedirectLoading, isAuthenticated } = useAuthRedirect();
-  
+  const { isLoading: authRedirectLoading, isAuthenticated, user } = useAuthRedirect();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
-  // Redirect authenticated users away from login page
   useEffect(() => {
-    if (!authRedirectLoading && isAuthenticated) {
-      navigate('/dashboard');
+    if (!authRedirectLoading && isAuthenticated && user) {
+      const isAdmin = user.user_metadata?.role === 'admin' || user.app_metadata?.role === 'admin';
+      const isPartner = user.user_metadata?.role === 'partner' || user.app_metadata?.role === 'partner';
+      
+      if (isAdmin) {
+        navigate('/admin/dashboard');
+      } else if (isPartner) {
+        navigate('/parceiro/dashboard');
+      } else {
+        navigate(returnTo);
+      }
     }
-  }, [authRedirectLoading, isAuthenticated, navigate]);
-  
-  // Handle successful login
+  }, [authRedirectLoading, isAuthenticated, user, navigate, returnTo]);
+
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
     setIsRedirecting(true);
     if (redirectToAdmin) {
       navigate("/admin");
     } else {
-      // Use the returnTo query param or default to dashboard
       navigate(returnTo);
     }
   };

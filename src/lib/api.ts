@@ -1,7 +1,9 @@
-
 import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
 import { Package } from '@/data/types/packageTypes';
+import { Partner } from '@/types/partner';
+import { Vehicle } from '@/types/vehicle';
+import { Event } from '@/types/event';
 
 // Tours API
 export const getToursFromDB = async () => {
@@ -76,6 +78,99 @@ export const getAccommodationByIdFromDB = async (id: number) => {
   }
   
   return data as Accommodation;
+};
+
+// Partners API
+export const getPartnersFromDB = async () => {
+  console.log("Fetching all partners");
+  const { data, error } = await supabase
+    .from('partners')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching partners:', error);
+    throw error;
+  }
+  
+  return data as Partner[];
+};
+
+export const getPartnerByIdFromDB = async (id: string) => {
+  console.log(`Fetching partner with ID: ${id}`);
+  const { data, error } = await supabase
+    .from('partners')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching partner ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Partner;
+};
+
+// Vehicles API
+export const getVehiclesFromDB = async () => {
+  console.log("Fetching all vehicles");
+  const { data, error } = await supabase
+    .from('vehicles')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching vehicles:', error);
+    throw error;
+  }
+  
+  return data as Vehicle[];
+};
+
+export const getVehicleByIdFromDB = async (id: number) => {
+  console.log(`Fetching vehicle with ID: ${id}`);
+  const { data, error } = await supabase
+    .from('vehicles')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching vehicle ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Vehicle;
+};
+
+// Events API
+export const getEventsFromDB = async () => {
+  console.log("Fetching all events");
+  const { data, error } = await supabase
+    .from('events')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
+  
+  return data as Event[];
+};
+
+export const getEventByIdFromDB = async (id: number) => {
+  console.log(`Fetching event with ID: ${id}`);
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching event ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Event;
 };
 
 // Bookings API
@@ -250,5 +345,51 @@ export const hasRole = async (userId: string, roleName: string): Promise<boolean
   } catch (error) {
     console.error('Error checking user role:', error);
     return false;
+  }
+};
+
+// Check if user is a partner
+export const isUserPartner = async (userId: string): Promise<boolean> => {
+  if (!userId) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the error for "no rows returned"
+      console.error('Error checking if user is partner:', error);
+      throw error;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking if user is partner:', error);
+    return false;
+  }
+};
+
+// Get user partner profile
+export const getUserPartnerProfile = async (userId: string): Promise<Partner | null> => {
+  if (!userId) return null;
+  
+  try {
+    const { data, error } = await supabase
+      .from('partners')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the error for "no rows returned"
+      console.error('Error fetching user partner profile:', error);
+      throw error;
+    }
+    
+    return data as Partner | null;
+  } catch (error) {
+    console.error('Error fetching user partner profile:', error);
+    return null;
   }
 };

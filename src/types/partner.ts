@@ -1,4 +1,22 @@
 
+export interface Partner {
+  id: string;
+  user_id: string;
+  business_name: string;
+  business_type: 'accommodation' | 'tour' | 'vehicle' | 'event' | 'product' | 'restaurant' | 'service';
+  description?: string;
+  logo_url?: string;
+  cover_image?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  website?: string;
+  address?: string;
+  is_verified: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DiscountCode {
   id: number;
   code: string;
@@ -8,16 +26,4 @@ export interface DiscountCode {
   max_uses?: number;
   current_uses: number;
   description: string;
-}
-
-export interface Partner {
-  id: number;
-  name: string;
-  description: string;
-  logo_url: string;
-  website: string;
-  category: string;
-  address?: string;
-  featured?: boolean;
-  discount_codes: DiscountCode[];
 }

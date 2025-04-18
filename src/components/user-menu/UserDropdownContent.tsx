@@ -1,110 +1,111 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { User } from "@supabase/supabase-js";
-import {
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  User as UserIcon,
-  Settings,
-  CreditCard,
-  Heart,
-  LogOut,
-  LayoutDashboard,
-  CalendarDays,
-  ShoppingBag,
-  Ticket,
-  BadgePercent,
-  Bell,
-  FileText,
-  LucideIcon
-} from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, LogOut, Settings, UserCircle, Heart, Package } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { isUserPartner } from '@/lib/api';
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
-interface UserDropdownItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  onClick?: () => void;
-}
-
-interface UserDropdownContentProps {
-  user: User;
-  onSignOut: () => Promise<void>;
-}
-
-const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
+export const UserDropdownContent = ({ closeDropdown }: { closeDropdown: () => void }) => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
-  
-  const menuItems: UserDropdownItem[] = [
-    { label: "Meu Painel", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Meu Perfil", href: "/profile", icon: UserIcon },
-    { label: "Minhas Reservas", href: "/bookings", icon: CalendarDays },
-    { label: "Minhas Compras", href: "/orders", icon: ShoppingBag },
-    { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
-    { label: "Documentos de Viagem", href: "/profile?tab=documents", icon: FileText },
-    { label: "Cupons e Descontos", href: "/cupons", icon: Ticket },
-    { label: "Programa de Pontos", href: "/pontos", icon: BadgePercent },
-    { label: "Notificações", href: "/notificacoes", icon: Bell },
-    { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
-    { label: "Configurações", href: "/configuracoes", icon: Settings },
-  ];
-  
-  // Add admin dashboard link for admin users
-  if (isAdmin) {
-    menuItems.unshift({ label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard });
-  }
 
-  const handleNavigation = (href: string) => {
-    navigate(href);
-  };
+  const { data: isPartner } = useQuery({
+    queryKey: ['isPartner', user?.id],
+    queryFn: () => user?.id ? isUserPartner(user.id) : false,
+    enabled: !!user?.id,
+  });
 
-  const handleSignOut = async () => {
-    await onSignOut();
-  };
-
-  const truncateEmail = (email: string) => {
-    if (!email) return "";
-    if (email.length <= 20) return email;
-    return email.substring(0, 17) + "...";
+  const handleLogout = async () => {
+    closeDropdown();
+    try {
+      await logout();
+      toast.success('Logout realizado com sucesso');
+      navigate('/');
+    } catch (error) {
+      toast.error('Erro ao fazer logout');
+    }
   };
 
   return (
-    <DropdownMenuContent className="w-56" align="end" forceMount>
-      <DropdownMenuLabel className="font-normal">
-        <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">{user?.user_metadata?.name || "Usuário"}</p>
-          <p className="text-xs leading-none text-muted-foreground">
-            {truncateEmail(user?.email || "")}
-          </p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup className="max-h-[400px] overflow-y-auto">
-        {menuItems.map((item, index) => (
-          <DropdownMenuItem
-            key={index}
-            className="cursor-pointer"
-            onClick={() => item.onClick ? item.onClick() : handleNavigation(item.href)}
+    <div className="py-2">
+      <div className="px-4 py-3">
+        <p className="text-sm">Logado como</p>
+        <p className="text-sm font-medium truncate">{user?.email}</p>
+      </div>
+      
+      <div className="border-t border-gray-200"></div>
+      
+      <div className="flex flex-col px-1 py-1">
+        <Link 
+          to="/perfil" 
+          onClick={closeDropdown}
+          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+        >
+          <UserCircle className="w-4 h-4 mr-2" />
+          Meu Perfil
+        </Link>
+        
+        <Link 
+          to="/reservas" 
+          onClick={closeDropdown}
+          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+        >
+          <Package className="w-4 h-4 mr-2" />
+          Minhas Reservas
+        </Link>
+        
+        <Link 
+          to="/wishlist" 
+          onClick={closeDropdown}
+          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+        >
+          <Heart className="w-4 h-4 mr-2" />
+          Favoritos
+        </Link>
+        
+        <Link 
+          to="/dashboard" 
+          onClick={closeDropdown}
+          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+        >
+          <Settings className="w-4 h-4 mr-2" />
+          Dashboard
+        </Link>
+
+        {isPartner ? (
+          <Link 
+            to="/parceiro/dashboard" 
+            onClick={closeDropdown}
+            className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
           >
-            <item.icon className="mr-2 h-4 w-4" />
-            <span>{item.label}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
-        <LogOut className="mr-2 h-4 w-4" />
-        <span>Sair</span>
-      </DropdownMenuItem>
-    </DropdownMenuContent>
+            <User className="w-4 h-4 mr-2" />
+            Área do Parceiro
+          </Link>
+        ) : (
+          <Link 
+            to="/parceiro/cadastro" 
+            onClick={closeDropdown}
+            className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+          >
+            <User className="w-4 h-4 mr-2" />
+            Seja um Parceiro
+          </Link>
+        )}
+      </div>
+      
+      <div className="border-t border-gray-200"></div>
+      
+      <div className="px-1 py-1">
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center px-3 py-2 text-sm rounded-md hover:bg-gray-100 text-red-600"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sair
+        </button>
+      </div>
+    </div>
   );
 };
-
-export default UserDropdownContent;

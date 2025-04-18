@@ -38,3 +38,6 @@ export const useNavigation = () => {
 
   return context;
 };
+
+// Add default export
+export default NavigationProvider;

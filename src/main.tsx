@@ -8,7 +8,7 @@ import { adminRoutes } from './routes/adminRoutes'
 import { partnerRoutes } from './routes/partnerRoutes'
 
 import { Toaster } from '@/components/ui/sonner'
-import QueryProvider from './providers/QueryProvider'
+import { QueryProvider } from './providers/QueryProvider'
 import NavigationProvider from './providers/NavigationProvider'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { CartProvider } from './contexts/CartContext'
@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   ...publicRoutes,
   ...protectedRoutes,
   ...adminRoutes,
-  ...partnerRoutes, // Add partner routes
+  ...partnerRoutes,
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

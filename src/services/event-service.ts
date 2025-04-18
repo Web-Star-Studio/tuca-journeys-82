@@ -19,7 +19,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Event[];
   }
 
   /**
@@ -37,7 +37,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Event;
   }
 
   /**
@@ -54,7 +54,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Event[];
   }
 
   /**
@@ -72,7 +72,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Event;
   }
 
   /**
@@ -91,7 +91,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as Event;
   }
 
   /**
@@ -124,7 +124,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as EventBooking;
   }
 
   /**
@@ -145,7 +145,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as unknown as EventBooking[];
   }
 
   /**
@@ -166,7 +166,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as unknown as EventBooking[];
   }
 
   /**
@@ -176,8 +176,8 @@ export class EventService extends BaseApiService {
     const { data, error } = await this.supabase
       .from('event_bookings')
       .update({ 
-        status: 'cancelled',
-        payment_status: 'refunded'
+        status: 'cancelled' as const,
+        payment_status: 'refunded' as const
       })
       .eq('id', bookingId)
       .select()
@@ -188,7 +188,7 @@ export class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as EventBooking;
   }
 }
 

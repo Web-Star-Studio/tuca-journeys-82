@@ -15,6 +15,11 @@ export interface Partner {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Additional properties used in components
+  name?: string; // For backward compatibility
+  category?: string; // For backward compatibility
+  featured?: boolean; // For backward compatibility
+  discount_codes?: DiscountCode[]; // For backward compatibility
 }
 
 export interface DiscountCode {

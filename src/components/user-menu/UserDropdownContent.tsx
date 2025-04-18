@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 
 export const UserDropdownContent = ({ closeDropdown }: { closeDropdown: () => void }) => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();  // Using signOut instead of logout
   const navigate = useNavigate();
 
   const { data: isPartner } = useQuery({
@@ -20,7 +20,7 @@ export const UserDropdownContent = ({ closeDropdown }: { closeDropdown: () => vo
   const handleLogout = async () => {
     closeDropdown();
     try {
-      await logout();
+      await signOut?.(); // Using optional chaining since signOut might be undefined
       toast.success('Logout realizado com sucesso');
       navigate('/');
     } catch (error) {

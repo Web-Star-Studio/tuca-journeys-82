@@ -16,6 +16,9 @@ export interface Event {
   available_spots: number;
   category: string;
   is_featured?: boolean;
+  featured?: boolean; // Added for backward compatibility
+  status?: 'scheduled' | 'ongoing' | 'completed' | 'cancelled'; // Added to match implementation
+  organizer?: string; // Added to match implementation
   created_at?: string;
   updated_at?: string;
 }

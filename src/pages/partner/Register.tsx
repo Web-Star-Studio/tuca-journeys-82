@@ -1,280 +1,226 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCreatePartner } from "@/hooks/use-partner";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCreatePartner } from '@/hooks/use-partner';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { toast } from 'sonner';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const partnerFormSchema = z.object({
-  business_name: z.string().min(3, {
-    message: "Nome do negócio deve ter pelo menos 3 caracteres",
-  }),
-  business_type: z.enum(['accommodation', 'tour', 'vehicle', 'event', 'product', 'restaurant', 'service'], {
-    required_error: "Selecione o tipo de negócio",
-  }),
-  description: z.string().min(20, {
-    message: "Descrição deve ter pelo menos 20 caracteres",
-  }),
-  contact_email: z.string().email({
-    message: "Email inválido",
-  }),
-  contact_phone: z.string().min(10, {
-    message: "Telefone deve ter pelo menos 10 dígitos",
-  }),
-  address: z.string().min(5, {
-    message: "Endereço deve ter pelo menos 5 caracteres",
-  }),
-  website: z.string().url({
-    message: "URL inválida",
-  }).optional().or(z.literal('')),
+  business_name: z.string().min(3, "Nome do negócio deve ter pelo menos 3 caracteres"),
+  business_type: z.enum(['accommodation', 'tour', 'vehicle', 'event', 'product', 'restaurant', 'service']),
+  description: z.string().min(10, "Descrição deve ter pelo menos 10 caracteres"),
+  contact_email: z.string().email("Email inválido").optional(),
+  contact_phone: z.string().optional(),
+  website: z.string().url("URL inválida").optional(),
+  address: z.string().optional(),
 });
 
 type PartnerFormValues = z.infer<typeof partnerFormSchema>;
 
-const PartnerRegister: React.FC = () => {
+const PartnerRegister = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
-  const { mutate: createPartner, isPending } = useCreatePartner();
+  const createPartner = useCreatePartner();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerFormSchema),
     defaultValues: {
-      business_name: "",
-      business_type: undefined,
-      description: "",
-      contact_email: user?.email || "",
-      contact_phone: "",
-      address: "",
-      website: "",
+      business_name: '',
+      business_type: 'accommodation',
+      description: '',
+      contact_email: user?.email || '',
+      contact_phone: '',
+      website: '',
+      address: '',
     },
   });
 
-  React.useEffect(() => {
-    if (!authLoading && !user) {
+  const onSubmit = async (data: PartnerFormValues) => {
+    if (!user) {
       toast.error("Você precisa estar logado para se cadastrar como parceiro");
-      navigate("/login?redirectTo=/parceiro/cadastro");
+      return;
     }
-  }, [user, authLoading, navigate]);
 
-  const onSubmit = (data: PartnerFormValues) => {
-    createPartner(data, {
-      onSuccess: () => {
-        navigate("/parceiro/dashboard");
-      },
-    });
+    setIsSubmitting(true);
+    try {
+      await createPartner.mutateAsync({
+        business_name: data.business_name,
+        business_type: data.business_type,
+        description: data.description,
+        contact_email: data.contact_email,
+        contact_phone: data.contact_phone,
+        website: data.website,
+        address: data.address,
+      });
+      
+      toast.success("Cadastro de parceiro realizado com sucesso!");
+      navigate('/parceiro/dashboard');
+    } catch (error) {
+      console.error("Error creating partner:", error);
+      toast.error("Erro ao criar perfil de parceiro. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow py-20 md:py-32 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-medium mb-6 text-center">Cadastre-se como Parceiro</h1>
-            <p className="text-gray-500 mb-8 text-center">
-              Junte-se à Tuca Noronha e expanda seu negócio em Fernando de Noronha.
-              Cadastre-se como parceiro para oferecer seus serviços em nossa plataforma.
-            </p>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações do Negócio</CardTitle>
-                <CardDescription>
-                  Forneça as informações do seu negócio para análise e aprovação.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="business_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome do Negócio</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nome do seu negócio" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            O nome oficial do seu negócio.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="business_type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Negócio</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o tipo de negócio" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="accommodation">Hospedagem</SelectItem>
-                              <SelectItem value="tour">Passeio</SelectItem>
-                              <SelectItem value="vehicle">Veículo</SelectItem>
-                              <SelectItem value="event">Evento</SelectItem>
-                              <SelectItem value="product">Produto</SelectItem>
-                              <SelectItem value="restaurant">Restaurante</SelectItem>
-                              <SelectItem value="service">Serviço</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            Selecione o tipo principal do seu negócio.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Descreva seu negócio"
-                              className="min-h-[120px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Uma descrição detalhada do seu negócio ou serviço.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="contact_email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email de Contato</FormLabel>
-                            <FormControl>
-                              <Input placeholder="email@exemplo.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="contact_phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Telefone de Contato</FormLabel>
-                            <FormControl>
-                              <Input placeholder="(81) 99999-9999" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Endereço</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Endereço do negócio em Fernando de Noronha" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="website"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Website (opcional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://www.exemplo.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="pt-4">
-                      <Button 
-                        type="submit" 
-                        className="w-full"
-                        disabled={isPending}
-                      >
-                        {isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            Enviar Cadastro
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+      
+      <main className="flex-grow pt-24 pb-16 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <h1 className="text-3xl font-bold mb-8 text-center">Torne-se um Parceiro</h1>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Cadastro de Parceiro</CardTitle>
+              <CardDescription>
+                Preencha as informações abaixo para se cadastrar como parceiro da plataforma Tuca Noronha.
+              </CardDescription>
+            </CardHeader>
+            
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="business_name">Nome do Negócio *</Label>
+                  <Input
+                    id="business_name"
+                    {...form.register("business_name")}
+                    placeholder="Nome da sua empresa ou estabelecimento"
+                  />
+                  {form.formState.errors.business_name && (
+                    <p className="text-sm text-red-500">{form.formState.errors.business_name.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="business_type">Tipo de Negócio *</Label>
+                  <Select
+                    defaultValue={form.getValues("business_type")}
+                    onValueChange={(value) => form.setValue("business_type", value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de negócio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="accommodation">Hospedagem</SelectItem>
+                      <SelectItem value="tour">Passeio/Tour</SelectItem>
+                      <SelectItem value="vehicle">Veículo/Transporte</SelectItem>
+                      <SelectItem value="event">Evento</SelectItem>
+                      <SelectItem value="product">Produto</SelectItem>
+                      <SelectItem value="restaurant">Restaurante</SelectItem>
+                      <SelectItem value="service">Serviço</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.business_type && (
+                    <p className="text-sm text-red-500">{form.formState.errors.business_type.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição do Negócio *</Label>
+                  <Textarea
+                    id="description"
+                    {...form.register("description")}
+                    placeholder="Descreva seu negócio, produtos ou serviços"
+                    rows={4}
+                  />
+                  {form.formState.errors.description && (
+                    <p className="text-sm text-red-500">{form.formState.errors.description.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="contact_email">Email de Contato</Label>
+                  <Input
+                    id="contact_email"
+                    type="email"
+                    {...form.register("contact_email")}
+                    placeholder="Email para clientes entrarem em contato"
+                  />
+                  {form.formState.errors.contact_email && (
+                    <p className="text-sm text-red-500">{form.formState.errors.contact_email.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="contact_phone">Telefone de Contato</Label>
+                  <Input
+                    id="contact_phone"
+                    {...form.register("contact_phone")}
+                    placeholder="Telefone para clientes entrarem em contato"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    {...form.register("website")}
+                    placeholder="https://www.seusite.com.br"
+                  />
+                  {form.formState.errors.website && (
+                    <p className="text-sm text-red-500">{form.formState.errors.website.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="address">Endereço</Label>
+                  <Input
+                    id="address"
+                    {...form.register("address")}
+                    placeholder="Endereço do seu estabelecimento"
+                  />
+                </div>
               </CardContent>
-            </Card>
+              
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" type="button" onClick={() => navigate(-1)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Enviando..." : "Cadastrar como Parceiro"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+          
+          <div className="mt-8 p-6 bg-blue-50 rounded-lg">
+            <h2 className="text-xl font-medium mb-2">Vantagens de ser um parceiro</h2>
+            <ul className="space-y-2">
+              <li className="flex items-start">
+                <span className="text-blue-600 font-bold mr-2">✓</span>
+                <span>Aumente sua visibilidade para turistas em Fernando de Noronha</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 font-bold mr-2">✓</span>
+                <span>Gerencie reservas e disponibilidade em uma plataforma integrada</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 font-bold mr-2">✓</span>
+                <span>Crie cupons de desconto exclusivos para atrair mais clientes</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 font-bold mr-2">✓</span>
+                <span>Acesse estatísticas e relatórios sobre seu desempenho</span>
+              </li>
+            </ul>
           </div>
         </div>
       </main>
+      
       <Footer />
     </div>
   );

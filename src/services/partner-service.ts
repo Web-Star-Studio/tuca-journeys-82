@@ -19,7 +19,8 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Cast the response to the Partner type
+    return data as Partner[];
   }
 
   /**
@@ -37,7 +38,8 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Cast the response to the Partner type
+    return data as Partner;
   }
 
   /**
@@ -55,7 +57,8 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    return data || null;
+    // Cast the response to the Partner type
+    return data as Partner | null;
   }
 
   /**
@@ -73,7 +76,8 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Cast the response to the Partner type
+    return data as Partner;
   }
 
   /**
@@ -92,7 +96,8 @@ export class PartnerService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Cast the response to the Partner type
+    return data as Partner;
   }
 
   /**

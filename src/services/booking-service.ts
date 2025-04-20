@@ -69,19 +69,16 @@ export class BookingService extends BaseApiService {
     }
   }
 
-  async getBookingById(bookingId: string): Promise<Booking | null> {
+  async getBookingById(bookingId: string | number): Promise<Booking | null> {
     try {
-      // Handle numeric and string IDs
-      let query = supabase.from('bookings').select('*');
+      // Ensure numeric ID for Supabase query
+      const numericId = typeof bookingId === 'string' ? parseInt(bookingId, 10) : bookingId;
       
-      if (!isNaN(Number(bookingId))) {
-        // If it's a numeric ID, convert to number
-        query = query.eq('id', Number(bookingId));
-      } else {
-        query = query.eq('id', bookingId);
-      }
-      
-      const { data, error } = await query.single();
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', numericId)
+        .single();
       
       if (error) {
         throw error;
@@ -93,35 +90,10 @@ export class BookingService extends BaseApiService {
       
       // Map to our application model
       const booking = data as DatabaseBooking;
-      return {
-        id: String(booking.id),
-        user_id: booking.user_id,
-        user_name: 'User',
-        user_email: '',
-        tour_id: booking.tour_id || null,
-        accommodation_id: booking.accommodation_id || null,
-        event_id: booking.event_id || null,
-        vehicle_id: booking.vehicle_id || null,
-        item_type: booking.tour_id ? 'tour' : 
-                  booking.accommodation_id ? 'accommodation' : 
-                  booking.event_id ? 'event' : 'vehicle',
-        item_name: '',
-        start_date: booking.start_date,
-        end_date: booking.end_date,
-        guests: booking.guests,
-        total_price: booking.total_price,
-        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
-        payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
-        payment_method: booking.payment_method,
-        special_requests: booking.special_requests,
-        created_at: booking.created_at,
-        updated_at: booking.updated_at
-      };
+      return this.mapBookingToDTOType(booking);
     } catch (error) {
       console.error(`Error fetching booking ${bookingId}:`, error);
-      // For demo purposes, find in mock bookings
-      const mockBooking = this.getMockBookings().find(booking => booking.id === bookingId);
-      return mockBooking || null;
+      return null;
     }
   }
   
@@ -214,70 +186,56 @@ export class BookingService extends BaseApiService {
     }
   }
   
-  async cancelBooking(bookingId: string): Promise<Booking> {
+  async cancelBooking(bookingId: string | number): Promise<Booking> {
     try {
-      // Handle numeric and string IDs
-      let query = supabase.from('bookings').update({ status: 'cancelled' });
+      // Ensure numeric ID for Supabase query
+      const numericId = typeof bookingId === 'string' ? parseInt(bookingId, 10) : bookingId;
       
-      if (!isNaN(Number(bookingId))) {
-        // If it's a numeric ID, convert to number
-        query = query.eq('id', Number(bookingId));
-      } else {
-        query = query.eq('id', bookingId);
-      }
-      
-      const { data, error } = await query.select().single();
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', numericId)
+        .select()
+        .single();
       
       if (error) {
         throw error;
       }
       
       const booking = data as DatabaseBooking;
-      
-      // Map to our application model
-      return {
-        id: String(booking.id),
-        user_id: booking.user_id,
-        user_name: 'User',
-        user_email: '',
-        tour_id: booking.tour_id || null,
-        accommodation_id: booking.accommodation_id || null,
-        event_id: booking.event_id || null,
-        vehicle_id: booking.vehicle_id || null,
-        item_type: booking.tour_id ? 'tour' : 
-                  booking.accommodation_id ? 'accommodation' : 
-                  booking.event_id ? 'event' : 'vehicle',
-        item_name: '',
-        start_date: booking.start_date,
-        end_date: booking.end_date,
-        guests: booking.guests,
-        total_price: booking.total_price,
-        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
-        payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
-        payment_method: booking.payment_method,
-        special_requests: booking.special_requests,
-        created_at: booking.created_at,
-        updated_at: booking.updated_at
-      };
+      return this.mapBookingToDTOType(booking);
     } catch (error) {
       console.error(`Error cancelling booking ${bookingId}:`, error);
-      
-      // For demo purposes, find and update in mock bookings
-      const mockBookings = this.getMockBookings();
-      const bookingIndex = mockBookings.findIndex(booking => booking.id === bookingId);
-      
-      if (bookingIndex !== -1) {
-        const updatedBooking = {
-          ...mockBookings[bookingIndex],
-          status: 'cancelled' as const,
-          updated_at: new Date().toISOString()
-        };
-        
-        return updatedBooking;
-      }
-      
-      throw new Error(`Booking with ID ${bookingId} not found`);
+      throw error;
     }
+  }
+
+  // Helper method to map database booking to application booking model
+  private mapBookingToDTOType(bookingDB: DatabaseBooking): Booking {
+    return {
+      id: String(bookingDB.id),
+      user_id: bookingDB.user_id,
+      user_name: 'User', // This would need to be populated from user profiles
+      user_email: '', // This would need to be populated from user profiles
+      tour_id: bookingDB.tour_id || null,
+      accommodation_id: bookingDB.accommodation_id || null,
+      event_id: bookingDB.event_id || null,
+      vehicle_id: bookingDB.vehicle_id || null,
+      item_type: bookingDB.tour_id ? 'tour' : 
+                bookingDB.accommodation_id ? 'accommodation' : 
+                bookingDB.event_id ? 'event' : 'vehicle',
+      item_name: '', // This would need to be populated based on the related item
+      start_date: bookingDB.start_date,
+      end_date: bookingDB.end_date,
+      guests: bookingDB.guests,
+      total_price: bookingDB.total_price,
+      status: bookingDB.status as 'pending' | 'confirmed' | 'cancelled',
+      payment_status: bookingDB.payment_status as 'paid' | 'pending' | 'refunded',
+      payment_method: bookingDB.payment_method,
+      special_requests: bookingDB.special_requests,
+      created_at: bookingDB.created_at,
+      updated_at: bookingDB.updated_at
+    };
   }
 
   private getMockBookings(): Booking[] {

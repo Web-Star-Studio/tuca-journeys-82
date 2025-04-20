@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { Routes } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { UIProvider } from './contexts/UIContext';
 import { CartProvider } from './contexts/CartContext';
@@ -21,12 +21,12 @@ const App: React.FC = () => {
         <Suspense fallback={<GlobalLoading />}>
           <Routes>
             {setupRoute}
-            <RequireSetup>
+            <Route element={<RequireSetup />}>
               {publicRoutes}
               {protectedRoutes}
               {adminRoutes}
               {partnerRoutes}
-            </RequireSetup>
+            </Route>
           </Routes>
         </Suspense>
         <Toaster position="top-center" richColors closeButton />

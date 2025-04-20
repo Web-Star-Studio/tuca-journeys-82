@@ -1,14 +1,10 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSetupInitialized } from '@/hooks/use-setup-initialized';
 import { Loader2 } from 'lucide-react';
 
-interface RequireSetupProps {
-  children: React.ReactNode;
-}
-
-const RequireSetup: React.FC<RequireSetupProps> = ({ children }) => {
+const RequireSetup: React.FC = () => {
   const { isInitialized, isLoading } = useSetupInitialized();
 
   if (isLoading) {
@@ -23,7 +19,7 @@ const RequireSetup: React.FC<RequireSetupProps> = ({ children }) => {
     return <Navigate to="/setup" replace />;
   }
 
-  return <>{children}</>;
+  return <Outlet />;
 };
 
 export default RequireSetup;

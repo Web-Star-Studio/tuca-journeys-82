@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { supabase } from '@/lib/supabase';
@@ -143,7 +144,7 @@ export class BookingService extends BaseApiService {
       
       const { data, error } = await supabase
         .from('bookings')
-        .insert([dbBooking])
+        .insert(dbBooking)
         .select()
         .single();
       

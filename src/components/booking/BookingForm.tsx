@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "@/contexts/AuthContext";
@@ -141,7 +140,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       // For real implementation, check Supabase
       if (!user?.id.startsWith('demo-')) {
         const { data, error } = await supabase
-          .from('coupons')
+          .from('discount_coupons') // Changed from 'coupons' to 'discount_coupons'
           .select('*')
           .eq('code', couponCode.toUpperCase())
           .single();

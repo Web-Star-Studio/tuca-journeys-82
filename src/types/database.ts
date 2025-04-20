@@ -71,3 +71,122 @@ export interface DatabaseBooking {
   coupon_code?: string | null;
   coupon_discount?: number | null;
 }
+
+// Add Tour interface
+export interface Tour {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  price: number;
+  duration: string;
+  category: string;
+  difficulty?: string;
+  rating: number;
+  max_participants: number;
+  min_participants: number;
+  meeting_point?: string;
+  includes?: string[];
+  excludes?: string[];
+  notes?: string[];
+  schedule?: string[];
+  image_url: string;
+  gallery_images?: string[];
+  created_at?: string;
+  updated_at?: string;
+  is_available?: boolean;
+  location?: string;
+}
+
+// Add Accommodation interface
+export interface Accommodation {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  price_per_night: number;
+  type: string;
+  address: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip_code?: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  amenities: string[];
+  image_url: string;
+  gallery_images?: string[];
+  is_available: boolean;
+  created_at?: string;
+  updated_at?: string;
+  location?: string;
+  category?: string;
+}
+
+// Add Notification interface
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: "promo" | "booking" | "system";
+  read: boolean;
+  createdAt?: string;
+}
+
+// Add Event interface
+export interface Event {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  date: string;
+  time: string;
+  location: string;
+  price: number;
+  image_url?: string;
+  gallery_images?: string[];
+  is_available: boolean;
+  capacity: number;
+  organizer: string;
+  category?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Add Vehicle interface
+export interface Vehicle {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  price_per_day: number;
+  type: string;
+  brand: string;
+  model: string;
+  year: number;
+  seats: number;
+  transmission: string;
+  fuel_type: string;
+  image_url: string;
+  gallery_images?: string[];
+  is_available: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Add Coupon interface
+export interface Coupon {
+  id: number;
+  code: string;
+  discount_percentage: number;
+  valid_from: string;
+  valid_to: string;
+  is_active: boolean;
+  min_purchase?: number;
+  max_discount?: number;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}

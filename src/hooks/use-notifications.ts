@@ -39,7 +39,7 @@ export const useNotifications = () => {
           title: notification.title,
           message: notification.message,
           type: notification.type,
-          read: notification.read,
+          read: notification.is_read, // Fixed: is_read instead of read
           createdAt: notification.created_at,
         }));
       } catch (error) {
@@ -77,7 +77,7 @@ export const useNotifications = () => {
             title: notification.title,
             message: notification.message,
             type: notification.type,
-            read: false,
+            is_read: false, // Fixed: is_read instead of read
           }]);
           
         if (error) throw error;

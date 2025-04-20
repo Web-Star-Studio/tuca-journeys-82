@@ -65,8 +65,8 @@ const ServiceRating: React.FC<ServiceRatingProps> = ({
     try {
       const reviewData = {
         user_id: user.id,
-        [`${serviceType}_id`]: serviceId,
-        booking_id: bookingId || null,
+        item_id: Number(serviceId), // Convert to number for database consistency
+        item_type: serviceType,
         rating: rating,
         comment: comment.trim() || null,
         created_at: new Date().toISOString()

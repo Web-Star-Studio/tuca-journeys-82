@@ -1,191 +1,176 @@
 
-import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-
-export interface TravelerPreferences {
-  user_id: string;
-  travel_style?: string;
-  activities?: string[];
-  accommodation_types?: string[];
-  budget_range?: string;
-  travel_frequency?: string;
-  transport_modes?: string[];
-  dietary_restrictions?: {
-    vegetarian: boolean;
-    vegan: boolean;
-    glutenFree: boolean;
-    dairyFree: boolean;
-    other?: string;
-  };
-  accessibility?: {
-    mobilitySupport: boolean;
-    visualAids: boolean;
-    hearingAids: boolean;
-    other?: string;
-  };
-  notification_preferences?: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-    marketing: boolean;
-    booking_updates: boolean;
-    promotions: boolean;
-  };
-  updated_at?: string;
-}
+import { useToast } from '@/hooks/use-toast';
+import { UserPreferences } from '@/types/database';
 
 export const useTravelerPreferences = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Define states for local preferences
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get user preferences from Supabase or mock for demo users
-  const { data: preferences, isLoading: isFetching, refetch } = useQuery({
-    queryKey: ['traveler-preferences', user?.id],
+  // Query to fetch preferences
+  const { data, isLoading: isFetching, refetch } = useQuery({
+    queryKey: ['userPreferences', user?.id],
     queryFn: async () => {
       if (!user) return null;
       
+      // For demo users, return mock data
+      if (user.id.startsWith('demo-')) {
+        return getMockPreferences(user.id);
+      }
+      
       try {
-        // Mock preferences for demo users
-        if (user.id.startsWith('demo-')) {
-          return getMockPreferences(user.id);
-        }
-        
-        // Try to get real preferences from Supabase
         const { data, error } = await supabase
-          .from('traveler_preferences')
+          .from('user_preferences') // Changed from 'traveler_preferences' to 'user_preferences'
           .select('*')
           .eq('user_id', user.id)
           .single();
-          
+        
         if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user preferences:', error);
-          throw new Error(error.message);
+          throw error;
         }
         
-        // Return data if found, or default preferences if not
-        return data || getMockPreferences(user.id);
+        if (!data) {
+          // Return default preferences if none exist
+          return {
+            user_id: user.id,
+            notifications: {
+              email: true,
+              push: true,
+              sms: false,
+              marketing: true,
+              recommendations: true,
+              booking_updates: true
+            }
+          } as UserPreferences;
+        }
+        
+        return data as UserPreferences;
       } catch (error) {
-        console.error('Error in preferences query:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar suas preferências. Tente novamente.",
-          variant: "destructive",
-        });
-        return getMockPreferences(user.id);
+        console.error('Error fetching user preferences:', error);
+        return null;
       }
     },
-    enabled: !!user?.id
+    enabled: !!user,
   });
 
-  // Create mutation to update preferences
-  const updatePreferencesMutation = useMutation({
-    mutationFn: async (newPreferences: Partial<TravelerPreferences>) => {
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado');
+  // Update local state when data changes
+  useEffect(() => {
+    if (data) {
+      setPreferences(data);
+      setIsLoading(false);
+    } else if (!isFetching) {
+      setIsLoading(false);
+    }
+  }, [data, isFetching]);
+
+  // Mutation for saving preferences
+  const { mutate: savePreferences, isPending: isSaving } = useMutation({
+    mutationFn: async (newPreferences: UserPreferences) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      // For demo users, just update local state
+      if (user.id.startsWith('demo-')) {
+        await new Promise(resolve => setTimeout(resolve, 800)); // simulate delay
+        return newPreferences;
       }
       
-      setIsLoading(true);
-      
-      try {
-        // For demo users, just mock the update
-        if (user.id.startsWith('demo-')) {
-          await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-          
-          return {
-            ...preferences,
-            ...newPreferences,
-            user_id: user.id,
-            updated_at: new Date().toISOString()
-          };
-        }
-        
-        // For real users, update in Supabase
-        const prefsToUpdate = {
-          user_id: user.id,
+      // For real users, save to database
+      const { data, error } = await supabase
+        .from('user_preferences') // Changed from 'traveler_preferences' to 'user_preferences'
+        .upsert([{
           ...newPreferences,
           updated_at: new Date().toISOString()
-        };
+        }])
+        .select()
+        .single();
         
-        const { data, error } = await supabase
-          .from('traveler_preferences')
-          .upsert(prefsToUpdate)
-          .select();
-          
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        return data[0];
-      } catch (error: any) {
-        console.error('Error updating preferences:', error);
-        throw new Error(`Erro ao atualizar preferências: ${error.message}`);
-      } finally {
-        setIsLoading(false);
-      }
+      if (error) throw error;
+      
+      return data as UserPreferences;
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(['traveler-preferences', user?.id], data);
+      // Update cache
+      queryClient.setQueryData(['userPreferences', user?.id], data);
+      
+      // Show success toast
       toast({
-        title: "Preferências atualizadas",
-        description: "Suas preferências de viagem foram salvas com sucesso.",
+        title: 'Preferências salvas',
+        description: 'Suas preferências foram atualizadas com sucesso.',
       });
+      
+      setPreferences(data);
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      console.error('Error saving preferences:', error);
+      
+      // Show error toast
       toast({
-        title: "Erro",
-        description: error.message || "Não foi possível salvar suas preferências.",
-        variant: "destructive",
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar suas preferências. Tente novamente.',
+        variant: 'destructive',
       });
     }
   });
 
-  // Create a function to get default/mock preferences
-  const getMockPreferences = (userId: string): TravelerPreferences => {
+  // Function to update specific preferences
+  const updatePreferences = (updates: Partial<UserPreferences>) => {
+    if (!preferences || !user) return;
+    
+    const updatedPreferences = {
+      ...preferences,
+      ...updates,
+      user_id: user.id,
+    };
+    
+    savePreferences(updatedPreferences as UserPreferences);
+  };
+
+  // Mock preferences for demo users
+  const getMockPreferences = (userId: string): UserPreferences => {
     return {
       user_id: userId,
-      travel_style: 'relaxation',
-      activities: ['beach', 'sightseeing', 'hiking'],
-      accommodation_types: ['hotel', 'pousada'],
+      travel_style: 'adventure',
+      activities: ['hiking', 'swimming', 'sightseeing'],
+      accommodation_types: ['hotel', 'resort'],
       budget_range: 'medium',
-      travel_frequency: 'quarterly',
-      transport_modes: ['car', 'airplane'],
+      travel_frequency: 'occasional',
+      transport_modes: ['airplane', 'car'],
       dietary_restrictions: {
         vegetarian: false,
         vegan: false,
         glutenFree: false,
-        dairyFree: false,
+        dairyFree: false
       },
       accessibility: {
         mobilitySupport: false,
         visualAids: false,
-        hearingAids: false,
+        hearingAids: false
       },
-      notification_preferences: {
+      notifications: {
         email: true,
         push: true,
         sms: false,
         marketing: true,
-        booking_updates: true,
-        promotions: true,
+        recommendations: true,
+        booking_updates: true
       },
       updated_at: new Date().toISOString()
     };
   };
 
-  // Create a wrapper function for the mutation
-  const updatePreferences = useCallback((data: Partial<TravelerPreferences>) => {
-    return updatePreferencesMutation.mutate(data);
-  }, [updatePreferencesMutation]);
-
   return {
     preferences,
-    isLoading: isFetching || isLoading,
+    isLoading: isLoading || isFetching,
+    isSaving,
     updatePreferences,
-    refetch
+    refetchPreferences: refetch
   };
 };

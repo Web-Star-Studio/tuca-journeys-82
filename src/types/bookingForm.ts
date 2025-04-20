@@ -7,7 +7,7 @@ export interface BookingFormValues {
   contactName: string;
   contactEmail: string;
   contactPhone: string;
-  paymentMethod: 'credit_card' | 'debit_card' | 'pix' | 'bank_transfer';
+  paymentMethod: string;
   couponCode?: string;
   termsAccepted: boolean;
 }

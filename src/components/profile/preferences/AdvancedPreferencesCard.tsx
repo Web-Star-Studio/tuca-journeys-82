@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -6,22 +5,26 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Car, Bus, Train, Plane, Bike, Accessibility, Utensils, Activity } from "lucide-react";
 
+interface DietaryRestrictions {
+  vegetarian: boolean;
+  vegan: boolean;
+  glutenFree: boolean;
+  dairyFree: boolean;
+}
+
+interface AccessibilityOptions {
+  mobilitySupport: boolean;
+  visualAids: boolean;
+  hearingAids: boolean;
+}
+
 interface AdvancedPreferencesCardProps {
   transportModes: string[];
   onTransportModesChange: (values: string[]) => void;
-  dietaryRestrictions: {
-    vegetarian: boolean;
-    vegan: boolean;
-    glutenFree: boolean;
-    dairyFree: boolean;
-  };
-  onDietaryChange: (key: keyof typeof dietaryRestrictions, value: boolean) => void;
-  accessibility: {
-    mobilitySupport: boolean;
-    visualAids: boolean;
-    hearingAids: boolean;
-  };
-  onAccessibilityChange: (key: keyof typeof accessibility, value: boolean) => void;
+  dietaryRestrictions: DietaryRestrictions;
+  onDietaryChange: (key: keyof DietaryRestrictions, value: boolean) => void;
+  accessibility: AccessibilityOptions;
+  onAccessibilityChange: (key: keyof AccessibilityOptions, value: boolean) => void;
 }
 
 const AdvancedPreferencesCard = ({ 
@@ -81,9 +84,9 @@ const AdvancedPreferencesCard = ({
                   <span>{label}</span>
                 </div>
                 <Switch
-                  checked={dietaryRestrictions[key as keyof typeof dietaryRestrictions]}
+                  checked={dietaryRestrictions[key as keyof DietaryRestrictions]}
                   onCheckedChange={(checked) => 
-                    onDietaryChange(key as keyof typeof dietaryRestrictions, checked)
+                    onDietaryChange(key as keyof DietaryRestrictions, checked)
                   }
                 />
               </div>
@@ -105,9 +108,9 @@ const AdvancedPreferencesCard = ({
                   <span>{label}</span>
                 </div>
                 <Switch
-                  checked={accessibility[key as keyof typeof accessibility]}
+                  checked={accessibility[key as keyof AccessibilityOptions]}
                   onCheckedChange={(checked) => 
-                    onAccessibilityChange(key as keyof typeof accessibility, checked)
+                    onAccessibilityChange(key as keyof AccessibilityOptions, checked)
                   }
                 />
               </div>

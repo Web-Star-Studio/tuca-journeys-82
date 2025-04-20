@@ -1,26 +1,29 @@
-
 import React from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Car, Bus, Train, Plane, Bike, Accessibility, Utensils, Activity } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
+interface DietaryRestrictions {
+  vegetarian: boolean;
+  vegan: boolean;
+  glutenFree: boolean;
+  dairyFree: boolean;
+}
+
+interface AccessibilityOptions {
+  mobilitySupport: boolean;
+  visualAids: boolean;
+  hearingAids: boolean;
+}
+
 interface AdvancedPreferencesStepProps {
   transportModes: string[];
   onTransportModesChange: (values: string[]) => void;
-  dietaryRestrictions: {
-    vegetarian: boolean;
-    vegan: boolean;
-    glutenFree: boolean;
-    dairyFree: boolean;
-  };
-  onDietaryChange: (key: keyof typeof dietaryRestrictions, value: boolean) => void;
-  accessibility: {
-    mobilitySupport: boolean;
-    visualAids: boolean;
-    hearingAids: boolean;
-  };
-  onAccessibilityChange: (key: keyof typeof accessibility, value: boolean) => void;
+  dietaryRestrictions: DietaryRestrictions;
+  onDietaryChange: (key: keyof DietaryRestrictions, value: boolean) => void;
+  accessibility: AccessibilityOptions;
+  onAccessibilityChange: (key: keyof AccessibilityOptions, value: boolean) => void;
 }
 
 const AdvancedPreferencesStep = ({

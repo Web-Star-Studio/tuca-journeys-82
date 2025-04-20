@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -9,6 +8,7 @@ import Orders from '@/pages/Orders';
 import OrderDetail from '@/pages/OrderDetail';
 import Checkout from '@/pages/Checkout';
 import BookingDetail from '@/pages/BookingDetail';
+import PreferencesWizard from '@/components/preferences-wizard/PreferencesWizard';
 
 export const protectedRoutes = (
   <>
@@ -19,5 +19,6 @@ export const protectedRoutes = (
     <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
     <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
     <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
+    <Route path="/preferences/wizard" element={<ProtectedRoute><PreferencesWizard /></ProtectedRoute>} />
   </>
 );

@@ -23,7 +23,7 @@ export class AccommodationService extends BaseApiService {
     return data.map(accommodation => ({
       ...accommodation,
       location: accommodation.address || 'Unknown Location',
-      is_available: accommodation.is_available !== undefined ? accommodation.is_available : true,
+      is_available: typeof accommodation.is_available !== 'undefined' ? accommodation.is_available : true,
       category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
@@ -47,7 +47,7 @@ export class AccommodationService extends BaseApiService {
     return {
       ...data,
       location: data.address || 'Unknown Location',
-      is_available: data.is_available !== undefined ? data.is_available : true,
+      is_available: typeof data.is_available !== 'undefined' ? data.is_available : true,
       category: data.type || 'Standard'
     } as Accommodation;
   }

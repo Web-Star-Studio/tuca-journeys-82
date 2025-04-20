@@ -8,6 +8,7 @@ import { publicRoutes } from './routes/publicRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { adminRoutes } from './routes/adminRoutes';
 import { partnerRoutes } from './routes/partnerRoutes';
+import { setupRoute } from './routes/setupRoute';
 import ScrollToTop from './components/utils/ScrollToTop';
 import GlobalLoading from './components/utils/GlobalLoading';
 
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         <ScrollToTop />
         <Suspense fallback={<GlobalLoading />}>
           <Routes>
+            {setupRoute}
             {publicRoutes}
             {protectedRoutes}
             {adminRoutes}

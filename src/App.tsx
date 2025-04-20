@@ -11,6 +11,7 @@ import { partnerRoutes } from './routes/partnerRoutes';
 import { setupRoute } from './routes/setupRoute';
 import ScrollToTop from './components/utils/ScrollToTop';
 import GlobalLoading from './components/utils/GlobalLoading';
+import RequireSetup from './components/utils/RequireSetup';
 
 const App: React.FC = () => {
   return (
@@ -20,10 +21,12 @@ const App: React.FC = () => {
         <Suspense fallback={<GlobalLoading />}>
           <Routes>
             {setupRoute}
-            {publicRoutes}
-            {protectedRoutes}
-            {adminRoutes}
-            {partnerRoutes}
+            <RequireSetup>
+              {publicRoutes}
+              {protectedRoutes}
+              {adminRoutes}
+              {partnerRoutes}
+            </RequireSetup>
           </Routes>
         </Suspense>
         <Toaster position="top-center" richColors closeButton />

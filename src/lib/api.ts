@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, UserProfile } from '@/types/database';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -151,8 +152,8 @@ export const getVehiclesFromDB = async () => {
     name: item.name,
     description: item.description,
     type: item.type || 'car',
-    price_per_day: item.price_per_day || item.price || 0,
-    price: item.price || item.price_per_day || 0,
+    price_per_day: item.price_per_day || 0,
+    price: item.price_per_day || 0, // Map to price_per_day if missing
     capacity: item.capacity || item.available_quantity || 1,
     image_url: item.image_url,
     partner_id: item.partner_id,
@@ -184,8 +185,8 @@ export const getVehicleByIdFromDB = async (id: number) => {
     name: data.name,
     description: data.description,
     type: data.type || 'car',
-    price_per_day: data.price_per_day || data.price || 0,
-    price: data.price || data.price_per_day || 0,
+    price_per_day: data.price_per_day || 0,
+    price: data.price_per_day || 0, // Map to price_per_day if missing
     capacity: data.capacity || data.available_quantity || 1,
     image_url: data.image_url,
     partner_id: data.partner_id,
@@ -212,8 +213,8 @@ export const getEventsFromDB = async () => {
   // Map database fields to match our Event interface
   return data.map(eventData => ({
     id: eventData.id,
-    name: eventData.name || eventData.title || "",
-    title: eventData.name || eventData.title || "", // For backward compatibility
+    name: eventData.name || "",
+    title: eventData.name || "", // For backward compatibility
     description: eventData.description,
     short_description: eventData.short_description,
     date: eventData.date,
@@ -252,8 +253,8 @@ export const getEventByIdFromDB = async (id: number) => {
   // Map database fields to match our Event interface
   return {
     id: data.id,
-    name: data.name || data.title || "",
-    title: data.name || data.title || "", // For backward compatibility
+    name: data.name || "",
+    title: data.name || "", // For backward compatibility
     description: data.description,
     short_description: data.short_description,
     date: data.date,
@@ -285,8 +286,8 @@ export const createBooking = async (bookingData: CreateBookingDTO) => {
     user_id: bookingData.user_id,
     tour_id: bookingData.tour_id,
     accommodation_id: bookingData.accommodation_id,
-    event_id: bookingData.event_id,
-    vehicle_id: bookingData.vehicle_id,
+    event_id: bookingData.event_id || null,
+    vehicle_id: bookingData.vehicle_id || null,
     start_date: bookingData.start_date,
     end_date: bookingData.end_date,
     guests: bookingData.guests || bookingData.number_of_guests, 
@@ -316,8 +317,8 @@ export const createBooking = async (bookingData: CreateBookingDTO) => {
     user_email: '', // This would need to be populated from user profiles
     tour_id: data.tour_id,
     accommodation_id: data.accommodation_id,
-    event_id: data.event_id,
-    vehicle_id: data.vehicle_id,
+    event_id: data.event_id || null,
+    vehicle_id: data.vehicle_id || null,
     item_type: data.tour_id ? 'tour' : 
                data.accommodation_id ? 'accommodation' : 
                data.event_id ? 'event' : 'vehicle',

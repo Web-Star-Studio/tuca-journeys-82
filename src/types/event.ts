@@ -19,8 +19,8 @@ export interface Event {
   updated_at: string;
   category: string;
   featured: boolean;
-  status?: string; // Added as optional for backward compatibility
-  organizer?: string; // Added as optional for backward compatibility
+  status: string; // Added as required for API compatibility
+  organizer: string; // Added as required for API compatibility
   is_featured?: boolean; // Some legacy code might use is_featured instead of featured
-  gallery_images?: string[];
+  gallery_images: string[];
 }

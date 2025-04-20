@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,7 +57,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
 }) => {
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
-  const { createAccommodation, updateAccommodation, getAccommodationById } = useAccommodations();
+  const { saveAccommodation, getAccommodationById } = useAccommodations();
   const [isLoading, setIsLoading] = useState(accommodationId ? true : false);
 
   // Initialize form
@@ -136,52 +135,26 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     const galleryArray = data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [];
 
     try {
-      if (accommodationId) {
-        // Update existing accommodation
-        await updateAccommodation({ 
-          id: accommodationId,
-          title: data.title,
-          description: data.description,
-          short_description: data.description.substring(0, 100),
-          price_per_night: data.price_per_night,
-          image_url: data.image_url,
-          type: data.type,
-          bedrooms: data.bedrooms,
-          bathrooms: data.bathrooms,
-          max_guests: data.capacity,
-          address: data.location,
-          amenities: amenitiesArray,
-          gallery_images: galleryArray,
-          rating: data.rating
-        });
-        
-        toast({
-          title: "Sucesso",
-          description: "Hospedagem atualizada com sucesso.",
-        });
-      } else {
-        // Create new accommodation
-        await createAccommodation({ 
-          title: data.title,
-          description: data.description,
-          short_description: data.description.substring(0, 100),
-          price_per_night: data.price_per_night,
-          image_url: data.image_url,
-          type: data.type,
-          bedrooms: data.bedrooms,
-          bathrooms: data.bathrooms,
-          max_guests: data.capacity,
-          address: data.location,
-          amenities: amenitiesArray,
-          gallery_images: galleryArray,
-          rating: data.rating
-        });
-        
-        toast({
-          title: "Sucesso",
-          description: "Nova hospedagem criada com sucesso.",
-        });
-      }
+      await saveAccommodation({ 
+        id: accommodationId,
+        title: data.title,
+        description: data.description,
+        short_description: data.description.substring(0, 100),
+        price_per_night: data.price_per_night,
+        image_url: data.image_url,
+        location: data.location,
+        address: data.location,
+        type: data.type,
+        category: data.type,
+        is_available: true,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        max_guests: data.capacity,
+        amenities: amenitiesArray,
+        gallery_images: galleryArray,
+        rating: data.rating
+      });
+      
       onSuccess();
     } catch (error) {
       console.error("Error saving accommodation:", error);
@@ -457,4 +430,3 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     </Form>
   );
 };
-

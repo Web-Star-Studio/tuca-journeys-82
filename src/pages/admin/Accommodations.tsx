@@ -34,13 +34,8 @@ const AdminAccommodations = () => {
     accommodations, 
     isLoading, 
     error, 
-    fetchAccommodations 
+    refetch 
   } = useAccommodations();
-
-  // Fetch accommodations on component mount
-  useEffect(() => {
-    fetchAccommodations().catch(console.error);
-  }, []);
 
   // Filter accommodations based on search and type
   const filteredAccommodations = accommodations
@@ -140,7 +135,7 @@ const AdminAccommodations = () => {
                       <TableRow key={accommodation.id}>
                         <TableCell className="font-medium">{accommodation.title}</TableCell>
                         <TableCell className="capitalize">{accommodation.type}</TableCell>
-                        <TableCell>{accommodation.address}</TableCell>
+                        <TableCell>{accommodation.address || accommodation.location}</TableCell>
                         <TableCell className="text-right">
                           R$ {accommodation.price_per_night.toFixed(2)}
                         </TableCell>
@@ -170,7 +165,7 @@ const AdminAccommodations = () => {
         accommodationId={editAccommodationId}
         onSuccess={() => {
           setShowForm(false);
-          fetchAccommodations();
+          refetch();
         }}
       />
     </AdminLayout>

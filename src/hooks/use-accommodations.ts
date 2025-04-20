@@ -6,7 +6,7 @@ import { generateDemoAccommodations } from '@/utils/demoDataGenerator';
 
 export const useAccommodations = () => {
   // Query to fetch accommodations
-  const { data: accommodations, isLoading, error, refetch } = useQuery({
+  const { data: accommodations = [], isLoading, error, refetch } = useQuery({
     queryKey: ['accommodations'],
     queryFn: async () => {
       // In a real app, we'd fetch from an API
@@ -42,22 +42,41 @@ export const useAccommodations = () => {
     }
   });
 
-  // Mutation to create or update an accommodation
-  const saveAccommodationMutation = useMutation({
+  // Mutation to create an accommodation
+  const createAccommodationMutation = useMutation({
     mutationFn: async (accommodation: Partial<Accommodation>) => {
       // In a real app, we'd call an API
-      console.log('Saving accommodation:', accommodation);
+      console.log('Creating accommodation:', accommodation);
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 800));
       return { success: true };
     },
     onSuccess: () => {
-      toast.success('Acomodação salva com sucesso');
+      toast.success('Acomodação criada com sucesso');
       refetch();
     },
     onError: (error) => {
-      toast.error('Erro ao salvar a acomodação');
-      console.error('Error saving accommodation:', error);
+      toast.error('Erro ao criar a acomodação');
+      console.error('Error creating accommodation:', error);
+    }
+  });
+
+  // Mutation to update an accommodation
+  const updateAccommodationMutation = useMutation({
+    mutationFn: async (accommodation: Partial<Accommodation>) => {
+      // In a real app, we'd call an API
+      console.log('Updating accommodation:', accommodation);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Acomodação atualizada com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar a acomodação');
+      console.error('Error updating accommodation:', error);
     }
   });
 
@@ -66,7 +85,20 @@ export const useAccommodations = () => {
   };
 
   const saveAccommodation = (accommodation: Partial<Accommodation>) => {
-    saveAccommodationMutation.mutate(accommodation);
+    // If accommodation has an id, it's an update, otherwise it's a create
+    if (accommodation.id) {
+      updateAccommodationMutation.mutate(accommodation);
+    } else {
+      createAccommodationMutation.mutate(accommodation);
+    }
+  };
+
+  const createAccommodation = (accommodation: Partial<Accommodation>) => {
+    createAccommodationMutation.mutate(accommodation);
+  };
+
+  const updateAccommodation = (accommodation: Partial<Accommodation>) => {
+    updateAccommodationMutation.mutate(accommodation);
   };
 
   const getAccommodationById = (id?: number) => {
@@ -90,6 +122,8 @@ export const useAccommodations = () => {
     error,
     deleteAccommodation,
     saveAccommodation,
+    createAccommodation,
+    updateAccommodation,
     getAccommodationById,
     refetch
   };

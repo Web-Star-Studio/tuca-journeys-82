@@ -6,8 +6,8 @@ export interface Vehicle {
   description: string;
   type: string;
   price_per_day: number;
-  price?: number; // Added for backward compatibility
-  capacity?: number;
+  price: number; // Required for backward compatibility
+  capacity: number; // Required for backward compatibility
   image_url: string;
   partner_id: string;
   created_at: string;

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Car, Bus, TrainFront, Plane, Bicycle, Wheelchair, Utensils, Vegan, Accessibility } from "lucide-react";
+import { Car, Bus, Train, Plane, Bike, Accessibility, Utensils, Activity } from "lucide-react";
 
 interface AdvancedPreferencesCardProps {
   transportModes: string[];
@@ -52,7 +52,7 @@ const AdvancedPreferencesCard = ({
               Ônibus
             </ToggleGroupItem>
             <ToggleGroupItem value="train" aria-label="Trem">
-              <TrainFront className="h-4 w-4 mr-2" />
+              <Train className="h-4 w-4 mr-2" />
               Trem
             </ToggleGroupItem>
             <ToggleGroupItem value="plane" aria-label="Avião">
@@ -60,7 +60,7 @@ const AdvancedPreferencesCard = ({
               Avião
             </ToggleGroupItem>
             <ToggleGroupItem value="bicycle" aria-label="Bicicleta">
-              <Bicycle className="h-4 w-4 mr-2" />
+              <Bike className="h-4 w-4 mr-2" />
               Bicicleta
             </ToggleGroupItem>
           </ToggleGroup>
@@ -71,7 +71,7 @@ const AdvancedPreferencesCard = ({
           <div className="space-y-4">
             {Object.entries({
               vegetarian: { icon: Utensils, label: "Vegetariano" },
-              vegan: { icon: Vegan, label: "Vegano" },
+              vegan: { icon: Activity, label: "Vegano" },
               glutenFree: { icon: Utensils, label: "Sem Glúten" },
               dairyFree: { icon: Utensils, label: "Sem Lactose" },
             }).map(([key, { icon: Icon, label }]) => (
@@ -95,7 +95,7 @@ const AdvancedPreferencesCard = ({
           <Label>Necessidades de Acessibilidade</Label>
           <div className="space-y-4">
             {Object.entries({
-              mobilitySupport: { icon: Wheelchair, label: "Suporte à Mobilidade" },
+              mobilitySupport: { icon: Accessibility, label: "Suporte à Mobilidade" },
               visualAids: { icon: Accessibility, label: "Auxílios Visuais" },
               hearingAids: { icon: Accessibility, label: "Auxílios Auditivos" },
             }).map(([key, { icon: Icon, label }]) => (

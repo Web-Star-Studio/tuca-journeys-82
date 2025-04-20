@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Car, Bus, TrainFront, Plane, Bicycle, Wheelchair, Utensils, Vegan, Accessibility } from "lucide-react";
+import { Car, Bus, Train, Plane, Bike, Accessibility, Utensils, Activity } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
@@ -54,7 +54,7 @@ const AdvancedPreferencesStep = ({
             Ônibus
           </ToggleGroupItem>
           <ToggleGroupItem value="train" aria-label="Trem">
-            <TrainFront className="h-4 w-4 mr-2" />
+            <Train className="h-4 w-4 mr-2" />
             Trem
           </ToggleGroupItem>
           <ToggleGroupItem value="plane" aria-label="Avião">
@@ -62,7 +62,7 @@ const AdvancedPreferencesStep = ({
             Avião
           </ToggleGroupItem>
           <ToggleGroupItem value="bicycle" aria-label="Bicicleta">
-            <Bicycle className="h-4 w-4 mr-2" />
+            <Bike className="h-4 w-4 mr-2" />
             Bicicleta
           </ToggleGroupItem>
         </ToggleGroup>
@@ -84,7 +84,7 @@ const AdvancedPreferencesStep = ({
           
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Vegan className="h-4 w-4" />
+              <Activity className="h-4 w-4" />
               <span>Vegano</span>
             </div>
             <Switch
@@ -122,7 +122,7 @@ const AdvancedPreferencesStep = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Wheelchair className="h-4 w-4" />
+              <Accessibility className="h-4 w-4" />
               <span>Suporte à Mobilidade</span>
             </div>
             <Switch

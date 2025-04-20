@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -24,7 +23,19 @@ export interface ExtendedUserProfile {
       marketing: boolean;
       booking_updates: boolean;
       recommendations: boolean;
-    }
+    };
+    transportModes?: string[];
+    dietaryRestrictions?: {
+      vegetarian: boolean;
+      vegan: boolean;
+      glutenFree: boolean;
+      dairyFree: boolean;
+    };
+    accessibility?: {
+      mobilitySupport: boolean;
+      visualAids: boolean;
+      hearingAids: boolean;
+    };
   };
   created_at: string;
   updated_at: string;
@@ -58,6 +69,18 @@ export const useProfile = () => {
             marketing: true,
             booking_updates: true,
             recommendations: true
+          },
+          transportModes: [],
+          dietaryRestrictions: {
+            vegetarian: false,
+            vegan: false,
+            glutenFree: false,
+            dairyFree: false,
+          },
+          accessibility: {
+            mobilitySupport: false,
+            visualAids: false,
+            hearingAids: false,
           }
         },
         created_at: new Date().toISOString(),

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,15 +52,16 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
       await createBookingMutation.mutateAsync({
         user_id: user.id,
         tour_id: tour.id,
-        accommodation_id: null,
+        accommodation_id: undefined,
         start_date: selectedDate,
         end_date: selectedDate, // For tours, start and end date are the same
         number_of_guests: participants,
+        guests: participants, // Add this to match the updated DTO
         total_price: totalPrice,
         status: 'pending',
         payment_status: 'pending',
-        payment_method: null,
-        special_requests: null
+        payment_method: undefined,
+        special_requests: undefined
       });
 
       navigate("/reserva-confirmada");

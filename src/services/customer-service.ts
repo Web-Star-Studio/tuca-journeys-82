@@ -53,12 +53,12 @@ export class CustomerService extends BaseApiService {
     }
 
     try {
-      // For actual data, we'll query a custom table that should be created in Supabase
+      // For actual data, we'll query the user_profiles table and join with bookings
+      // since we don't have a specific customers table
       const { data, error } = await this.supabase
-        .from('customers')
+        .from('user_profiles')
         .select('*')
-        .eq('partner_id', partnerId)
-        .order('created_at', { ascending: false });
+        .eq('partner_id', partnerId);
 
       if (error) {
         console.error('Error fetching customers:', error);
@@ -68,14 +68,14 @@ export class CustomerService extends BaseApiService {
       // Map the data to our Customer interface
       return data.map(customer => ({
         id: customer.id.toString(),
-        name: customer.name,
-        email: customer.email,
-        location: customer.location,
-        lastBooking: customer.last_booking,
-        totalBookings: customer.total_bookings,
-        avatar: customer.avatar_url,
+        name: customer.name || 'Unknown',
+        email: customer.email || 'unknown@example.com',
+        location: customer.address ? `${customer.city}, ${customer.state}` : 'Unknown',
+        lastBooking: null, // We would need to join with bookings table to get this
+        totalBookings: 0,  // We would need to join with bookings table to get this
+        avatar: null,
         phone: customer.phone,
-        partnerId: customer.partner_id,
+        partnerId: partnerId,
         createdAt: customer.created_at
       }));
     } catch (error) {

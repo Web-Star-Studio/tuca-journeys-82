@@ -130,12 +130,13 @@ export const getVehiclesFromDB = async () => {
     description: item.description,
     type: item.type || 'car',
     price_per_day: item.price_per_day || item.price || 0,
+    price: item.price || item.price_per_day || 0, // Add this for compatibility
     capacity: item.capacity || item.available_quantity || 1,
     image_url: item.image_url,
     partner_id: item.partner_id,
     created_at: item.created_at,
     updated_at: item.updated_at,
-    available_quantity: item.available_quantity,
+    available_quantity: item.available_quantity || 1,
     features: item.features,
     gallery_images: item.gallery_images,
     is_available: item.is_available
@@ -162,12 +163,13 @@ export const getVehicleByIdFromDB = async (id: number) => {
     description: data.description,
     type: data.type || 'car',
     price_per_day: data.price_per_day || data.price || 0,
+    price: data.price || data.price_per_day || 0, // Add this for compatibility
     capacity: data.capacity || data.available_quantity || 1,
     image_url: data.image_url,
     partner_id: data.partner_id,
     created_at: data.created_at,
     updated_at: data.updated_at,
-    available_quantity: data.available_quantity,
+    available_quantity: data.available_quantity || 1,
     features: data.features,
     gallery_images: data.gallery_images,
     is_available: data.is_available

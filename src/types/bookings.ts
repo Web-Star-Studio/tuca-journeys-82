@@ -25,8 +25,8 @@ export interface CreateBookingDTO {
   accommodation_id?: number;
   start_date: string;
   end_date: string;
-  number_of_guests: number;
-  guests?: number; // Adding this to support both naming conventions
+  number_of_guests?: number;
+  guests: number; // Making this non-optional
   total_price: number;
   status: 'pending' | 'confirmed' | 'cancelled';
   payment_status?: 'paid' | 'pending' | 'refunded';

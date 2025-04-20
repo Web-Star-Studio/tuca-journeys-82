@@ -1,7 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
-import { BookingDB, CreateBookingDTO } from '@/types/bookings';
+import { Booking, CreateBookingDTO } from '@/types/bookings'; // Changed from BookingDB to Booking
 import { Package } from '@/data/types/packageTypes';
 
 /**
@@ -99,13 +99,28 @@ class ApiService {
     }
     
     // Transform database bookings into the application booking model
-    return (data || []).map((bookingDB: BookingDB) => this.mapBookingFromDB(bookingDB));
+    return (data || []).map((bookingDB: any) => this.mapBookingFromDB(bookingDB));
   }
 
   async createBooking(bookingData: CreateBookingDTO): Promise<UIBooking> {
+    // Map DTO to match database schema
+    const dbBookingData = {
+      user_id: bookingData.user_id,
+      tour_id: bookingData.tour_id,
+      accommodation_id: bookingData.accommodation_id,
+      start_date: bookingData.start_date,
+      end_date: bookingData.end_date,
+      guests: bookingData.guests,
+      total_price: bookingData.total_price,
+      status: bookingData.status,
+      payment_status: bookingData.payment_status || 'pending',
+      payment_method: bookingData.payment_method,
+      special_requests: bookingData.special_requests
+    };
+    
     const { data, error } = await this.supabase
       .from('bookings')
-      .insert([bookingData])
+      .insert(dbBookingData)
       .select()
       .single();
     
@@ -114,7 +129,7 @@ class ApiService {
       throw error;
     }
     
-    return this.mapBookingFromDB(data as BookingDB);
+    return this.mapBookingFromDB(data);
   }
 
   async cancelBooking(bookingId: string, userId: string): Promise<UIBooking> {
@@ -138,17 +153,30 @@ class ApiService {
       throw error;
     }
     
-    return this.mapBookingFromDB(data as BookingDB);
+    return this.mapBookingFromDB(data);
   }
 
   // Helper method to map database booking to application booking model
-  private mapBookingFromDB(bookingDB: BookingDB): UIBooking {
+  private mapBookingFromDB(bookingDB: any): UIBooking {
+    // Determine item type including event and vehicle
+    let itemType: 'tour' | 'accommodation' | 'event' | 'vehicle' = 'tour';
+    
+    if (bookingDB.tour_id) {
+      itemType = 'tour';
+    } else if (bookingDB.accommodation_id) {
+      itemType = 'accommodation';
+    } else if (bookingDB.event_id) {
+      itemType = 'event';
+    } else if (bookingDB.vehicle_id) {
+      itemType = 'vehicle';
+    }
+
     return {
       id: bookingDB.id.toString(),
       user_id: bookingDB.user_id,
       user_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'User',
       user_email: '',  // This would ideally come from user profiles
-      item_type: bookingDB.tour_id ? 'tour' : bookingDB.accommodation_id ? 'accommodation' : 'package',
+      item_type: itemType,
       item_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'Booking',
       start_date: bookingDB.start_date,
       end_date: bookingDB.end_date,

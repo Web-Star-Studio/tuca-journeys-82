@@ -56,7 +56,7 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
         start_date: selectedDate,
         end_date: selectedDate, // For tours, start and end date are the same
         number_of_guests: participants,
-        guests: participants, // Add this to match the updated DTO
+        guests: participants,
         total_price: totalPrice,
         status: 'pending',
         payment_status: 'pending',

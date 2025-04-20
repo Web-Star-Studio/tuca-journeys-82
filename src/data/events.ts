@@ -39,6 +39,7 @@ export const events: Event[] = [
     available_spots: 82,
     status: "scheduled",
     organizer: "Associação de Atletas de Fernando de Noronha",
+    featured: false,
     partner_id: "2",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -59,6 +60,7 @@ export const events: Event[] = [
     available_spots: 12,
     status: "scheduled",
     organizer: "Instituto Marinho de Noronha",
+    featured: false,
     partner_id: "1",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -100,6 +102,7 @@ export const events: Event[] = [
     available_spots: 8,
     status: "scheduled",
     organizer: "Centro de Yoga Noronha",
+    featured: false,
     partner_id: "4",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -120,6 +123,7 @@ export const events: Event[] = [
     available_spots: 35,
     status: "scheduled",
     organizer: "ICMBio - Fernando de Noronha",
+    featured: false,
     partner_id: "2",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -140,6 +144,7 @@ export const events: Event[] = [
     available_spots: 180,
     status: "scheduled",
     organizer: "Associação Cultural de Noronha",
+    featured: false,
     partner_id: "3",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -160,6 +165,7 @@ export const events: Event[] = [
     available_spots: 9,
     status: "scheduled",
     organizer: "Cooperativa de Artesãos de Fernando de Noronha",
+    featured: false,
     partner_id: "5",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -180,6 +186,7 @@ export const events: Event[] = [
     available_spots: 22,
     status: "scheduled",
     organizer: "Instituto Histórico de Fernando de Noronha",
+    featured: false,
     partner_id: "6",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()

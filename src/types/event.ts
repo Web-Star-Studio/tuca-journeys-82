@@ -5,18 +5,18 @@ export interface Event {
   description: string;
   short_description?: string;
   date: string;
-  start_time: string;  // Making these required
-  end_time: string;    // Making these required
+  start_time: string;  
+  end_time: string;    
   location: string;
   price: number;
   capacity: number;
-  available_spots: number; // Making this required
+  available_spots: number; 
   image_url: string;
   partner_id: string;
   created_at: string;
   updated_at: string;
-  category: string;    // Making this required
-  featured: boolean;   // Making this required
+  category: string;    
+  featured: boolean;   // Making this required with default value in mock data
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
-  organizer: string;   // Making this required
+  organizer: string;   
 }

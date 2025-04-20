@@ -5,13 +5,13 @@ export interface Vehicle {
   description: string;
   type: string;
   price_per_day: number;
-  price?: number; // Adding optional price field for compatibility
+  price?: number; // Optional price field for compatibility
   capacity: number;
   image_url: string;
   partner_id: string;
   created_at: string;
   updated_at: string;
-  available_quantity: number;
+  available_quantity: number; // Making this required
   features?: string[];
   gallery_images?: string[];
   is_available?: boolean;

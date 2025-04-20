@@ -53,8 +53,9 @@ export class CustomerService extends BaseApiService {
     }
 
     try {
-      // For actual data, we'll query the user_profiles table and join with bookings
-      // since we don't have a specific customers table
+      // For actual data, we'll query the user_profiles table 
+      // Since the actual table structure seems to be different from what's expected
+      // We'll provide a safe implementation that avoids type errors
       const { data, error } = await this.supabase
         .from('user_profiles')
         .select('*')
@@ -65,18 +66,18 @@ export class CustomerService extends BaseApiService {
         throw error;
       }
 
-      // Map the data to our Customer interface
-      return data.map(customer => ({
-        id: customer.id.toString(),
-        name: customer.name || 'Unknown',
-        email: customer.email || 'unknown@example.com',
-        location: customer.address ? `${customer.city}, ${customer.state}` : 'Unknown',
-        lastBooking: null, // We would need to join with bookings table to get this
-        totalBookings: 0,  // We would need to join with bookings table to get this
-        avatar: null,
-        phone: customer.phone,
+      // Map the data to our Customer interface with safe type handling
+      return data.map(profile => ({
+        id: profile.id.toString(),
+        name: profile.name || 'Unknown',
+        email: profile.email || 'unknown@example.com',
+        location: profile.city ? `${profile.city}, ${profile.state || ''}` : 'Unknown',
+        lastBooking: null, 
+        totalBookings: 0,
+        avatar: profile.avatar_url,
+        phone: profile.phone,
         partnerId: partnerId,
-        createdAt: customer.created_at
+        createdAt: profile.created_at
       }));
     } catch (error) {
       console.error('Error in getCustomersByPartnerId:', error);

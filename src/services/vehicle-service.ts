@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Vehicle } from '@/types/vehicle';
 
@@ -44,7 +45,10 @@ export class VehicleService extends BaseApiService {
       image_url: '',
       partner_id: vehicleData.partner_id || 'partner-1',
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      available_quantity: 1,
+      features: [],
+      gallery_images: []
     };
   }
 
@@ -70,11 +74,15 @@ export class VehicleService extends BaseApiService {
         description: 'Buggy para explorar as praias',
         type: 'buggy',
         price_per_day: 250,
+        price: 250, // Adding this for compatibility
         capacity: 4,
         image_url: '/vehicles/buggy.jpg',
         partner_id: 'demo-partner-1',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        available_quantity: 3,
+        features: ['4x4', 'Open top', 'Manual'],
+        gallery_images: ['/vehicles/buggy-1.jpg', '/vehicles/buggy-2.jpg']
       },
       {
         id: 2,
@@ -82,11 +90,14 @@ export class VehicleService extends BaseApiService {
         description: 'Bicicleta elétrica para passeios na ilha',
         type: 'bicycle',
         price_per_day: 80,
+        price: 80, // Adding this for compatibility
         capacity: 1,
         image_url: '/vehicles/ebike.jpg',
         partner_id: 'demo-partner-2',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        available_quantity: 5,
+        features: ['Electric', 'Basket', '30km range']
       }
     ];
   }

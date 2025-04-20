@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Event } from '@/types/event';
 
@@ -39,13 +40,20 @@ export class EventService extends BaseApiService {
       name: 'Updated Event',
       description: 'Description',
       date: new Date().toISOString(),
+      start_time: '09:00',
+      end_time: '12:00',
       location: 'Location',
       price: 100,
       capacity: 50,
+      available_spots: 30,
+      category: 'Workshop',
       image_url: '',
       partner_id: eventData.partner_id || 'partner-1',
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      status: 'scheduled',
+      featured: false,
+      organizer: 'Event Organizer'
     };
   }
 
@@ -69,10 +77,18 @@ export class EventService extends BaseApiService {
         id: 1,
         name: 'Festival de Verão',
         description: 'Um festival de música e cultura na praia',
+        short_description: 'Festival de música na praia',
         date: new Date(Date.now() + 86400000 * 20).toISOString(),
+        start_time: '18:00',
+        end_time: '23:00',
         location: 'Praia do Leão',
         price: 120,
         capacity: 500,
+        available_spots: 250,
+        category: 'Música',
+        featured: true,
+        status: 'scheduled',
+        organizer: 'Eventos Noronha',
         image_url: '/events/festival.jpg',
         partner_id: 'demo-partner-1',
         created_at: new Date().toISOString(),
@@ -82,10 +98,18 @@ export class EventService extends BaseApiService {
         id: 2,
         name: 'Workshop de Fotografia',
         description: 'Aprenda técnicas de fotografia de natureza',
+        short_description: 'Workshop de fotografia',
         date: new Date(Date.now() + 86400000 * 5).toISOString(),
+        start_time: '09:00',
+        end_time: '16:00',
         location: 'Centro Cultural',
         price: 80,
         capacity: 30,
+        available_spots: 15,
+        category: 'Workshop',
+        featured: false,
+        status: 'scheduled',
+        organizer: 'Instituto de Arte',
         image_url: '/events/photo-workshop.jpg',
         partner_id: 'demo-partner-2',
         created_at: new Date().toISOString(),

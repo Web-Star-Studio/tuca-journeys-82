@@ -111,7 +111,6 @@ export const getPartnerByIdFromDB = async (id: string) => {
   return data as Partner;
 };
 
-// Vehicles API
 export const getVehiclesFromDB = async () => {
   console.log("Fetching all vehicles");
   const { data, error } = await supabase
@@ -176,7 +175,6 @@ export const getVehicleByIdFromDB = async (id: number) => {
   } as Vehicle;
 };
 
-// Events API
 export const getEventsFromDB = async () => {
   console.log("Fetching all events");
   const { data, error } = await supabase
@@ -188,7 +186,28 @@ export const getEventsFromDB = async () => {
     throw error;
   }
   
-  return data as Event[];
+  // Map database fields to match our Event interface
+  return data.map(eventData => ({
+    id: eventData.id,
+    name: eventData.name || eventData.title,
+    description: eventData.description,
+    short_description: eventData.short_description,
+    date: eventData.date,
+    start_time: eventData.start_time,
+    end_time: eventData.end_time,
+    location: eventData.location,
+    price: eventData.price || 0,
+    capacity: eventData.capacity || 0,
+    available_spots: eventData.available_spots || 0,
+    image_url: eventData.image_url,
+    partner_id: eventData.partner_id,
+    created_at: eventData.created_at,
+    updated_at: eventData.updated_at,
+    category: eventData.category || 'Other',
+    featured: eventData.featured || false,
+    status: eventData.status || 'scheduled',
+    organizer: eventData.organizer || 'Unknown'
+  })) as Event[];
 };
 
 export const getEventByIdFromDB = async (id: number) => {
@@ -204,10 +223,30 @@ export const getEventByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  return data as Event;
+  // Map database fields to match our Event interface
+  return {
+    id: data.id,
+    name: data.name || data.title,
+    description: data.description,
+    short_description: data.short_description,
+    date: data.date,
+    start_time: data.start_time,
+    end_time: data.end_time,
+    location: data.location,
+    price: data.price || 0,
+    capacity: data.capacity || 0,
+    available_spots: data.available_spots || 0,
+    image_url: data.image_url,
+    partner_id: data.partner_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    category: data.category || 'Other',
+    featured: data.featured || false,
+    status: data.status || 'scheduled',
+    organizer: data.organizer || 'Unknown'
+  } as Event;
 };
 
-// Bookings API
 export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
   console.log("Creating booking:", booking);
   
@@ -217,12 +256,14 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     user_id: booking.user_id,
     tour_id: booking.tour_id,
     accommodation_id: booking.accommodation_id,
+    event_id: booking.event_id,
+    vehicle_id: booking.vehicle_id,
     start_date: booking.start_date,
     end_date: booking.end_date,
-    guests: booking.number_of_guests, // Map from number_of_guests to guests
+    guests: booking.guests, 
     total_price: booking.total_price,
     status: booking.status,
-    payment_status: booking.status === 'confirmed' ? 'paid' : 'pending',
+    payment_status: booking.payment_status || 'pending',
     payment_method: booking.payment_method || null,
     special_requests: booking.special_requests || null
   };
@@ -242,17 +283,24 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
   const responseBooking: Booking = {
     id: data.id.toString(),
     user_id: data.user_id,
+    user_name: '', // This would need to be populated from user profiles
+    user_email: '', // This would need to be populated from user profiles
     tour_id: data.tour_id,
     accommodation_id: data.accommodation_id,
+    event_id: data.event_id,
+    vehicle_id: data.vehicle_id,
+    item_type: data.tour_id ? 'tour' : data.accommodation_id ? 'accommodation' : data.event_id ? 'event' : 'vehicle',
+    item_name: '', // This would need to be populated based on the related item
     start_date: data.start_date,
     end_date: data.end_date,
-    number_of_guests: data.guests, // Map from guests to number_of_guests
+    guests: data.guests,
     total_price: data.total_price,
     status: data.status as 'pending' | 'confirmed' | 'cancelled',
-    notes: data.special_requests || undefined,
+    payment_status: data.payment_status as 'paid' | 'pending' | 'refunded',
+    payment_method: data.payment_method,
+    special_requests: data.special_requests,
     created_at: data.created_at,
-    updated_at: data.updated_at,
-    payment_method: data.payment_method
+    updated_at: data.updated_at
   };
   
   return responseBooking;
@@ -283,7 +331,7 @@ export const getUserBookings = async (userId: string) => {
     accommodation_id: dbBooking.accommodation_id,
     start_date: dbBooking.start_date,
     end_date: dbBooking.end_date,
-    number_of_guests: dbBooking.guests, // Map from guests to number_of_guests
+    guests: dbBooking.guests, // Map from guests to number_of_guests
     total_price: dbBooking.total_price,
     status: dbBooking.status as 'pending' | 'confirmed' | 'cancelled',
     notes: dbBooking.special_requests || undefined,
@@ -291,7 +339,13 @@ export const getUserBookings = async (userId: string) => {
     updated_at: dbBooking.updated_at,
     tours: dbBooking.tours,
     accommodations: dbBooking.accommodations,
-    payment_method: dbBooking.payment_method
+    payment_method: dbBooking.payment_method,
+    user_name: '',
+    user_email: '',
+    item_type: 'tour',
+    item_name: '',
+    event_id: undefined,
+    vehicle_id: undefined
   }));
   
   return bookings;

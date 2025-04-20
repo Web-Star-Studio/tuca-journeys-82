@@ -65,8 +65,8 @@ const PartnerHeader: React.FC<PartnerHeaderProps> = ({ pageTitle, toggleMobileSi
             <DropdownMenuContent align="end">
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-0.5">
-                  <p className="text-sm font-medium">{partner?.business_name}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
+                  <p className="text-sm font-medium">{partner?.business_name || 'Parceiro'}</p>
+                  <p className="text-xs text-gray-500">{user?.email || 'parceiro@email.com'}</p>
                 </div>
               </div>
               <DropdownMenuSeparator />

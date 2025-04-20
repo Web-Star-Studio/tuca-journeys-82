@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrentPartner } from "@/hooks/use-partner";
 import PartnerSidebar from "./PartnerSidebar";
 import PartnerHeader from "./PartnerHeader";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 interface PartnerLayoutProps {
   children: React.ReactNode;
@@ -16,40 +15,10 @@ interface PartnerLayoutProps {
 const PartnerLayout: React.FC<PartnerLayoutProps> = ({ children, pageTitle }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
-  const { data: partner, isLoading: partnerLoading } = useCurrentPartner();
 
   const toggleMobileSidebar = () => {
     setMobileOpen(!mobileOpen);
   };
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      toast.error("Você precisa estar logado para acessar esta página");
-      navigate("/login?redirectTo=/parceiro/dashboard");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (!authLoading && !partnerLoading && user && !partner) {
-      toast.error("Você precisa se cadastrar como parceiro para acessar esta página");
-      navigate("/parceiro/cadastro");
-    }
-  }, [user, partner, authLoading, partnerLoading, navigate]);
-
-  if (authLoading || partnerLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
-        <span className="ml-2 text-lg">Carregando...</span>
-      </div>
-    );
-  }
-
-  if (!user || !partner) {
-    return null; // Will be redirected by useEffect
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

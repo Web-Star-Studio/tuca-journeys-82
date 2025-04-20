@@ -41,7 +41,7 @@ class ApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || tour.location || 'Unknown Location',
-      is_available: tour.is_available ?? true
+      is_available: tour.is_available !== undefined ? tour.is_available : true
     })) as Tour[];
   }
 
@@ -61,7 +61,7 @@ class ApiService {
     return {
       ...data,
       location: data.meeting_point || data.location || 'Unknown Location',
-      is_available: data.is_available ?? true
+      is_available: data.is_available !== undefined ? data.is_available : true
     } as Tour;
   }
 
@@ -93,7 +93,7 @@ class ApiService {
     return data.map(accommodation => ({
       ...accommodation,
       location: accommodation.address || 'Unknown Location',
-      is_available: accommodation.is_available ?? true,
+      is_available: accommodation.is_available !== undefined ? accommodation.is_available : true,
       category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
@@ -114,7 +114,7 @@ class ApiService {
     return {
       ...data,
       location: data.address || 'Unknown Location',
-      is_available: data.is_available ?? true,
+      is_available: data.is_available !== undefined ? data.is_available : true,
       category: data.type || 'Standard'
     } as Accommodation;
   }
@@ -293,7 +293,7 @@ class ApiService {
     
     const { data, error } = await this.supabase
       .from('bookings')
-      .insert([dbBooking])
+      .insert(dbBooking)
       .select()
       .single();
     

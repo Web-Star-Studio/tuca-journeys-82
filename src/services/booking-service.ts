@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { supabase } from '@/lib/supabase';
@@ -72,10 +71,13 @@ export class BookingService extends BaseApiService {
 
   async getBookingById(bookingId: string): Promise<Booking | null> {
     try {
+      // Convert ID to number for Supabase if it's numeric
+      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
+      
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .eq('id', bookingId)
+        .eq('id', id)
         .single();
       
       if (error) {
@@ -211,10 +213,13 @@ export class BookingService extends BaseApiService {
   
   async cancelBooking(bookingId: string): Promise<Booking> {
     try {
+      // Convert ID to number for Supabase if it's numeric
+      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
+      
       const { data, error } = await supabase
         .from('bookings')
         .update({ status: 'cancelled' })
-        .eq('id', bookingId)
+        .eq('id', id)
         .select()
         .single();
       

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +14,11 @@ import { useNavigate } from "react-router-dom";
  */
 export const hasRole = async (userId: string, role: string): Promise<boolean> => {
   if (!userId) return false;
+  
+  // Demo users get admin access for testing
+  if (userId.startsWith('demo-')) {
+    return true;
+  }
   
   try {
     const { data, error } = await supabase
@@ -87,6 +93,11 @@ export const setAdminRole = async (userId: string): Promise<boolean> => {
  * Check if the current user has admin access, checking both session data and custom claims
  */
 export const checkAdminAccess = async (userId: string): Promise<boolean> => {
+  // Demo users get admin access for testing
+  if (userId.startsWith('demo-')) {
+    return true;
+  }
+  
   return await isUserAdmin(userId);
 };
 

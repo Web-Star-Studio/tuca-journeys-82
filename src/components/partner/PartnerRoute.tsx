@@ -18,7 +18,7 @@ const PartnerRoute: React.FC<PartnerRouteProps> = ({ children }) => {
     );
   }
 
-  // Allow access even without partner data during development
+  // Allow access even without partner data during development or for demo users
   return <>{children}</>;
 };
 

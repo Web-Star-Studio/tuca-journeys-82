@@ -52,22 +52,54 @@ export class PartnerService extends BaseApiService {
    * Get partner by user ID
    */
   async getPartnerByUserId(userId: string): Promise<Partner | null> {
-    const { data, error } = await this.supabase
-      .from('partners')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
-      console.error(`Error fetching partner for user ${userId}:`, error);
-      throw error;
+    // Handle demo users with mock data for better UI experience
+    if (userId.startsWith('demo-')) {
+      console.log(`Returning demo partner data for user ${userId}`);
+      // Return mock partner data for demo users
+      return {
+        id: 'demo-partner-id',
+        user_id: userId,
+        business_name: 'Demo Business',
+        business_type: 'accommodation',
+        description: 'This is a demo partner account for testing purposes.',
+        logo_url: '/lovable-uploads/1ed8fc0e-6277-4755-8c6e-88af20896e06.png',
+        contact_email: 'demo@example.com',
+        contact_phone: '+55 99 99999-9999',
+        address: 'Rua Demo, 123 - São Paulo, SP',
+        is_verified: true,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
     }
     
-    // Cast the response to the Partner type
-    return data ? {
-      ...data,
-      business_type: (data as any).business_type as Partner['business_type']
-    } as Partner : null;
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
+        console.error(`Error fetching partner for user ${userId}:`, error);
+        throw error;
+      }
+      
+      // Cast the response to the Partner type
+      return data ? {
+        ...data,
+        business_type: (data as any).business_type as Partner['business_type']
+      } as Partner : null;
+    } catch (error: any) {
+      // Log error but don't throw for demo users to prevent UI from breaking
+      console.error(`Error fetching partner for user ${userId}:`, error);
+      
+      if (userId.startsWith('demo-')) {
+        return null;
+      }
+      
+      throw error;
+    }
   }
 
   /**

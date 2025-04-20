@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import TravelStyleStep from "./steps/TravelStyleStep";
 import BudgetStep from "./steps/BudgetStep";
 import ActivitiesStep from "./steps/ActivitiesStep";
 import NotificationsStep from "./steps/NotificationsStep";
+import AdvancedPreferencesStep from "./steps/AdvancedPreferencesStep";
 
 interface WizardState {
   travelStyle: string;
@@ -17,6 +17,18 @@ interface WizardState {
   activities: string[];
   notifyPromos: boolean;
   notifyBookings: boolean;
+  transportModes: string[];
+  dietaryRestrictions: {
+    vegetarian: boolean;
+    vegan: boolean;
+    glutenFree: boolean;
+    dairyFree: boolean;
+  };
+  accessibility: {
+    mobilitySupport: boolean;
+    visualAids: boolean;
+    hearingAids: boolean;
+  };
 }
 
 const PreferencesWizard = () => {
@@ -30,6 +42,18 @@ const PreferencesWizard = () => {
     activities: [],
     notifyPromos: true,
     notifyBookings: true,
+    transportModes: [],
+    dietaryRestrictions: {
+      vegetarian: false,
+      vegan: false,
+      glutenFree: false,
+      dairyFree: false,
+    },
+    accessibility: {
+      mobilitySupport: false,
+      visualAids: false,
+      hearingAids: false,
+    },
   });
 
   const steps = [
@@ -71,6 +95,33 @@ const PreferencesWizard = () => {
         onNotifyBookingsChange={(checked) => setPreferences(prev => ({ ...prev, notifyBookings: checked }))}
       />,
     },
+    {
+      title: "Preferências Avançadas",
+      component: <AdvancedPreferencesStep 
+        transportModes={preferences.transportModes}
+        onTransportModesChange={(values) => setPreferences(prev => ({ ...prev, transportModes: values }))}
+        dietaryRestrictions={preferences.dietaryRestrictions}
+        onDietaryChange={(key, value) => 
+          setPreferences(prev => ({
+            ...prev,
+            dietaryRestrictions: {
+              ...prev.dietaryRestrictions,
+              [key]: value,
+            },
+          }))
+        }
+        accessibility={preferences.accessibility}
+        onAccessibilityChange={(key, value) => 
+          setPreferences(prev => ({
+            ...prev,
+            accessibility: {
+              ...prev.accessibility,
+              [key]: value,
+            },
+          }))
+        }
+      />,
+    },
   ];
 
   const handleNext = () => {
@@ -100,6 +151,9 @@ const PreferencesWizard = () => {
             booking_updates: preferences.notifyBookings,
             recommendations: true,
           },
+          transportModes: preferences.transportModes,
+          dietaryRestrictions: preferences.dietaryRestrictions,
+          accessibility: preferences.accessibility,
         },
       });
       toast.success("Preferências salvas com sucesso!");

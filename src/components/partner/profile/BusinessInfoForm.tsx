@@ -1,101 +1,177 @@
 
 import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Partner } from "@/types/partner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useUpdatePartner } from "@/hooks/use-partner";
+import { partnerFormSchema, type PartnerFormData } from "@/utils/validation";
 
 interface BusinessInfoFormProps {
-  formData: {
-    business_name: string;
-    description: string;
-    contact_email: string;
-    contact_phone: string;
-    website: string;
-    address: string;
-  };
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  initialData: PartnerFormData;
   onCancel: () => void;
 }
 
-const BusinessInfoForm: React.FC<BusinessInfoFormProps> = ({
-  formData,
-  onSubmit,
-  onChange,
-  onCancel,
-}) => {
+const BusinessInfoForm = ({ initialData, onCancel }: BusinessInfoFormProps) => {
+  const { mutate: updatePartner, isPending } = useUpdatePartner();
+  
+  const form = useForm<PartnerFormData>({
+    resolver: zodResolver(partnerFormSchema),
+    defaultValues: initialData
+  });
+
+  const onSubmit = (data: PartnerFormData) => {
+    updatePartner(data, {
+      onSuccess: () => onCancel()
+    });
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="business_name">Nome do Negócio</Label>
-        <Input 
-          id="business_name" 
-          name="business_name" 
-          value={formData.business_name} 
-          onChange={onChange} 
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="business_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Negócio</FormLabel>
+              <FormControl>
+                <Input placeholder="Nome da sua empresa" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea 
-          id="description" 
-          name="description" 
-          value={formData.description} 
-          onChange={onChange}
-          rows={4}
+
+        <FormField
+          control={form.control}
+          name="business_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Negócio</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de negócio" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="accommodation">Hospedagem</SelectItem>
+                  <SelectItem value="tour">Passeios</SelectItem>
+                  <SelectItem value="vehicle">Veículos</SelectItem>
+                  <SelectItem value="event">Eventos</SelectItem>
+                  <SelectItem value="product">Produtos</SelectItem>
+                  <SelectItem value="restaurant">Restaurante</SelectItem>
+                  <SelectItem value="service">Serviços</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="contact_email">Email de Contato</Label>
-          <Input 
-            id="contact_email" 
-            name="contact_email" 
-            value={formData.contact_email} 
-            onChange={onChange}
-            type="email"
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descreva seu negócio brevemente"
+                  className="min-h-[100px]"
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="contact_email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email de Contato</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="contact_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Telefone</FormLabel>
+                <FormControl>
+                  <Input type="tel" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="contact_phone">Telefone</Label>
-          <Input 
-            id="contact_phone" 
-            name="contact_phone" 
-            value={formData.contact_phone} 
-            onChange={onChange}
-          />
+
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input type="url" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Endereço</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-4 mt-6">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Salvando..." : "Salvar Alterações"}
+          </Button>
         </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="website">Website</Label>
-        <Input 
-          id="website" 
-          name="website" 
-          value={formData.website} 
-          onChange={onChange}
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="address">Endereço</Label>
-        <Input 
-          id="address" 
-          name="address" 
-          value={formData.address} 
-          onChange={onChange}
-        />
-      </div>
-      
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit">Salvar</Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 };
 

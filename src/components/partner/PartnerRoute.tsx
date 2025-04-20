@@ -1,24 +1,33 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
-import { useCurrentPartner } from '@/hooks/use-partner';
+import { Navigate } from 'react-router-dom';
+import { usePartnerAuth } from '@/hooks/use-partner-auth';
+import { Loader2 } from "lucide-react";
 
 interface PartnerRouteProps {
   children: React.ReactNode;
 }
 
 const PartnerRoute: React.FC<PartnerRouteProps> = ({ children }) => {
-  const { data: partner, isLoading: partnerLoading } = useCurrentPartner();
+  const { isLoading, isAuthenticated, isPartner } = usePartnerAuth();
 
-  if (partnerLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
+        <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
   }
 
-  // Allow access even without partner data during development or for demo users
+  if (!isAuthenticated) {
+    return <Navigate to="/login?returnTo=/parceiro/dashboard" replace />;
+  }
+
+  if (!isPartner) {
+    return <Navigate to="/parceiro/cadastro" replace />;
+  }
+
   return <>{children}</>;
 };
 

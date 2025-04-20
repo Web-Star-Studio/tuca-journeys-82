@@ -1,0 +1,81 @@
+
+import { BaseApiService } from './base-api';
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  location: string;
+  lastBooking?: string;
+  totalBookings: number;
+  avatar?: string;
+  phone?: string;
+  createdAt: string;
+  partnerId: string;
+}
+
+export class CustomerService extends BaseApiService {
+  async getCustomersByPartnerId(partnerId: string): Promise<Customer[]> {
+    // For demo partners, return mock data
+    if (partnerId.startsWith('demo-')) {
+      return [
+        {
+          id: '1',
+          name: 'Carlos Silva',
+          email: 'carlos.silva@example.com',
+          location: 'Rio de Janeiro, RJ',
+          lastBooking: '2024-04-10',
+          totalBookings: 3,
+          partnerId: partnerId,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          name: 'Maria Oliveira',
+          email: 'maria.oliveira@example.com',
+          location: 'São Paulo, SP',
+          lastBooking: '2024-04-15',
+          totalBookings: 2,
+          partnerId: partnerId,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '3',
+          name: 'João Santos',
+          email: 'joao.santos@example.com',
+          location: 'Belo Horizonte, MG',
+          lastBooking: '2024-04-18',
+          totalBookings: 1,
+          partnerId: partnerId,
+          createdAt: new Date().toISOString(),
+        }
+      ];
+    }
+
+    const { data, error } = await this.supabase
+      .from('partner_customers')
+      .select('*')
+      .eq('partner_id', partnerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching customers:', error);
+      throw error;
+    }
+
+    return data.map(customer => ({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      location: customer.location,
+      lastBooking: customer.last_booking,
+      totalBookings: customer.total_bookings,
+      avatar: customer.avatar_url,
+      phone: customer.phone,
+      partnerId: customer.partner_id,
+      createdAt: customer.created_at
+    }));
+  }
+}
+
+export const customerService = new CustomerService();

@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PartnerLayout from "@/components/partner/PartnerLayout";
-import PartnerCustomersTable from "@/components/partner/dashboard/PartnerCustomersTable";
+import PartnerCustomersTable from "@/components/partner/customers/PartnerCustomersTable";
 
 const PartnerClients: React.FC = () => {
   return (

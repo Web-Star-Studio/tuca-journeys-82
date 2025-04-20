@@ -1,4 +1,3 @@
-
 import { Tour } from "@/types/database";
 import { Accommodation } from "@/types/database";
 import { Booking } from "@/types/bookings";
@@ -213,6 +212,7 @@ export function generateDemoData(): DemoData {
   const bookings: Booking[] = [
     {
       id: "booking-001",
+      user_id: "user-001",
       user_name: "João Silva",
       user_email: "joao@example.com",
       item_type: "tour",
@@ -223,10 +223,18 @@ export function generateDemoData(): DemoData {
       total_price: 700,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-09-01T14:30:00Z"
+      payment_method: "credit_card",
+      created_at: "2023-09-01T14:30:00Z",
+      updated_at: "2023-09-01T14:30:00Z",
+      tour_id: 1,
+      accommodation_id: undefined,
+      event_id: undefined,
+      vehicle_id: undefined,
+      special_requests: ""
     },
     {
       id: "booking-002",
+      user_id: "user-002",
       user_name: "Maria Oliveira",
       user_email: "maria@example.com",
       item_type: "accommodation",
@@ -237,13 +245,21 @@ export function generateDemoData(): DemoData {
       total_price: 4250,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-08-25T10:15:00Z"
+      payment_method: "credit_card",
+      created_at: "2023-08-25T10:15:00Z",
+      updated_at: "2023-08-25T10:15:00Z",
+      tour_id: undefined,
+      accommodation_id: 1,
+      event_id: undefined,
+      vehicle_id: undefined,
+      special_requests: ""
     },
     {
       id: "booking-003",
+      user_id: "user-003",
       user_name: "Pedro Santos",
       user_email: "pedro@example.com",
-      item_type: "package",
+      item_type: "event",  // Changed from package to event
       item_name: "Escapada Romântica",
       start_date: "2023-12-05",
       end_date: "2023-12-10",
@@ -251,10 +267,18 @@ export function generateDemoData(): DemoData {
       total_price: 4899,
       status: "pending",
       payment_status: "pending",
-      created_at: "2023-09-20T16:45:00Z"
+      payment_method: undefined,
+      created_at: "2023-09-20T16:45:00Z",
+      updated_at: "2023-09-20T16:45:00Z",
+      tour_id: undefined,
+      accommodation_id: undefined,
+      event_id: 1,
+      vehicle_id: undefined,
+      special_requests: ""
     },
     {
       id: "booking-004",
+      user_id: "user-004",
       user_name: "Ana Souza",
       user_email: "ana@example.com",
       item_type: "tour",
@@ -265,10 +289,18 @@ export function generateDemoData(): DemoData {
       total_price: 480,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-09-15T11:30:00Z"
+      payment_method: "credit_card",
+      created_at: "2023-09-15T11:30:00Z",
+      updated_at: "2023-09-15T11:30:00Z",
+      tour_id: 2,
+      accommodation_id: undefined,
+      event_id: undefined,
+      vehicle_id: undefined,
+      special_requests: ""
     },
     {
       id: "booking-005",
+      user_id: "user-001",
       user_name: "João Silva",
       user_email: "joao@example.com",
       item_type: "accommodation",
@@ -279,7 +311,14 @@ export function generateDemoData(): DemoData {
       total_price: 11000,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-09-10T09:20:00Z"
+      payment_method: "credit_card",
+      created_at: "2023-09-10T09:20:00Z",
+      updated_at: "2023-09-10T09:20:00Z",
+      tour_id: undefined,
+      accommodation_id: 2,
+      event_id: undefined,
+      vehicle_id: undefined,
+      special_requests: ""
     }
   ];
   

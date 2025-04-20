@@ -27,9 +27,24 @@ export class EventService extends BaseApiService {
     // Placeholder implementation
     return {
       id: Date.now(),
-      ...eventData,
+      name: eventData.name,
+      description: eventData.description,
+      short_description: eventData.short_description || '',
+      date: eventData.date,
+      start_time: eventData.start_time,
+      end_time: eventData.end_time,
+      location: eventData.location,
+      price: eventData.price,
+      capacity: eventData.capacity,
+      available_spots: eventData.available_spots,
+      category: eventData.category,
+      image_url: eventData.image_url,
+      partner_id: eventData.partner_id,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      featured: eventData.featured || false,
+      status: eventData.status || 'scheduled',
+      organizer: eventData.organizer || 'Event Organizer'
     };
   }
 
@@ -39,6 +54,7 @@ export class EventService extends BaseApiService {
       id,
       name: 'Updated Event',
       description: 'Description',
+      short_description: 'Short description',
       date: new Date().toISOString(),
       start_time: '09:00',
       end_time: '12:00',
@@ -51,8 +67,8 @@ export class EventService extends BaseApiService {
       partner_id: eventData.partner_id || 'partner-1',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      status: 'scheduled',
       featured: false,
+      status: 'scheduled',
       organizer: 'Event Organizer'
     };
   }

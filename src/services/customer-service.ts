@@ -1,89 +1,108 @@
 
 import { BaseApiService } from './base-api';
-
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  location: string;
-  lastBooking?: string;
-  totalBookings: number;
-  avatar?: string;
-  phone?: string;
-  createdAt: string;
-  partnerId: string;
-}
+import { Customer } from '@/types/customer';
+import { supabase } from '@/lib/supabase';
 
 export class CustomerService extends BaseApiService {
-  async getCustomersByPartnerId(partnerId: string): Promise<Customer[]> {
-    // For demo partners, return mock data
-    if (partnerId.startsWith('demo-')) {
-      return [
-        {
-          id: '1',
-          name: 'Carlos Silva',
-          email: 'carlos.silva@example.com',
-          location: 'Rio de Janeiro, RJ',
-          lastBooking: '2024-04-10',
-          totalBookings: 3,
-          partnerId: partnerId,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Maria Oliveira',
-          email: 'maria.oliveira@example.com',
-          location: 'São Paulo, SP',
-          lastBooking: '2024-04-15',
-          totalBookings: 2,
-          partnerId: partnerId,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          name: 'João Santos',
-          email: 'joao.santos@example.com',
-          location: 'Belo Horizonte, MG',
-          lastBooking: '2024-04-18',
-          totalBookings: 1,
-          partnerId: partnerId,
-          createdAt: new Date().toISOString(),
-        }
-      ];
+  async getCustomers(): Promise<Customer[]> {
+    // Demo implementation
+    return this.getMockCustomers();
+  }
+
+  async getCustomerById(id: string): Promise<Customer | null> {
+    const customers = await this.getCustomers();
+    return customers.find(customer => customer.id === id) || null;
+  }
+
+  async createCustomer(customerData: Partial<Customer>): Promise<Customer> {
+    // Mock implementation
+    return {
+      id: Date.now().toString(),
+      name: customerData.name || 'New Customer',
+      email: customerData.email || 'customer@example.com',
+      phone: customerData.phone || '',
+      location: customerData.location || '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      avatar_url: customerData.avatar_url || '',
+      last_booking: null,
+      total_bookings: 0
+    };
+  }
+
+  async updateCustomer(id: string, customerData: Partial<Customer>): Promise<Customer> {
+    // Mock implementation
+    const customer = await this.getCustomerById(id);
+    if (!customer) {
+      throw new Error(`Customer with ID ${id} not found`);
     }
 
+    return {
+      ...customer,
+      ...customerData,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  async deleteCustomer(id: string): Promise<void> {
+    // Mock implementation
+    console.log(`Deleting customer ${id}`);
+  }
+
+  private async getCustomersFromDB(): Promise<Customer[]> {
+    // Use a simplified query to avoid type recursion issues
     try {
-      // For actual data, we'll query the user_profiles table 
-      // Since the actual table structure seems to be different from what's expected
-      // We'll provide a safe implementation that avoids type errors
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
-        .eq('partner_id', partnerId);
-
-      if (error) {
-        console.error('Error fetching customers:', error);
-        throw error;
-      }
-
-      // Map the data to our Customer interface with safe type handling
-      return data.map(profile => ({
-        id: profile.id.toString(),
-        name: profile.name || 'Unknown',
-        email: profile.email || 'unknown@example.com',
-        location: profile.city ? `${profile.city}, ${profile.state || ''}` : 'Unknown',
-        lastBooking: null, 
-        totalBookings: 0,
-        avatar: profile.avatar_url,
-        phone: profile.phone,
-        partnerId: partnerId,
-        createdAt: profile.created_at
+        .select('*');
+      
+      if (error) throw error;
+      
+      return (data || []).map(profile => ({
+        id: profile.id,
+        name: profile.name || '',
+        email: profile.email || '',
+        location: profile.city || '',
+        last_booking: null,
+        total_bookings: 0,
+        avatar_url: '',
+        created_at: profile.created_at,
+        updated_at: profile.updated_at || profile.created_at,
+        phone: profile.phone || ''
       }));
     } catch (error) {
-      console.error('Error in getCustomersByPartnerId:', error);
-      // If there's an error, return empty array
+      console.error('Error fetching customers:', error);
       return [];
     }
+  }
+
+  private getMockCustomers(): Customer[] {
+    return [
+      {
+        id: '1',
+        name: 'João Silva',
+        email: 'joao.silva@example.com',
+        phone: '+55 11 98765-4321',
+        location: 'São Paulo, SP',
+        created_at: '2023-08-10T12:30:00Z',
+        updated_at: '2023-09-15T14:22:00Z',
+        avatar_url: '/avatars/joao.jpg',
+        last_booking: '2023-09-12T09:45:00Z',
+        total_bookings: 3
+      },
+      {
+        id: '2',
+        name: 'Maria Oliveira',
+        email: 'maria.oliveira@example.com',
+        phone: '+55 21 99876-5432',
+        location: 'Rio de Janeiro, RJ',
+        created_at: '2023-07-22T10:15:00Z',
+        updated_at: '2023-09-01T16:08:00Z',
+        avatar_url: '/avatars/maria.jpg',
+        last_booking: '2023-08-28T15:30:00Z',
+        total_bookings: 2
+      }
+    ];
   }
 }
 

@@ -27,9 +27,20 @@ export class VehicleService extends BaseApiService {
     // Placeholder implementation
     return {
       id: Date.now(),
-      ...vehicleData,
+      name: vehicleData.name,
+      description: vehicleData.description,
+      type: vehicleData.type,
+      price_per_day: vehicleData.price_per_day,
+      price: vehicleData.price,
+      capacity: vehicleData.capacity,
+      image_url: vehicleData.image_url,
+      partner_id: vehicleData.partner_id,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      available_quantity: vehicleData.available_quantity,
+      features: vehicleData.features || [],
+      gallery_images: vehicleData.gallery_images || [],
+      is_available: vehicleData.is_available || true
     };
   }
 
@@ -41,6 +52,7 @@ export class VehicleService extends BaseApiService {
       description: 'Description',
       type: 'car',
       price_per_day: 100,
+      price: 100,
       capacity: 4,
       image_url: '',
       partner_id: vehicleData.partner_id || 'partner-1',
@@ -48,7 +60,8 @@ export class VehicleService extends BaseApiService {
       updated_at: new Date().toISOString(),
       available_quantity: 1,
       features: [],
-      gallery_images: []
+      gallery_images: [],
+      is_available: true
     };
   }
 
@@ -82,7 +95,8 @@ export class VehicleService extends BaseApiService {
         updated_at: new Date().toISOString(),
         available_quantity: 3,
         features: ['4x4', 'Open top', 'Manual'],
-        gallery_images: ['/vehicles/buggy-1.jpg', '/vehicles/buggy-2.jpg']
+        gallery_images: ['/vehicles/buggy-1.jpg', '/vehicles/buggy-2.jpg'],
+        is_available: true
       },
       {
         id: 2,
@@ -97,7 +111,9 @@ export class VehicleService extends BaseApiService {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         available_quantity: 5,
-        features: ['Electric', 'Basket', '30km range']
+        features: ['Electric', 'Basket', '30km range'],
+        gallery_images: [],
+        is_available: true
       }
     ];
   }

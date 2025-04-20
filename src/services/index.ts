@@ -1,5 +1,4 @@
 
-export * from './api-service';
 export * from './booking-service';
 export * from './customer-service';
 export * from './event-service';

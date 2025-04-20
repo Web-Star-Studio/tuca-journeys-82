@@ -332,23 +332,24 @@ export const getUserBookings = async (userId: string) => {
     user_id: dbBooking.user_id,
     tour_id: dbBooking.tour_id,
     accommodation_id: dbBooking.accommodation_id,
+    event_id: dbBooking.event_id,
+    vehicle_id: dbBooking.vehicle_id,
     start_date: dbBooking.start_date,
     end_date: dbBooking.end_date,
-    guests: dbBooking.guests, // Map from guests to number_of_guests
+    guests: dbBooking.guests,
     total_price: dbBooking.total_price,
     status: dbBooking.status as 'pending' | 'confirmed' | 'cancelled',
-    notes: dbBooking.special_requests || undefined,
-    created_at: dbBooking.created_at,
-    updated_at: dbBooking.updated_at,
-    tours: dbBooking.tours,
-    accommodations: dbBooking.accommodations,
-    payment_method: dbBooking.payment_method,
+    payment_status: dbBooking.payment_status as 'paid' | 'pending' | 'refunded',
     user_name: '',
     user_email: '',
-    item_type: 'tour',
+    item_type: dbBooking.tour_id ? 'tour' : 
+               dbBooking.accommodation_id ? 'accommodation' : 
+               dbBooking.event_id ? 'event' : 'vehicle',
     item_name: '',
-    event_id: undefined,
-    vehicle_id: undefined
+    payment_method: dbBooking.payment_method,
+    special_requests: dbBooking.special_requests,
+    created_at: dbBooking.created_at,
+    updated_at: dbBooking.updated_at
   }));
   
   return bookings;

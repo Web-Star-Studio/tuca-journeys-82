@@ -1,7 +1,6 @@
-
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
-import { Booking, CreateBookingDTO } from '@/types/bookings'; // Changed from BookingDB to Booking
+import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { Package } from '@/data/types/packageTypes';
 
 /**
@@ -108,6 +107,8 @@ class ApiService {
       user_id: bookingData.user_id,
       tour_id: bookingData.tour_id,
       accommodation_id: bookingData.accommodation_id,
+      event_id: bookingData.event_id,
+      vehicle_id: bookingData.vehicle_id,
       start_date: bookingData.start_date,
       end_date: bookingData.end_date,
       guests: bookingData.guests,
@@ -174,10 +175,10 @@ class ApiService {
     return {
       id: bookingDB.id.toString(),
       user_id: bookingDB.user_id,
-      user_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'User',
-      user_email: '',  // This would ideally come from user profiles
+      user_name: bookingDB.user_name || 'User',
+      user_email: bookingDB.user_email || '',
       item_type: itemType,
-      item_name: bookingDB.tours?.title || bookingDB.accommodations?.title || 'Booking',
+      item_name: bookingDB.item_name || bookingDB.tours?.title || bookingDB.accommodations?.title || 'Booking',
       start_date: bookingDB.start_date,
       end_date: bookingDB.end_date,
       guests: bookingDB.guests,
@@ -190,8 +191,8 @@ class ApiService {
       updated_at: bookingDB.updated_at,
       tour_id: bookingDB.tour_id,
       accommodation_id: bookingDB.accommodation_id,
-      tours: bookingDB.tours,
-      accommodations: bookingDB.accommodations
+      event_id: bookingDB.event_id,
+      vehicle_id: bookingDB.vehicle_id
     };
   }
 

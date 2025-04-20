@@ -25,17 +25,18 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ collapsed, partne
   return (
     <nav className="space-y-1">
       {routes.map((route) => (
-        <SidebarLink
-          key={route.path}
-          to={route.path}
-          icon={<route.icon size={20} />}
-          label={route.label}
-          collapsed={collapsed}
-        />
+        route.icon ? (
+          <SidebarLink
+            key={route.path}
+            to={route.path}
+            icon={<route.icon size={20} />}
+            label={route.label}
+            collapsed={collapsed}
+          />
+        ) : null
       ))}
     </nav>
   );
 };
 
 export default SidebarNavigation;
-

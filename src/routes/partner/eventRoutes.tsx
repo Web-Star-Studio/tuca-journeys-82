@@ -11,4 +11,3 @@ export const eventRoutes = [
     icon: CalendarDays,
   },
 ];
-

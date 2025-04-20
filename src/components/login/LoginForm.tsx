@@ -16,7 +16,7 @@ interface LoginFormValues {
 }
 
 interface LoginFormProps {
-  onSuccessfulLogin?: (redirectToAdmin: boolean) => void;
+  onSuccessfulLogin?: (redirectToAdmin: boolean, isPartner: boolean) => void;
 }
 
 const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
@@ -54,7 +54,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       
       // Use the callback if provided, otherwise handle navigation directly
       if (onSuccessfulLogin) {
-        onSuccessfulLogin(isAdmin);
+        onSuccessfulLogin(isAdmin, isPartner);
       } else {
         if (isAdmin) {
           navigate("/admin/dashboard");

@@ -23,7 +23,7 @@ const QuickAccessButtons = () => {
     try {
       await signIn(email, password);
       
-      // Redirect based on user type
+      // Redirect based on user type with clear logic
       if (email.includes("admin")) {
         navigate("/admin/dashboard");
       } else if (email.includes("partner")) {

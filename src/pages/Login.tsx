@@ -9,14 +9,19 @@ const Login = () => {
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
-  const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
-    // Check if this is a partner login
-    if (returnTo.includes('/parceiro/')) {
+  const handleSuccessfulLogin = (redirectToAdmin: boolean, isPartner: boolean = false) => {
+    // Check role-based redirections
+    if (isPartner) {
       navigate("/parceiro/dashboard");
     } else if (redirectToAdmin) {
       navigate("/admin/dashboard");
     } else {
-      navigate(returnTo);
+      // For normal users, respect the returnTo parameter unless it's for partner routes
+      if (returnTo.includes('/parceiro/')) {
+        navigate("/dashboard");
+      } else {
+        navigate(returnTo);
+      }
     }
   };
   

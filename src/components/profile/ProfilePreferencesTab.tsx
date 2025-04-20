@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useProfile } from "@/hooks/use-profile";
+import { useProfile, ExtendedUserProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -26,9 +26,9 @@ const ProfilePreferencesTab = () => {
     setIsSaving(true);
     try {
       await updateProfile({
-        ...profile,
+        ...(profile as ExtendedUserProfile),
         preferences: {
-          ...profile?.preferences,
+          ...(profile?.preferences || {}),
           travelStyle: preferences.travelStyle,
           budget_range: preferences.budget,
           activities: preferences.activities,

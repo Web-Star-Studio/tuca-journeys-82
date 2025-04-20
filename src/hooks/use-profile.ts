@@ -2,6 +2,33 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { UserPreferences } from '@/types/database';
+
+// Extend the UserProfile type to include the missing fields
+export interface ExtendedUserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  bio?: string;
+  preferences?: {
+    travelStyle: string;
+    budget_range: string;
+    activities: string[];
+    notifications: {
+      marketing: boolean;
+      booking_updates: boolean;
+      recommendations: boolean;
+    }
+  };
+  created_at: string;
+  updated_at: string;
+}
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -11,7 +38,7 @@ export const useProfile = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       // In a real app, we'd fetch from an API
-      // For demo, return a placeholder user
+      // For demo, return a placeholder user with all required fields
       return {
         id: "demo-user",
         name: "Usuário Demo",
@@ -22,16 +49,27 @@ export const useProfile = () => {
         state: "SP",
         zip_code: "01234-567",
         country: "Brasil",
+        bio: "Olá, sou um usuário demonstrativo.",
+        preferences: {
+          travelStyle: "relaxation",
+          budget_range: "medium",
+          activities: ["beach", "hiking"],
+          notifications: {
+            marketing: true,
+            booking_updates: true,
+            recommendations: true
+          }
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      };
+      } as ExtendedUserProfile;
     },
     enabled: !!user,
   });
 
   // Mutation to update profile
   const updateProfileMutation = useMutation({
-    mutationFn: async (profileData: any) => {
+    mutationFn: async (profileData: ExtendedUserProfile) => {
       // In a real app, we'd call an API
       console.log('Updating profile:', profileData);
       // Simulate API delay
@@ -52,6 +90,6 @@ export const useProfile = () => {
     profile,
     isLoading,
     error,
-    updateProfile: (data: any) => updateProfileMutation.mutate(data)
+    updateProfile: (data: ExtendedUserProfile) => updateProfileMutation.mutate(data)
   };
 };

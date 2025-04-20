@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import PartnerLayout from "@/components/partner/PartnerLayout";
 import { useCurrentPartner } from "@/hooks/use-partner";
@@ -10,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { FileUpload, Mail, MapPin, Phone, Globe, Building, Smile, AlertTriangle } from "lucide-react";
+import { Upload, Mail, MapPin, Phone, Globe, Building, Smile, AlertTriangle } from "lucide-react";
 
 const PartnerProfile: React.FC = () => {
   const { data: partner } = useCurrentPartner();
@@ -167,7 +166,7 @@ const PartnerProfile: React.FC = () => {
                           </AvatarFallback>
                         </Avatar>
                         <Button size="icon" className="absolute bottom-0 right-0 h-8 w-8 rounded-full">
-                          <FileUpload className="h-4 w-4" />
+                          <Upload className="h-4 w-4" />
                         </Button>
                       </div>
                       <Badge className="mb-2">{getPartnerTypeLabel()}</Badge>

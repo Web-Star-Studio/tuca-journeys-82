@@ -21,7 +21,8 @@ export const events: Event[] = [
     featured: true,
     partner_id: "1",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 2,
@@ -42,7 +43,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "2",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 3,
@@ -63,7 +65,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "1",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 4,
@@ -84,7 +87,8 @@ export const events: Event[] = [
     featured: true,
     partner_id: "3",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 5,
@@ -105,7 +109,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "4",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 6,
@@ -126,7 +131,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "2",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 7,
@@ -147,7 +153,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "3",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 8,
@@ -168,7 +175,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "5",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   },
   {
     id: 9,
@@ -189,7 +197,8 @@ export const events: Event[] = [
     featured: false,
     partner_id: "6",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    gallery_images: []
   }
 ];
 

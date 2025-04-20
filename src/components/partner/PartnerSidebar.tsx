@@ -2,11 +2,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  Home,
+  LayoutDashboard,
   Calendar,
   Package,
   Settings,
-  Users,
+  User,
   BarChart2,
   MessageSquare,
   Tag,
@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentPartner } from '@/hooks/use-partner';
@@ -62,6 +63,17 @@ interface PartnerSidebarProps {
 const PartnerSidebar: React.FC<PartnerSidebarProps> = ({ collapsed, setCollapsed }) => {
   const { data: partner } = useCurrentPartner();
 
+  // Get business name initials for the collapsed logo
+  const getInitials = (name?: string) => {
+    if (!name) return "TN";
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <aside
       className={cn(
@@ -74,11 +86,11 @@ const PartnerSidebar: React.FC<PartnerSidebarProps> = ({ collapsed, setCollapsed
           {!collapsed ? (
             <div>
               <h2 className="text-lg font-medium">Parceiro</h2>
-              <p className="text-xs text-gray-500 truncate">{partner?.business_name}</p>
+              <p className="text-xs text-gray-500 truncate">{partner?.business_name || "Tucano Noronha"}</p>
             </div>
           ) : (
             <div className="mx-auto">
-              <span className="font-bold">TN</span>
+              <span className="font-bold">{getInitials(partner?.business_name)}</span>
             </div>
           )}
           <button
@@ -93,7 +105,7 @@ const PartnerSidebar: React.FC<PartnerSidebarProps> = ({ collapsed, setCollapsed
           <nav className="space-y-1">
             <SidebarLink
               to="/parceiro/dashboard"
-              icon={<Home size={20} />}
+              icon={<LayoutDashboard size={20} />}
               label="Dashboard"
               end
               collapsed={collapsed}
@@ -108,7 +120,7 @@ const PartnerSidebar: React.FC<PartnerSidebarProps> = ({ collapsed, setCollapsed
             {partner?.business_type === 'accommodation' && (
               <SidebarLink
                 to="/parceiro/hospedagens"
-                icon={<Home size={20} />}
+                icon={<Calendar size={20} />}
                 label="Hospedagens"
                 collapsed={collapsed}
               />
@@ -175,6 +187,13 @@ const PartnerSidebar: React.FC<PartnerSidebarProps> = ({ collapsed, setCollapsed
               to="/parceiro/chat"
               icon={<MessageSquare size={20} />}
               label="Mensagens"
+              collapsed={collapsed}
+            />
+            
+            <SidebarLink
+              to="/parceiro/perfil"
+              icon={<User size={20} />}
+              label="Perfil"
               collapsed={collapsed}
             />
             

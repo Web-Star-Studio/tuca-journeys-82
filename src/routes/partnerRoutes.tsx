@@ -6,6 +6,11 @@ import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerBookings from "@/pages/partner/Bookings";
 import PartnerProfile from "@/pages/partner/Profile";
 import PartnerRegister from "@/pages/partner/Register";
+import PartnerSettings from "@/pages/partner/Settings";
+import PartnerClients from "@/pages/partner/Clients";
+import PartnerReports from "@/pages/partner/Reports";
+import PartnerChat from "@/pages/partner/Chat";
+import PartnerCoupons from "@/pages/partner/Coupons";
 
 export const partnerRoutes = (
   <>
@@ -30,6 +35,46 @@ export const partnerRoutes = (
       element={
         <PartnerRoute>
           <PartnerProfile />
+        </PartnerRoute>
+      } 
+    />
+    <Route 
+      path="/parceiro/configuracoes" 
+      element={
+        <PartnerRoute>
+          <PartnerSettings />
+        </PartnerRoute>
+      } 
+    />
+    <Route 
+      path="/parceiro/clientes" 
+      element={
+        <PartnerRoute>
+          <PartnerClients />
+        </PartnerRoute>
+      } 
+    />
+    <Route 
+      path="/parceiro/relatorios" 
+      element={
+        <PartnerRoute>
+          <PartnerReports />
+        </PartnerRoute>
+      } 
+    />
+    <Route 
+      path="/parceiro/chat" 
+      element={
+        <PartnerRoute>
+          <PartnerChat />
+        </PartnerRoute>
+      } 
+    />
+    <Route 
+      path="/parceiro/cupons" 
+      element={
+        <PartnerRoute>
+          <PartnerCoupons />
         </PartnerRoute>
       } 
     />

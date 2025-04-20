@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBookingDetails, useCancelBooking } from '@/hooks/use-bookings';
@@ -17,7 +18,7 @@ const BookingDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { booking, isLoading, error } = useBookingDetails(id);
-  const { cancelBooking, isCancelling } = useCancelBooking();
+  const { cancelBooking, isPending: isCancelling } = useCancelBooking();
   
   // Handle cancellation request
   const handleCancelBooking = async () => {

@@ -2,6 +2,7 @@
 import { BaseApiService } from './base-api';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { supabase } from '@/lib/supabase';
+import { DatabaseBooking } from '@/types/database';
 
 export class BookingService extends BaseApiService {
   async getBookings(userId?: string): Promise<Booking[]> {
@@ -36,13 +37,13 @@ export class BookingService extends BaseApiService {
       }
       
       // Map the database bookings to our application model
-      const bookings = data.map(booking => ({
+      const bookings: Booking[] = data.map((booking: DatabaseBooking) => ({
         id: booking.id.toString(),
         user_id: booking.user_id,
         user_name: 'User', // This would need to be populated from user profiles
         user_email: '', // This would need to be populated from user profiles
-        tour_id: booking.tour_id,
-        accommodation_id: booking.accommodation_id,
+        tour_id: booking.tour_id || null,
+        accommodation_id: booking.accommodation_id || null,
         event_id: booking.event_id || null,
         vehicle_id: booking.vehicle_id || null,
         item_type: booking.tour_id ? 'tour' : 
@@ -86,29 +87,30 @@ export class BookingService extends BaseApiService {
       }
       
       // Map to our application model
+      const booking = data as DatabaseBooking;
       return {
-        id: data.id.toString(),
-        user_id: data.user_id,
+        id: booking.id.toString(),
+        user_id: booking.user_id,
         user_name: 'User',
         user_email: '',
-        tour_id: data.tour_id,
-        accommodation_id: data.accommodation_id,
-        event_id: data.event_id || null,
-        vehicle_id: data.vehicle_id || null,
-        item_type: data.tour_id ? 'tour' : 
-                  data.accommodation_id ? 'accommodation' : 
-                  data.event_id ? 'event' : 'vehicle',
+        tour_id: booking.tour_id || null,
+        accommodation_id: booking.accommodation_id || null,
+        event_id: booking.event_id || null,
+        vehicle_id: booking.vehicle_id || null,
+        item_type: booking.tour_id ? 'tour' : 
+                  booking.accommodation_id ? 'accommodation' : 
+                  booking.event_id ? 'event' : 'vehicle',
         item_name: '',
-        start_date: data.start_date,
-        end_date: data.end_date,
-        guests: data.guests,
-        total_price: data.total_price,
-        status: data.status as 'pending' | 'confirmed' | 'cancelled',
-        payment_status: data.payment_status as 'paid' | 'pending' | 'refunded',
-        payment_method: data.payment_method,
-        special_requests: data.special_requests,
-        created_at: data.created_at,
-        updated_at: data.updated_at
+        start_date: booking.start_date,
+        end_date: booking.end_date,
+        guests: booking.guests,
+        total_price: booking.total_price,
+        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
+        payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
+        payment_method: booking.payment_method,
+        special_requests: booking.special_requests,
+        created_at: booking.created_at,
+        updated_at: booking.updated_at
       };
     } catch (error) {
       console.error(`Error fetching booking ${bookingId}:`, error);
@@ -121,8 +123,7 @@ export class BookingService extends BaseApiService {
   async createBooking(bookingData: CreateBookingDTO): Promise<Booking> {
     try {
       // Create a booking object that matches the database schema
-      // Map number_of_guests to guests as required by the database
-      const dbBooking = {
+      const dbBooking: Partial<DatabaseBooking> = {
         user_id: bookingData.user_id,
         tour_id: bookingData.tour_id,
         accommodation_id: bookingData.accommodation_id,
@@ -148,30 +149,32 @@ export class BookingService extends BaseApiService {
         throw error;
       }
       
+      const booking = data as DatabaseBooking;
+      
       // Map the response back to the Booking interface expected by the app
       return {
-        id: data.id.toString(),
-        user_id: data.user_id,
+        id: booking.id.toString(),
+        user_id: booking.user_id,
         user_name: 'User',
         user_email: '',
-        tour_id: data.tour_id,
-        accommodation_id: data.accommodation_id,
-        event_id: data.event_id || null,
-        vehicle_id: data.vehicle_id || null,
-        item_type: data.tour_id ? 'tour' : 
-                  data.accommodation_id ? 'accommodation' : 
-                  data.event_id ? 'event' : 'vehicle',
+        tour_id: booking.tour_id || null,
+        accommodation_id: booking.accommodation_id || null,
+        event_id: booking.event_id || null,
+        vehicle_id: booking.vehicle_id || null,
+        item_type: booking.tour_id ? 'tour' : 
+                  booking.accommodation_id ? 'accommodation' : 
+                  booking.event_id ? 'event' : 'vehicle',
         item_name: '',
-        start_date: data.start_date,
-        end_date: data.end_date,
-        guests: data.guests,
-        total_price: data.total_price,
-        status: data.status as 'pending' | 'confirmed' | 'cancelled',
-        payment_status: data.payment_status as 'paid' | 'pending' | 'refunded',
-        payment_method: data.payment_method,
-        special_requests: data.special_requests,
-        created_at: data.created_at,
-        updated_at: data.updated_at
+        start_date: booking.start_date,
+        end_date: booking.end_date,
+        guests: booking.guests,
+        total_price: booking.total_price,
+        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
+        payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
+        payment_method: booking.payment_method,
+        special_requests: booking.special_requests,
+        created_at: booking.created_at,
+        updated_at: booking.updated_at
       };
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -182,10 +185,10 @@ export class BookingService extends BaseApiService {
         user_id: bookingData.user_id,
         user_name: 'Demo User',
         user_email: 'demo@example.com',
-        tour_id: bookingData.tour_id,
-        accommodation_id: bookingData.accommodation_id,
-        event_id: bookingData.event_id,
-        vehicle_id: bookingData.vehicle_id,
+        tour_id: bookingData.tour_id || null,
+        accommodation_id: bookingData.accommodation_id || null,
+        event_id: bookingData.event_id || null,
+        vehicle_id: bookingData.vehicle_id || null,
         item_type: bookingData.tour_id ? 'tour' : 
                   bookingData.accommodation_id ? 'accommodation' : 
                   bookingData.event_id ? 'event' : 'vehicle',
@@ -196,8 +199,8 @@ export class BookingService extends BaseApiService {
         total_price: bookingData.total_price,
         status: bookingData.status,
         payment_status: bookingData.payment_status || 'pending',
-        payment_method: bookingData.payment_method,
-        special_requests: bookingData.special_requests,
+        payment_method: bookingData.payment_method || null,
+        special_requests: bookingData.special_requests || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -219,30 +222,32 @@ export class BookingService extends BaseApiService {
         throw error;
       }
       
+      const booking = data as DatabaseBooking;
+      
       // Map to our application model
       return {
-        id: data.id.toString(),
-        user_id: data.user_id,
+        id: booking.id.toString(),
+        user_id: booking.user_id,
         user_name: 'User',
         user_email: '',
-        tour_id: data.tour_id,
-        accommodation_id: data.accommodation_id,
-        event_id: data.event_id || null,
-        vehicle_id: data.vehicle_id || null,
-        item_type: data.tour_id ? 'tour' : 
-                  data.accommodation_id ? 'accommodation' : 
-                  data.event_id ? 'event' : 'vehicle',
+        tour_id: booking.tour_id || null,
+        accommodation_id: booking.accommodation_id || null,
+        event_id: booking.event_id || null,
+        vehicle_id: booking.vehicle_id || null,
+        item_type: booking.tour_id ? 'tour' : 
+                  booking.accommodation_id ? 'accommodation' : 
+                  booking.event_id ? 'event' : 'vehicle',
         item_name: '',
-        start_date: data.start_date,
-        end_date: data.end_date,
-        guests: data.guests,
-        total_price: data.total_price,
-        status: data.status as 'pending' | 'confirmed' | 'cancelled',
-        payment_status: data.payment_status as 'paid' | 'pending' | 'refunded',
-        payment_method: data.payment_method,
-        special_requests: data.special_requests,
-        created_at: data.created_at,
-        updated_at: data.updated_at
+        start_date: booking.start_date,
+        end_date: booking.end_date,
+        guests: booking.guests,
+        total_price: booking.total_price,
+        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
+        payment_status: booking.payment_status as 'paid' | 'pending' | 'refunded',
+        payment_method: booking.payment_method,
+        special_requests: booking.special_requests,
+        created_at: booking.created_at,
+        updated_at: booking.updated_at
       };
     } catch (error) {
       console.error(`Error cancelling booking ${bookingId}:`, error);
@@ -254,7 +259,7 @@ export class BookingService extends BaseApiService {
       if (bookingIndex !== -1) {
         const updatedBooking = {
           ...mockBookings[bookingIndex],
-          status: 'cancelled',
+          status: 'cancelled' as const,
           updated_at: new Date().toISOString()
         };
         

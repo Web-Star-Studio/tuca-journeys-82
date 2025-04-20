@@ -2,7 +2,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Tour } from '@/types/database';
-import { demoData } from '@/utils/demoDataGenerator';
+import { generateDemoTours } from '@/utils/demoDataGenerator';
 
 export const useTours = () => {
   // Query to fetch tours
@@ -11,7 +11,7 @@ export const useTours = () => {
     queryFn: async () => {
       // In a real app, we'd fetch from an API
       // For demo purposes, return our generated tours
-      return demoData.tours;
+      return generateDemoTours();
     },
   });
 
@@ -86,7 +86,8 @@ export const useTour = (tourId?: number) => {
       
       // In a real app, we'd fetch from an API endpoint for a single tour
       // For demo, find the tour in our demo data
-      const tour = demoData.tours.find(t => t.id === tourId);
+      const tours = generateDemoTours();
+      const tour = tours.find(t => t.id === tourId);
       if (!tour) throw new Error('Tour not found');
       
       return tour;

@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 export const useCancelBooking = () => {
   const queryClient = useQueryClient();
   
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (bookingId: string) => {
       return bookingService.cancelBooking(bookingId);
     },
@@ -22,4 +22,10 @@ export const useCancelBooking = () => {
       toast.error(`Erro ao cancelar reserva: ${error.message}`);
     }
   });
+  
+  return {
+    cancelBooking: mutation.mutate,
+    isCancelling: mutation.isPending,
+    ...mutation
+  };
 };

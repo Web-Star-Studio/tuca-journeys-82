@@ -2,7 +2,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { demoData } from '@/utils/demoDataGenerator';
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -12,11 +11,7 @@ export const useProfile = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       // In a real app, we'd fetch from an API
-      // For demo, return the first demo user or create a placeholder
-      if (demoData.users.length > 0) {
-        return demoData.users[0];
-      }
-      
+      // For demo, return a placeholder user
       return {
         id: "demo-user",
         name: "Usuário Demo",

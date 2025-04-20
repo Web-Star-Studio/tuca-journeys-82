@@ -32,10 +32,10 @@ const BookingRow: React.FC<BookingRowProps> = ({
   compact = false 
 }) => {
   const navigate = useNavigate();
-  const { cancelBooking: hookCancelBooking } = useCancelBooking();
+  const { cancelBooking } = useCancelBooking();
   
   // Use the cancelBooking function from props if provided, otherwise use the one from the hook
-  const cancelBooking = propsCancelBooking || hookCancelBooking;
+  const handleCancelBooking = propsCancelBooking || ((id: string) => cancelBooking(id));
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -55,8 +55,8 @@ const BookingRow: React.FC<BookingRowProps> = ({
   };
 
   const handleCancel = () => {
-    if (cancelBooking) {
-      cancelBooking(booking.id);
+    if (handleCancelBooking) {
+      handleCancelBooking(booking.id);
       toast.success('Reserva cancelada com sucesso');
     }
   };
@@ -95,7 +95,7 @@ const BookingRow: React.FC<BookingRowProps> = ({
               <ExternalLink className="h-4 w-4 mr-1" /> Ver
             </Button>
             
-            {booking.status !== "cancelled" && cancelBooking && (
+            {booking.status !== "cancelled" && handleCancelBooking && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 

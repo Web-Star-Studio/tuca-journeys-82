@@ -1,7 +1,6 @@
 
 import { Package } from "@/data/types/packageTypes";
 import { getPackagesByCategory } from "@/data/packages";
-import { demoData } from "@/utils/demoDataGenerator";
 
 export interface PackageSaleData {
   name: string;

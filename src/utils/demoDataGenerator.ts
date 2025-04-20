@@ -1,4 +1,27 @@
+
 import { Booking } from "@/types/bookings";
+
+// Export demoData as an object with all the generated data
+export const demoData = {
+  tours: generateDemoTours(),
+  accommodations: generateDemoAccommodations(),
+  bookings: (userId: string) => generateDemoBookings(userId),
+  users: [
+    {
+      id: "demo-user",
+      name: "Usuário Demo",
+      email: "demo@example.com",
+      phone: "+55 11 99999-9999",
+      address: "Av. Exemplo, 123",
+      city: "São Paulo",
+      state: "SP",
+      zip_code: "01234-567",
+      country: "Brasil",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ]
+};
 
 export function generateDemoTours() {
   return [

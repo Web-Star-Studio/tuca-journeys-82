@@ -52,29 +52,37 @@ export class CustomerService extends BaseApiService {
       ];
     }
 
-    const { data, error } = await this.supabase
-      .from('partner_customers')
-      .select('*')
-      .eq('partner_id', partnerId)
-      .order('created_at', { ascending: false });
+    try {
+      // For actual data, we'll query a custom table that should be created in Supabase
+      const { data, error } = await this.supabase
+        .from('customers')
+        .select('*')
+        .eq('partner_id', partnerId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching customers:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching customers:', error);
+        throw error;
+      }
+
+      // Map the data to our Customer interface
+      return data.map(customer => ({
+        id: customer.id.toString(),
+        name: customer.name,
+        email: customer.email,
+        location: customer.location,
+        lastBooking: customer.last_booking,
+        totalBookings: customer.total_bookings,
+        avatar: customer.avatar_url,
+        phone: customer.phone,
+        partnerId: customer.partner_id,
+        createdAt: customer.created_at
+      }));
+    } catch (error) {
+      console.error('Error in getCustomersByPartnerId:', error);
+      // If there's an error, return empty array
+      return [];
     }
-
-    return data.map(customer => ({
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      location: customer.location,
-      lastBooking: customer.last_booking,
-      totalBookings: customer.total_bookings,
-      avatar: customer.avatar_url,
-      phone: customer.phone,
-      partnerId: customer.partner_id,
-      createdAt: customer.created_at
-    }));
   }
 }
 

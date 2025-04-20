@@ -21,7 +21,12 @@ export function useRecommendations() {
             .limit(4);
             
           if (error) throw error;
-          return data as Tour[];
+          // Add missing fields to match Tour interface
+          return (data || []).map(tour => ({
+            ...tour,
+            is_available: tour.is_available ?? true,
+            location: tour.meeting_point || tour.location || "Unknown"
+          })) as Tour[];
         }
         
         // Get tours based on travel style and activities preferences
@@ -43,11 +48,25 @@ export function useRecommendations() {
             .limit(4 - data.length);
             
           if (!additionalQuery.error && additionalQuery.data) {
-            return [...data, ...additionalQuery.data] as Tour[];
+            const completeAdditionalData = additionalQuery.data.map(tour => ({
+              ...tour,
+              is_available: tour.is_available ?? true,
+              location: tour.meeting_point || tour.location || "Unknown"
+            }));
+            const completeData = data.map(tour => ({
+              ...tour,
+              is_available: tour.is_available ?? true,
+              location: tour.meeting_point || tour.location || "Unknown"
+            }));
+            return [...completeData, ...completeAdditionalData] as Tour[];
           }
         }
         
-        return data as Tour[];
+        return data.map(tour => ({
+          ...tour,
+          is_available: tour.is_available ?? true,
+          location: tour.meeting_point || tour.location || "Unknown"
+        })) as Tour[];
       } catch (error) {
         console.error("Error fetching recommended tours:", error);
         return [];
@@ -68,7 +87,10 @@ export function useRecommendations() {
             .limit(4);
             
           if (error) throw error;
-          return data as Accommodation[];
+          return (data || []).map(accommodation => ({
+            ...accommodation,
+            is_available: accommodation.is_available ?? true
+          })) as Accommodation[];
         }
         
         // Filter accommodations by preferred types
@@ -91,11 +113,22 @@ export function useRecommendations() {
             .limit(4 - data.length);
             
           if (!additionalQuery.error && additionalQuery.data) {
-            return [...data, ...additionalQuery.data] as Accommodation[];
+            const completeAdditionalData = additionalQuery.data.map(accommodation => ({
+              ...accommodation,
+              is_available: accommodation.is_available ?? true
+            }));
+            const completeData = data.map(accommodation => ({
+              ...accommodation,
+              is_available: accommodation.is_available ?? true
+            }));
+            return [...completeData, ...completeAdditionalData] as Accommodation[];
           }
         }
         
-        return data as Accommodation[];
+        return data.map(accommodation => ({
+          ...accommodation,
+          is_available: accommodation.is_available ?? true
+        })) as Accommodation[];
       } catch (error) {
         console.error("Error fetching recommended accommodations:", error);
         return [];
@@ -119,7 +152,13 @@ export function useRecommendations() {
           
         if (error) throw error;
         
-        return data as Event[];
+        return (data || []).map(event => ({
+          ...event,
+          title: event.title || event.name || "",
+          time: event.start_time || "",
+          is_available: event.is_available ?? true,
+          organizer: event.organizer || "Unknown"
+        })) as Event[];
       } catch (error) {
         console.error("Error fetching upcoming events:", error);
         return [];

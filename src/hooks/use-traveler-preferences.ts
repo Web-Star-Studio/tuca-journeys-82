@@ -27,8 +27,9 @@ export const useTravelerPreferences = () => {
       }
       
       try {
+        // Using traveler_preferences instead of user_preferences to match the database
         const { data, error } = await supabase
-          .from('user_preferences') // Changed from 'traveler_preferences' to 'user_preferences'
+          .from('traveler_preferences')
           .select('*')
           .eq('user_id', user.id)
           .single();
@@ -82,9 +83,9 @@ export const useTravelerPreferences = () => {
         return newPreferences;
       }
       
-      // For real users, save to database
+      // Use traveler_preferences instead of user_preferences
       const { data, error } = await supabase
-        .from('user_preferences') // Changed from 'traveler_preferences' to 'user_preferences'
+        .from('traveler_preferences')
         .upsert([{
           ...newPreferences,
           updated_at: new Date().toISOString()

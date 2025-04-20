@@ -39,7 +39,7 @@ export const useNotifications = () => {
           title: notification.title,
           message: notification.message,
           type: notification.type,
-          read: notification.is_read, // Fixed: is_read instead of read
+          read: notification.is_read !== undefined ? notification.is_read : false,
           createdAt: notification.created_at,
         }));
       } catch (error) {
@@ -117,7 +117,7 @@ export const useNotifications = () => {
   };
 
   return {
-    ...contextNotifications, // Include all context methods (markAsRead, markAllAsRead, etc)
+    ...contextNotifications,
     notifications: data || contextNotifications.notifications,
     isLoading: isLoading || contextNotifications.loading,
     createNotification,

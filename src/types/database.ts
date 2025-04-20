@@ -1,4 +1,5 @@
 
+
 export interface UserProfile {
   id: string;
   user_id: string;
@@ -72,7 +73,7 @@ export interface DatabaseBooking {
   coupon_discount?: number | null;
 }
 
-// Add Tour interface
+// Updated Tour interface to match database schema
 export interface Tour {
   id: number;
   title: string;
@@ -96,9 +97,10 @@ export interface Tour {
   updated_at?: string;
   is_available?: boolean;
   location?: string;
+  partner_id?: string;
 }
 
-// Add Accommodation interface
+// Updated Accommodation interface to match database schema
 export interface Accommodation {
   id: number;
   title: string;
@@ -122,9 +124,11 @@ export interface Accommodation {
   updated_at?: string;
   location?: string;
   category?: string;
+  partner_id?: string;
+  rating?: number;
 }
 
-// Add Notification interface
+// Updated Notification interface
 export interface Notification {
   id: string;
   userId: string;
@@ -135,24 +139,30 @@ export interface Notification {
   createdAt?: string;
 }
 
-// Add Event interface
+// Updated Event interface to match database schema
 export interface Event {
   id: number;
   title: string;
+  name?: string;
   description: string;
   short_description: string;
   date: string;
-  time: string;
+  time?: string;
+  start_time?: string;
+  end_time?: string;
   location: string;
   price: number;
   image_url?: string;
   gallery_images?: string[];
   is_available: boolean;
+  available_spots?: number;
   capacity: number;
   organizer: string;
   category?: string;
   created_at?: string;
   updated_at?: string;
+  is_featured?: boolean;
+  status?: string;
 }
 
 // Add Vehicle interface

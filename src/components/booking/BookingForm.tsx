@@ -140,42 +140,42 @@ const BookingForm: React.FC<BookingFormProps> = ({
       // For real implementation, check Supabase
       if (!user?.id.startsWith('demo-')) {
         const { data, error } = await supabase
-          .from('discount_coupons') // Changed from 'coupons' to 'discount_coupons'
+          .from('discount_coupons')
           .select('*')
           .eq('code', couponCode.toUpperCase())
           .single();
-          
-        if (error) {
-          throw new Error('Cupom inválido ou expirado');
-        }
         
-        if (data) {
-          setAppliedCoupon({
-            code: data.code,
-            discountPercentage: data.discount_percentage
-          });
-          setIsCouponValid(true);
-          
-          toast({
-            title: "Cupom aplicado",
-            description: `Desconto de ${data.discount_percentage}% aplicado com sucesso!`,
-          });
-          return;
-        }
+      if (error) {
+        throw new Error('Cupom inválido ou expirado');
       }
       
-      // If we got here, coupon is invalid
-      setIsCouponValid(false);
-      setCouponError('Cupom inválido ou expirado');
-      setAppliedCoupon(null);
-    } catch (error) {
-      setIsCouponValid(false);
-      setCouponError('Erro ao validar cupom');
-      setAppliedCoupon(null);
-    } finally {
-      setIsValidatingCoupon(false);
+      if (data) {
+        setAppliedCoupon({
+          code: data.code,
+          discountPercentage: data.discount_percentage
+        });
+        setIsCouponValid(true);
+        
+        toast({
+          title: "Cupom aplicado",
+          description: `Desconto de ${data.discount_percentage}% aplicado com sucesso!`,
+        });
+        return;
+      }
     }
-  };
+    
+    // If we got here, coupon is invalid
+    setIsCouponValid(false);
+    setCouponError('Cupom inválido ou expirado');
+    setAppliedCoupon(null);
+  } catch (error) {
+    setIsCouponValid(false);
+    setCouponError('Erro ao validar cupom');
+    setAppliedCoupon(null);
+  } finally {
+    setIsValidatingCoupon(false);
+  }
+};
   
   const onSubmit = async (data: BookingFormValues) => {
     if (!user) {

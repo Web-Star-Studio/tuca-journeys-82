@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { Star, StarHalf, Loader2 } from "lucide-react";

@@ -10,7 +10,10 @@ const Login = () => {
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
-    if (redirectToAdmin) {
+    // Check if this is a partner login
+    if (returnTo.includes('/parceiro/')) {
+      navigate("/parceiro/dashboard");
+    } else if (redirectToAdmin) {
       navigate("/admin/dashboard");
     } else {
       navigate(returnTo);

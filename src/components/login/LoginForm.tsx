@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const { signIn, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const {
     register,
@@ -47,11 +48,21 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
         throw result.error;
       }
       
-      // If successful login and callback exists, call it
-      // Check if it's an admin login
+      // Check if it's an admin, partner or regular user login
       const isAdmin = data.email === "admin@tucanoronha.com" || data.email === "felipe@webstar.studio";
+      const isPartner = data.email === "partner@demo.com";
+      
+      // Use the callback if provided, otherwise handle navigation directly
       if (onSuccessfulLogin) {
         onSuccessfulLogin(isAdmin);
+      } else {
+        if (isAdmin) {
+          navigate("/admin/dashboard");
+        } else if (isPartner) {
+          navigate("/parceiro/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);

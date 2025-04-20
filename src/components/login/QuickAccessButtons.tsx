@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const DEMO_ACCOUNTS = [
   { email: "user@example.com", password: "password", label: "Acessar como Usuário" },
@@ -14,11 +16,22 @@ const QuickAccessButtons = () => {
   const { signIn } = useAuth();
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleDemoLogin = async (email: string, password: string) => {
     setLoggingIn(email);
     try {
       await signIn(email, password);
+      
+      // Redirect based on user type
+      if (email.includes("admin")) {
+        navigate("/admin/dashboard");
+      } else if (email.includes("partner")) {
+        navigate("/parceiro/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+      
       toast({
         title: "Acesso Demo",
         description: `Você está acessando como ${

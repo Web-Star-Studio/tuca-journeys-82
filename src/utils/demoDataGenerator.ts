@@ -1,265 +1,166 @@
+import { Tour, Accommodation } from '@/types/database';
 
-import { Booking } from "@/types/bookings";
+// Function to generate a single demo tour
+const generateDemoTour = (id: number): Tour => {
+  const imageUrls = [
+    '/img/tour-1.jpg',
+    '/img/tour-2.jpg',
+    '/img/tour-3.jpg',
+    '/img/tour-4.jpg',
+    '/img/tour-5.jpg',
+    '/img/tour-6.jpg',
+  ];
 
-// Export demoData as an object with all the generated data
-export const demoData = {
-  tours: generateDemoTours(),
-  accommodations: generateDemoAccommodations(),
-  bookings: (userId: string) => generateDemoBookings(userId),
-  users: [
-    {
-      id: "demo-user",
-      name: "Usuário Demo",
-      email: "demo@example.com",
-      phone: "+55 11 99999-9999",
-      address: "Av. Exemplo, 123",
-      city: "São Paulo",
-      state: "SP",
-      zip_code: "01234-567",
-      country: "Brasil",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ]
+  const titles = [
+    'Aventura na Floresta Amazônica',
+    'Explorando as Cataratas do Iguaçu',
+    'Caminhada no Parque Nacional da Chapada Diamantina',
+    'Descobrindo os Lençóis Maranhenses',
+    'Passeio de Barco no Rio Negro',
+    'Trilhas e Cachoeiras em Bonito'
+  ];
+
+  const descriptions = [
+    'Embarque em uma jornada inesquecível pela densa e exuberante Floresta Amazônica, onde a biodiversidade se revela em cada trilha e a cultura local pulsa em cada encontro.',
+    'Prepare-se para testemunhar a grandiosidade das Cataratas do Iguaçu, um espetáculo de águas poderosas e paisagens deslumbrantes que ficará gravado em sua memória para sempre.',
+    'Desafie seus limites em uma emocionante caminhada pelo Parque Nacional da Chapada Diamantina, um paraíso de cânions, grutas e cachoeiras que testarão sua resistência e recompensarão sua audácia.',
+    'Deixe-se encantar pela beleza surreal dos Lençóis Maranhenses, um deserto de dunas brancas e lagoas cristalinas que se estende até onde a vista alcança, proporcionando momentos de puro êxtase.',
+    'Navegue pelas águas misteriosas do Rio Negro, um gigante da Amazônia que esconde segredos milenares e revela paisagens intocadas, onde a natureza reina em sua forma mais selvagem.',
+    'Aventure-se por trilhas desafiadoras e refresque-se em cachoeiras revigorantes em Bonito, um destino que oferece uma combinação perfeita de aventura e relaxamento em meio à natureza exuberante.'
+  ];
+
+  const shortDescriptions = [
+    'Aventure-se na Amazônia: trilhas, cultura e biodiversidade.',
+    'Maravilhe-se com as Cataratas do Iguaçu: um espetáculo inesquecível.',
+    'Desafie-se na Chapada Diamantina: cânions, grutas e cachoeiras.',
+    'Encante-se nos Lençóis Maranhenses: dunas e lagoas cristalinas.',
+    'Explore o Rio Negro: segredos milenares e paisagens intocadas.',
+    'Descubra Bonito: aventura e relaxamento em meio à natureza.'
+  ];
+
+  const locations = [
+    'Manaus, Amazonas',
+    'Foz do Iguaçu, Paraná',
+    'Lençóis, Bahia',
+    'Barreirinhas, Maranhão',
+    'Novo Airão, Amazonas',
+    'Bonito, Mato Grosso do Sul'
+  ];
+
+  const categories = ['Aventura', 'Ecoturismo', 'Relaxamento', 'Cultural'];
+  const difficulties = ['Fácil', 'Médio', 'Difícil'];
+
+  return {
+    id,
+    title: titles[id % titles.length],
+    description: descriptions[id % descriptions.length],
+    short_description: shortDescriptions[id % shortDescriptions.length],
+    duration: `${Math.floor(Math.random() * 7) + 1} dias`,
+    price: Math.floor(Math.random() * 500) + 100,
+    image_url: imageUrls[id % imageUrls.length],
+    location: locations[id % locations.length],
+    meeting_point: 'Local de encontro a combinar',
+    is_available: Math.random() > 0.2,
+    category: categories[id % categories.length],
+    max_participants: Math.floor(Math.random() * 20) + 5,
+    min_participants: 2,
+    difficulty: difficulties[id % difficulties.length],
+    rating: Math.floor(Math.random() * 5) + 1,
+    schedule: ['Segunda a Sexta', 'Sábados e Domingos'],
+    includes: ['Transporte', 'Hospedagem', 'Alimentação'],
+    excludes: ['Bebidas', 'Taxas de entrada'],
+    notes: ['Levar roupa confortável', 'Usar protetor solar'],
+    gallery_images: imageUrls,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
 };
 
-export function generateDemoTours() {
-  return [
-    {
-      id: 1,
-      title: "Passeio de Barco ao Pôr do Sol",
-      description: "Desfrute de um belíssimo passeio de barco ao pôr do sol, com música e petiscos.",
-      short_description: "Passeio de barco ao pôr do sol",
-      duration: "2 horas",
-      price: 120,
-      image_url: "/tour-sunset.jpg",
-      location: "Praia da Conceição",
-      meeting_point: "Trapiche da Praia da Conceição",
-      is_available: true,
-      category: "Passeios",
-      max_participants: 10,
-      min_participants: 2,
-      difficulty: "Fácil",
-      rating: 4.8,
-      schedule: ["16:00 - 18:00"],
-      includes: ["Passeio de barco", "Música ao vivo", "Petiscos", "Bebidas"],
-      excludes: ["Transporte até o trapiche"],
-      notes: ["Levar protetor solar e óculos de sol"],
-      gallery_images: ["/tour-sunset-1.jpg", "/tour-sunset-2.jpg"]
-    },
-    {
-      id: 2,
-      title: "Mergulho com Tartarugas",
-      description: "Mergulhe nas águas cristalinas de Fernando de Noronha e observe as tartarugas marinhas em seu habitat natural.",
-      short_description: "Mergulho com tartarugas marinhas",
-      duration: "3 horas",
-      price: 150,
-      image_url: "/tour-diving.jpg",
-      location: "Baía do Sancho",
-      meeting_point: "Centro de Mergulho da Baía do Sancho",
-      is_available: true,
-      category: "Mergulho",
-      max_participants: 6,
-      min_participants: 1,
-      difficulty: "Médio",
-      rating: 4.9,
-      schedule: ["09:00 - 12:00"],
-      includes: ["Equipamento de mergulho", "Instrutor", "Passeio de barco"],
-      excludes: ["Taxa de acesso à Baía do Sancho"],
-      notes: ["Levar roupa de banho e toalha"],
-      gallery_images: ["/tour-diving-1.jpg", "/tour-diving-2.jpg"]
-    },
-    {
-      id: 3,
-      title: "Trilha Ecológica",
-      description: "Explore a natureza exuberante de Fernando de Noronha em uma trilha ecológica guiada.",
-      short_description: "Trilha ecológica guiada",
-      duration: "4 horas",
-      price: 80,
-      image_url: "/tour-trail.jpg",
-      location: "Parque Nacional Marinho",
-      meeting_point: "Entrada do Parque Nacional Marinho",
-      is_available: true,
-      category: "Trilhas",
-      max_participants: 8,
-      min_participants: 2,
-      difficulty: "Difícil",
-      rating: 4.7,
-      schedule: ["08:00 - 12:00"],
-      includes: ["Guia", "Entrada no parque", "Água"],
-      excludes: ["Transporte até a entrada do parque"],
-      notes: ["Levar calçado de trilha e repelente"],
-      gallery_images: ["/tour-trail-1.jpg", "/tour-trail-2.jpg"]
-    }
+// Function to generate a single demo accommodation
+const generateDemoAccommodation = (id: number): Accommodation => {
+  const imageUrls = [
+    '/img/accommodation-1.jpg',
+    '/img/accommodation-2.jpg',
+    '/img/accommodation-3.jpg',
+    '/img/accommodation-4.jpg',
+    '/img/accommodation-5.jpg',
+    '/img/accommodation-6.jpg',
   ];
-}
 
-export function generateDemoAccommodations() {
-  return [
-    {
-      id: 1,
-      title: "Pousada Vista Mar",
-      description: "Aconchegante pousada com vista para o mar, perfeita para relaxar e desfrutar da natureza.",
-      short_description: "Pousada com vista para o mar",
-      price_per_night: 400,
-      image_url: "/accommodation-1.jpg",
-      location: "Praia do Boldró",
-      address: "Rua da Pousada, 123",
-      is_available: true,
-      category: "Pousadas",
-      type: "Pousada",
-      bedrooms: 2,
-      bathrooms: 1,
-      max_guests: 4,
-      amenities: ["Wi-Fi", "Ar condicionado", "Café da manhã", "Piscina"],
-      gallery_images: ["/accommodation-1-1.jpg", "/accommodation-1-2.jpg"],
-      rating: 4.5
-    },
-    {
-      id: 2,
-      title: "Hotel Paraíso",
-      description: "Hotel de luxo com todas as comodidades para uma estadia inesquecível.",
-      short_description: "Hotel de luxo",
-      price_per_night: 800,
-      image_url: "/accommodation-2.jpg",
-      location: "Praia do Sancho",
-      address: "Avenida do Hotel, 456",
-      is_available: true,
-      category: "Hotéis",
-      type: "Hotel",
-      bedrooms: 3,
-      bathrooms: 2,
-      max_guests: 6,
-      amenities: ["Wi-Fi", "Ar condicionado", "Café da manhã", "Piscina", "Restaurante"],
-      gallery_images: ["/accommodation-2-1.jpg", "/accommodation-2-2.jpg"],
-      rating: 4.8
-    }
+  const titles = [
+    'Hotel das Cataratas',
+    'Pousada Canto das Águas',
+    'Resort Chapada Diamantina',
+    'Bangalôs da Amazônia',
+    'Refúgio Ecológico Bonito',
+    'Apart Hotel Maranhense'
   ];
-}
 
-export function generateDemoBookings(userId: string): Booking[] {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const nextWeek = new Date(today);
-  nextWeek.setDate(today.getDate() + 7);
-  const lastWeek = new Date(today);
-  lastWeek.setDate(today.getDate() - 7);
-  const nextMonth = new Date(today);
-  nextMonth.setMonth(today.getMonth() + 1);
-  
-  return [
-    {
-      id: "booking-1",
-      user_id: userId,
-      user_name: "Demo User",
-      user_email: "demo@example.com",
-      tour_id: 1,
-      accommodation_id: null,
-      event_id: null,
-      vehicle_id: null,
-      item_type: "tour",
-      item_name: "Passeio de Barco ao Pôr do Sol",
-      start_date: tomorrow.toISOString(),
-      end_date: tomorrow.toISOString(),
-      guests: 2,
-      total_price: 240,
-      status: "confirmed",
-      payment_status: "paid",
-      created_at: yesterday.toISOString(),
-      updated_at: yesterday.toISOString(),
-      payment_method: "credit_card",
-      special_requests: null
-    },
-    {
-      id: "booking-2",
-      user_id: userId,
-      user_name: "Demo User",
-      user_email: "demo@example.com",
-      tour_id: null,
-      accommodation_id: 1,
-      event_id: null,
-      vehicle_id: null,
-      item_type: "accommodation",
-      item_name: "Pousada Vista Mar",
-      start_date: nextWeek.toISOString(),
-      end_date: new Date(nextWeek.getTime() + 86400000 * 3).toISOString(),
-      guests: 2,
-      total_price: 1200,
-      status: "confirmed",
-      payment_status: "paid",
-      created_at: yesterday.toISOString(),
-      updated_at: yesterday.toISOString(),
-      payment_method: "credit_card",
-      special_requests: "Quarto com vista para o mar, por favor."
-    },
-    {
-      id: "booking-3",
-      user_id: userId,
-      user_name: "Demo User",
-      user_email: "demo@example.com",
-      tour_id: 2,
-      accommodation_id: null,
-      event_id: null,
-      vehicle_id: null,
-      item_type: "tour",
-      item_name: "Mergulho com Tartarugas",
-      start_date: lastWeek.toISOString(),
-      end_date: lastWeek.toISOString(),
-      guests: 1,
-      total_price: 150,
-      status: "confirmed",
-      payment_status: "paid",
-      created_at: new Date(lastWeek.getTime() - 86400000 * 2).toISOString(),
-      updated_at: new Date(lastWeek.getTime() - 86400000 * 2).toISOString(),
-      payment_method: "credit_card",
-      special_requests: null
-    },
-    {
-      id: "booking-4",
-      user_id: userId,
-      user_name: "Demo User",
-      user_email: "demo@example.com",
-      tour_id: null,
-      accommodation_id: null,
-      event_id: 1,
-      vehicle_id: null,
-      item_type: "event",
-      item_name: "Festival de Música",
-      start_date: nextMonth.toISOString(),
-      end_date: nextMonth.toISOString(),
-      guests: 2,
-      total_price: 300,
-      status: "pending",
-      payment_status: "pending",
-      created_at: today.toISOString(),
-      updated_at: today.toISOString(),
-      payment_method: "bank_transfer",
-      special_requests: null
-    },
-    {
-      id: "booking-5",
-      user_id: userId,
-      user_name: "Demo User",
-      user_email: "demo@example.com",
-      tour_id: 3,
-      accommodation_id: null,
-      event_id: null,
-      vehicle_id: null,
-      item_type: "tour",
-      item_name: "Trilha Ecológica",
-      start_date: tomorrow.toISOString(),
-      end_date: tomorrow.toISOString(),
-      guests: 4,
-      total_price: 320,
-      status: "confirmed",
-      payment_status: "paid",
-      created_at: yesterday.toISOString(),
-      updated_at: yesterday.toISOString(),
-      payment_method: "credit_card",
-      special_requests: null
-    }
+  const descriptions = [
+    'Hospede-se no luxuoso Hotel das Cataratas e desfrute de uma experiência inigualável em frente às majestosas Cataratas do Iguaçu, com serviços exclusivos e vistas panorâmicas de tirar o fôlego.',
+    'Relaxe na charmosa Pousada Canto das Águas, um refúgio acolhedor em meio à natureza exuberante de Bonito, com acomodações confortáveis e atividades relaxantes para recarregar as energias.',
+    'Desfrute de momentos inesquecíveis no Resort Chapada Diamantina, um oásis de conforto e lazer em meio aos cânions e cachoeiras da Bahia, com infraestrutura completa e serviços personalizados.',
+    'Acomode-se nos exclusivos Bangalôs da Amazônia e viva uma experiência autêntica em contato com a natureza intocada da floresta, com acomodações rústicas e confortáveis e atividades de ecoturismo.',
+    'Encontre a paz e a tranquilidade no Refúgio Ecológico Bonito, um paraíso sustentável em meio à natureza preservada do Mato Grosso do Sul, com acomodações charmosas e atividades de aventura.',
+    'Sinta-se em casa no Apart Hotel Maranhense, um espaço moderno e funcional em Barreirinhas, com apartamentos equipados e serviços práticos para quem busca conforto e comodidade durante a estadia nos Lençóis Maranhenses.'
   ];
-}
+
+  const shortDescriptions = [
+    'Luxo e vista panorâmica nas Cataratas do Iguaçu.',
+    'Refúgio acolhedor e relaxante em Bonito.',
+    'Conforto e lazer nos cânions da Chapada Diamantina.',
+    'Experiência autêntica na natureza amazônica.',
+    'Paraíso sustentável e aventura em Bonito.',
+    'Conforto e praticidade nos Lençóis Maranhenses.'
+  ];
+
+  const locations = [
+    'Foz do Iguaçu, Paraná',
+    'Bonito, Mato Grosso do Sul',
+    'Lençóis, Bahia',
+    'Manaus, Amazonas',
+    'Bonito, Mato Grosso do Sul',
+    'Barreirinhas, Maranhão'
+  ];
+
+  const categories = ['Hotel', 'Pousada', 'Resort', 'Bangalô', 'Apart Hotel'];
+  const types = ['Econômico', 'Médio', 'Luxo'];
+
+  return {
+    id,
+    title: titles[id % titles.length],
+    description: descriptions[id % descriptions.length],
+    short_description: shortDescriptions[id % shortDescriptions.length],
+    price_per_night: Math.floor(Math.random() * 300) + 50,
+    image_url: imageUrls[id % imageUrls.length],
+    location: locations[id % locations.length],
+    address: 'Endereço a combinar',
+    is_available: Math.random() > 0.2,
+    category: categories[id % categories.length],
+    type: types[id % types.length],
+    bedrooms: Math.floor(Math.random() * 3) + 1,
+    bathrooms: Math.floor(Math.random() * 2) + 1,
+    max_guests: Math.floor(Math.random() * 4) + 2,
+    amenities: ['Wi-Fi', 'Piscina', 'Café da manhã'],
+    gallery_images: imageUrls,
+    rating: Math.floor(Math.random() * 5) + 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+};
+
+// Function to generate multiple demo tours
+export const generateDemoTours = (count: number = 6): Tour[] => {
+  return Array.from({ length: count }, (_, i) => generateDemoTour(i + 1));
+};
+
+// Function to generate multiple demo accommodations
+export const generateDemoAccommodations = (count: number = 6): Accommodation[] => {
+  return Array.from({ length: count }, (_, i) => generateDemoAccommodation(i + 1));
+};
+
+// Add this export to make the file compile
+export const demoData = {
+  tours: generateDemoTours(),
+  accommodations: generateDemoAccommodations()
+};

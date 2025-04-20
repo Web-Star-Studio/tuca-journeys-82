@@ -36,6 +36,8 @@ export interface Tour {
   excludes: string[];
   notes: string[];
   gallery_images: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Accommodation {
@@ -56,6 +58,9 @@ export interface Accommodation {
   amenities: string[];
   gallery_images: string[];
   rating: number;
+  partner_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface DatabaseBooking {
@@ -77,4 +82,23 @@ export interface DatabaseBooking {
   updated_at: string;
   tours?: Tour;
   accommodations?: Accommodation;
+}
+
+// Add UserPreferences interface for user preferences
+export interface UserPreferences {
+  user_id: string;
+  travel_style?: 'adventure' | 'relaxation' | 'cultural' | 'gastronomy' | 'ecotourism' | string;
+  activities?: string[];
+  accommodation_types?: string[];
+  budget_range?: 'economy' | 'medium' | 'premium' | 'luxury' | string;
+  travel_frequency?: 'monthly' | 'quarterly' | 'biannual' | 'annual' | string;
+  notifications?: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+    marketing: boolean;
+    recommendations: boolean;
+    booking_updates: boolean;
+  };
+  updated_at?: string;
 }

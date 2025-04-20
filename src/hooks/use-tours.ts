@@ -11,7 +11,14 @@ export const useTours = () => {
     queryFn: async () => {
       // In a real app, we'd fetch from an API
       // For demo purposes, return our generated tours
-      return generateDemoTours();
+      const demoTours = generateDemoTours();
+      
+      // Ensure all tours have the required fields
+      return demoTours.map(tour => ({
+        ...tour,
+        location: tour.location || tour.meeting_point || '',
+        is_available: tour.is_available ?? true
+      })) as Tour[];
     },
   });
 
@@ -63,7 +70,15 @@ export const useTours = () => {
 
   const getTourById = (id?: number) => {
     if (!id || !tours) return null;
-    return tours.find(tour => tour.id === id) || null;
+    const tour = tours.find(tour => tour.id === id);
+    if (!tour) return null;
+    
+    // Ensure it has all required fields
+    return {
+      ...tour,
+      location: tour.location || tour.meeting_point || '',
+      is_available: tour.is_available ?? true
+    } as Tour;
   };
 
   return {
@@ -90,7 +105,11 @@ export const useTour = (tourId?: number) => {
       const tour = tours.find(t => t.id === tourId);
       if (!tour) throw new Error('Tour not found');
       
-      return tour;
+      return {
+        ...tour,
+        location: tour.location || tour.meeting_point || '',
+        is_available: tour.is_available ?? true
+      } as Tour;
     },
     enabled: !!tourId,
   });

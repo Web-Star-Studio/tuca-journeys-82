@@ -1,105 +1,120 @@
 
-import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
-import { getAccommodationsFromDB, getAccommodationByIdFromDB } from '@/lib/api';
-
-interface AccommodationCreate {
-  title: string;
-  description: string;
-  short_description: string;
-  price_per_night: number;
-  image_url: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  max_guests: number;
-  address: string;
-  amenities: string[];
-  gallery_images: string[];
-  rating: number;
-}
-
-interface AccommodationUpdate extends Partial<AccommodationCreate> {
-  id: number;
-}
+import { generateDemoAccommodations } from '@/utils/demoDataGenerator';
 
 export const useAccommodations = () => {
-  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // Query to fetch accommodations
+  const { data: accommodations, isLoading, error, refetch } = useQuery({
+    queryKey: ['accommodations'],
+    queryFn: async () => {
+      // In a real app, we'd fetch from an API
+      // For demo purposes, return our generated accommodations
+      const demoAccommodations = generateDemoAccommodations();
+      
+      // Make sure they match the expected type
+      return demoAccommodations.map(acc => ({
+        ...acc,
+        is_available: acc.is_available ?? true,
+        location: acc.location || acc.address || '',
+        category: acc.category || acc.type || 'Standard'
+      })) as Accommodation[];
+    },
+  });
 
-  const fetchAccommodations = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAccommodationsFromDB();
-      setAccommodations(data);
-      return data;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch accommodations');
-      setError(error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+  // Mutation to delete an accommodation
+  const deleteAccommodationMutation = useMutation({
+    mutationFn: async (accommodationId: number) => {
+      // In a real app, we'd call an API
+      console.log(`Deleting accommodation: ${accommodationId}`);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Acomodação excluída com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao excluir a acomodação');
+      console.error('Error deleting accommodation:', error);
     }
+  });
+
+  // Mutation to create or update an accommodation
+  const saveAccommodationMutation = useMutation({
+    mutationFn: async (accommodation: Partial<Accommodation>) => {
+      // In a real app, we'd call an API
+      console.log('Saving accommodation:', accommodation);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Acomodação salva com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao salvar a acomodação');
+      console.error('Error saving accommodation:', error);
+    }
+  });
+
+  const deleteAccommodation = (accommodationId: number) => {
+    deleteAccommodationMutation.mutate(accommodationId);
   };
 
-  const getAccommodationById = async (id: number): Promise<Accommodation> => {
-    try {
-      return await getAccommodationByIdFromDB(id);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(`Failed to fetch accommodation with ID ${id}`);
-      throw error;
-    }
+  const saveAccommodation = (accommodation: Partial<Accommodation>) => {
+    saveAccommodationMutation.mutate(accommodation);
   };
 
-  const createAccommodation = async (accommodation: AccommodationCreate) => {
-    // In a real application, this would make an API call
-    console.log('Creating accommodation:', accommodation);
-    // Convert the accommodation object to match the database structure
-    const newAccommodation = {
+  const getAccommodationById = (id?: number) => {
+    if (!id || !accommodations) return null;
+    
+    const accommodation = accommodations.find(acc => acc.id === id);
+    if (!accommodation) return null;
+    
+    // Ensure it's correctly typed
+    return {
       ...accommodation,
-      id: Math.floor(Math.random() * 1000),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      is_available: accommodation.is_available ?? true,
+      location: accommodation.location || accommodation.address || '',
+      category: accommodation.category || accommodation.type || 'Standard'
     } as Accommodation;
-    
-    setAccommodations([...accommodations, newAccommodation]);
-    return newAccommodation;
-  };
-
-  const updateAccommodation = async (accommodation: AccommodationUpdate) => {
-    // In a real application, this would make an API call
-    console.log('Updating accommodation:', accommodation);
-    
-    // Find the existing accommodation
-    const existingAccommodation = accommodations.find(acc => acc.id === accommodation.id);
-    
-    if (!existingAccommodation) {
-      throw new Error(`Accommodation with ID ${accommodation.id} not found`);
-    }
-    
-    // Merge the updated fields with the existing accommodation
-    const updatedAccommodation = {
-      ...existingAccommodation,
-      ...accommodation,
-      updated_at: new Date().toISOString()
-    } as Accommodation;
-    
-    // Update the local state
-    setAccommodations(accommodations.map(acc => 
-      acc.id === accommodation.id ? updatedAccommodation : acc
-    ));
-    
-    return updatedAccommodation;
   };
 
   return {
     accommodations,
     isLoading,
     error,
-    fetchAccommodations,
+    deleteAccommodation,
+    saveAccommodation,
     getAccommodationById,
-    createAccommodation,
-    updateAccommodation
+    refetch
   };
+};
+
+// Add the missing hook for single accommodation details
+export const useAccommodation = (accommodationId?: number) => {
+  return useQuery({
+    queryKey: ['accommodation', accommodationId],
+    queryFn: async () => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      
+      // In a real app, we'd fetch from an API endpoint for a single accommodation
+      // For demo, find the accommodation in our demo data
+      const accommodations = generateDemoAccommodations();
+      const accommodation = accommodations.find(a => a.id === accommodationId);
+      if (!accommodation) throw new Error('Accommodation not found');
+      
+      return {
+        ...accommodation,
+        is_available: accommodation.is_available ?? true,
+        location: accommodation.location || accommodation.address || '',
+        category: accommodation.category || accommodation.type || 'Standard'
+      } as Accommodation;
+    },
+    enabled: !!accommodationId,
+  });
 };

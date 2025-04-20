@@ -1,5 +1,5 @@
 
-// New file for Event type definition
+// Event type definition
 export interface Event {
   id: number;
   name: string;
@@ -19,7 +19,8 @@ export interface Event {
   updated_at: string;
   category: string;
   featured: boolean;
-  status: string;
-  organizer: string;
+  status?: string; // Added as optional for backward compatibility
+  organizer?: string; // Added as optional for backward compatibility
   is_featured?: boolean; // Some legacy code might use is_featured instead of featured
+  gallery_images?: string[];
 }

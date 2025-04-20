@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, UserProfile } from '@/types/database';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -19,7 +18,12 @@ export const getToursFromDB = async () => {
     throw error;
   }
   
-  return data as Tour[];
+  // Transform the data to ensure it matches the Tour interface
+  return data.map(tour => ({
+    ...tour,
+    location: tour.location || tour.meeting_point || 'Unknown Location',
+    is_available: tour.is_available ?? true
+  })) as Tour[];
 };
 
 export const getTourByIdFromDB = async (id: number) => {
@@ -35,7 +39,12 @@ export const getTourByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  return data as Tour;
+  // Transform to ensure it matches the Tour interface
+  return {
+    ...data,
+    location: data.location || data.meeting_point || 'Unknown Location',
+    is_available: data.is_available ?? true
+  } as Tour;
 };
 
 // Packages API
@@ -63,7 +72,13 @@ export const getAccommodationsFromDB = async () => {
     throw error;
   }
   
-  return data as Accommodation[];
+  // Transform to ensure it matches the Accommodation interface
+  return data.map(accommodation => ({
+    ...accommodation,
+    location: accommodation.location || accommodation.address || 'Unknown Location',
+    is_available: accommodation.is_available ?? true,
+    category: accommodation.category || accommodation.type || 'Standard'
+  })) as Accommodation[];
 };
 
 export const getAccommodationByIdFromDB = async (id: number) => {
@@ -79,7 +94,13 @@ export const getAccommodationByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  return data as Accommodation;
+  // Transform to ensure it matches the Accommodation interface
+  return {
+    ...data,
+    location: data.location || data.address || 'Unknown Location',
+    is_available: data.is_available ?? true,
+    category: data.category || data.type || 'Standard'
+  } as Accommodation;
 };
 
 // Partners API
@@ -124,23 +145,23 @@ export const getVehiclesFromDB = async () => {
     throw error;
   }
   
-  // Cast to Vehicle and add missing properties if needed
+  // Map and ensure all required fields are present
   return data.map(item => ({
     id: item.id,
     name: item.name,
     description: item.description,
     type: item.type || 'car',
     price_per_day: item.price_per_day || item.price || 0,
-    price: item.price || item.price_per_day || 0, // Add this for compatibility
+    price: item.price || item.price_per_day || 0,
     capacity: item.capacity || item.available_quantity || 1,
     image_url: item.image_url,
     partner_id: item.partner_id,
     created_at: item.created_at,
     updated_at: item.updated_at,
     available_quantity: item.available_quantity || 1,
-    features: item.features,
-    gallery_images: item.gallery_images,
-    is_available: item.is_available
+    features: item.features || [],
+    gallery_images: item.gallery_images || [],
+    is_available: item.is_available !== false
   })) as Vehicle[];
 };
 
@@ -157,23 +178,23 @@ export const getVehicleByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  // Cast to Vehicle and add missing properties if needed
+  // Add missing properties if needed
   return {
     id: data.id,
     name: data.name,
     description: data.description,
     type: data.type || 'car',
     price_per_day: data.price_per_day || data.price || 0,
-    price: data.price || data.price_per_day || 0, // Add this for compatibility
+    price: data.price || data.price_per_day || 0,
     capacity: data.capacity || data.available_quantity || 1,
     image_url: data.image_url,
     partner_id: data.partner_id,
     created_at: data.created_at,
     updated_at: data.updated_at,
     available_quantity: data.available_quantity || 1,
-    features: data.features,
-    gallery_images: data.gallery_images,
-    is_available: data.is_available
+    features: data.features || [],
+    gallery_images: data.gallery_images || [],
+    is_available: data.is_available !== false
   } as Vehicle;
 };
 
@@ -192,6 +213,7 @@ export const getEventsFromDB = async () => {
   return data.map(eventData => ({
     id: eventData.id,
     name: eventData.name || eventData.title || "",
+    title: eventData.name || eventData.title || "", // For backward compatibility
     description: eventData.description,
     short_description: eventData.short_description,
     date: eventData.date,
@@ -207,8 +229,10 @@ export const getEventsFromDB = async () => {
     updated_at: eventData.updated_at,
     category: eventData.category || 'Other',
     featured: eventData.is_featured || false,
-    status: eventData.status || 'scheduled',
-    organizer: eventData.organizer || 'Unknown'
+    is_featured: eventData.is_featured || false, // For backward compatibility
+    status: 'scheduled', // Default value
+    organizer: 'Unknown', // Default value
+    gallery_images: eventData.gallery_images || []
   })) as Event[];
 };
 
@@ -229,6 +253,7 @@ export const getEventByIdFromDB = async (id: number) => {
   return {
     id: data.id,
     name: data.name || data.title || "",
+    title: data.name || data.title || "", // For backward compatibility
     description: data.description,
     short_description: data.short_description,
     date: data.date,
@@ -244,8 +269,10 @@ export const getEventByIdFromDB = async (id: number) => {
     updated_at: data.updated_at,
     category: data.category || 'Other',
     featured: data.is_featured || false,
-    status: data.status || 'scheduled',
-    organizer: data.organizer || 'Unknown'
+    is_featured: data.is_featured || false, // For backward compatibility
+    status: 'scheduled', // Default value
+    organizer: 'Unknown', // Default value
+    gallery_images: data.gallery_images || []
   } as Event;
 };
 

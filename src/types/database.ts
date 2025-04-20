@@ -25,7 +25,7 @@ export interface Tour {
   image_url: string;
   location?: string;
   meeting_point: string;
-  is_available?: boolean;
+  is_available: boolean;
   category: string;
   max_participants: number;
   min_participants: number;
@@ -49,7 +49,7 @@ export interface Accommodation {
   image_url: string;
   location?: string;
   address: string;
-  is_available?: boolean;
+  is_available: boolean;
   category: string;
   type: string;
   bedrooms: number;
@@ -82,6 +82,24 @@ export interface DatabaseBooking {
   updated_at: string;
   tours?: Tour;
   accommodations?: Accommodation;
+}
+
+// Add Booking type for backward compatibility
+export interface Booking extends DatabaseBooking {}
+
+// Add Product interface to fix the type error
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  category: string;
+  stock: number;
+  status: string;
+  featured: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Add UserPreferences interface for user preferences

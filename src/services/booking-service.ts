@@ -214,7 +214,7 @@ export class BookingService extends BaseApiService {
   
   async cancelBooking(bookingId: string): Promise<Booking> {
     try {
-      // Convert ID to number for Supabase if it's numeric
+      // Convert string ID to number if it's numeric
       const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
       
       const { data, error } = await supabase

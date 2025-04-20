@@ -11,31 +11,21 @@ import BusinessInfoForm from "@/components/partner/profile/BusinessInfoForm";
 import BusinessInfoDisplay from "@/components/partner/profile/BusinessInfoDisplay";
 import TeamTab from "@/components/partner/profile/TeamTab";
 import SettingsTab from "@/components/partner/profile/SettingsTab";
+import { PartnerFormData } from "@/utils/validation";
 
 const PartnerProfile: React.FC = () => {
   const { data: partner } = useCurrentPartner();
   const [isEditing, setIsEditing] = useState(false);
   
-  const [formData, setFormData] = useState({
+  // Create initialData object matching the expected PartnerFormData type
+  const initialData: PartnerFormData = {
     business_name: partner?.business_name || "",
+    business_type: (partner?.business_type || "accommodation") as PartnerFormData["business_type"],
     description: partner?.description || "",
     contact_email: partner?.contact_email || "",
     contact_phone: partner?.contact_phone || "",
     website: partner?.website || "",
     address: partner?.address || ""
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditing(false);
   };
 
   const getPartnerTypeLabel = () => {
@@ -85,9 +75,7 @@ const PartnerProfile: React.FC = () => {
               <CardContent>
                 {isEditing ? (
                   <BusinessInfoForm 
-                    formData={formData}
-                    onSubmit={handleSubmit}
-                    onChange={handleChange}
+                    initialData={initialData}
                     onCancel={() => setIsEditing(false)}
                   />
                 ) : (

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
-import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
+import { Tour, Accommodation, UserProfile } from '@/types/database';
+import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { Package } from '@/data/types/packageTypes';
 import { Partner } from '@/types/partner';
 import { Vehicle } from '@/types/vehicle';
@@ -122,15 +123,15 @@ export const getVehiclesFromDB = async () => {
     throw error;
   }
   
-  // Cast to Vehicle and map missing properties if needed
+  // Cast to Vehicle and add missing properties if needed
   return data.map(item => ({
     id: item.id,
     name: item.name,
     description: item.description,
     type: item.type || 'car',
-    price_per_day: item.price_per_day || item.price || 0,
-    price: item.price || item.price_per_day || 0, // Add this for compatibility
-    capacity: item.capacity || item.available_quantity || 1,
+    price_per_day: item.price_per_day || (item as any).price || 0,
+    price: (item as any).price || item.price_per_day || 0, // Add this for compatibility
+    capacity: (item as any).capacity || item.available_quantity || 1,
     image_url: item.image_url,
     partner_id: item.partner_id,
     created_at: item.created_at,
@@ -155,15 +156,15 @@ export const getVehicleByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  // Cast to Vehicle and map missing properties if needed
+  // Cast to Vehicle and add missing properties if needed
   return {
     id: data.id,
     name: data.name,
     description: data.description,
     type: data.type || 'car',
-    price_per_day: data.price_per_day || data.price || 0,
-    price: data.price || data.price_per_day || 0, // Add this for compatibility
-    capacity: data.capacity || data.available_quantity || 1,
+    price_per_day: data.price_per_day || (data as any).price || 0,
+    price: (data as any).price || data.price_per_day || 0, // Add this for compatibility
+    capacity: (data as any).capacity || data.available_quantity || 1,
     image_url: data.image_url,
     partner_id: data.partner_id,
     created_at: data.created_at,
@@ -189,7 +190,7 @@ export const getEventsFromDB = async () => {
   // Map database fields to match our Event interface
   return data.map(eventData => ({
     id: eventData.id,
-    name: eventData.name || eventData.title,
+    name: eventData.name || eventData.title || "",
     description: eventData.description,
     short_description: eventData.short_description,
     date: eventData.date,
@@ -204,7 +205,7 @@ export const getEventsFromDB = async () => {
     created_at: eventData.created_at,
     updated_at: eventData.updated_at,
     category: eventData.category || 'Other',
-    featured: eventData.featured || false,
+    featured: eventData.is_featured || false,
     status: eventData.status || 'scheduled',
     organizer: eventData.organizer || 'Unknown'
   })) as Event[];
@@ -226,7 +227,7 @@ export const getEventByIdFromDB = async (id: number) => {
   // Map database fields to match our Event interface
   return {
     id: data.id,
-    name: data.name || data.title,
+    name: data.name || data.title || "",
     description: data.description,
     short_description: data.short_description,
     date: data.date,
@@ -241,31 +242,31 @@ export const getEventByIdFromDB = async (id: number) => {
     created_at: data.created_at,
     updated_at: data.updated_at,
     category: data.category || 'Other',
-    featured: data.featured || false,
+    featured: data.is_featured || false,
     status: data.status || 'scheduled',
     organizer: data.organizer || 'Unknown'
   } as Event;
 };
 
-export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
-  console.log("Creating booking:", booking);
+export const createBooking = async (bookingData: CreateBookingDTO) => {
+  console.log("Creating booking:", bookingData);
   
   // Create a booking object that matches the database schema
   // Map number_of_guests to guests as required by the database
   const dbBooking = {
-    user_id: booking.user_id,
-    tour_id: booking.tour_id,
-    accommodation_id: booking.accommodation_id,
-    event_id: booking.event_id,
-    vehicle_id: booking.vehicle_id,
-    start_date: booking.start_date,
-    end_date: booking.end_date,
-    guests: booking.guests, 
-    total_price: booking.total_price,
-    status: booking.status,
-    payment_status: booking.payment_status || 'pending',
-    payment_method: booking.payment_method || null,
-    special_requests: booking.special_requests || null
+    user_id: bookingData.user_id,
+    tour_id: bookingData.tour_id,
+    accommodation_id: bookingData.accommodation_id,
+    event_id: bookingData.event_id,
+    vehicle_id: bookingData.vehicle_id,
+    start_date: bookingData.start_date,
+    end_date: bookingData.end_date,
+    guests: bookingData.guests || bookingData.number_of_guests, 
+    total_price: bookingData.total_price,
+    status: bookingData.status,
+    payment_status: bookingData.payment_status || 'pending',
+    payment_method: bookingData.payment_method || null,
+    special_requests: bookingData.special_requests || null
   };
   
   const { data, error } = await supabase
@@ -280,7 +281,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
   }
   
   // Map the response back to the Booking interface expected by the app
-  const responseBooking: Booking = {
+  const responseBooking = {
     id: data.id.toString(),
     user_id: data.user_id,
     user_name: '', // This would need to be populated from user profiles
@@ -289,7 +290,9 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     accommodation_id: data.accommodation_id,
     event_id: data.event_id,
     vehicle_id: data.vehicle_id,
-    item_type: data.tour_id ? 'tour' : data.accommodation_id ? 'accommodation' : data.event_id ? 'event' : 'vehicle',
+    item_type: data.tour_id ? 'tour' : 
+               data.accommodation_id ? 'accommodation' : 
+               data.event_id ? 'event' : 'vehicle',
     item_name: '', // This would need to be populated based on the related item
     start_date: data.start_date,
     end_date: data.end_date,
@@ -303,7 +306,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     updated_at: data.updated_at
   };
   
-  return responseBooking;
+  return responseBooking as Booking;
 };
 
 export const getUserBookings = async (userId: string) => {

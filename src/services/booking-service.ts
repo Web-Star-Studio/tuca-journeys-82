@@ -17,6 +17,11 @@ export class BookingService extends BaseApiService {
     return bookings.filter(booking => booking.user_id === userId);
   }
 
+  // Add getUserBookings method that's being called in hooks
+  async getUserBookings(userId: string): Promise<Booking[]> {
+    return this.getBookingsByUserId(userId);
+  }
+
   async getBookingsByPartnerId(partnerId: string): Promise<Booking[]> {
     // For demo partners, return mock data
     if (partnerId.startsWith('demo-')) {
@@ -57,6 +62,7 @@ export class BookingService extends BaseApiService {
     };
   }
 
+  // Fix cancelBooking to only require one parameter (id)
   async cancelBooking(id: string): Promise<Booking> {
     const booking = await this.getBookingById(id);
     if (!booking) {

@@ -16,7 +16,7 @@ export const useCancelBooking = () => {
   const mutation = useMutation({
     mutationFn: async (bookingId: string) => {
       if (!user) throw new Error('User not authenticated');
-      return await bookingService.cancelBooking(bookingId, user.id);
+      return await bookingService.cancelBooking(bookingId);
     },
     onSuccess: () => {
       // Invalidate and refetch

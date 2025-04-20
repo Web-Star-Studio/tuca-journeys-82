@@ -7,3 +7,4 @@ export * from './tour-service';
 export * from './accommodation-service';
 export * from './vehicle-service';
 export * from './user-service';
+export * from './partner-service';

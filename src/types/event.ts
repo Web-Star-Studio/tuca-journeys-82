@@ -16,7 +16,7 @@ export interface Event {
   created_at: string;
   updated_at: string;
   category: string;    
-  featured: boolean;   // Making this required with default value in mock data
+  featured: boolean;   // Required with default value in mock data
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   organizer: string;   
 }

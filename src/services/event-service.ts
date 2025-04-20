@@ -59,6 +59,32 @@ export class EventService extends BaseApiService {
   }
   
   /**
+   * Get events by partner ID
+   */
+  async getEventsByPartnerId(partnerId: string): Promise<Event[]> {
+    const { data, error } = await this.supabase
+      .from('events')
+      .select('*')
+      .eq('partner_id', partnerId);
+    
+    if (error) {
+      console.error(`Error fetching events for partner ${partnerId}:`, error);
+      throw error;
+    }
+    
+    // Transform to ensure it matches the Event interface
+    return data.map(event => ({
+      ...event,
+      title: event.name || event.title || '',
+      name: event.name || event.title || '',
+      gallery_images: event.gallery_images || [],
+      status: event.status || 'active',
+      organizer: event.organizer || 'Noronha Adventures',
+      featured: event.featured || event.is_featured || false
+    })) as Event[];
+  }
+  
+  /**
    * Create a new event
    */
   async createEvent(eventData: Partial<Event>): Promise<Event> {
@@ -136,6 +162,35 @@ export class EventService extends BaseApiService {
       console.error(`Error deleting event ${id}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Create an event booking
+   */
+  async createEventBooking(bookingData: any): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .insert([{
+        user_id: bookingData.user_id,
+        event_id: bookingData.event_id,
+        start_date: bookingData.date || bookingData.start_date || new Date().toISOString(),
+        end_date: bookingData.date || bookingData.end_date || new Date().toISOString(),
+        guests: bookingData.guests || 1,
+        total_price: bookingData.total_price || 0,
+        status: bookingData.status || 'confirmed',
+        payment_status: bookingData.payment_status || 'pending',
+        payment_method: bookingData.payment_method || null,
+        special_requests: bookingData.special_requests || null
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating event booking:', error);
+      throw error;
+    }
+    
+    return data;
   }
 }
 

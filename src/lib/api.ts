@@ -163,7 +163,7 @@ class ApiService {
       ...item,
       price_per_day: item.price_per_day || 0,
       price: item.price_per_day || 0, // Map to price_per_day if missing
-      capacity: item.available_quantity || item.capacity || 1,
+      capacity: item.available_quantity || 1, // Default capacity if missing
       features: item.features || [],
       gallery_images: item.gallery_images || [],
       is_available: item.is_available !== false
@@ -187,7 +187,7 @@ class ApiService {
       ...data,
       price_per_day: data.price_per_day || 0,
       price: data.price_per_day || 0, // Map to price_per_day if missing
-      capacity: data.available_quantity || data.capacity || 1,
+      capacity: data.available_quantity || 1, // Default capacity if missing
       features: data.features || [],
       gallery_images: data.gallery_images || [],
       is_available: data.is_available !== false

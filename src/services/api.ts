@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -33,7 +34,12 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    // Transform data to match the Tour interface
+    return data.map(tour => ({
+      ...tour,
+      location: tour.meeting_point || 'Unknown Location',
+      is_available: tour.is_available ?? true
+    })) as Tour[];
   }
 
   async getTourById(id: number): Promise<Tour> {
@@ -48,7 +54,12 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    // Transform to match the Tour interface
+    return {
+      ...data,
+      location: data.meeting_point || 'Unknown Location', 
+      is_available: data.is_available ?? true
+    } as Tour;
   }
 
   // Accommodations
@@ -62,7 +73,13 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    // Transform to match the Accommodation interface
+    return data.map(accommodation => ({
+      ...accommodation,
+      location: accommodation.address || 'Unknown Location',
+      is_available: accommodation.is_available ?? true,
+      category: accommodation.type || 'Standard'
+    })) as Accommodation[];
   }
 
   async getAccommodationById(id: number): Promise<Accommodation> {
@@ -77,7 +94,13 @@ class ApiService {
       throw error;
     }
     
-    return data;
+    // Transform to match the Accommodation interface
+    return {
+      ...data,
+      location: data.address || 'Unknown Location',
+      is_available: data.is_available ?? true,
+      category: data.type || 'Standard' 
+    } as Accommodation;
   }
 
   // Bookings
@@ -107,8 +130,8 @@ class ApiService {
       user_id: bookingData.user_id,
       tour_id: bookingData.tour_id,
       accommodation_id: bookingData.accommodation_id,
-      event_id: bookingData.event_id,
-      vehicle_id: bookingData.vehicle_id,
+      event_id: bookingData.event_id || null,
+      vehicle_id: bookingData.vehicle_id || null,
       start_date: bookingData.start_date,
       end_date: bookingData.end_date,
       guests: bookingData.guests,
@@ -277,6 +300,33 @@ class ApiService {
       return false;
     }
   }
+  
+  // Check if user is a partner - needed for UserDropdownContent
+  async isUserPartner(userId: string): Promise<boolean> {
+    if (!userId) return false;
+    
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+    
+      if (error && error.code !== 'PGRST116') { // PGRST116 is the error for "no rows returned"
+        console.error('Error checking if user is partner:', error);
+        throw error;
+      }
+    
+      return !!data;
+    } catch (error) {
+      console.error('Error checking if user is partner:', error);
+      return false;
+    }
+  }
 }
 
 export const apiService = new ApiService();
+// Export the isUserPartner function for use in the UserDropdownContent component
+export const isUserPartner = async (userId: string): Promise<boolean> => {
+  return await apiService.isUserPartner(userId);
+};

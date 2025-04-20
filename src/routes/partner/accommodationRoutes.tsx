@@ -1,12 +1,12 @@
 
 import React from "react";
-import PartnerRoute from "@/components/partner/PartnerRoute";
 import { Building } from "lucide-react";
+import PartnerAccommodations from "@/pages/partner/accommodations/PartnerAccommodations";
 
 export const accommodationRoutes = [
   {
     path: "/parceiro/hospedagens",
-    element: <div>Hospedagens</div>,
+    element: <PartnerAccommodations />,
     label: "Hospedagens",
     icon: Building,
   },

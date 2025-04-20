@@ -9,10 +9,18 @@ import { useProfile, ExtendedUserProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+interface PreferenceState {
+  travelStyle: string;
+  notifyPromos: boolean;
+  notifyBookings: boolean;
+  budget: string;
+  activities: string[];
+}
+
 const ProfilePreferencesTab = () => {
   const { profile, updateProfile, isLoading } = useProfile();
   
-  const [preferences, setPreferences] = useState({
+  const [preferences, setPreferences] = useState<PreferenceState>({
     travelStyle: profile?.preferences?.travelStyle || 'relaxation',
     notifyPromos: profile?.preferences?.notifications?.marketing || true,
     notifyBookings: profile?.preferences?.notifications?.booking_updates || true,

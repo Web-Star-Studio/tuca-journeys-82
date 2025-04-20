@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, UserProfile } from '@/types/database';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -436,7 +437,7 @@ class ApiService {
   }
 
   // Get user roles
-  async getUserRoles(userId: string) => {
+  async getUserRoles(userId: string): Promise<string[]> {
     console.log(`Fetching roles for user: ${userId}`);
     const { data, error } = await this.supabase
       .from('user_roles')
@@ -449,10 +450,10 @@ class ApiService {
     }
     
     return data.map(item => item.role);
-  };
+  }
 
   // Check if user has specific role
-  async hasRole(userId: string, roleName: string): Promise<boolean> => {
+  async hasRole(userId: string, roleName: string): Promise<boolean> {
     if (!userId) return false;
     
     try {
@@ -462,10 +463,10 @@ class ApiService {
       console.error('Error checking user role:', error);
       return false;
     }
-  };
+  }
 
   // Check if user is a partner
-  async isUserPartner(userId: string): Promise<boolean> => {
+  async isUserPartner(userId: string): Promise<boolean> {
     if (!userId) return false;
     
     try {
@@ -485,10 +486,10 @@ class ApiService {
       console.error('Error checking if user is partner:', error);
       return false;
     }
-  };
+  }
 
   // Get user partner profile
-  async getUserPartnerProfile(userId: string): Promise<Partner | null> => {
+  async getUserPartnerProfile(userId: string): Promise<Partner | null> {
     if (!userId) return null;
     
     try {
@@ -508,7 +509,7 @@ class ApiService {
       console.error('Error fetching user partner profile:', error);
       return null;
     }
-  };
+  }
 }
 
 export const apiService = new ApiService();

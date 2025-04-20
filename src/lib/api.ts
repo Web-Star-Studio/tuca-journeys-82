@@ -123,7 +123,23 @@ export const getVehiclesFromDB = async () => {
     throw error;
   }
   
-  return data as Vehicle[];
+  // Cast to Vehicle and map missing properties if needed
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type || 'car',
+    price_per_day: item.price_per_day || item.price || 0,
+    capacity: item.capacity || item.available_quantity || 1,
+    image_url: item.image_url,
+    partner_id: item.partner_id,
+    created_at: item.created_at,
+    updated_at: item.updated_at,
+    available_quantity: item.available_quantity,
+    features: item.features,
+    gallery_images: item.gallery_images,
+    is_available: item.is_available
+  })) as Vehicle[];
 };
 
 export const getVehicleByIdFromDB = async (id: number) => {
@@ -139,7 +155,23 @@ export const getVehicleByIdFromDB = async (id: number) => {
     throw error;
   }
   
-  return data as Vehicle;
+  // Cast to Vehicle and map missing properties if needed
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    type: data.type || 'car',
+    price_per_day: data.price_per_day || data.price || 0,
+    capacity: data.capacity || data.available_quantity || 1,
+    image_url: data.image_url,
+    partner_id: data.partner_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    available_quantity: data.available_quantity,
+    features: data.features,
+    gallery_images: data.gallery_images,
+    is_available: data.is_available
+  } as Vehicle;
 };
 
 // Events API

@@ -6,63 +6,71 @@ import BookingsTable from "@/components/admin/bookings/BookingsTable";
 import BookingDetailDrawer from "@/components/admin/bookings/BookingDetailDrawer";
 import { Booking } from "@/types/bookings";
 
-// Dummy bookings data
-const dummyBookings = [
+// Dummy bookings data that matches the Booking interface
+const dummyBookings: Booking[] = [
   {
     id: "B1234",
+    user_id: "user-1",
     user_name: "Maria Silva",
     user_email: "maria@example.com",
-    item_type: "tour" as const,
+    item_type: "tour",
     item_name: "Mergulho em Noronha",
     start_date: "2023-09-10",
     end_date: "2023-09-10",
     guests: 2,
     total_price: 450.0,
-    status: "confirmed" as const,
-    payment_status: "paid" as const,
+    status: "confirmed",
+    payment_status: "paid",
     created_at: "2023-08-25T14:30:00",
+    updated_at: "2023-08-25T14:30:00",
   },
   {
     id: "B1235",
+    user_id: "user-2",
     user_name: "João Oliveira",
     user_email: "joao@example.com",
-    item_type: "accommodation" as const,
+    item_type: "accommodation",
     item_name: "Pousada Vista Mar",
     start_date: "2023-10-15",
     end_date: "2023-10-20",
     guests: 3,
     total_price: 2500.0,
-    status: "pending" as const,
-    payment_status: "pending" as const,
+    status: "pending",
+    payment_status: "pending",
     created_at: "2023-08-28T09:15:00",
+    updated_at: "2023-08-28T09:15:00",
   },
   {
     id: "B1236",
+    user_id: "user-3",
     user_name: "Ana Santos",
     user_email: "ana@example.com",
-    item_type: "package" as const,
+    item_type: "event",
     item_name: "Noronha Completo",
     start_date: "2023-11-05",
     end_date: "2023-11-12",
     guests: 2,
     total_price: 5800.0,
-    status: "confirmed" as const,
-    payment_status: "paid" as const,
+    status: "confirmed",
+    payment_status: "paid",
     created_at: "2023-08-30T16:45:00",
+    updated_at: "2023-08-30T16:45:00",
   },
   {
     id: "B1237",
+    user_id: "user-4",
     user_name: "Carlos Pereira",
     user_email: "carlos@example.com",
-    item_type: "tour" as const,
+    item_type: "tour",
     item_name: "Passeio de Buggy",
     start_date: "2023-09-05",
     end_date: "2023-09-05",
     guests: 4,
     total_price: 600.0,
-    status: "cancelled" as const,
-    payment_status: "refunded" as const,
+    status: "cancelled",
+    payment_status: "refunded",
     created_at: "2023-08-20T11:30:00",
+    updated_at: "2023-08-20T11:30:00",
   },
 ];
 
@@ -76,9 +84,11 @@ const generateMoreBookings = () => {
     additionalBookings.push({
       ...baseBooking,
       id: `B${5000 + i}`,
+      user_id: `user-${5000 + i}`,
       user_name: `${baseBooking.user_name} ${i + 1}`,
       user_email: `user${i + 1}@example.com`,
       created_at: new Date(new Date(baseBooking.created_at).getTime() + i * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(new Date(baseBooking.updated_at).getTime() + i * 24 * 60 * 60 * 1000).toISOString(),
     });
   }
   

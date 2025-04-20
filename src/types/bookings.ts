@@ -26,8 +26,11 @@ export interface CreateBookingDTO {
   start_date: string;
   end_date: string;
   number_of_guests: number;
+  guests?: number; // Adding this to support both naming conventions
   total_price: number;
   status: 'pending' | 'confirmed' | 'cancelled';
+  payment_status?: 'paid' | 'pending' | 'refunded';
   notes?: string;
   payment_method?: string;
+  special_requests?: string;
 }

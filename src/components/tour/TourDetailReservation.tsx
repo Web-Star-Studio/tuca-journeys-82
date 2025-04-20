@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +54,7 @@ const TourDetailReservation = ({ tour }: TourDetailReservationProps) => {
         accommodation_id: null,
         start_date: selectedDate,
         end_date: selectedDate, // For tours, start and end date are the same
-        guests: participants,
+        number_of_guests: participants,
         total_price: totalPrice,
         status: 'pending',
         payment_status: 'pending',

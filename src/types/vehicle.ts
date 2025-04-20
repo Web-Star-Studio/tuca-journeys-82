@@ -10,4 +10,8 @@ export interface Vehicle {
   partner_id: string;
   created_at: string;
   updated_at: string;
+  available_quantity?: number;
+  features?: string[];
+  gallery_images?: string[];
+  is_available?: boolean;
 }

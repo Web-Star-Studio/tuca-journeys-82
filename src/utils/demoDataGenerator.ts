@@ -1,3 +1,4 @@
+
 import { Tour, Accommodation, Product } from '@/types/database';
 
 // Demo data for seeding the database
@@ -26,6 +27,7 @@ export const demoData = {
       excludes: ["Transporte até o ponto de encontro", "Taxa de preservação ambiental"],
       notes: ["Levar roupa de banho, toalha e protetor solar.", "Não recomendado para pessoas com problemas cardíacos."],
       meeting_point: "Centro de Mergulho Tubarão",
+      is_available: true
     },
     {
       id: 2,
@@ -50,6 +52,7 @@ export const demoData = {
       excludes: ["Taxa de acesso ao ICMBio", "Alimentação"],
       notes: ["Usar calçado fechado e roupas confortáveis.", "Levar água e lanche."],
       meeting_point: "Agência EcoNoronha",
+      is_available: true
     },
     {
       id: 3,
@@ -74,6 +77,7 @@ export const demoData = {
       excludes: ["Transporte até o porto", "Alimentação"],
       notes: ["Levar roupa de banho, toalha e protetor solar.", "Em caso de chuva, o passeio será remarcado."],
       meeting_point: "Porto de Santo Antônio",
+      is_available: true
     },
     {
       id: 4,
@@ -98,6 +102,7 @@ export const demoData = {
       excludes: ["Taxa de preservação ambiental", "Bebidas"],
       notes: ["Usar roupas confortáveis e calçado fechado.", "Levar água e protetor solar."],
       meeting_point: "Receptivo Noronha",
+      is_available: true
     }
   ] as Tour[],
   
@@ -121,6 +126,8 @@ export const demoData = {
         "/accommodations/pousada-mar-atlantico-3.jpg"
       ],
       address: "Rua da Praia, 123",
+      is_available: true,
+      category: "pousada"
     },
     {
       id: 2,
@@ -141,6 +148,8 @@ export const demoData = {
         "/accommodations/bangalo-boldro-3.jpg"
       ],
       address: "Estrada do Boldró, km 5",
+      is_available: true,
+      category: "bangalô"
     },
     {
       id: 3,
@@ -161,6 +170,8 @@ export const demoData = {
         "/accommodations/apartamento-sancho-3.jpg"
       ],
       address: "Rua das Flores, 456",
+      is_available: true,
+      category: "apartamento"
     },
     {
       id: 4,
@@ -181,6 +192,8 @@ export const demoData = {
         "/accommodations/casa-praia-3.jpg"
       ],
       address: "Avenida Beira Mar, 789",
+      is_available: true,
+      category: "casa"
     }
   ] as Accommodation[],
   
@@ -230,4 +243,17 @@ export const demoData = {
       featured: false
     }
   ] as Product[]
+};
+
+// Export helper functions to generate demo data for various hooks
+export const generateDemoTours = (): Tour[] => {
+  return demoData.tours;
+};
+
+export const generateDemoAccommodations = (): Accommodation[] => {
+  return demoData.accommodations;
+};
+
+export const generateDemoProducts = (): Product[] => {
+  return demoData.products;
 };

@@ -7,7 +7,7 @@ export * from './partner';
 
 // Explicitly re-export types that have naming conflicts
 export type { Booking as UIBooking } from './bookings';
-export type { Booking as DatabaseBooking } from './database';
+export type { DatabaseBooking } from './database';
 
 // Re-export product types with explicit naming
 export type { Product as UIProduct } from './product';

@@ -23,7 +23,7 @@ export class TourService extends BaseApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || 'Unknown Location',
-      is_available: tour.is_available !== undefined ? Boolean(tour.is_available) : true
+      is_available: typeof tour.is_available === 'boolean' ? tour.is_available : true
     })) as Tour[];
   }
 
@@ -46,7 +46,7 @@ export class TourService extends BaseApiService {
     return {
       ...data,
       location: data.meeting_point || 'Unknown Location',
-      is_available: data.is_available !== undefined ? Boolean(data.is_available) : true
+      is_available: typeof data.is_available === 'boolean' ? data.is_available : true
     } as Tour;
   }
 }

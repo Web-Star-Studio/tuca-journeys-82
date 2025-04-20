@@ -72,14 +72,16 @@ export class BookingService extends BaseApiService {
 
   async getBookingById(bookingId: string): Promise<Booking | null> {
     try {
-      // Convert ID to number for Supabase if it's numeric
-      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
+      // Handle numeric and string IDs
+      let query = supabase.from('bookings').select('*');
       
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('id', id)
-        .single();
+      if (!isNaN(Number(bookingId))) {
+        query = query.eq('id', Number(bookingId));
+      } else {
+        query = query.eq('id', bookingId);
+      }
+      
+      const { data, error } = await query.single();
       
       if (error) {
         throw error;
@@ -144,7 +146,7 @@ export class BookingService extends BaseApiService {
       
       const { data, error } = await supabase
         .from('bookings')
-        .insert(dbBooking)
+        .insert([dbBooking])
         .select()
         .single();
       
@@ -214,15 +216,16 @@ export class BookingService extends BaseApiService {
   
   async cancelBooking(bookingId: string): Promise<Booking> {
     try {
-      // Convert string ID to number if it's numeric
-      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
+      // Handle numeric and string IDs
+      let query = supabase.from('bookings').update({ status: 'cancelled' });
       
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', id)
-        .select()
-        .single();
+      if (!isNaN(Number(bookingId))) {
+        query = query.eq('id', Number(bookingId));
+      } else {
+        query = query.eq('id', bookingId);
+      }
+      
+      const { data, error } = await query.select().single();
       
       if (error) {
         throw error;

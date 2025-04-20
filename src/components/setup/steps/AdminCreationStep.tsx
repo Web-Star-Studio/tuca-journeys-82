@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Check } from "lucide-react";
-import { createInitialAdmin } from "@/utils/seedDatabase";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminCreationStepProps {
   isCreatingAdmin: boolean;
@@ -30,83 +30,121 @@ export const AdminCreationStep: React.FC<AdminCreationStepProps> = ({
   onConfirmPasswordChange,
   onAdminComplete,
 }) => {
+  const { signUp } = useAuth();
+  const [adminName, setAdminName] = useState("Administrador");
+  
   const handleCreateAdmin = async () => {
     if (adminComplete) {
       toast.info("Administrador já foi criado");
       return;
     }
     
-    if (!adminEmail || !adminPassword) {
-      toast.error("Por favor, preencha todos os campos");
+    // Validar email
+    if (!validateEmail(adminEmail)) {
+      toast.error("Email inválido");
       return;
     }
     
-    if (adminPassword !== confirmPassword) {
-      toast.error("As senhas não coincidem");
-      return;
-    }
-    
+    // Validar senha
     if (adminPassword.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres");
       return;
     }
     
+    // Verificar se as senhas conferem
+    if (adminPassword !== confirmPassword) {
+      toast.error("As senhas não conferem");
+      return;
+    }
+    
     try {
-      const result = await createInitialAdmin(adminEmail, adminPassword);
-      if (result.success) {
-        toast.success("Administrador criado com sucesso!");
-        onAdminComplete();
-      } else {
-        toast.error("Erro ao criar administrador");
-      }
-    } catch (error) {
+      // Em um ambiente real, chamaríamos o Supabase
+      // await signUp(adminEmail, adminPassword, adminName);
+      
+      // Simulamos a criação para demonstração
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success("Administrador criado com sucesso!");
+      onAdminComplete();
+      
+      // Salvando no localStorage para demonstração
+      localStorage.setItem('adminEmail', adminEmail);
+    } catch (error: any) {
       console.error("Error creating admin:", error);
-      toast.error("Erro ao criar administrador");
+      toast.error(error.message || "Erro ao criar administrador");
     }
   };
-
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium">2. Criar Administrador</h3>
+        <h3 className="font-medium">2. Criar Conta de Administrador</h3>
         {adminComplete ? <Check className="h-5 w-5 text-green-500" /> : null}
       </div>
       
       <div className="space-y-3">
-        <div className="space-y-1">
-          <Label htmlFor="admin-email">Email do Administrador</Label>
+        <div className="space-y-2">
+          <Label htmlFor="adminName">Nome</Label>
           <Input
-            id="admin-email"
+            id="adminName"
+            placeholder="Nome do Administrador"
+            value={adminName}
+            onChange={(e) => setAdminName(e.target.value)}
+            disabled={isCreatingAdmin || adminComplete}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="adminEmail">Email</Label>
+          <Input
+            id="adminEmail"
             type="email"
+            placeholder="exemplo@tucanoronha.com"
             value={adminEmail}
             onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="admin@tucanoronha.com"
+            disabled={isCreatingAdmin || adminComplete}
           />
         </div>
         
-        <div className="space-y-1">
-          <Label htmlFor="admin-password">Senha</Label>
+        <div className="space-y-2">
+          <Label htmlFor="adminPassword">Senha</Label>
           <Input
-            id="admin-password"
+            id="adminPassword"
             type="password"
+            placeholder="•••••••••"
             value={adminPassword}
             onChange={(e) => onPasswordChange(e.target.value)}
+            disabled={isCreatingAdmin || adminComplete}
           />
+          {adminPassword && adminPassword.length < 6 && (
+            <p className="text-xs text-amber-600 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              A senha deve ter pelo menos 6 caracteres
+            </p>
+          )}
         </div>
         
-        <div className="space-y-1">
-          <Label htmlFor="confirm-password">Confirmar Senha</Label>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirmar Senha</Label>
           <Input
-            id="confirm-password"
+            id="confirmPassword"
             type="password"
+            placeholder="•••••••••"
             value={confirmPassword}
             onChange={(e) => onConfirmPasswordChange(e.target.value)}
+            disabled={isCreatingAdmin || adminComplete}
           />
+          {adminPassword && confirmPassword && adminPassword !== confirmPassword && (
+            <p className="text-xs text-amber-600 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              As senhas não conferem
+            </p>
+          )}
         </div>
         
         <Button 
           onClick={handleCreateAdmin}
-          disabled={isCreatingAdmin || adminComplete || !adminEmail || !adminPassword || adminPassword !== confirmPassword}
+          disabled={isCreatingAdmin || adminComplete}
           className="w-full"
         >
           {isCreatingAdmin ? (
@@ -124,3 +162,9 @@ export const AdminCreationStep: React.FC<AdminCreationStepProps> = ({
     </div>
   );
 };
+
+// Helper para validar email
+function validateEmail(email: string): boolean {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}

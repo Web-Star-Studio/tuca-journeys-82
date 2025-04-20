@@ -2,31 +2,54 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export const useSetupInitialized = () => {
-  const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface UseSetupInitializedResult {
+  isInitialized: boolean;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const useSetupInitialized = (): UseSetupInitializedResult => {
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const checkInitialization = async () => {
+    const checkSetupStatus = async () => {
       try {
-        // Check if we have any tours in the database as a simple initialization check
-        const { count, error } = await supabase
-          .from('tours')
-          .select('*', { count: 'exact', head: true });
-
-        if (error) throw error;
+        setIsLoading(true);
         
-        setIsInitialized(count ? count > 0 : false);
-      } catch (error) {
-        console.error('Error checking initialization:', error);
+        // Verificar no localStorage para demonstração (em produção, verificaríamos no banco)
+        const setupCompleted = localStorage.getItem('setupCompleted');
+        
+        if (setupCompleted === 'true') {
+          setIsInitialized(true);
+          return;
+        }
+
+        // Em um ambiente real, verificaríamos no Supabase
+        // const { data, error } = await supabase
+        //   .from('system_settings')
+        //   .select('value')
+        //   .eq('key', 'setup_completed')
+        //   .single();
+        //
+        // if (error) throw error;
+        // setIsInitialized(data?.value === 'true');
+
+        // Para demonstração, assumimos que não está inicializado
         setIsInitialized(false);
+      } catch (err) {
+        console.error('Erro ao verificar status de inicialização:', err);
+        setError(err as Error);
+        // Em caso de erro, permitimos o acesso à aplicação
+        setIsInitialized(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkInitialization();
+    checkSetupStatus();
   }, []);
 
-  return { isInitialized, isLoading };
+  return { isInitialized, isLoading, error };
 };

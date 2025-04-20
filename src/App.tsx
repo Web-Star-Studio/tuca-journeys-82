@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { UIProvider } from './contexts/UIContext';
 import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { publicRoutes } from './routes/publicRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { adminRoutes } from './routes/adminRoutes';
@@ -17,19 +18,21 @@ const App: React.FC = () => {
   return (
     <UIProvider>
       <CartProvider>
-        <ScrollToTop />
-        <Suspense fallback={<GlobalLoading />}>
-          <Routes>
-            {setupRoute}
-            <Route element={<RequireSetup />}>
-              {publicRoutes}
-              {protectedRoutes}
-              {adminRoutes}
-              {partnerRoutes}
-            </Route>
-          </Routes>
-        </Suspense>
-        <Toaster position="top-center" richColors closeButton />
+        <NotificationProvider>
+          <ScrollToTop />
+          <Suspense fallback={<GlobalLoading />}>
+            <Routes>
+              {setupRoute}
+              <Route element={<RequireSetup />}>
+                {publicRoutes}
+                {protectedRoutes}
+                {adminRoutes}
+                {partnerRoutes}
+              </Route>
+            </Routes>
+          </Suspense>
+          <Toaster position="top-center" richColors closeButton />
+        </NotificationProvider>
       </CartProvider>
     </UIProvider>
   );

@@ -1,326 +1,303 @@
 
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormDescription,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
-
-const preferencesSchema = z.object({
-  travelStyle: z.string().min(1, "Selecione um estilo de viagem"),
-  preferredActivities: z.array(z.string()).min(1, "Selecione pelo menos uma atividade"),
-  accommodationType: z.array(z.string()).min(1, "Selecione pelo menos um tipo de hospedagem"),
-  budgetRange: z.string().min(1, "Selecione uma faixa de orçamento"),
-  travelFrequency: z.string().min(1, "Selecione uma frequência de viagem"),
-});
-
-type PreferencesFormValues = z.infer<typeof preferencesSchema>;
-
-const travelStyles = [
-  { id: "adventure", label: "Aventura" },
-  { id: "relaxation", label: "Relaxamento" },
-  { id: "cultural", label: "Cultural" },
-  { id: "nature", label: "Natureza" },
-  { id: "gastronomic", label: "Gastronômico" },
-];
-
-const activities = [
-  { id: "hiking", label: "Trilhas" },
-  { id: "diving", label: "Mergulho" },
-  { id: "tours", label: "Passeios Guiados" },
-  { id: "beach", label: "Praia" },
-  { id: "photography", label: "Fotografia" },
-  { id: "local_cuisine", label: "Culinária Local" },
-  { id: "wildlife", label: "Observação de Fauna" },
-];
-
-const accommodationTypes = [
-  { id: "hotel", label: "Hotel" },
-  { id: "pousada", label: "Pousada" },
-  { id: "resort", label: "Resort" },
-  { id: "hostel", label: "Hostel" },
-  { id: "apartment", label: "Apartamento" },
-];
+import { Loader2 } from "lucide-react";
 
 const ProfilePreferencesTab = () => {
+  const { profile, updateProfile, isLoading } = useProfile();
+  
+  const [preferences, setPreferences] = useState({
+    travelStyle: profile?.preferences?.travelStyle || 'relaxation',
+    notifyPromos: profile?.preferences?.notifications?.marketing || true,
+    notifyBookings: profile?.preferences?.notifications?.booking_updates || true,
+    budget: profile?.preferences?.budget_range || 'medium',
+    activities: profile?.preferences?.activities || ['beach', 'hiking'],
+  });
+  
   const [isSaving, setIsSaving] = useState(false);
   
-  // Get profile and predefined preference values (mock data for now)
-  const mockPreferences = {
-    travelStyle: "adventure",
-    preferredActivities: ["hiking", "diving", "beach"],
-    accommodationType: ["pousada", "hotel"],
-    budgetRange: "medium",
-    travelFrequency: "quarterly",
-  };
-
-  const form = useForm<PreferencesFormValues>({
-    resolver: zodResolver(preferencesSchema),
-    defaultValues: mockPreferences,
-  });
-
-  const onSubmit = async (values: PreferencesFormValues) => {
+  const handleSave = async () => {
     setIsSaving(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Preferências salvas com sucesso!");
-      console.log("Updated preferences:", values);
+      await updateProfile({
+        ...profile,
+        preferences: {
+          ...profile?.preferences,
+          travelStyle: preferences.travelStyle,
+          budget_range: preferences.budget,
+          activities: preferences.activities,
+          notifications: {
+            marketing: preferences.notifyPromos,
+            booking_updates: preferences.notifyBookings,
+            recommendations: true,
+          },
+        },
+      });
+      toast.success("Preferências salvas com sucesso");
     } catch (error) {
-      toast.error("Erro ao salvar preferências.");
-      console.error("Error saving preferences:", error);
+      console.error("Erro ao salvar preferências:", error);
+      toast.error("Erro ao salvar suas preferências");
     } finally {
       setIsSaving(false);
     }
   };
-
+  
+  const handleActivityToggle = (activity: string) => {
+    setPreferences(prev => {
+      const activities = [...prev.activities];
+      
+      if (activities.includes(activity)) {
+        return { 
+          ...prev, 
+          activities: activities.filter(a => a !== activity) 
+        };
+      } else {
+        return { 
+          ...prev, 
+          activities: [...activities, activity] 
+        };
+      }
+    });
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Preferências de Viagem</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="travelStyle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estilo de Viagem</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione seu estilo preferido de viagem" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {travelStyles.map(style => (
-                          <SelectItem key={style.id} value={style.id}>
-                            {style.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Este será o foco principal das recomendações de viagem.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="preferredActivities"
-                render={() => (
-                  <FormItem>
-                    <div className="mb-4">
-                      <FormLabel>Atividades Preferidas</FormLabel>
-                      <FormDescription>
-                        Selecione suas atividades favoritas durante viagens.
-                      </FormDescription>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {activities.map((activity) => (
-                        <FormField
-                          key={activity.id}
-                          control={form.control}
-                          name="preferredActivities"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={activity.id}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(activity.id)}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, activity.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== activity.id
-                                            )
-                                          )
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {activity.label}
-                                </FormLabel>
-                              </FormItem>
-                            )
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="accommodationType"
-                render={() => (
-                  <FormItem>
-                    <div className="mb-4">
-                      <FormLabel>Tipo de Hospedagem</FormLabel>
-                      <FormDescription>
-                        Selecione os tipos de hospedagem que você prefere.
-                      </FormDescription>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {accommodationTypes.map((accommodation) => (
-                        <FormField
-                          key={accommodation.id}
-                          control={form.control}
-                          name="accommodationType"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={accommodation.id}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(accommodation.id)}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, accommodation.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== accommodation.id
-                                            )
-                                          )
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {accommodation.label}
-                                </FormLabel>
-                              </FormItem>
-                            )
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="budgetRange"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Faixa de Orçamento</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione seu orçamento típico" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="economy">Econômico</SelectItem>
-                          <SelectItem value="medium">Médio</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="luxury">Luxo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Isso ajuda a filtrar recomendações por preço.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="travelFrequency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Frequência de Viagem</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Com que frequência você viaja?" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="monthly">Mensalmente</SelectItem>
-                          <SelectItem value="quarterly">Trimestralmente</SelectItem>
-                          <SelectItem value="biannually">Semestralmente</SelectItem>
-                          <SelectItem value="annually">Anualmente</SelectItem>
-                          <SelectItem value="rarely">Raramente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Usamos isso para enviar recomendações oportunas.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full md:w-auto"
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Salvar Preferências
-                  </>
-                )}
-              </Button>
-            </form>
-          </Form>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-medium mb-4">Estilo de Viagem</h3>
+          
+          <RadioGroup
+            value={preferences.travelStyle}
+            onValueChange={(value) => setPreferences(prev => ({ ...prev, travelStyle: value }))}
+            className="space-y-3"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="relaxation" id="relaxation" />
+              <Label htmlFor="relaxation">Relaxamento e descanso</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="adventure" id="adventure" />
+              <Label htmlFor="adventure">Aventura e adrenalina</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="cultural" id="cultural" />
+              <Label htmlFor="cultural">Cultural e histórico</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="gastronomy" id="gastronomy" />
+              <Label htmlFor="gastronomy">Gastronomia</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="ecotourism" id="ecotourism" />
+              <Label htmlFor="ecotourism">Ecoturismo e natureza</Label>
+            </div>
+          </RadioGroup>
         </CardContent>
       </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-medium mb-4">Faixa de Orçamento</h3>
+          
+          <RadioGroup
+            value={preferences.budget}
+            onValueChange={(value) => setPreferences(prev => ({ ...prev, budget: value }))}
+            className="space-y-3"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="economy" id="economy" />
+              <Label htmlFor="economy">Econômico</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="medium" id="medium" />
+              <Label htmlFor="medium">Moderado</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="premium" id="premium" />
+              <Label htmlFor="premium">Premium</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="luxury" id="luxury" />
+              <Label htmlFor="luxury">Luxo</Label>
+            </div>
+          </RadioGroup>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-medium mb-4">Atividades Preferidas</h3>
+          
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="beach" 
+                checked={preferences.activities.includes('beach')}
+                onCheckedChange={() => handleActivityToggle('beach')}
+              />
+              <label
+                htmlFor="beach"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Praia e sol
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="hiking" 
+                checked={preferences.activities.includes('hiking')}
+                onCheckedChange={() => handleActivityToggle('hiking')}
+              />
+              <label
+                htmlFor="hiking"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Trilhas e caminhadas
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="diving" 
+                checked={preferences.activities.includes('diving')}
+                onCheckedChange={() => handleActivityToggle('diving')}
+              />
+              <label
+                htmlFor="diving"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Mergulho e snorkeling
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="cultural" 
+                checked={preferences.activities.includes('cultural')}
+                onCheckedChange={() => handleActivityToggle('cultural')}
+              />
+              <label
+                htmlFor="cultural"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Passeios culturais
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="gastronomy" 
+                checked={preferences.activities.includes('gastronomy')}
+                onCheckedChange={() => handleActivityToggle('gastronomy')}
+              />
+              <label
+                htmlFor="gastronomy"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Experiências gastronômicas
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="wildlife" 
+                checked={preferences.activities.includes('wildlife')}
+                onCheckedChange={() => handleActivityToggle('wildlife')}
+              />
+              <label
+                htmlFor="wildlife"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Observação de fauna e flora
+              </label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-medium mb-4">Notificações</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="notifyPromos" 
+                checked={preferences.notifyPromos}
+                onCheckedChange={(checked) => 
+                  setPreferences(prev => ({ 
+                    ...prev, 
+                    notifyPromos: checked === true 
+                  }))
+                }
+              />
+              <div className="space-y-1">
+                <label
+                  htmlFor="notifyPromos"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Promoções e ofertas especiais
+                </label>
+                <p className="text-sm text-gray-500">
+                  Receba notificações sobre promoções, descontos e ofertas exclusivas.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="notifyBookings" 
+                checked={preferences.notifyBookings}
+                onCheckedChange={(checked) => 
+                  setPreferences(prev => ({ 
+                    ...prev, 
+                    notifyBookings: checked === true 
+                  }))
+                }
+              />
+              <div className="space-y-1">
+                <label
+                  htmlFor="notifyBookings"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Atualizações de reservas
+                </label>
+                <p className="text-sm text-gray-500">
+                  Receba notificações sobre confirmações, cancelamentos e alterações em suas reservas.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            "Salvar Preferências"
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

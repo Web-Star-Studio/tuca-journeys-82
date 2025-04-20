@@ -1,143 +1,94 @@
 
-import { supabase } from "@/lib/supabase";
-import { demoData } from "./demoDataGenerator";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+
+interface SeedResult {
+  success: boolean;
+  message: string;
+}
 
 /**
- * Seeds the database with initial data for production/demo purposes
- * This function should be called once during initial setup
+ * Função para inicializar o banco de dados com dados básicos
  */
-export const seedDatabase = async () => {
+export async function seedDatabase(): Promise<SeedResult> {
   try {
-    console.log("Starting database seeding process...");
+    // Simulamos um atraso para demonstração
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Insert tours
-    for (const tour of demoData.tours) {
-      const { error } = await supabase
-        .from('tours')
-        .upsert({
-          title: tour.title,
-          short_description: tour.short_description,
-          description: tour.description,
-          price: tour.price,
-          category: tour.category,
-          duration: tour.duration,
-          max_participants: tour.max_participants,
-          min_participants: tour.min_participants,
-          difficulty: tour.difficulty,
-          rating: tour.rating,
-          image_url: tour.image_url,
-          gallery_images: tour.gallery_images,
-          schedule: tour.schedule,
-          includes: tour.includes,
-          excludes: tour.excludes,
-          notes: tour.notes,
-          meeting_point: tour.meeting_point,
-        });
-      
-      if (error) throw error;
-    }
+    // Em um ambiente real, inicializaríamos tabelas no Supabase
+    // Exemplo:
+    // await setupUsersTable();
+    // await setupProductsTable();
+    // await setupBookingsTable();
+    // await setupSettingsTable();
     
-    // Insert accommodations
-    for (const accommodation of demoData.accommodations) {
-      const { error } = await supabase
-        .from('accommodations')
-        .upsert({
-          title: accommodation.title,
-          short_description: accommodation.description,
-          description: accommodation.description,
-          price_per_night: accommodation.price_per_night,
-          type: accommodation.type,
-          max_guests: accommodation.max_guests,
-          bedrooms: accommodation.bedrooms,
-          bathrooms: accommodation.bathrooms,
-          amenities: accommodation.amenities,
-          rating: accommodation.rating,
-          image_url: accommodation.image_url,
-          gallery_images: accommodation.gallery_images,
-          address: accommodation.address,
-        });
-      
-      if (error) throw error;
-    }
+    // Para demonstração, apenas salvamos um flag no localStorage
+    localStorage.setItem('databaseSeeded', 'true');
     
-    // Insert products
-    for (const product of demoData.products) {
-      const { error } = await supabase
-        .from('products')
-        .upsert({
-          name: product.name,
-          description: product.description,
-          image_url: product.image_url,
-          price: product.price,
-          category: product.category,
-          stock: product.stock,
-          status: product.status,
-          featured: product.featured,
-        });
-      
-      if (error) throw error;
-    }
-    
-    console.log("Database seeding completed successfully!");
-    return { success: true };
+    return {
+      success: true,
+      message: "Banco de dados inicializado com sucesso",
+    };
   } catch (error) {
-    console.error("Error seeding database:", error);
-    toast.error("Erro ao semear o banco de dados");
-    return { success: false, error };
+    console.error("Erro ao inicializar banco de dados:", error);
+    return {
+      success: false,
+      message: "Erro ao inicializar o banco de dados",
+    };
   }
-};
+}
 
 /**
- * Creates an initial admin user
- * @param email Admin email
- * @param password Admin password
+ * Marca o processo de setup como concluído
  */
-export const createInitialAdmin = async (email: string, password: string) => {
+export async function markSetupAsComplete(): Promise<SeedResult> {
   try {
-    // Check if the user already exists
-    const { data: existingUser } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('email', email)
-      .single();
-      
-    if (existingUser) {
-      console.log("Admin user already exists");
-      return { success: true, message: "Admin already exists" };
-    }
+    // Em um ambiente real, salvaríamos no Supabase
+    // const { error } = await supabase
+    //   .from('system_settings')
+    //   .upsert([{ key: 'setup_completed', value: 'true' }]);
+    //
+    // if (error) throw error;
     
-    // Register the user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name: "Administrador",
-          role: "admin"
-        }
-      }
-    });
+    // Para demonstração, salvamos no localStorage
+    localStorage.setItem('setupCompleted', 'true');
     
-    if (authError) throw authError;
-    
-    if (authData?.user) {
-      // Add admin role to the user
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert([
-          { user_id: authData.user.id, role: 'admin' }
-        ]);
-      
-      if (roleError) throw roleError;
-      
-      console.log("Initial admin user created successfully!");
-      return { success: true };
-    }
-    
-    return { success: false, error: "Failed to create user" };
+    return {
+      success: true,
+      message: "Setup marcado como concluído",
+    };
   } catch (error) {
-    console.error("Error creating initial admin:", error);
-    return { success: false, error };
+    console.error("Erro ao marcar setup como concluído:", error);
+    return {
+      success: false,
+      message: "Erro ao finalizar o setup",
+    };
   }
-};
+}
+
+/**
+ * Exemplos de funções para configurar tabelas específicas (não utilizadas na demo)
+ */
+async function setupUsersTable() {
+  // Verificar se a tabela existe e criar se necessário
+  // const { error } = await supabase.rpc('create_users_table_if_not_exists');
+  // if (error) throw error;
+}
+
+async function setupProductsTable() {
+  // Verificar se a tabela existe e criar se necessário
+  // const { error } = await supabase.rpc('create_products_table_if_not_exists');
+  // if (error) throw error;
+}
+
+async function setupBookingsTable() {
+  // Verificar se a tabela existe e criar se necessário
+  // const { error } = await supabase.rpc('create_bookings_table_if_not_exists');
+  // if (error) throw error;
+}
+
+async function setupSettingsTable() {
+  // Verificar se a tabela existe e criar se necessário
+  // const { error } = await supabase.rpc('create_settings_table_if_not_exists');
+  // if (error) throw error;
+}

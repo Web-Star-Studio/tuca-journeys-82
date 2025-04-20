@@ -23,9 +23,9 @@ export interface Tour {
   duration: string;
   price: number;
   image_url: string;
-  location: string;
+  location?: string;
   meeting_point: string;
-  is_available: boolean;
+  is_available?: boolean;
   category: string;
   max_participants: number;
   min_participants: number;
@@ -47,9 +47,9 @@ export interface Accommodation {
   short_description: string;
   price_per_night: number;
   image_url: string;
-  location: string;
+  location?: string;
   address: string;
-  is_available: boolean;
+  is_available?: boolean;
   category: string;
   type: string;
   bedrooms: number;

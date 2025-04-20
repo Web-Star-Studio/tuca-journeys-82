@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -38,7 +37,7 @@ class ApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || 'Unknown Location',
-      is_available: typeof tour.is_available !== 'undefined' ? tour.is_available : true
+      is_available: tour.is_available === undefined ? true : !!tour.is_available
     })) as Tour[];
   }
 
@@ -58,7 +57,7 @@ class ApiService {
     return {
       ...data,
       location: data.meeting_point || 'Unknown Location', 
-      is_available: typeof data.is_available !== 'undefined' ? data.is_available : true
+      is_available: data.is_available === undefined ? true : !!data.is_available
     } as Tour;
   }
 
@@ -77,7 +76,7 @@ class ApiService {
     return data.map(accommodation => ({
       ...accommodation,
       location: accommodation.address || 'Unknown Location',
-      is_available: typeof accommodation.is_available !== 'undefined' ? accommodation.is_available : true,
+      is_available: accommodation.is_available === undefined ? true : !!accommodation.is_available,
       category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
@@ -98,12 +97,12 @@ class ApiService {
     return {
       ...data,
       location: data.address || 'Unknown Location',
-      is_available: typeof data.is_available !== 'undefined' ? data.is_available : true,
+      is_available: data.is_available === undefined ? true : !!data.is_available,
       category: data.type || 'Standard' 
     } as Accommodation;
   }
 
-  // Bookings
+  // User bookings
   async getUserBookings(userId: string): Promise<UIBooking[]> {
     const { data, error } = await this.supabase
       .from('bookings')
@@ -195,6 +194,14 @@ class ApiService {
       itemType = 'vehicle';
     }
 
+    // Add safe access to properties with defaults
+    const event_id = bookingDB.event_id || null;
+    const vehicle_id = bookingDB.vehicle_id || null;
+    const name = bookingDB.name || "";
+    const title = bookingDB.title || name || "";
+    const status = bookingDB.status || "pending";
+    const organizer = bookingDB.organizer || "Unknown";
+
     return {
       id: bookingDB.id.toString(),
       user_id: bookingDB.user_id,
@@ -214,8 +221,8 @@ class ApiService {
       updated_at: bookingDB.updated_at,
       tour_id: bookingDB.tour_id,
       accommodation_id: bookingDB.accommodation_id,
-      event_id: bookingDB.event_id || null,
-      vehicle_id: bookingDB.vehicle_id || null
+      event_id: event_id,
+      vehicle_id: vehicle_id
     };
   }
 

@@ -19,7 +19,12 @@ export class TourService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Transform to ensure it matches the Tour interface
+    return data.map(tour => ({
+      ...tour,
+      location: tour.meeting_point || 'Unknown Location',
+      is_available: tour.is_available === undefined ? true : !!tour.is_available
+    })) as Tour[];
   }
 
   /**
@@ -37,7 +42,12 @@ export class TourService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    // Transform to ensure it matches the Tour interface
+    return {
+      ...data,
+      location: data.meeting_point || 'Unknown Location',
+      is_available: data.is_available === undefined ? true : !!data.is_available
+    } as Tour;
   }
 }
 

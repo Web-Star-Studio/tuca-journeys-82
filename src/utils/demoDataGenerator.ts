@@ -1,383 +1,242 @@
-import { Tour } from "@/types/database";
-import { Accommodation } from "@/types/database";
 import { Booking } from "@/types/bookings";
-import { UserProfile } from "@/types/database";
-import { Product } from "@/types/product";
-import { Package } from "@/data/types/packageTypes";
 
-export interface DemoData {
-  tours: Tour[];
-  accommodations: Accommodation[];
-  bookings: Booking[];
-  users: UserProfile[];
-  products: Product[];
-}
-
-/**
- * Generates consistent demo data for the entire application
- */
-export function generateDemoData(): DemoData {
-  // Generate users
-  const users: UserProfile[] = [
-    {
-      id: "user-001",
-      name: "João Silva",
-      email: "joao@example.com",
-      phone: "+55 11 98765-4321",
-      address: "Rua das Flores, 123",
-      city: "São Paulo",
-      state: "SP",
-      zip_code: "01234-567",
-      country: "Brasil",
-      created_at: "2023-08-15T10:30:00Z",
-      updated_at: "2023-09-10T14:45:00Z"
-    },
-    {
-      id: "user-002",
-      name: "Maria Oliveira",
-      email: "maria@example.com",
-      phone: "+55 21 98765-1234",
-      address: "Av. Atlântica, 500",
-      city: "Rio de Janeiro",
-      state: "RJ",
-      zip_code: "22021-001",
-      country: "Brasil",
-      created_at: "2023-07-20T09:15:00Z",
-      updated_at: "2023-08-25T11:20:00Z"
-    },
-    {
-      id: "user-003",
-      name: "Pedro Santos",
-      email: "pedro@example.com",
-      phone: "+55 31 99876-5432",
-      address: "Rua das Acácias, 45",
-      city: "Belo Horizonte",
-      state: "MG",
-      zip_code: "30140-060",
-      country: "Brasil",
-      created_at: "2023-09-05T15:10:00Z",
-      updated_at: "2023-09-05T15:10:00Z"
-    },
-    {
-      id: "user-004",
-      name: "Ana Souza",
-      email: "ana@example.com",
-      phone: "+55 41 98888-7777",
-      address: "Av. Paulista, 1000",
-      city: "Curitiba",
-      state: "PR",
-      zip_code: "80230-000",
-      country: "Brasil",
-      created_at: "2023-06-12T08:45:00Z",
-      updated_at: "2023-09-01T10:30:00Z"
-    }
-  ];
-  
-  // Generate tours data that matches our existing tour types
-  const tours: Tour[] = [
+export function generateDemoTours() {
+  return [
     {
       id: 1,
       title: "Passeio de Barco ao Pôr do Sol",
-      short_description: "Navegue pelas águas cristalinas e aprecie o pôr do sol",
-      description: "Navegue pelas águas cristalinas e aprecie o espetacular pôr do sol em Fernando de Noronha.",
-      price: 350,
-      category: "Barco",
-      duration: "3 horas",
-      max_participants: 12,
-      min_participants: 4,
-      difficulty: "Fácil",
-      rating: 4.9,
-      image_url: "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png",
-      gallery_images: [
-        "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
-        "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png"
-      ],
-      schedule: [
-        "16:00 - Embarque no Porto de Santo Antônio",
-        "16:30 - Navegação pela costa da ilha",
-        "17:45 - Parada para contemplação do pôr do sol",
-        "19:00 - Retorno ao porto"
-      ],
-      includes: [
-        "Bebidas de boas-vindas",
-        "Petiscos típicos",
-        "Equipamento de segurança",
-        "Fotos profissionais"
-      ],
-      excludes: [
-        "Transporte para o ponto de partida",
-        "Equipamentos de mergulho"
-      ],
-      notes: [
-        "Levar protetor solar",
-        "Levar roupa extra",
-        "Ideal para maiores de 6 anos"
-      ],
-      meeting_point: "Porto de Santo Antônio",
-      created_at: "2023-05-10T08:30:00Z",
-      updated_at: "2023-08-15T13:45:00Z"
-    },
-    {
-      id: 2,
-      title: "Mergulho na Baía dos Porcos",
-      short_description: "Explore a vida marinha única da Baía dos Porcos",
-      description: "Explore a vida marinha única da Baía dos Porcos, um dos pontos mais famosos para mergulho em Fernando de Noronha.",
-      price: 480,
-      category: "Mergulho",
-      duration: "4 horas",
-      max_participants: 8,
+      description: "Desfrute de um belíssimo passeio de barco ao pôr do sol, com música e petiscos.",
+      short_description: "Passeio de barco ao pôr do sol",
+      duration: "2 horas",
+      price: 120,
+      image_url: "/tour-sunset.jpg",
+      location: "Praia da Conceição",
+      meeting_point: "Trapiche da Praia da Conceição",
+      is_available: true,
+      category: "Passeios",
+      max_participants: 10,
       min_participants: 2,
-      difficulty: "Moderado",
-      rating: 5.0,
-      image_url: "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
-      gallery_images: [
-        "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png",
-        "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png"
-      ],
-      schedule: [
-        "08:00 - Encontro na base",
-        "08:30 - Instruções de segurança e técnicas de mergulho",
-        "09:30 - Início da atividade de mergulho",
-        "11:30 - Retorno à praia e lanche"
-      ],
-      includes: [
-        "Equipamento completo de mergulho",
-        "Instrutor certificado",
-        "Lanche e água",
-        "Fotos subaquáticas"
-      ],
-      excludes: [
-        "Transporte até o local",
-        "Itens pessoais"
-      ],
-      notes: [
-        "Atestado médico para mergulho",
-        "Saber nadar",
-        "Maiores de 12 anos",
-        "Preenchimento de termo de responsabilidade"
-      ],
-      meeting_point: "Baía dos Porcos",
-      created_at: "2023-04-20T10:15:00Z",
-      updated_at: "2023-07-05T09:30:00Z"
-    }
-  ];
-  
-  // Generate accommodations data
-  const accommodations: Accommodation[] = [
-    {
-      id: 1,
-      title: "Pousada Vista Mar",
-      short_description: "Pousada com vista privilegiada para o mar de Noronha",
-      description: "Pousada com vista privilegiada para o mar de Noronha, café da manhã incluso e localização estratégica.",
-      price_per_night: 850,
-      type: "Pousada",
-      max_guests: 2,
-      bedrooms: 1,
-      bathrooms: 1,
-      amenities: ["Wi-Fi", "Café da manhã", "Ar-condicionado", "Piscina"],
+      difficulty: "Fácil",
       rating: 4.8,
-      image_url: "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png",
-      gallery_images: [
-        "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
-        "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png"
-      ],
-      address: "Praia do Sueste, s/n",
-      created_at: "2023-03-10T14:20:00Z",
-      updated_at: "2023-08-01T11:45:00Z"
+      schedule: ["16:00 - 18:00"],
+      includes: ["Passeio de barco", "Música ao vivo", "Petiscos", "Bebidas"],
+      excludes: ["Transporte até o trapiche"],
+      notes: ["Levar protetor solar e óculos de sol"],
+      gallery_images: ["/tour-sunset-1.jpg", "/tour-sunset-2.jpg"]
     },
     {
       id: 2,
-      title: "Villa Paradiso",
-      short_description: "Villa completa com piscina privativa e 3 quartos",
-      description: "Villa completa com piscina privativa, 3 quartos e vista panorâmica para o Morro Dois Irmãos.",
-      price_per_night: 2200,
-      type: "Villa",
-      max_guests: 6,
-      bedrooms: 3,
-      bathrooms: 2,
-      amenities: ["Wi-Fi", "Piscina privativa", "Ar-condicionado", "Cozinha completa", "Churrasqueira"],
+      title: "Mergulho com Tartarugas",
+      description: "Mergulhe nas águas cristalinas de Fernando de Noronha e observe as tartarugas marinhas em seu habitat natural.",
+      short_description: "Mergulho com tartarugas marinhas",
+      duration: "3 horas",
+      price: 150,
+      image_url: "/tour-diving.jpg",
+      location: "Baía do Sancho",
+      meeting_point: "Centro de Mergulho da Baía do Sancho",
+      is_available: true,
+      category: "Mergulho",
+      max_participants: 6,
+      min_participants: 1,
+      difficulty: "Médio",
       rating: 4.9,
-      image_url: "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
-      gallery_images: [
-        "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
-        "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png"
-      ],
-      address: "Vila dos Remédios, 123",
-      created_at: "2023-02-15T09:10:00Z",
-      updated_at: "2023-07-20T16:30:00Z"
-    }
-  ];
-
-  // Generate bookings data
-  const bookings: Booking[] = [
-    {
-      id: "booking-001",
-      user_id: "user-001",
-      user_name: "João Silva",
-      user_email: "joao@example.com",
-      item_type: "tour",
-      item_name: "Passeio de Barco ao Pôr do Sol",
-      start_date: "2023-10-15",
-      end_date: "2023-10-15",
-      guests: 2,
-      total_price: 700,
-      status: "confirmed",
-      payment_status: "paid",
-      payment_method: "credit_card",
-      created_at: "2023-09-01T14:30:00Z",
-      updated_at: "2023-09-01T14:30:00Z",
-      tour_id: 1,
-      accommodation_id: undefined,
-      event_id: undefined,
-      vehicle_id: undefined,
-      special_requests: ""
-    },
-    {
-      id: "booking-002",
-      user_id: "user-002",
-      user_name: "Maria Oliveira",
-      user_email: "maria@example.com",
-      item_type: "accommodation",
-      item_name: "Pousada Vista Mar",
-      start_date: "2023-11-10",
-      end_date: "2023-11-15",
-      guests: 2,
-      total_price: 4250,
-      status: "confirmed",
-      payment_status: "paid",
-      payment_method: "credit_card",
-      created_at: "2023-08-25T10:15:00Z",
-      updated_at: "2023-08-25T10:15:00Z",
-      tour_id: undefined,
-      accommodation_id: 1,
-      event_id: undefined,
-      vehicle_id: undefined,
-      special_requests: ""
-    },
-    {
-      id: "booking-003",
-      user_id: "user-003",
-      user_name: "Pedro Santos",
-      user_email: "pedro@example.com",
-      item_type: "event",  // Changed from package to event
-      item_name: "Escapada Romântica",
-      start_date: "2023-12-05",
-      end_date: "2023-12-10",
-      guests: 2,
-      total_price: 4899,
-      status: "pending",
-      payment_status: "pending",
-      payment_method: undefined,
-      created_at: "2023-09-20T16:45:00Z",
-      updated_at: "2023-09-20T16:45:00Z",
-      tour_id: undefined,
-      accommodation_id: undefined,
-      event_id: 1,
-      vehicle_id: undefined,
-      special_requests: ""
-    },
-    {
-      id: "booking-004",
-      user_id: "user-004",
-      user_name: "Ana Souza",
-      user_email: "ana@example.com",
-      item_type: "tour",
-      item_name: "Mergulho na Baía dos Porcos",
-      start_date: "2023-10-20",
-      end_date: "2023-10-20",
-      guests: 1,
-      total_price: 480,
-      status: "confirmed",
-      payment_status: "paid",
-      payment_method: "credit_card",
-      created_at: "2023-09-15T11:30:00Z",
-      updated_at: "2023-09-15T11:30:00Z",
-      tour_id: 2,
-      accommodation_id: undefined,
-      event_id: undefined,
-      vehicle_id: undefined,
-      special_requests: ""
-    },
-    {
-      id: "booking-005",
-      user_id: "user-001",
-      user_name: "João Silva",
-      user_email: "joao@example.com",
-      item_type: "accommodation",
-      item_name: "Villa Paradiso",
-      start_date: "2023-11-20",
-      end_date: "2023-11-25",
-      guests: 4,
-      total_price: 11000,
-      status: "confirmed",
-      payment_status: "paid",
-      payment_method: "credit_card",
-      created_at: "2023-09-10T09:20:00Z",
-      updated_at: "2023-09-10T09:20:00Z",
-      tour_id: undefined,
-      accommodation_id: 2,
-      event_id: undefined,
-      vehicle_id: undefined,
-      special_requests: ""
-    }
-  ];
-  
-  // Generate products data
-  const products: Product[] = [
-    {
-      id: 1,
-      name: "Camiseta Fernando de Noronha",
-      description: "Camiseta 100% algodão com estampa exclusiva de Fernando de Noronha",
-      image_url: "/product-tshirt.jpg",
-      price: 79.90,
-      category: "Vestuário",
-      stock: 50,
-      status: "active",
-      featured: true
-    },
-    {
-      id: 2,
-      name: "Chapéu de Palha Noronha",
-      description: "Chapéu de palha artesanal fabricado por artesãos locais",
-      image_url: "/product-hat.jpg",
-      price: 45.50,
-      category: "Vestuário",
-      stock: 30,
-      status: "active",
-      featured: true
+      schedule: ["09:00 - 12:00"],
+      includes: ["Equipamento de mergulho", "Instrutor", "Passeio de barco"],
+      excludes: ["Taxa de acesso à Baía do Sancho"],
+      notes: ["Levar roupa de banho e toalha"],
+      gallery_images: ["/tour-diving-1.jpg", "/tour-diving-2.jpg"]
     },
     {
       id: 3,
-      name: "Caneca Morro Dois Irmãos",
-      description: "Caneca de cerâmica com imagem do Morro Dois Irmãos",
-      image_url: "/product-mug.jpg",
-      price: 39.90,
-      category: "Souvenir",
-      stock: 45,
-      status: "active",
-      featured: false
-    },
-    {
-      id: 4,
-      name: "Guia Fernando de Noronha",
-      description: "Livro com dicas, mapas e informações completas sobre Fernando de Noronha",
-      image_url: "/product-book.jpg",
-      price: 68.00,
-      category: "Livros",
-      stock: 20,
-      status: "active",
-      featured: true
+      title: "Trilha Ecológica",
+      description: "Explore a natureza exuberante de Fernando de Noronha em uma trilha ecológica guiada.",
+      short_description: "Trilha ecológica guiada",
+      duration: "4 horas",
+      price: 80,
+      image_url: "/tour-trail.jpg",
+      location: "Parque Nacional Marinho",
+      meeting_point: "Entrada do Parque Nacional Marinho",
+      is_available: true,
+      category: "Trilhas",
+      max_participants: 8,
+      min_participants: 2,
+      difficulty: "Difícil",
+      rating: 4.7,
+      schedule: ["08:00 - 12:00"],
+      includes: ["Guia", "Entrada no parque", "Água"],
+      excludes: ["Transporte até a entrada do parque"],
+      notes: ["Levar calçado de trilha e repelente"],
+      gallery_images: ["/tour-trail-1.jpg", "/tour-trail-2.jpg"]
     }
   ];
-
-  return {
-    tours,
-    accommodations,
-    bookings,
-    users,
-    products
-  };
 }
 
-// Use this function to access demo data throughout the application
-export const demoData = generateDemoData();
+export function generateDemoAccommodations() {
+  return [
+    {
+      id: 1,
+      title: "Pousada Vista Mar",
+      description: "Aconchegante pousada com vista para o mar, perfeita para relaxar e desfrutar da natureza.",
+      short_description: "Pousada com vista para o mar",
+      price_per_night: 400,
+      image_url: "/accommodation-1.jpg",
+      location: "Praia do Boldró",
+      address: "Rua da Pousada, 123",
+      is_available: true,
+      category: "Pousadas",
+      type: "Pousada",
+      bedrooms: 2,
+      bathrooms: 1,
+      max_guests: 4,
+      amenities: ["Wi-Fi", "Ar condicionado", "Café da manhã", "Piscina"],
+      gallery_images: ["/accommodation-1-1.jpg", "/accommodation-1-2.jpg"],
+      rating: 4.5
+    },
+    {
+      id: 2,
+      title: "Hotel Paraíso",
+      description: "Hotel de luxo com todas as comodidades para uma estadia inesquecível.",
+      short_description: "Hotel de luxo",
+      price_per_night: 800,
+      image_url: "/accommodation-2.jpg",
+      location: "Praia do Sancho",
+      address: "Avenida do Hotel, 456",
+      is_available: true,
+      category: "Hotéis",
+      type: "Hotel",
+      bedrooms: 3,
+      bathrooms: 2,
+      max_guests: 6,
+      amenities: ["Wi-Fi", "Ar condicionado", "Café da manhã", "Piscina", "Restaurante"],
+      gallery_images: ["/accommodation-2-1.jpg", "/accommodation-2-2.jpg"],
+      rating: 4.8
+    }
+  ];
+}
+
+export function generateDemoBookings(userId: string): Booking[] {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const nextWeek = new Date(today);
+  nextWeek.setDate(today.getDate() + 7);
+  const lastWeek = new Date(today);
+  lastWeek.setDate(today.getDate() - 7);
+  const nextMonth = new Date(today);
+  nextMonth.setMonth(today.getMonth() + 1);
+  
+  return [
+    {
+      id: "booking-1",
+      user_id: userId,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      tour_id: 1,
+      accommodation_id: null,
+      event_id: null,
+      vehicle_id: null,
+      item_type: "tour",
+      item_name: "Passeio de Barco ao Pôr do Sol",
+      start_date: tomorrow.toISOString(),
+      end_date: tomorrow.toISOString(),
+      guests: 2,
+      total_price: 240,
+      status: "confirmed",
+      payment_status: "paid",
+      created_at: yesterday.toISOString(),
+      updated_at: yesterday.toISOString(),
+      payment_method: "credit_card",
+      special_requests: null
+    },
+    {
+      id: "booking-2",
+      user_id: userId,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      tour_id: null,
+      accommodation_id: 1,
+      event_id: null,
+      vehicle_id: null,
+      item_type: "accommodation",
+      item_name: "Pousada Vista Mar",
+      start_date: nextWeek.toISOString(),
+      end_date: new Date(nextWeek.getTime() + 86400000 * 3).toISOString(),
+      guests: 2,
+      total_price: 1200,
+      status: "confirmed",
+      payment_status: "paid",
+      created_at: yesterday.toISOString(),
+      updated_at: yesterday.toISOString(),
+      payment_method: "credit_card",
+      special_requests: "Quarto com vista para o mar, por favor."
+    },
+    {
+      id: "booking-3",
+      user_id: userId,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      tour_id: 2,
+      accommodation_id: null,
+      event_id: null,
+      vehicle_id: null,
+      item_type: "tour",
+      item_name: "Mergulho com Tartarugas",
+      start_date: lastWeek.toISOString(),
+      end_date: lastWeek.toISOString(),
+      guests: 1,
+      total_price: 150,
+      status: "confirmed",
+      payment_status: "paid",
+      created_at: new Date(lastWeek.getTime() - 86400000 * 2).toISOString(),
+      updated_at: new Date(lastWeek.getTime() - 86400000 * 2).toISOString(),
+      payment_method: "credit_card",
+      special_requests: null
+    },
+    {
+      id: "booking-4",
+      user_id: userId,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      tour_id: null,
+      accommodation_id: null,
+      event_id: 1,
+      vehicle_id: null,
+      item_type: "event",
+      item_name: "Festival de Música",
+      start_date: nextMonth.toISOString(),
+      end_date: nextMonth.toISOString(),
+      guests: 2,
+      total_price: 300,
+      status: "pending",
+      payment_status: "pending",
+      created_at: today.toISOString(),
+      updated_at: today.toISOString(),
+      payment_method: "bank_transfer",
+      special_requests: null
+    },
+    {
+      id: "booking-5",
+      user_id: userId,
+      user_name: "Demo User",
+      user_email: "demo@example.com",
+      tour_id: 3,
+      accommodation_id: null,
+      event_id: null,
+      vehicle_id: null,
+      item_type: "tour",
+      item_name: "Trilha Ecológica",
+      start_date: tomorrow.toISOString(),
+      end_date: tomorrow.toISOString(),
+      guests: 4,
+      total_price: 320,
+      status: "confirmed",
+      payment_status: "paid",
+      created_at: yesterday.toISOString(),
+      updated_at: yesterday.toISOString(),
+      payment_method: "credit_card",
+      special_requests: null
+    }
+  ];
+}

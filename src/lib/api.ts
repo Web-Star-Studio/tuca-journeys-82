@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Tour, Accommodation, UserProfile } from '@/types/database';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -129,9 +130,9 @@ export const getVehiclesFromDB = async () => {
     name: item.name,
     description: item.description,
     type: item.type || 'car',
-    price_per_day: item.price_per_day || (item as any).price || 0,
-    price: (item as any).price || item.price_per_day || 0, // Add this for compatibility
-    capacity: (item as any).capacity || item.available_quantity || 1,
+    price_per_day: item.price_per_day || item.price || 0,
+    price: item.price || item.price_per_day || 0, // Add this for compatibility
+    capacity: item.capacity || item.available_quantity || 1,
     image_url: item.image_url,
     partner_id: item.partner_id,
     created_at: item.created_at,
@@ -162,9 +163,9 @@ export const getVehicleByIdFromDB = async (id: number) => {
     name: data.name,
     description: data.description,
     type: data.type || 'car',
-    price_per_day: data.price_per_day || (data as any).price || 0,
-    price: (data as any).price || data.price_per_day || 0, // Add this for compatibility
-    capacity: (data as any).capacity || data.available_quantity || 1,
+    price_per_day: data.price_per_day || data.price || 0,
+    price: data.price || data.price_per_day || 0, // Add this for compatibility
+    capacity: data.capacity || data.available_quantity || 1,
     image_url: data.image_url,
     partner_id: data.partner_id,
     created_at: data.created_at,
@@ -327,30 +328,33 @@ export const getUserBookings = async (userId: string) => {
   }
   
   // Map the database bookings to the Booking interface
-  const bookings: Booking[] = data.map(dbBooking => ({
-    id: dbBooking.id.toString(),
-    user_id: dbBooking.user_id,
-    tour_id: dbBooking.tour_id,
-    accommodation_id: dbBooking.accommodation_id,
-    event_id: dbBooking.event_id,
-    vehicle_id: dbBooking.vehicle_id,
-    start_date: dbBooking.start_date,
-    end_date: dbBooking.end_date,
-    guests: dbBooking.guests,
-    total_price: dbBooking.total_price,
-    status: dbBooking.status as 'pending' | 'confirmed' | 'cancelled',
-    payment_status: dbBooking.payment_status as 'paid' | 'pending' | 'refunded',
-    user_name: '',
-    user_email: '',
-    item_type: dbBooking.tour_id ? 'tour' : 
-               dbBooking.accommodation_id ? 'accommodation' : 
-               dbBooking.event_id ? 'event' : 'vehicle',
-    item_name: '',
-    payment_method: dbBooking.payment_method,
-    special_requests: dbBooking.special_requests,
-    created_at: dbBooking.created_at,
-    updated_at: dbBooking.updated_at
-  }));
+  const bookings = data.map(dbBooking => {
+    // Ensure all required fields are present in the returned object
+    return {
+      id: dbBooking.id.toString(),
+      user_id: dbBooking.user_id,
+      tour_id: dbBooking.tour_id,
+      accommodation_id: dbBooking.accommodation_id,
+      event_id: dbBooking.event_id || null,
+      vehicle_id: dbBooking.vehicle_id || null,
+      start_date: dbBooking.start_date,
+      end_date: dbBooking.end_date,
+      guests: dbBooking.guests,
+      total_price: dbBooking.total_price,
+      status: dbBooking.status as 'pending' | 'confirmed' | 'cancelled',
+      payment_status: dbBooking.payment_status as 'paid' | 'pending' | 'refunded',
+      user_name: '',
+      user_email: '',
+      item_type: dbBooking.tour_id ? 'tour' : 
+                dbBooking.accommodation_id ? 'accommodation' : 
+                dbBooking.event_id ? 'event' : 'vehicle',
+      item_name: '',
+      payment_method: dbBooking.payment_method,
+      special_requests: dbBooking.special_requests,
+      created_at: dbBooking.created_at,
+      updated_at: dbBooking.updated_at
+    } as Booking;
+  });
   
   return bookings;
 };

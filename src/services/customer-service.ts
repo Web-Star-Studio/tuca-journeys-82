@@ -14,6 +14,17 @@ export class CustomerService extends BaseApiService {
     return customers.find(customer => customer.id === id) || null;
   }
 
+  async getCustomersByPartnerId(partnerId: string): Promise<Customer[]> {
+    // For demo partners, return mock data
+    if (partnerId.startsWith('demo-')) {
+      return this.getMockCustomers();
+    }
+
+    // In a real implementation, we would filter customers by partner ID
+    // For now, return mock customers
+    return this.getMockCustomers();
+  }
+
   async createCustomer(customerData: Partial<Customer>): Promise<Customer> {
     // Mock implementation
     return {
@@ -49,8 +60,8 @@ export class CustomerService extends BaseApiService {
     console.log(`Deleting customer ${id}`);
   }
 
+  // Simplified method to get customers from DB to avoid deep type issues
   private async getCustomersFromDB(): Promise<Customer[]> {
-    // Use a simplified query to avoid type recursion issues
     try {
       const { data, error } = await supabase
         .from('user_profiles')

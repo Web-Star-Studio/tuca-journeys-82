@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
 import { supabase } from '@/lib/supabase';
@@ -72,15 +71,14 @@ export class BookingService extends BaseApiService {
 
   async getBookingById(bookingId: string): Promise<Booking | null> {
     try {
-      // Handle numeric and string IDs - convert to number if it's numeric
-      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
-      
+      // Handle numeric and string IDs
       let query = supabase.from('bookings').select('*');
       
-      if (typeof id === 'number') {
-        query = query.eq('id', id);
+      if (!isNaN(Number(bookingId))) {
+        // If it's a numeric ID, convert to number
+        query = query.eq('id', Number(bookingId));
       } else {
-        query = query.eq('id', id);
+        query = query.eq('id', bookingId);
       }
       
       const { data, error } = await query.single();
@@ -218,15 +216,14 @@ export class BookingService extends BaseApiService {
   
   async cancelBooking(bookingId: string): Promise<Booking> {
     try {
-      // Handle numeric and string IDs - convert to number if it's numeric
-      const id = !isNaN(Number(bookingId)) ? Number(bookingId) : bookingId;
-      
+      // Handle numeric and string IDs
       let query = supabase.from('bookings').update({ status: 'cancelled' });
       
-      if (typeof id === 'number') {
-        query = query.eq('id', id);
+      if (!isNaN(Number(bookingId))) {
+        // If it's a numeric ID, convert to number
+        query = query.eq('id', Number(bookingId));
       } else {
-        query = query.eq('id', id);
+        query = query.eq('id', bookingId);
       }
       
       const { data, error } = await query.select().single();

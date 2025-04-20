@@ -22,12 +22,12 @@ export class EventService extends BaseApiService {
     // Transform to ensure it matches the Event interface
     return data.map(event => ({
       ...event,
-      title: event.name || event.title || '', // Handle both name and title for compatibility
-      name: event.name || event.title || '',  // Handle both name and title for compatibility
+      title: event.name || '', // Handle both name and title for compatibility
+      name: event.name || '',  // Handle both name and title for compatibility
       gallery_images: event.gallery_images || [],
-      status: event.status || 'active',
-      organizer: event.organizer || 'Noronha Adventures',
-      featured: event.featured || event.is_featured || false
+      status: 'active', // Default value since it's not in the database
+      organizer: 'Noronha Adventures', // Default value since it's not in the database
+      featured: event.is_featured || false // Map is_featured to featured
     })) as Event[];
   }
 
@@ -49,12 +49,12 @@ export class EventService extends BaseApiService {
     // Transform to ensure it matches the Event interface
     return {
       ...data,
-      title: data.name || data.title || '', // Handle both name and title for compatibility
-      name: data.name || data.title || '',  // Handle both name and title for compatibility
+      title: data.name || '', // Handle both name and title for compatibility
+      name: data.name || '',  // Handle both name and title for compatibility
       gallery_images: data.gallery_images || [],
-      status: data.status || 'active',
-      organizer: data.organizer || 'Noronha Adventures',
-      featured: data.featured || data.is_featured || false
+      status: 'active', // Default value since it's not in the database
+      organizer: 'Noronha Adventures', // Default value since it's not in the database
+      featured: data.is_featured || false // Map is_featured to featured
     } as Event;
   }
   
@@ -75,12 +75,12 @@ export class EventService extends BaseApiService {
     // Transform to ensure it matches the Event interface
     return data.map(event => ({
       ...event,
-      title: event.name || event.title || '',
-      name: event.name || event.title || '',
+      title: event.name || '',
+      name: event.name || '',
       gallery_images: event.gallery_images || [],
-      status: event.status || 'active',
-      organizer: event.organizer || 'Noronha Adventures',
-      featured: event.featured || event.is_featured || false
+      status: 'active', // Default value since it's not in the database
+      organizer: 'Noronha Adventures', // Default value since it's not in the database
+      featured: event.is_featured || false // Map is_featured to featured
     })) as Event[];
   }
   
@@ -91,7 +91,6 @@ export class EventService extends BaseApiService {
     // Ensure all required fields are present
     const dbEvent = {
       name: eventData.name || eventData.title || '',
-      title: eventData.title || eventData.name || '',
       description: eventData.description || '',
       short_description: eventData.short_description || '',
       date: eventData.date || new Date().toISOString(),
@@ -104,9 +103,7 @@ export class EventService extends BaseApiService {
       category: eventData.category || 'other',
       image_url: eventData.image_url || '',
       partner_id: eventData.partner_id || '',
-      featured: eventData.featured || false,
-      status: eventData.status || 'active',
-      organizer: eventData.organizer || 'Noronha Adventures',
+      is_featured: eventData.featured || eventData.is_featured || false,
       gallery_images: eventData.gallery_images || []
     };
     
@@ -123,7 +120,12 @@ export class EventService extends BaseApiService {
     
     return {
       ...data,
-      gallery_images: data.gallery_images || []
+      title: data.name || '',
+      name: data.name || '',
+      gallery_images: data.gallery_images || [],
+      status: 'active', // Default value since it's not in the database
+      organizer: 'Noronha Adventures', // Default value since it's not in the database
+      featured: data.is_featured || false, // Map is_featured to featured
     } as Event;
   }
   
@@ -131,9 +133,21 @@ export class EventService extends BaseApiService {
    * Update an existing event
    */
   async updateEvent(id: number, eventData: Partial<Event>): Promise<Event> {
+    // Map featured to is_featured for database compatibility
+    const dbEventData = {
+      ...eventData,
+      is_featured: eventData.featured
+    };
+    
+    // Remove properties that don't exist in the database
+    delete dbEventData.featured;
+    delete dbEventData.status;
+    delete dbEventData.organizer;
+    delete dbEventData.title;
+    
     const { data, error } = await this.supabase
       .from('events')
-      .update(eventData)
+      .update(dbEventData)
       .eq('id', id)
       .select()
       .single();
@@ -145,7 +159,12 @@ export class EventService extends BaseApiService {
     
     return {
       ...data,
-      gallery_images: data.gallery_images || []
+      title: data.name || '',
+      name: data.name || '',
+      gallery_images: data.gallery_images || [],
+      status: 'active',
+      organizer: 'Noronha Adventures',
+      featured: data.is_featured || false
     } as Event;
   }
   

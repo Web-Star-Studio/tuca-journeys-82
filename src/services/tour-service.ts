@@ -23,7 +23,7 @@ export class TourService extends BaseApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || 'Unknown Location',
-      is_available: tour.is_available !== undefined ? tour.is_available : true
+      is_available: true // Default value as it may be missing in database
     })) as Tour[];
   }
 
@@ -46,7 +46,7 @@ export class TourService extends BaseApiService {
     return {
       ...data,
       location: data.meeting_point || 'Unknown Location',
-      is_available: data.is_available !== undefined ? data.is_available : true
+      is_available: true // Default value as it may be missing in database
     } as Tour;
   }
 }

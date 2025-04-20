@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -38,7 +37,7 @@ class ApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || 'Unknown Location',
-      is_available: tour.is_available !== undefined ? Boolean(tour.is_available) : true
+      is_available: true // Default since it might not be in the database
     })) as Tour[];
   }
 
@@ -58,7 +57,7 @@ class ApiService {
     return {
       ...data,
       location: data.meeting_point || 'Unknown Location', 
-      is_available: data.is_available !== undefined ? Boolean(data.is_available) : true
+      is_available: true // Default since it might not be in the database
     } as Tour;
   }
 
@@ -77,7 +76,7 @@ class ApiService {
     return data.map(accommodation => ({
       ...accommodation,
       location: accommodation.address || 'Unknown Location',
-      is_available: accommodation.is_available !== undefined ? Boolean(accommodation.is_available) : true,
+      is_available: true, // Default since it might not be in the database
       category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
@@ -98,7 +97,7 @@ class ApiService {
     return {
       ...data,
       location: data.address || 'Unknown Location',
-      is_available: data.is_available !== undefined ? Boolean(data.is_available) : true,
+      is_available: true, // Default since it might not be in the database
       category: data.type || 'Standard' 
     } as Accommodation;
   }

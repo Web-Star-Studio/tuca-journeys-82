@@ -25,7 +25,7 @@ export interface Tour {
   image_url: string;
   location?: string;
   meeting_point: string;
-  is_available: boolean;
+  is_available: boolean; // Added this field explicitly
   category: string;
   max_participants: number;
   min_participants: number;
@@ -49,7 +49,7 @@ export interface Accommodation {
   image_url: string;
   location?: string;
   address: string;
-  is_available: boolean;
+  is_available: boolean; // Added this field explicitly
   category: string;
   type: string;
   bedrooms: number;

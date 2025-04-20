@@ -40,7 +40,7 @@ class ApiService {
     // Transform the data to ensure it matches the Tour interface
     return data.map(tour => ({
       ...tour,
-      location: tour.location || tour.meeting_point || 'Unknown Location',
+      location: tour.meeting_point || tour.location || 'Unknown Location',
       is_available: tour.is_available ?? true
     })) as Tour[];
   }
@@ -60,7 +60,7 @@ class ApiService {
     // Transform to ensure it matches the Tour interface
     return {
       ...data,
-      location: data.location || data.meeting_point || 'Unknown Location',
+      location: data.meeting_point || data.location || 'Unknown Location',
       is_available: data.is_available ?? true
     } as Tour;
   }
@@ -92,9 +92,9 @@ class ApiService {
     // Transform to ensure it matches the Accommodation interface
     return data.map(accommodation => ({
       ...accommodation,
-      location: accommodation.location || accommodation.address || 'Unknown Location',
+      location: accommodation.address || 'Unknown Location',
       is_available: accommodation.is_available ?? true,
-      category: accommodation.category || accommodation.type || 'Standard'
+      category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
 
@@ -113,9 +113,9 @@ class ApiService {
     // Transform to ensure it matches the Accommodation interface
     return {
       ...data,
-      location: data.location || data.address || 'Unknown Location',
+      location: data.address || 'Unknown Location',
       is_available: data.is_available ?? true,
-      category: data.category || data.type || 'Standard'
+      category: data.type || 'Standard'
     } as Accommodation;
   }
 
@@ -163,7 +163,7 @@ class ApiService {
       ...item,
       price_per_day: item.price_per_day || 0,
       price: item.price_per_day || 0, // Map to price_per_day if missing
-      capacity: item.capacity || item.available_quantity || 1,
+      capacity: item.available_quantity || item.capacity || 1,
       features: item.features || [],
       gallery_images: item.gallery_images || [],
       is_available: item.is_available !== false
@@ -187,7 +187,7 @@ class ApiService {
       ...data,
       price_per_day: data.price_per_day || 0,
       price: data.price_per_day || 0, // Map to price_per_day if missing
-      capacity: data.capacity || data.available_quantity || 1,
+      capacity: data.available_quantity || data.capacity || 1,
       features: data.features || [],
       gallery_images: data.gallery_images || [],
       is_available: data.is_available !== false
@@ -504,7 +504,7 @@ class ApiService {
         throw error;
       }
     
-    return data as Partner | null;
+      return data as Partner | null;
     } catch (error) {
       console.error('Error fetching user partner profile:', error);
       return null;
@@ -513,3 +513,7 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+// Export the isUserPartner function directly for use in the UserDropdownContent component
+export const isUserPartner = async (userId: string): Promise<boolean> => {
+  return await apiService.isUserPartner(userId);
+};

@@ -22,7 +22,9 @@ export const events: Event[] = [
     partner_id: "1",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Festival de Gastronomia e Cultura", // Adding title for backward compatibility
+    is_featured: true // Adding is_featured for backward compatibility
   },
   {
     id: 2,
@@ -44,7 +46,9 @@ export const events: Event[] = [
     partner_id: "2",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Corrida Ecológica de Noronha", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 3,
@@ -66,7 +70,9 @@ export const events: Event[] = [
     partner_id: "1",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Workshop de Fotografia Submarina", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 4,
@@ -88,7 +94,9 @@ export const events: Event[] = [
     partner_id: "3",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Observação de Tartarugas Marinhas", // Adding title for backward compatibility
+    is_featured: true // Adding is_featured for backward compatibility
   },
   {
     id: 5,
@@ -110,7 +118,9 @@ export const events: Event[] = [
     partner_id: "4",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Sunset Yoga na Praia", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 6,
@@ -132,7 +142,9 @@ export const events: Event[] = [
     partner_id: "2",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Palestra: Preservação dos Recifes de Coral", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 7,
@@ -154,7 +166,9 @@ export const events: Event[] = [
     partner_id: "3",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Festival de Música na Praia", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 8,
@@ -176,7 +190,9 @@ export const events: Event[] = [
     partner_id: "5",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Workshop de Artesanato Local", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   },
   {
     id: 9,
@@ -198,7 +214,9 @@ export const events: Event[] = [
     partner_id: "6",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    gallery_images: []
+    gallery_images: [],
+    title: "Tour Histórico: Fortes e Ruínas", // Adding title for backward compatibility
+    is_featured: false // Adding is_featured for backward compatibility
   }
 ];
 

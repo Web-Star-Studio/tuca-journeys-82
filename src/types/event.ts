@@ -3,7 +3,7 @@
 export interface Event {
   id: number;
   name: string;
-  title?: string; // Some legacy code might use title instead of name
+  title: string; // Some legacy code might use title instead of name
   description: string;
   short_description: string;
   date: string;

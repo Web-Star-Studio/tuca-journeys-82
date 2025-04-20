@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
 import { Booking, CreateBookingDTO } from '@/types/bookings';
@@ -37,7 +38,7 @@ class ApiService {
     return data.map(tour => ({
       ...tour,
       location: tour.meeting_point || 'Unknown Location',
-      is_available: tour.is_available === undefined ? true : !!tour.is_available
+      is_available: tour.is_available !== undefined ? Boolean(tour.is_available) : true
     })) as Tour[];
   }
 
@@ -57,7 +58,7 @@ class ApiService {
     return {
       ...data,
       location: data.meeting_point || 'Unknown Location', 
-      is_available: data.is_available === undefined ? true : !!data.is_available
+      is_available: data.is_available !== undefined ? Boolean(data.is_available) : true
     } as Tour;
   }
 
@@ -76,7 +77,7 @@ class ApiService {
     return data.map(accommodation => ({
       ...accommodation,
       location: accommodation.address || 'Unknown Location',
-      is_available: accommodation.is_available === undefined ? true : !!accommodation.is_available,
+      is_available: accommodation.is_available !== undefined ? Boolean(accommodation.is_available) : true,
       category: accommodation.type || 'Standard'
     })) as Accommodation[];
   }
@@ -97,7 +98,7 @@ class ApiService {
     return {
       ...data,
       location: data.address || 'Unknown Location',
-      is_available: data.is_available === undefined ? true : !!data.is_available,
+      is_available: data.is_available !== undefined ? Boolean(data.is_available) : true,
       category: data.type || 'Standard' 
     } as Accommodation;
   }
@@ -208,7 +209,10 @@ class ApiService {
       user_name: bookingDB.user_name || 'User',
       user_email: bookingDB.user_email || '',
       item_type: itemType,
-      item_name: bookingDB.item_name || bookingDB.tours?.title || bookingDB.accommodations?.title || 'Booking',
+      item_name: bookingDB.item_name || 
+                (bookingDB.tours && bookingDB.tours.title) || 
+                (bookingDB.accommodations && bookingDB.accommodations.title) || 
+                'Booking',
       start_date: bookingDB.start_date,
       end_date: bookingDB.end_date,
       guests: bookingDB.guests,

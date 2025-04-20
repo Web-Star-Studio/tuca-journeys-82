@@ -44,7 +44,9 @@ export class EventService extends BaseApiService {
       updated_at: new Date().toISOString(),
       featured: eventData.featured || false,
       status: eventData.status || 'scheduled',
-      organizer: eventData.organizer || 'Event Organizer'
+      organizer: eventData.organizer || 'Event Organizer',
+      title: eventData.name, // Use name as a fallback for title
+      gallery_images: eventData.gallery_images || []
     };
   }
 
@@ -69,7 +71,9 @@ export class EventService extends BaseApiService {
       updated_at: new Date().toISOString(),
       featured: false,
       status: 'scheduled',
-      organizer: 'Event Organizer'
+      organizer: 'Event Organizer',
+      title: 'Updated Event', // Add title property
+      gallery_images: []
     };
   }
 
@@ -92,6 +96,7 @@ export class EventService extends BaseApiService {
       {
         id: 1,
         name: 'Festival de Verão',
+        title: 'Festival de Verão', // Add title property
         description: 'Um festival de música e cultura na praia',
         short_description: 'Festival de música na praia',
         date: new Date(Date.now() + 86400000 * 20).toISOString(),
@@ -108,11 +113,13 @@ export class EventService extends BaseApiService {
         image_url: '/events/festival.jpg',
         partner_id: 'demo-partner-1',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        gallery_images: []
       },
       {
         id: 2,
         name: 'Workshop de Fotografia',
+        title: 'Workshop de Fotografia', // Add title property
         description: 'Aprenda técnicas de fotografia de natureza',
         short_description: 'Workshop de fotografia',
         date: new Date(Date.now() + 86400000 * 5).toISOString(),
@@ -129,7 +136,8 @@ export class EventService extends BaseApiService {
         image_url: '/events/photo-workshop.jpg',
         partner_id: 'demo-partner-2',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        gallery_images: []
       }
     ];
   }

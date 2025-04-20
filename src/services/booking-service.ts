@@ -38,7 +38,7 @@ export class BookingService extends BaseApiService {
       
       // Map the database bookings to our application model
       const bookings: Booking[] = data.map((booking: DatabaseBooking) => ({
-        id: booking.id.toString(),
+        id: String(booking.id),
         user_id: booking.user_id,
         user_name: 'User', // This would need to be populated from user profiles
         user_email: '', // This would need to be populated from user profiles
@@ -92,7 +92,7 @@ export class BookingService extends BaseApiService {
       // Map to our application model
       const booking = data as DatabaseBooking;
       return {
-        id: booking.id.toString(),
+        id: String(booking.id),
         user_id: booking.user_id,
         user_name: 'User',
         user_email: '',
@@ -125,16 +125,16 @@ export class BookingService extends BaseApiService {
   
   async createBooking(bookingData: CreateBookingDTO): Promise<Booking> {
     try {
-      // Create a booking object that matches the database schema
-      const dbBooking: Partial<DatabaseBooking> = {
+      // Create a booking object that matches the database schema, ensuring required fields are present
+      const dbBooking = {
         user_id: bookingData.user_id,
-        tour_id: bookingData.tour_id,
-        accommodation_id: bookingData.accommodation_id,
-        event_id: bookingData.event_id,
-        vehicle_id: bookingData.vehicle_id,
+        tour_id: bookingData.tour_id || null,
+        accommodation_id: bookingData.accommodation_id || null,
+        event_id: bookingData.event_id || null,
+        vehicle_id: bookingData.vehicle_id || null,
         start_date: bookingData.start_date,
         end_date: bookingData.end_date,
-        guests: bookingData.guests || bookingData.number_of_guests,
+        guests: bookingData.guests || bookingData.number_of_guests || 1,
         total_price: bookingData.total_price,
         status: bookingData.status,
         payment_status: bookingData.payment_status || 'pending',
@@ -156,7 +156,7 @@ export class BookingService extends BaseApiService {
       
       // Map the response back to the Booking interface expected by the app
       return {
-        id: booking.id.toString(),
+        id: String(booking.id),
         user_id: booking.user_id,
         user_name: 'User',
         user_email: '',
@@ -232,7 +232,7 @@ export class BookingService extends BaseApiService {
       
       // Map to our application model
       return {
-        id: booking.id.toString(),
+        id: String(booking.id),
         user_id: booking.user_id,
         user_name: 'User',
         user_email: '',

@@ -4,6 +4,7 @@ import { partnerService } from '@/services';
 import { Partner } from '@/types/partner';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { DemoService } from '@/services/demo-service';
 
 /**
  * Hook for getting a partner by ID
@@ -56,6 +57,13 @@ export const useCreatePartner = () => {
       queryClient.invalidateQueries({ queryKey: ['currentPartner'] });
     },
     onError: (error: any) => {
+      const isDemoUser = user?.id && DemoService.isDemoUser(user.id);
+      if (isDemoUser) {
+        // For demo users, invalidate queries but don't show error
+        queryClient.invalidateQueries({ queryKey: ['currentPartner'] });
+        return;
+      }
+      
       toast.error(`Erro ao criar perfil de parceiro: ${error.message}`);
     }
   });

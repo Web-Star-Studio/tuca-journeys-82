@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
-import { useAccommodations } from "@/hooks/use-accommodations";
+import { useAccommodation, useCreateAccommodation, useUpdateAccommodation } from "@/hooks/use-accommodations";
 import { Accommodation } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Form schema for validation
 const accommodationFormSchema = z.object({
@@ -47,17 +47,16 @@ type AccommodationFormValues = z.infer<typeof accommodationFormSchema>;
 interface AccommodationFormProps {
   accommodationId?: number;
   onSuccess: () => void;
-  onCancel: () => void;
 }
 
 export const AccommodationForm: React.FC<AccommodationFormProps> = ({ 
   accommodationId, 
-  onSuccess, 
-  onCancel 
+  onSuccess
 }) => {
   const [previewUrl, setPreviewUrl] = useState("");
-  const { toast } = useToast();
-  const { saveAccommodation, getAccommodationById } = useAccommodations();
+  const { data: accommodation, isLoading: isLoadingAccommodation } = useAccommodation(accommodationId || 0);
+  const createAccommodation = useCreateAccommodation();
+  const updateAccommodation = accommodationId ? useUpdateAccommodation(accommodationId) : null;
   const [isLoading, setIsLoading] = useState(accommodationId ? true : false);
 
   // Initialize form
@@ -81,42 +80,26 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
 
   // Fetch accommodation data when editing
   useEffect(() => {
-    const loadAccommodationData = async () => {
-      if (accommodationId) {
-        try {
-          const accommodation = await getAccommodationById(accommodationId);
-          if (accommodation) {
-            form.reset({
-              title: accommodation.title,
-              description: accommodation.description,
-              image_url: accommodation.image_url,
-              type: accommodation.type,
-              price_per_night: accommodation.price_per_night,
-              bedrooms: accommodation.bedrooms,
-              bathrooms: accommodation.bathrooms,
-              capacity: accommodation.max_guests,
-              location: accommodation.address,
-              rating: accommodation.rating,
-              amenities: accommodation.amenities?.join("\n") || "",
-              gallery: accommodation.gallery_images?.join("\n") || "",
-            });
-            setPreviewUrl(accommodation.image_url);
-          }
-        } catch (error) {
-          console.error("Error loading accommodation:", error);
-          toast({
-            title: "Erro",
-            description: "Não foi possível carregar os dados da hospedagem.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadAccommodationData();
-  }, [accommodationId, form, getAccommodationById, toast]);
+    if (accommodationId && accommodation) {
+      form.reset({
+        title: accommodation.title,
+        description: accommodation.description,
+        image_url: accommodation.image_url,
+        type: accommodation.type,
+        price_per_night: accommodation.price_per_night,
+        bedrooms: accommodation.bedrooms,
+        bathrooms: accommodation.bathrooms,
+        capacity: accommodation.max_guests,
+        location: accommodation.address,
+        rating: accommodation.rating || 0,
+        amenities: accommodation.amenities?.join("\n") || "",
+        gallery: accommodation.gallery_images?.join("\n") || "",
+      });
+      
+      setPreviewUrl(accommodation.image_url);
+      setIsLoading(false);
+    }
+  }, [accommodationId, accommodation, form]);
 
   // Update image preview
   useEffect(() => {
@@ -135,8 +118,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     const galleryArray = data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [];
 
     try {
-      await saveAccommodation({ 
-        id: accommodationId,
+      const accommodationData = {
         title: data.title,
         description: data.description,
         short_description: data.description.substring(0, 100),
@@ -153,20 +135,22 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
         amenities: amenitiesArray,
         gallery_images: galleryArray,
         rating: data.rating
-      });
+      };
+      
+      if (accommodationId) {
+        await updateAccommodation?.mutateAsync(accommodationData);
+      } else {
+        await createAccommodation.mutateAsync(accommodationData);
+      }
       
       onSuccess();
     } catch (error) {
       console.error("Error saving accommodation:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar a hospedagem. Tente novamente.",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível salvar a hospedagem. Tente novamente.");
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingAccommodation) {
     return (
       <div className="flex justify-center items-center p-8">
         <Loader2 className="h-8 w-8 animate-spin mr-2" />
@@ -419,7 +403,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={() => onSuccess()}>
             Cancelar
           </Button>
           <Button type="submit">
@@ -430,3 +414,5 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     </Form>
   );
 };
+
+export default AccommodationForm;

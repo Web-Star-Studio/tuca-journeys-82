@@ -29,7 +29,81 @@ export const useAccommodations = (partnerId?: string) => {
     enabled: true,
   });
   
-  return { accommodations, isLoading, error };
+  const refetch = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['accommodations', partnerIdToUse] });
+  };
+
+  // Get single accommodation by ID
+  const getAccommodationById = async (accommodationId: number) => {
+    const { data, error } = await supabase
+      .from('accommodations')
+      .select('*')
+      .eq('id', accommodationId)
+      .single();
+      
+    if (error) throw error;
+    return data as Accommodation;
+  };
+
+  // Save (create or update) accommodation
+  const saveAccommodation = async (accommodationData: Partial<Accommodation> & { id?: number }) => {
+    if (accommodationData.id) {
+      // Update existing accommodation
+      const { data, error } = await supabase
+        .from('accommodations')
+        .update({
+          ...accommodationData,
+          updated_at: new Date().toISOString(),
+          rating: accommodationData.rating || 0,
+        })
+        .eq('id', accommodationData.id)
+        .select();
+        
+      if (error) throw error;
+      return data[0] as Accommodation;
+    } else {
+      // Create new accommodation
+      const { data, error } = await supabase
+        .from('accommodations')
+        .insert({
+          ...(accommodationData as Required<Pick<Accommodation, 
+            'title' | 'description' | 'short_description' | 'price_per_night' | 
+            'type' | 'address' | 'bedrooms' | 'bathrooms' | 'max_guests' | 
+            'amenities' | 'image_url'>> & Partial<Accommodation>),
+          partner_id: accommodationData.partner_id,
+          rating: accommodationData.rating || 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select();
+        
+      if (error) throw error;
+      return data[0] as Accommodation;
+    }
+  };
+
+  // Delete accommodation
+  const deleteAccommodation = async (accommodationId: number) => {
+    const { error } = await supabase
+      .from('accommodations')
+      .delete()
+      .eq('id', accommodationId);
+      
+    if (error) throw error;
+    return { success: true };
+  };
+  
+  const queryClient = useQueryClient();
+  
+  return { 
+    accommodations, 
+    isLoading, 
+    error, 
+    getAccommodationById, 
+    saveAccommodation, 
+    deleteAccommodation,
+    refetch
+  };
 };
 
 export const useAccommodation = (accommodationId: number | string) => {
@@ -39,7 +113,7 @@ export const useAccommodation = (accommodationId: number | string) => {
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
-        .eq('id', accommodationId)
+        .eq('id', typeof accommodationId === 'string' ? parseInt(accommodationId, 10) : accommodationId)
         .single();
         
       if (error) throw error;

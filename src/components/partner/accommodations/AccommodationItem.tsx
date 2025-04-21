@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Calendar } from "lucide-react";
 import { Accommodation } from "@/types/database";
-import { useAccommodations } from "@/hooks/use-accommodations";
+import { useDeleteAccommodation } from "@/hooks/use-accommodations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,27 +18,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import AccommodationFormDialog from "./AccommodationFormDialog";
 import SafeImage from "@/components/ui/safe-image";
+import { Link } from "react-router-dom";
 
 interface AccommodationItemProps {
   accommodation: Accommodation;
 }
 
 const AccommodationItem = ({ accommodation }: AccommodationItemProps) => {
-  const { deleteAccommodation } = useAccommodations();
+  const deleteAccommodation = useDeleteAccommodation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     if (!accommodation.id) return;
     
-    setIsDeleting(true);
     try {
-      await deleteAccommodation(accommodation.id);
+      await deleteAccommodation.mutateAsync(accommodation.id);
     } catch (error) {
       console.error("Error deleting accommodation:", error);
     } finally {
-      setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
   };
@@ -63,8 +61,14 @@ const AccommodationItem = ({ accommodation }: AccommodationItemProps) => {
               <div className="flex justify-between">
                 <h3 className="font-medium">{accommodation.title}</h3>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
-                    <Eye className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    asChild
+                  >
+                    <Link to={`/parceiro/hospedagens/${accommodation.id}/disponibilidade`}>
+                      <Calendar className="h-4 w-4" />
+                    </Link>
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -116,13 +120,13 @@ const AccommodationItem = ({ accommodation }: AccommodationItemProps) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteAccommodation.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
-              disabled={isDeleting} 
+              disabled={deleteAccommodation.isPending} 
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isDeleting ? "Excluindo..." : "Excluir"}
+              {deleteAccommodation.isPending ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

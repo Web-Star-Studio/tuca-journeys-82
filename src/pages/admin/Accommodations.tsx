@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
 import { Button } from "@/components/ui/button";
@@ -23,19 +23,25 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import AccommodationFormDialog from "@/components/admin/accommodations/AccommodationFormDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AdminAccommodations = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [editAccommodationId, setEditAccommodationId] = useState<number | undefined>(undefined);
+  const queryClient = useQueryClient();
 
   const { 
-    accommodations, 
+    accommodations = [], 
     isLoading, 
-    error, 
-    refetch 
+    error 
   } = useAccommodations();
+
+  // Function to refetch accommodations
+  const refetchAccommodations = () => {
+    queryClient.invalidateQueries({ queryKey: ['accommodations'] });
+  };
 
   // Filter accommodations based on search and type
   const filteredAccommodations = accommodations
@@ -165,7 +171,7 @@ const AdminAccommodations = () => {
         accommodationId={editAccommodationId}
         onSuccess={() => {
           setShowForm(false);
-          refetch();
+          refetchAccommodations();
         }}
       />
     </AdminLayout>

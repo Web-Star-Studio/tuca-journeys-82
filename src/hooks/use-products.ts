@@ -1,29 +1,95 @@
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Product } from '@/types/product';
+import { Product } from '@/types/database';
 import { supabase } from '@/lib/supabase';
 import { useCurrentPartner } from './use-partner';
 import { toast } from 'sonner';
 
-export const usePartnerProducts = () => {
+export const useProducts = (filters?: { search?: string; category?: string; status?: string }) => {
   const { data: partner } = useCurrentPartner();
   const partnerId = partner?.id;
   
-  return useQuery({
-    queryKey: ['partner-products', partnerId],
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ['products', partnerId, filters],
     queryFn: async () => {
       if (!partnerId) return [];
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
         .select('*')
         .eq('partner_id', partnerId);
+        
+      // Apply filters
+      if (filters?.search) {
+        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      }
+      
+      if (filters?.category) {
+        query = query.eq('category', filters.category);
+      }
+      
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      
+      const { data, error } = await query;
         
       if (error) throw error;
       return data as Product[];
     },
     enabled: !!partnerId,
   });
+
+  // Get product categories for filtering
+  const useProductCategories = () => {
+    return useQuery({
+      queryKey: ['product-categories', partnerId],
+      queryFn: async () => {
+        if (!partnerId) return [];
+        
+        const { data, error } = await supabase
+          .from('products')
+          .select('category')
+          .eq('partner_id', partnerId)
+          .order('category');
+          
+        if (error) throw error;
+        
+        // Extract unique categories
+        const categories = [...new Set(data.map(item => item.category))];
+        return categories;
+      },
+      enabled: !!partnerId,
+    });
+  };
+  
+  // Delete product mutation
+  const deleteProduct = useMutation({
+    mutationFn: async (productId: number) => {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+        
+      if (error) throw error;
+      return { success: true, id: productId };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error: any) => {
+      toast.error(`Error deleting product: ${error.message}`);
+    }
+  });
+  
+  const queryClient = useQueryClient();
+  
+  return { 
+    products, 
+    isLoading, 
+    error, 
+    deleteProduct,
+    useProductCategories
+  };
 };
 
 export const useProduct = (productId: number | string) => {
@@ -33,7 +99,7 @@ export const useProduct = (productId: number | string) => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('id', productId)
+        .eq('id', typeof productId === 'string' ? parseInt(productId, 10) : productId)
         .single();
         
       if (error) throw error;
@@ -43,6 +109,7 @@ export const useProduct = (productId: number | string) => {
   });
 };
 
+// Rest of the existing functions
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
   const { data: partner } = useCurrentPartner();

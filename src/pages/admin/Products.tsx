@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
-import { useProducts } from "@/hooks/use-products";
+import { useProducts, useProduct, useDeleteProduct } from "@/hooks/use-products";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -121,6 +121,7 @@ const Products = () => {
   };
 
   return (
+    
     <AdminLayout pageTitle="Gerenciar Produtos">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -212,7 +213,7 @@ const Products = () => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              // Loading state
+              
               Array.from({ length: 5 }).map((_, index) => (
                 <TableRow key={`loading-${index}`}>
                   <TableCell><Skeleton className="h-5 w-8" /></TableCell>
@@ -301,7 +302,7 @@ const Products = () => {
         </Table>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -329,7 +330,7 @@ const Products = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Product Form Dialog */}
+      
       <ProductFormDialog 
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}

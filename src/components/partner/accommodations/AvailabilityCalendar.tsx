@@ -181,7 +181,11 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
               blocked: "bg-gray-200"
             }}
             disabled={isLoading}
-            dayClassName={getDayClass}
+            modifiersStyles={{
+              booked: { backgroundColor: "#fee2e2" },
+              maintenance: { backgroundColor: "#ffedd5" },
+              blocked: { backgroundColor: "#e5e7eb" }
+            }}
           />
         </div>
         <div className="flex-1 space-y-4">

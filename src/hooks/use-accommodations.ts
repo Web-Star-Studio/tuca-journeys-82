@@ -64,7 +64,7 @@ export const useAccommodations = (partnerId?: string) => {
       return data[0] as Accommodation;
     } else {
       // Create new accommodation with all required fields
-      const newAccommodationData: Omit<Accommodation, 'id' | 'created_at' | 'updated_at'> = {
+      const newAccommodationData = {
         title: accommodationData.title || '',
         description: accommodationData.description || '',
         short_description: accommodationData.short_description || '',
@@ -83,11 +83,7 @@ export const useAccommodations = (partnerId?: string) => {
       
       const { data, error } = await supabase
         .from('accommodations')
-        .insert({
-          ...newAccommodationData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .insert(newAccommodationData)
         .select();
         
       if (error) throw error;
@@ -146,14 +142,16 @@ export const useCreateAccommodation = () => {
         throw new Error('Partner ID is required');
       }
       
+      // Ensure we have all required fields with proper values
+      const insertData = {
+        ...accommodationData,
+        partner_id: partner.id,
+        rating: accommodationData.rating || 0 // Ensure rating has default value
+      };
+      
       const { data, error } = await supabase
         .from('accommodations')
-        .insert({
-          ...accommodationData,
-          partner_id: partner.id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .insert(insertData)
         .select()
         .single();
         
@@ -175,12 +173,16 @@ export const useUpdateAccommodation = (accommodationId: number) => {
   
   return useMutation({
     mutationFn: async (accommodationData: Partial<Accommodation>) => {
+      // Ensure rating is set with a default value if not provided
+      const updateData = {
+        ...accommodationData,
+        updated_at: new Date().toISOString(),
+        rating: accommodationData.rating ?? 0 // Use nullish coalescing to handle 0 values
+      };
+      
       const { data, error } = await supabase
         .from('accommodations')
-        .update({
-          ...accommodationData,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', accommodationId)
         .select()
         .single();

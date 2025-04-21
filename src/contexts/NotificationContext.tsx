@@ -55,17 +55,22 @@ export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ ch
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
         if (error) throw error;
-        setNotifications(
-          (data ?? []).map((d) => ({
-            id: d.id?.toString() || "",
-            userId: d.user_id,
-            title: d.title,
-            message: d.message,
-            type: d.type,
-            read: d.is_read ?? false,
-            createdAt: d.created_at ?? "",
-          }))
-        );
+        
+        // Fix type casting for notification type
+        const formattedNotifications: Notification[] = (data ?? []).map((d) => ({
+          id: d.id?.toString() || "",
+          userId: d.user_id,
+          title: d.title,
+          message: d.message,
+          // Cast the type to one of the allowed values, or default to "system"
+          type: (d.type === "promo" || d.type === "booking" || d.type === "system") 
+            ? d.type as "promo" | "booking" | "system" 
+            : "system",
+          read: d.is_read ?? false,
+          createdAt: d.created_at ?? "",
+        }));
+        
+        setNotifications(formattedNotifications);
       } catch (error) {
         console.error("Erro ao buscar notificações:", error);
         toast.error("Não foi possível carregar suas notificações");
@@ -89,7 +94,7 @@ export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ ch
       await supabase
         .from('notifications')
         .update({ is_read: true })
-        .eq('id', id)
+        .eq('id', parseInt(id, 10))
         .eq('user_id', user?.id);
     } catch (error) {
       console.error("Erro ao marcar notificação como lida:", error);
@@ -128,18 +133,21 @@ export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ ch
         .maybeSingle();
       if (error) throw error;
       if (data) {
-        setNotifications(prev => [
-          {
-            id: data.id?.toString() || "",
-            userId: user.id,
-            title: data.title,
-            message: data.message,
-            type: data.type,
-            read: data.is_read ?? false,
-            createdAt: data.created_at ?? "",
-          },
-          ...prev
-        ]);
+        // Ensure proper typing when adding to state
+        const newNotification: Notification = {
+          id: data.id?.toString() || "",
+          userId: user.id,
+          title: data.title,
+          message: data.message,
+          type: (data.type === "promo" || data.type === "booking" || data.type === "system") 
+            ? data.type as "promo" | "booking" | "system" 
+            : "system",
+          read: data.is_read ?? false,
+          createdAt: data.created_at ?? "",
+        };
+        
+        setNotifications(prev => [newNotification, ...prev]);
+        
         if (!notification.read) {
           toast(notification.title, {
             description: notification.message,

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface RegisterFormValues {
   name: string;
@@ -29,12 +30,7 @@ const Register = () => {
     }
   }, [user, navigate]);
   
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<RegisterFormValues>({
+  const form = useForm<RegisterFormValues>({
     defaultValues: {
       name: "",
       email: "",
@@ -44,7 +40,7 @@ const Register = () => {
     },
   });
 
-  const password = watch("password");
+  const password = form.watch("password");
   
   const onSubmit = async (data: RegisterFormValues) => {
     setIsSubmitting(true);
@@ -80,122 +76,147 @@ const Register = () => {
             </p>
           </div>
           
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
-            
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome completo
-              </label>
-              <Input
-                id="name"
-                type="text"
-                autoComplete="name"
-                {...register("name", {
+          <Form {...form}>
+            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <FormField
+                control={form.control}
+                name="name"
+                rules={{
                   required: "Nome é obrigatório",
                   minLength: {
                     value: 3,
                     message: "Nome deve ter pelo menos 3 caracteres",
                   },
-                })}
-                className="mt-1"
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome completo</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="name"
+                        type="text"
+                        autoComplete="name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                {...register("email", {
+              
+              <FormField
+                control={form.control}
+                name="email"
+                rules={{
                   required: "Email é obrigatório",
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                     message: "Endereço de email inválido",
                   },
-                })}
-                className="mt-1"
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                {...register("password", {
+              
+              <FormField
+                control={form.control}
+                name="password"
+                rules={{
                   required: "Senha é obrigatória",
                   minLength: {
                     value: 6,
                     message: "A senha deve ter pelo menos 6 caracteres",
                   },
-                })}
-                className="mt-1"
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="password"
+                        type="password"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700">
-                Confirmar senha
-              </label>
-              <Input
-                id="passwordConfirm"
-                type="password"
-                autoComplete="new-password"
-                {...register("passwordConfirm", {
+              
+              <FormField
+                control={form.control}
+                name="passwordConfirm"
+                rules={{
                   required: "Confirme sua senha",
                   validate: (value) =>
                     value === password || "As senhas não conferem",
-                })}
-                className="mt-1"
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="passwordConfirm"
+                        type="password"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.passwordConfirm && (
-                <p className="mt-1 text-sm text-red-600">{errors.passwordConfirm.message}</p>
-              )}
-            </div>
-            
-            <div className="flex items-center">
-              <Checkbox
-                id="terms"
-                {...register("terms", {
+              
+              <FormField
+                control={form.control}
+                name="terms"
+                rules={{
                   required: "Você deve aceitar os termos",
-                })}
+                }}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-normal text-sm text-gray-900">
+                        Eu concordo com os{" "}
+                        <Link to="/termos" className="text-tuca-ocean-blue">
+                          Termos de Serviço
+                        </Link>{" "}
+                        e{" "}
+                        <Link to="/privacidade" className="text-tuca-ocean-blue">
+                          Política de Privacidade
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
               />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-                Eu concordo com os{" "}
-                <Link to="/termos" className="text-tuca-ocean-blue">
-                  Termos de Serviço
-                </Link>{" "}
-                e{" "}
-                <Link to="/privacidade" className="text-tuca-ocean-blue">
-                  Política de Privacidade
-                </Link>
-              </label>
-            </div>
-            {errors.terms && (
-              <p className="text-sm text-red-600">{errors.terms.message}</p>
-            )}
 
-            <div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
@@ -206,20 +227,20 @@ const Register = () => {
                   "Criar conta"
                 )}
               </Button>
-            </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Já tem uma conta?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-tuca-ocean-blue hover:text-tuca-ocean-blue/80"
-                >
-                  Entrar
-                </Link>
-              </p>
-            </div>
-          </form>
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Já tem uma conta?{" "}
+                  <Link
+                    to="/login"
+                    className="font-medium text-tuca-ocean-blue hover:text-tuca-ocean-blue/80"
+                  >
+                    Entrar
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

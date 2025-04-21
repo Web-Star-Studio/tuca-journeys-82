@@ -89,9 +89,14 @@ export class PartnerService extends BaseApiService {
    */
   async createPartner(partnerData: Partial<Partner>): Promise<Partner | null> {
     try {
+      // Ensure that required fields are present to satisfy TypeScript
+      if (!partnerData.business_name || !partnerData.business_type) {
+        throw new Error('Business name and type are required');
+      }
+
       const { data, error } = await this.supabase
         .from('partners')
-        .insert([partnerData])
+        .insert(partnerData)
         .select()
         .single();
 

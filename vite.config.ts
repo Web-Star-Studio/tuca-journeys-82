@@ -11,7 +11,8 @@ export default defineConfig(({ mode }) => ({
     headers: {
       "Content-Security-Policy": [
         "default-src 'self'",
-        "script-src 'self' https://cdn.gpteng.co",
+        // Add 'unsafe-inline' and 'unsafe-eval' for development mode
+        `script-src 'self' https://cdn.gpteng.co ${mode === 'development' ? "'unsafe-inline' 'unsafe-eval'" : ''}`,
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: https://api.mapbox.com https://*.tiles.mapbox.com https://res.cloudinary.com",

@@ -80,8 +80,8 @@ export const UserForm: React.FC<UserFormProps> = ({
         id: "1",
         name: "Maria Silva",
         email: "maria@example.com",
-        role: "customer",
-        status: "active",
+        role: "customer" as UserRole,
+        status: "active" as UserStatus,
         created_at: "2023-06-15",
         avatar: null,
       },
@@ -89,8 +89,8 @@ export const UserForm: React.FC<UserFormProps> = ({
         id: "2",
         name: "João Oliveira",
         email: "joao@example.com",
-        role: "customer",
-        status: "active",
+        role: "customer" as UserRole,
+        status: "active" as UserStatus,
         created_at: "2023-07-22",
         avatar: null,
       },
@@ -98,8 +98,8 @@ export const UserForm: React.FC<UserFormProps> = ({
         id: "3",
         name: "Ana Souza",
         email: "ana@example.com",
-        role: "admin",
-        status: "active",
+        role: "admin" as UserRole,
+        status: "active" as UserStatus,
         created_at: "2023-05-10",
         avatar: null,
       }
@@ -177,13 +177,12 @@ export const UserForm: React.FC<UserFormProps> = ({
   const onSubmit = async (data: UserFormValues) => {
     try {
       if (userId) {
-        // ... keep existing code for updateUser ...
         await updateUser({
           id: userId,
           name: data.name,
           email: data.email,
-          role: data.role,
-          status: data.status,
+          role: data.role as UserRole,  // Type cast here
+          status: data.status as UserStatus,  // Type cast here
           avatar: data.avatar || null,
         });
         toast({
@@ -202,8 +201,8 @@ export const UserForm: React.FC<UserFormProps> = ({
         const newUser = {
           name: data.name,
           email: data.email,
-          role: data.role,
-          status: data.status,
+          role: data.role as UserRole,  // Type cast here
+          status: data.status as UserStatus,  // Type cast here
           avatar: data.avatar || null,
         };
         const createdUser = await createUser(newUser);
@@ -230,7 +229,7 @@ export const UserForm: React.FC<UserFormProps> = ({
       }
       onSuccess();
     } catch (error) {
-      // ... keep existing error handling ...
+      console.error("Error saving user:", error);
       toast({
         title: "Erro",
         description: "Não foi possível salvar o usuário. Tente novamente.",
@@ -238,8 +237,6 @@ export const UserForm: React.FC<UserFormProps> = ({
       });
     }
   };
-
-  // ... keep existing code (loading state JSX) the same ...
 
   if (isLoading) {
     return (
@@ -256,7 +253,6 @@ export const UserForm: React.FC<UserFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
-            {/* ... keep existing name, email, password fields ... */}
             <FormField
               control={form.control}
               name="name"
@@ -311,7 +307,6 @@ export const UserForm: React.FC<UserFormProps> = ({
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* ... keep existing avatar field ... */}
             <FormField
               control={form.control}
               name="avatar"

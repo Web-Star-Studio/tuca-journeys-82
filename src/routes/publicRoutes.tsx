@@ -1,4 +1,3 @@
-
 import { Route } from 'react-router-dom';
 import Home from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
@@ -19,6 +18,7 @@ import Wishlist from '@/pages/Wishlist';
 import Loja from '@/pages/Loja';
 import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
+import AccommodationDetail from '@/pages/AccommodationDetail';
 
 export const publicRoutes = (
   <>
@@ -32,7 +32,7 @@ export const publicRoutes = (
     <Route path="/passeios" element={<Tours />} />
     <Route path="/passeios/:id" element={<TourDetail />} />
     <Route path="/hospedagens" element={<Hospedagens />} />
-    <Route path="/hospedagens/:id" element={<TourDetail />} />
+    <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
     <Route path="/pacotes" element={<Packages />} />
     <Route path="/pacotes/:id" element={<PackageDetail />} />
     <Route path="/sobre" element={<About />} />

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase-client';
 import { UserProfile } from '@/types/database';
 
@@ -49,9 +50,17 @@ async function getUserProfile(userId: string): Promise<UserProfile | null> {
 
 async function updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
   try {
+    // Convert preferences to a plain object for JSON storage
+    const supabaseUpdates: Record<string, any> = { ...updates };
+      
+    // If there are preferences, make sure they're converted to a plain object
+    if (updates.preferences) {
+      supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
+    }
+    
     const { data, error } = await supabase
       .from('user_profiles')
-      .update(updates)
+      .update(supabaseUpdates)
       .eq('id', userId)
       .select()
       .single();
@@ -90,9 +99,12 @@ async function getUserPreferences(userId: string): Promise<any | null> {
 
 async function updateUserPreferences(userId: string, preferences: any): Promise<boolean> {
   try {
+    // Convert to plain object for JSON storage
+    const preferencesObj = JSON.parse(JSON.stringify(preferences));
+    
     const { error } = await supabase
       .from('user_profiles')
-      .update({ preferences: preferences })
+      .update({ preferences: preferencesObj })
       .eq('id', userId);
     
     if (error) {

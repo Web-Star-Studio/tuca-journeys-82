@@ -19,6 +19,12 @@ export interface Accommodation {
   type: string;
   is_available?: boolean;
   location?: string;
+  // UI props for compatibility
+  price?: number;
+  perNight?: number;
+  image?: string;
+  capacity?: number;
+  featured?: boolean;
 }
 
 export interface Tour {
@@ -166,5 +172,3 @@ export interface Event {
   is_featured?: boolean;
   gallery_images: string[];
 }
-
-// Add more types as needed

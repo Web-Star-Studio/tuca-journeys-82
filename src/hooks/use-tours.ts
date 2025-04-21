@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { Tour } from '@/types';
 
+// Hook for fetching all tours
 export const useTours = () => {
   const queryClient = useQueryClient();
 
@@ -103,4 +104,26 @@ export const useTours = () => {
     deleteTour: deleteTourMutation.mutate,
     getTourById
   };
+};
+
+// Hook for fetching a single tour by ID
+export const useTour = (id: number | string | undefined) => {
+  return useQuery({
+    queryKey: ['tour', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+      
+      const { data, error } = await supabase
+        .from('tours')
+        .select('*')
+        .eq('id', numericId)
+        .single();
+      
+      if (error) throw error;
+      return data as Tour;
+    },
+    enabled: !!id,
+  });
 };

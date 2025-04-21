@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
-import type { Accommodation } from '@/types/database';
+import { Accommodation } from '@/types';
 
 export const useAccommodations = () => {
   return useQuery({
@@ -18,27 +18,20 @@ export const useAccommodations = () => {
   });
 };
 
-export const useAccommodation = (id?: string | number) => {
+export const useAccommodation = (id: number | string | undefined) => {
   return useQuery({
     queryKey: ['accommodation', id],
     queryFn: async () => {
-      if (!id) throw new Error('Accommodation ID is required');
+      if (!id) return null;
       
-      let numericId: number;
-      if (typeof id === 'string') {
-        numericId = parseInt(id, 10);
-        if (isNaN(numericId)) {
-          throw new Error('Invalid accommodation ID');
-        }
-      } else {
-        numericId = id;
-      }
+      // Convert string ID to number if necessary
+      const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
       
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
         .eq('id', numericId)
-        .maybeSingle();
+        .single();
       
       if (error) throw error;
       return data as Accommodation;

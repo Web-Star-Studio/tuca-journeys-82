@@ -5,6 +5,20 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { UserPreferences } from "@/types";
 
+// UI-oriented interfaces for the form
+interface DietaryRestrictions {
+  vegetarian: boolean;
+  vegan: boolean;
+  glutenFree: boolean;
+  dairyFree: boolean;
+}
+
+interface AccessibilityOptions {
+  mobilitySupport: boolean;
+  visualAids: boolean;
+  hearingAids: boolean;
+}
+
 // Combined preferences state type to match component usage
 interface PreferencesState {
   travelStyle: string;
@@ -13,17 +27,8 @@ interface PreferencesState {
   notifyPromos: boolean;
   notifyBookings: boolean;
   transportModes: string[];
-  dietaryRestrictions: {
-    vegetarian?: boolean;
-    vegan?: boolean;
-    gluten_free?: boolean;
-    other?: string;
-  };
-  accessibility: {
-    wheelchair?: boolean;
-    limited_mobility?: boolean;
-    other?: string;
-  };
+  dietaryRestrictions: DietaryRestrictions;
+  accessibility: AccessibilityOptions;
 }
 
 // Initial state values matching the component usage
@@ -37,11 +42,13 @@ const INITIAL_PREFERENCES: PreferencesState = {
   dietaryRestrictions: {
     vegetarian: false,
     vegan: false,
-    gluten_free: false
+    glutenFree: false,
+    dairyFree: false
   },
   accessibility: {
-    wheelchair: false,
-    limited_mobility: false
+    mobilitySupport: false,
+    visualAids: false,
+    hearingAids: false
   }
 };
 
@@ -73,8 +80,17 @@ export const usePreferencesWizard = () => {
         activities: preferences.activities,
         budget_range: preferences.budget,
         transport_modes: preferences.transportModes,
-        dietary_restrictions: preferences.dietaryRestrictions,
-        accessibility: preferences.accessibility,
+        dietary_restrictions: {
+          vegetarian: preferences.dietaryRestrictions.vegetarian,
+          vegan: preferences.dietaryRestrictions.vegan,
+          gluten_free: preferences.dietaryRestrictions.glutenFree,
+          other: ""
+        },
+        accessibility: {
+          wheelchair: preferences.accessibility.mobilitySupport,
+          limited_mobility: preferences.accessibility.visualAids,
+          other: preferences.accessibility.hearingAids ? "hearing_aids" : ""
+        },
         notifications: {
           marketing: preferences.notifyPromos,
           booking_updates: preferences.notifyBookings,
@@ -82,14 +98,9 @@ export const usePreferencesWizard = () => {
         }
       };
       
-      const success = await updatePreferences(userPreferences);
-      
-      if (success) {
-        toast.success("Preferências salvas com sucesso!");
-        navigate("/perfil");
-      } else {
-        toast.error("Erro ao salvar preferências");
-      }
+      await updatePreferences(userPreferences);
+      toast.success("Preferências salvas com sucesso!");
+      navigate("/perfil");
     } catch (error) {
       console.error("Error saving preferences:", error);
       toast.error("Ocorreu um erro ao salvar suas preferências");

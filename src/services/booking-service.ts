@@ -29,9 +29,52 @@ export class BookingService extends BaseApiService {
         .single();
 
       if (error) throw error;
-      return data as Booking;
+      
+      // Convert database result to Booking type format
+      const booking: Booking = {
+        ...data as any,
+        user_name: '', // These fields will be populated via joins when retrieved
+        user_email: '',
+        item_type: data.tour_id ? 'tour' : data.accommodation_id ? 'accommodation' : 'event',
+        item_name: '', // This will be populated when retrieved
+      };
+      
+      return booking;
     } catch (error) {
       this.handleError(error, 'Failed to create booking');
+      return null;
+    }
+  }
+
+  /**
+   * Cancel a booking
+   */
+  async cancelBooking(bookingId: string): Promise<Booking | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('bookings')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      
+      // Convert database result to Booking type format
+      const booking: Booking = {
+        ...data as any,
+        user_name: '', // These fields will be populated via joins when retrieved
+        user_email: '',
+        item_type: data.tour_id ? 'tour' : data.accommodation_id ? 'accommodation' : 'event',
+        item_name: '', // This will be populated when retrieved
+      };
+      
+      return booking;
+    } catch (error) {
+      this.handleError(error, 'Failed to cancel booking');
       return null;
     }
   }

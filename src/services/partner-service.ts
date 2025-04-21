@@ -24,6 +24,85 @@ export class PartnerService extends BaseApiService {
       return null;
     }
   }
+  
+  /**
+   * Get partner by ID
+   */
+  async getPartnerById(partnerId: string): Promise<Partner | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .select('*')
+        .eq('id', partnerId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Partner;
+    } catch (error) {
+      this.handleError(error, 'Failed to get partner by ID');
+      return null;
+    }
+  }
+
+  /**
+   * Create a new partner
+   */
+  async createPartner(partnerData: Partial<Partner>): Promise<Partner | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .insert(partnerData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Partner;
+    } catch (error) {
+      this.handleError(error, 'Failed to create partner profile');
+      return null;
+    }
+  }
+
+  /**
+   * Update partner profile
+   */
+  async updatePartner(partnerId: string, updates: Partial<Partner>): Promise<Partner | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', partnerId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Partner;
+    } catch (error) {
+      this.handleError(error, 'Failed to update partner profile');
+      return null;
+    }
+  }
+
+  /**
+   * Get all partners
+   */
+  async getPartners(): Promise<Partner[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('partners')
+        .select('*')
+        .order('business_name');
+
+      if (error) throw error;
+      return data as Partner[];
+    } catch (error) {
+      this.handleError(error, 'Failed to get partners');
+      return [];
+    }
+  }
 
   /**
    * Update partner profile
@@ -100,14 +179,18 @@ export class PartnerService extends BaseApiService {
    */
   async createAccommodation(partnerId: string, accomData: Omit<Accommodation, 'id' | 'created_at' | 'updated_at' | 'partner_id'>): Promise<Accommodation | null> {
     try {
+      // Make sure the required fields are present and assign default values for required fields
+      const accommodationData = {
+        ...accomData,
+        partner_id: partnerId,
+        rating: accomData.rating ?? 0, // Default rating if not provided
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await this.supabase
         .from('accommodations')
-        .insert({
-          ...accomData,
-          partner_id: partnerId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .insert(accommodationData)
         .select()
         .single();
 

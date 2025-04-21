@@ -16,7 +16,10 @@ export const useCancelBooking = () => {
     onSuccess: (data) => {
       toast.success('Reserva cancelada com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      queryClient.setQueryData(['booking', data.id], data);
+      // Using optional chaining to safely access id property
+      if (data?.id) {
+        queryClient.setQueryData(['booking', data.id], data);
+      }
     },
     onError: (error: any) => {
       toast.error(`Erro ao cancelar reserva: ${error.message}`);

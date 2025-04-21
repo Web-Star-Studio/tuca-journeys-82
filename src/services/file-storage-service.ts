@@ -85,7 +85,7 @@ export class FileStorageService {
    * Update database record with file reference
    */
   static async updateFileReference(
-    tableName: string,
+    tableName: "tours" | "accommodations" | "events" | "vehicles" | "partners" | "products" | "user_profiles",
     columnName: string,
     recordId: string | number,
     fileUrl: string

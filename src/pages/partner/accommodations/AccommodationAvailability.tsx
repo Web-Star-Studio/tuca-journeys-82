@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
 import PartnerLayout from "@/components/partner/PartnerLayout";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAccommodation } from "@/hooks/accommodations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import AvailabilityCalendar from "@/components/partner/accommodations/AvailabilityCalendar";
 
 const AccommodationAvailability = () => {
   const { id } = useParams<{ id: string }>();

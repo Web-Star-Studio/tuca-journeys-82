@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Eye, Calendar } from "lucide-react";
 import { Accommodation } from "@/types/database";
-import { useDeleteAccommodation } from "@/hooks/use-accommodations";
+import { useDeleteAccommodation } from "@/hooks/accommodations";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
-import { useAccommodation, useCreateAccommodation, useUpdateAccommodation } from "@/hooks/use-accommodations";
+import { useAccommodation, useCreateAccommodation, useUpdateAccommodation } from "@/hooks/accommodations";
 import { Accommodation } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

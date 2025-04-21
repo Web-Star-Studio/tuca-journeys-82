@@ -38,7 +38,7 @@ const BookingPage = () => {
       
       <BookingForm
         itemId={parseInt(id)}
-        itemType={type as 'tour' | 'accommodation' | 'event' | 'vehicle'}
+        itemType={(type as 'tour' | 'accommodation' | 'event' | 'vehicle')}
         itemName={name}
         basePrice={price}
         minGuests={minGuests}

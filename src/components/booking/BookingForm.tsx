@@ -1,28 +1,34 @@
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Loader2, CreditCard, CheckCircle, XCircle } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { BookingFormValues, CouponData } from "@/types/bookingForm";
-import { supabase } from "@/lib/supabase";
 
-interface BookingFormProps {
+import React, { useState, useEffect } from 'react';
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { useForm } from 'react-hook-form';
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/use-profile";
+import { BookingFormValues, CouponData } from "@/types/bookingForm";
+import { addDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Switch } from "../ui/switch";
+import { Checkbox } from "../ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/lib/supabase';
+import { useNavigate } from "react-router-dom";
+import { DiscountCoupon } from '@/types/database';
+import { useNotifications } from '@/hooks/use-notifications';
+
+export interface BookingFormProps {
   itemId: number;
   itemType: 'tour' | 'accommodation' | 'event' | 'vehicle';
   itemName: string;
   basePrice: number;
   minGuests?: number;
   maxGuests?: number;
-  startDate?: Date;
-  endDate?: Date;
   onSuccess?: (bookingId: string) => void;
 }
 
@@ -33,574 +39,512 @@ const BookingForm: React.FC<BookingFormProps> = ({
   basePrice,
   minGuests = 1,
   maxGuests = 10,
-  startDate: initialStartDate,
-  endDate: initialEndDate,
   onSuccess
 }) => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
-  const [isCouponValid, setIsCouponValid] = useState<boolean | null>(null);
-  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { sendBookingNotification } = useNotifications();
   
-  // Calculate price with guests and duration
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [guests, setGuests] = useState(minGuests);
   const [totalPrice, setTotalPrice] = useState(basePrice);
+  const [isLoading, setIsLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
   
-  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<BookingFormValues>({
-    defaultValues: {
-      startDate: initialStartDate || new Date(),
-      endDate: initialEndDate || new Date(),
-      guests: minGuests,
-      specialRequests: "",
-      contactName: user?.user_metadata?.name || "",
-      contactEmail: user?.email || "",
-      contactPhone: "",
-      paymentMethod: 'credit_card',
-      couponCode: "",
-      termsAccepted: false,
-    }
+  const defaultValues = {
+    contactName: profile?.name || user?.email?.split('@')[0] || '',
+    contactEmail: profile?.email || user?.email || '',
+    contactPhone: profile?.phone || '',
+    specialRequests: '',
+    paymentMethod: 'credit_card',
+    termsAccepted: false,
+  };
+  
+  const form = useForm<BookingFormValues>({
+    defaultValues
   });
   
-  // Watch values for real-time updates
-  const watchGuests = watch("guests");
-  const watchStartDate = watch("startDate");
-  const watchEndDate = watch("endDate");
-  const watchCouponCode = watch("couponCode");
-  
-  // Update total price when inputs change
-  React.useEffect(() => {
-    if (typeof watchGuests !== 'number') return;
-    
-    const startDate = typeof watchStartDate === 'string' 
-      ? new Date(watchStartDate) 
-      : watchStartDate;
+  useEffect(() => {
+    // Calculate nights/days
+    const days = endDate && startDate 
+      ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 1;
       
-    const endDate = typeof watchEndDate === 'string' 
-      ? new Date(watchEndDate) 
-      : watchEndDate;
+    // Calculate base total
+    let calculatedPrice = basePrice;
     
-    let daysDifference = 1;
-    if (itemType === 'accommodation' || itemType === 'vehicle') {
-      // Calculate days difference for accommodations and vehicle rentals
-      const diffTime = endDate.getTime() - startDate.getTime();
-      daysDifference = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-      daysDifference = Math.max(1, daysDifference); // At least 1 day
+    if (itemType === 'accommodation') {
+      calculatedPrice = basePrice * days;
     }
     
-    // Calculate base price
-    let price = basePrice * watchGuests * daysDifference;
+    calculatedPrice = calculatedPrice * guests;
     
-    // Apply coupon discount if valid
+    // Apply coupon discount if available
     if (appliedCoupon) {
-      const discountAmount = price * (appliedCoupon.discountPercentage / 100);
-      price = price - discountAmount;
+      const discountAmount = (calculatedPrice * appliedCoupon.discountPercentage) / 100;
+      calculatedPrice -= discountAmount;
     }
     
-    setTotalPrice(price);
-  }, [watchGuests, watchStartDate, watchEndDate, basePrice, itemType, appliedCoupon]);
+    setTotalPrice(calculatedPrice);
+  }, [startDate, endDate, guests, basePrice, appliedCoupon, itemType]);
   
-  // Function to validate coupon
-  const validateCoupon = async (couponCode: string) => {
-    if (!couponCode.trim()) {
-      return;
+  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= minGuests && value <= maxGuests) {
+      setGuests(value);
     }
+  };
+
+  const verifyCoupon = async () => {
+    if (!couponCode.trim()) return;
     
-    setCouponError(null);
-    setIsValidatingCoupon(true);
-    setIsCouponValid(null);
+    setIsCheckingCoupon(true);
     
     try {
-      // Demo coupon validation logic
-      if (couponCode.toUpperCase() === 'DEMO10') {
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-        setAppliedCoupon({ code: 'DEMO10', discountPercentage: 10 });
-        setIsCouponValid(true);
-        
+      // Check discount_coupons table instead of coupons
+      const { data, error } = await supabase
+        .from('discount_coupons')
+        .select('*')
+        .eq('code', couponCode.trim())
+        .single();
+      
+      if (error) throw error;
+      
+      if (!data) {
         toast({
-          title: "Cupom aplicado",
-          description: "Desconto de 10% aplicado com sucesso!",
+          title: "Cupom não encontrado",
+          description: "O código informado não existe.",
+          variant: "destructive",
+        });
+        setAppliedCoupon(null);
+        return;
+      }
+      
+      const coupon = data as DiscountCoupon;
+      
+      // Check if coupon is valid
+      const now = new Date();
+      const validFrom = new Date(coupon.valid_from);
+      const validUntil = new Date(coupon.valid_until);
+      
+      if (now < validFrom || now > validUntil) {
+        toast({
+          title: "Cupom expirado",
+          description: "Este cupom não é mais válido.",
+          variant: "destructive",
         });
         return;
       }
       
-      if (couponCode.toUpperCase() === 'NORONHA20') {
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-        setAppliedCoupon({ code: 'NORONHA20', discountPercentage: 20 });
-        setIsCouponValid(true);
-        
-        toast({
-          title: "Cupom aplicado",
-          description: "Desconto de 20% aplicado com sucesso!",
-        });
-        return;
-      }
+      // Apply the coupon
+      setAppliedCoupon({
+        code: coupon.code,
+        discountPercentage: coupon.discount_percentage
+      });
       
-      // For real implementation, check Supabase
-      if (!user?.id.startsWith('demo-')) {
-        const { data, error } = await supabase
-          .from('discount_coupons')
-          .select('*')
-          .eq('code', couponCode.toUpperCase())
-          .single();
-        
-      if (error) {
-        throw new Error('Cupom inválido ou expirado');
-      }
-      
-      if (data) {
-        setAppliedCoupon({
-          code: data.code,
-          discountPercentage: data.discount_percentage
-        });
-        setIsCouponValid(true);
-        
-        toast({
-          title: "Cupom aplicado",
-          description: `Desconto de ${data.discount_percentage}% aplicado com sucesso!`,
-        });
-        return;
-      }
+      toast({
+        title: "Cupom aplicado",
+        description: `Desconto de ${coupon.discount_percentage}% aplicado.`,
+      });
+    } catch (error) {
+      console.error("Error verifying coupon:", error);
+      toast({
+        title: "Erro ao verificar cupom",
+        description: "Não foi possível verificar o cupom. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingCoupon(false);
     }
-    
-    // If we got here, coupon is invalid
-    setIsCouponValid(false);
-    setCouponError('Cupom inválido ou expirado');
-    setAppliedCoupon(null);
-  } catch (error) {
-    setIsCouponValid(false);
-    setCouponError('Erro ao validar cupom');
-    setAppliedCoupon(null);
-  } finally {
-    setIsValidatingCoupon(false);
-  }
-};
+  };
   
-  const onSubmit = async (data: BookingFormValues) => {
+  const handleSubmit = async (data: BookingFormValues) => {
     if (!user) {
       toast({
-        title: "Erro",
-        description: "Você precisa estar logado para fazer uma reserva.",
+        title: "É necessário estar logado",
+        description: "Faça login para realizar uma reserva.",
         variant: "destructive",
       });
       return;
     }
     
-    setIsSubmitting(true);
+    if (!startDate || !endDate) {
+      toast({
+        title: "Datas obrigatórias",
+        description: "Selecione as datas de início e fim.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.termsAccepted) {
+      toast({
+        title: "Termos e condições",
+        description: "Você precisa aceitar os termos e condições.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
     
     try {
-      // Transform the data for the reservation
-      const bookingData = {
+      // Create booking object based on item type
+      const bookingData: any = {
         user_id: user.id,
-        [`${itemType}_id`]: itemId,
-        start_date: typeof data.startDate === 'string' 
-          ? data.startDate 
-          : data.startDate.toISOString(),
-        end_date: typeof data.endDate === 'string' 
-          ? data.endDate 
-          : data.endDate.toISOString(),
-        guests: data.guests,
-        special_requests: data.specialRequests,
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd'),
+        guests: guests,
         total_price: totalPrice,
-        status: 'pending',
-        payment_status: 'pending',
+        status: 'confirmed',
+        payment_status: 'paid',
         payment_method: data.paymentMethod,
-        coupon_code: appliedCoupon?.code || null,
-        coupon_discount: appliedCoupon ? appliedCoupon.discountPercentage : null
+        special_requests: data.specialRequests || null,
       };
       
-      // For demo implementation, simulate success
-      if (user.id.startsWith('demo-')) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const mockBookingId = `booking-${Date.now()}`;
-        
-        toast({
-          title: "Reserva realizada com sucesso!",
-          description: "Você receberá um email com os detalhes da sua reserva.",
-        });
-        
-        if (onSuccess) {
-          onSuccess(mockBookingId);
-        }
-        
-        return;
+      // Add the corresponding item ID field based on type
+      switch (itemType) {
+        case 'tour':
+          bookingData.tour_id = itemId;
+          break;
+        case 'accommodation':
+          bookingData.accommodation_id = itemId;
+          break;
+        case 'event':
+          bookingData.event_id = itemId;
+          break;
+        case 'vehicle':
+          bookingData.vehicle_id = itemId;
+          break;
       }
       
-      // For real implementation, save to Supabase
-      const { data: bookingResult, error } = await supabase
+      // Add coupon if applied
+      if (appliedCoupon) {
+        bookingData.coupon_code = appliedCoupon.code;
+        bookingData.coupon_discount = appliedCoupon.discountPercentage;
+      }
+      
+      // Save booking to database
+      const { data: booking, error } = await supabase
         .from('bookings')
-        .insert([bookingData])
+        .insert(bookingData)
         .select()
         .single();
         
       if (error) throw error;
       
       toast({
-        title: "Reserva realizada com sucesso!",
-        description: "Você receberá um email com os detalhes da sua reserva.",
+        title: "Reserva confirmada",
+        description: "Sua reserva foi realizada com sucesso!",
       });
       
-      if (onSuccess && bookingResult) {
-        onSuccess(String(bookingResult.id));
+      // Send notification
+      await sendBookingNotification(booking.id.toString(), itemName);
+      
+      // Call onSuccess callback or redirect
+      if (onSuccess) {
+        onSuccess(booking.id.toString());
+      } else {
+        navigate(`/confirmacao?id=${booking.id}`);
       }
     } catch (error: any) {
-      console.error('Error creating booking:', error);
+      console.error("Error creating booking:", error);
       toast({
-        title: "Erro ao fazer reserva",
-        description: error.message || "Não foi possível concluir sua reserva. Tente novamente.",
+        title: "Erro ao criar reserva",
+        description: error.message || "Não foi possível finalizar sua reserva. Tente novamente.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card className="max-w-xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl">Reservar {itemName}</CardTitle>
-      </CardHeader>
+    <div className="bg-white shadow-md rounded-lg p-6">
+      <h2 className="text-xl font-semibold mb-4">Detalhes da reserva</h2>
       
-      <CardContent>
-        <form id="booking-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="startDate" className="text-sm font-medium">Data de início</label>
-              <Controller
-                name="startDate"
-                control={control}
-                rules={{ required: "Data de início é obrigatória" }}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={`w-full justify-start text-left font-normal ${
-                          errors.startDate ? "border-red-500" : ""
-                        }`}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          typeof field.value === 'string' ? 
-                            format(new Date(field.value), "PPP", { locale: ptBR }) :
-                            format(field.value, "PPP", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          typeof field.value === 'string' ? 
-                            new Date(field.value) : field.value
-                        }
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        locale={ptBR}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-              {errors.startDate && (
-                <p className="text-sm text-red-500">{errors.startDate.message}</p>
-              )}
-            </div>
-            
-            {(itemType === 'accommodation' || itemType === 'vehicle') && (
-              <div className="space-y-2">
-                <label htmlFor="endDate" className="text-sm font-medium">Data de término</label>
-                <Controller
-                  name="endDate"
-                  control={control}
-                  rules={{ required: "Data de término é obrigatória" }}
-                  render={({ field }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={`w-full justify-start text-left font-normal ${
-                            errors.endDate ? "border-red-500" : ""
-                          }`}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? (
-                            typeof field.value === 'string' ? 
-                              format(new Date(field.value), "PPP", { locale: ptBR }) :
-                              format(field.value, "PPP", { locale: ptBR })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={
-                            typeof field.value === 'string' ? 
-                              new Date(field.value) : field.value
-                          }
-                          onSelect={field.onChange}
-                          disabled={(date) => {
-                            const startDate = typeof watchStartDate === 'string' 
-                              ? new Date(watchStartDate) 
-                              : watchStartDate;
-                            return date < startDate;
-                          }}
-                          locale={ptBR}
-                        />
-                      </PopoverContent>
-                    </Popover>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* Date selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="startDate">Data de início</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !startDate && "text-muted-foreground"
                   )}
-                />
-                {errors.endDate && (
-                  <p className="text-sm text-red-500">{errors.endDate.message}</p>
-                )}
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <label htmlFor="guests" className="text-sm font-medium">
-                Número de pessoas
-              </label>
-              <Input
-                type="number"
-                min={minGuests}
-                max={maxGuests}
-                {...register("guests", {
-                  required: "Número de pessoas é obrigatório",
-                  min: {
-                    value: minGuests,
-                    message: `Mínimo de ${minGuests} pessoas`
-                  },
-                  max: {
-                    value: maxGuests,
-                    message: `Máximo de ${maxGuests} pessoas`
-                  },
-                  valueAsNumber: true
-                })}
-                className={errors.guests ? "border-red-500" : ""}
-              />
-              {errors.guests && (
-                <p className="text-sm text-red-500">{errors.guests.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2 sm:col-span-2">
-              <label htmlFor="specialRequests" className="text-sm font-medium">
-                Pedidos especiais (opcional)
-              </label>
-              <Textarea
-                {...register("specialRequests")}
-                placeholder="Ex: Preferência por quarto com vista para o mar, restrições alimentares, etc."
-                rows={3}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="contactName" className="text-sm font-medium">
-                Nome completo
-              </label>
-              <Input
-                {...register("contactName", {
-                  required: "Nome é obrigatório"
-                })}
-                className={errors.contactName ? "border-red-500" : ""}
-              />
-              {errors.contactName && (
-                <p className="text-sm text-red-500">{errors.contactName.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="contactEmail" className="text-sm font-medium">
-                Email
-              </label>
-              <Input
-                type="email"
-                {...register("contactEmail", {
-                  required: "Email é obrigatório",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Email inválido"
-                  }
-                })}
-                className={errors.contactEmail ? "border-red-500" : ""}
-              />
-              {errors.contactEmail && (
-                <p className="text-sm text-red-500">{errors.contactEmail.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="contactPhone" className="text-sm font-medium">
-                Telefone
-              </label>
-              <Input
-                type="tel"
-                {...register("contactPhone", {
-                  required: "Telefone é obrigatório"
-                })}
-                placeholder="(99) 99999-9999"
-                className={errors.contactPhone ? "border-red-500" : ""}
-              />
-              {errors.contactPhone && (
-                <p className="text-sm text-red-500">{errors.contactPhone.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-medium">Forma de pagamento</label>
-              <div className="grid grid-cols-2 gap-2">
-                <label
-                  className={`border rounded-md p-3 flex items-center gap-2 cursor-pointer ${
-                    watch('paymentMethod') === 'credit_card' 
-                      ? 'border-tuca-ocean-blue bg-tuca-ocean-blue/10' 
-                      : 'border-gray-200'
-                  }`}
                 >
-                  <input
-                    type="radio"
-                    value="credit_card"
-                    className="sr-only"
-                    {...register("paymentMethod", { required: true })}
-                  />
-                  <CreditCard className="h-4 w-4" />
-                  <span>Cartão de Crédito</span>
-                </label>
-                
-                <label
-                  className={`border rounded-md p-3 flex items-center gap-2 cursor-pointer ${
-                    watch('paymentMethod') === 'pix' 
-                      ? 'border-tuca-ocean-blue bg-tuca-ocean-blue/10' 
-                      : 'border-gray-200'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value="pix"
-                    className="sr-only"
-                    {...register("paymentMethod", { required: true })}
-                  />
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M6 9L18 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M18 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Pix</span>
-                </label>
-              </div>
-            </div>
-            
-            <div className="space-y-2 sm:col-span-2">
-              <label htmlFor="couponCode" className="text-sm font-medium flex justify-between">
-                <span>Cupom de desconto (opcional)</span>
-                {isCouponValid !== null && (
-                  <span className={`text-xs flex items-center ${isCouponValid ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCouponValid ? (
-                      <>
-                        <CheckCircle className="h-3 w-3 mr-1" /> Válido
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="h-3 w-3 mr-1" /> Inválido
-                      </>
-                    )}
-                  </span>
-                )}
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  {...register("couponCode")}
-                  placeholder="NORONHA20"
-                  className={`${couponError ? 'border-red-500' : ''} ${isCouponValid ? 'border-green-500' : ''}`}
-                  disabled={isValidatingCoupon || !!appliedCoupon}
-                />
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  disabled={!watchCouponCode || isValidatingCoupon || !!appliedCoupon}
-                  onClick={() => validateCoupon(watchCouponCode)}
-                >
-                  {isValidatingCoupon ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : appliedCoupon ? (
-                    "Aplicado"
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? (
+                    format(startDate, "PPP", { locale: ptBR })
                   ) : (
-                    "Aplicar"
+                    <span>Selecione uma data</span>
                   )}
                 </Button>
-              </div>
-              {couponError && (
-                <p className="text-sm text-red-500">{couponError}</p>
-              )}
-              {appliedCoupon && (
-                <p className="text-sm text-green-600">
-                  Desconto de {appliedCoupon.discountPercentage}% aplicado!
-                </p>
-              )}
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => {
+                    setStartDate(date);
+                    if (date && endDate && date > endDate) {
+                      setEndDate(addDays(date, 1));
+                    }
+                  }}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="endDate">Data de término</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? (
+                    format(endDate, "PPP", { locale: ptBR })
+                  ) : (
+                    <span>Selecione uma data</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  disabled={(date) => 
+                    date < new Date() || (startDate ? date <= startDate : false)
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        
+        {/* Guests */}
+        <div className="space-y-2">
+          <Label htmlFor="guests">Número de pessoas</Label>
+          <div className="flex items-center">
+            <Button 
+              type="button"
+              variant="outline" 
+              size="icon"
+              onClick={() => guests > minGuests && setGuests(guests - 1)}
+              disabled={guests <= minGuests}
+            >
+              -
+            </Button>
+            <Input 
+              id="guests" 
+              type="number" 
+              min={minGuests} 
+              max={maxGuests} 
+              value={guests} 
+              onChange={handleGuestsChange}
+              className="w-20 text-center mx-2"
+            />
+            <Button 
+              type="button"
+              variant="outline" 
+              size="icon"
+              onClick={() => guests < maxGuests && setGuests(guests + 1)}
+              disabled={guests >= maxGuests}
+            >
+              +
+            </Button>
+          </div>
+        </div>
+        
+        {/* Contact information */}
+        <div className="space-y-2">
+          <h3 className="font-medium">Informações de contato</h3>
+          
+          <div className="space-y-2">
+            <Label htmlFor="contactName">Nome</Label>
+            <Input 
+              id="contactName" 
+              {...form.register("contactName", { required: true })} 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="contactEmail">Email</Label>
+            <Input 
+              id="contactEmail" 
+              type="email" 
+              {...form.register("contactEmail", { required: true })} 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="contactPhone">Telefone</Label>
+            <Input 
+              id="contactPhone" 
+              {...form.register("contactPhone")} 
+            />
+          </div>
+        </div>
+        
+        {/* Special requests */}
+        <div className="space-y-2">
+          <Label htmlFor="specialRequests">Pedidos especiais</Label>
+          <Textarea 
+            id="specialRequests" 
+            {...form.register("specialRequests")} 
+            placeholder="Algum pedido especial? Informe aqui."
+          />
+        </div>
+        
+        {/* Coupon code */}
+        <div className="space-y-2">
+          <Label htmlFor="couponCode">Cupom de desconto</Label>
+          <div className="flex space-x-2">
+            <Input 
+              id="couponCode" 
+              value={couponCode} 
+              onChange={(e) => setCouponCode(e.target.value)} 
+              className="flex-1"
+              disabled={!!appliedCoupon}
+            />
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={verifyCoupon} 
+              disabled={isCheckingCoupon || !couponCode.trim() || !!appliedCoupon}
+              className="whitespace-nowrap"
+            >
+              {isCheckingCoupon ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verificando...
+                </>
+              ) : appliedCoupon ? "Aplicado" : "Aplicar"}
+            </Button>
+          </div>
+          {appliedCoupon && (
+            <p className="text-sm text-green-600">
+              Cupom aplicado: {appliedCoupon.discountPercentage}% de desconto
+            </p>
+          )}
+        </div>
+        
+        {/* Payment method */}
+        <div className="space-y-2">
+          <Label>Método de pagamento</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2 border p-3 rounded">
+              <input 
+                type="radio" 
+                id="credit_card" 
+                value="credit_card" 
+                {...form.register("paymentMethod")} 
+                defaultChecked 
+              />
+              <Label htmlFor="credit_card" className="cursor-pointer">Cartão de crédito</Label>
             </div>
             
-            <div className="sm:col-span-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-tuca-ocean-blue focus:ring-tuca-ocean-blue"
-                  {...register("termsAccepted", { 
-                    required: "Você precisa aceitar os termos e condições" 
-                  })}
-                />
-                <span className="text-sm text-gray-600">
-                  Eu li e concordo com os 
-                  <a href="/termos" className="text-tuca-ocean-blue hover:underline ml-1">
-                    Termos e Condições
-                  </a>
-                  .
-                </span>
-              </label>
-              {errors.termsAccepted && (
-                <p className="text-sm text-red-500 mt-1">{errors.termsAccepted.message}</p>
-              )}
+            <div className="flex items-center space-x-2 border p-3 rounded">
+              <input 
+                type="radio" 
+                id="pix" 
+                value="pix" 
+                {...form.register("paymentMethod")} 
+              />
+              <Label htmlFor="pix" className="cursor-pointer">PIX</Label>
             </div>
           </div>
-        </form>
-      </CardContent>
-      
-      <CardFooter className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:justify-between sm:items-center border-t pt-6">
-        <div>
-          <p className="text-sm text-gray-600">Valor total</p>
-          <p className="text-2xl font-semibold">
-            R$ {totalPrice.toFixed(2)}
-            {appliedCoupon && (
-              <span className="text-sm line-through text-gray-400 ml-2">
-                R$ {(totalPrice / (1 - appliedCoupon.discountPercentage / 100)).toFixed(2)}
-              </span>
-            )}
-          </p>
         </div>
+        
+        {/* Booking summary */}
+        <div className="bg-gray-50 p-4 rounded">
+          <h3 className="font-medium mb-2">Resumo da reserva</h3>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <span>Item:</span>
+              <span className="font-medium">{itemName}</span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span>Período:</span>
+              <span>
+                {startDate && endDate ? (
+                  <>
+                    {format(startDate, 'dd/MM/yyyy')} até {format(endDate, 'dd/MM/yyyy')}
+                  </>
+                ) : 'Selecione as datas'}
+              </span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span>Pessoas:</span>
+              <span>{guests}</span>
+            </div>
+            
+            {appliedCoupon && (
+              <div className="flex justify-between text-green-600">
+                <span>Desconto:</span>
+                <span>{appliedCoupon.discountPercentage}%</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total:</span>
+              <span>R$ {totalPrice.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Terms and conditions */}
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="termsAccepted" 
+            {...form.register("termsAccepted")} 
+          />
+          <label
+            htmlFor="termsAccepted"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Aceito os termos e condições
+          </label>
+        </div>
+        
+        {/* Submit button */}
         <Button 
-          type="submit"
-          form="booking-form"
-          disabled={isSubmitting}
-          className="w-full sm:w-auto"
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading}
         >
-          {isSubmitting ? (
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processando...
             </>
           ) : (
-            "Finalizar Reserva"
+            "Finalizar reserva"
           )}
         </Button>
-      </CardFooter>
-    </Card>
+      </form>
+    </div>
   );
 };
 

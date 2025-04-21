@@ -82,22 +82,22 @@ export interface Tour {
   price: number;
   duration: string;
   category: string;
-  difficulty?: string;
+  difficulty: string;
   rating: number;
   max_participants: number;
   min_participants: number;
-  meeting_point?: string;
+  meeting_point?: string | null;
   includes?: string[];
   excludes?: string[];
   notes?: string[];
   schedule?: string[];
   image_url: string;
   gallery_images?: string[];
-  created_at?: string;
-  updated_at?: string;
-  is_available?: boolean;
-  location?: string;
-  partner_id?: string;
+  created_at: string;
+  updated_at: string;
+  partner_id?: string | null;
+  location?: string; // Virtual field for mappings
+  is_available?: boolean; // Virtual field for availability
 }
 
 // Updated Accommodation interface to match database schema
@@ -119,13 +119,13 @@ export interface Accommodation {
   amenities: string[];
   image_url: string;
   gallery_images?: string[];
-  is_available: boolean;
-  created_at?: string;
-  updated_at?: string;
-  location?: string;
-  category?: string;
-  partner_id?: string;
-  rating?: number;
+  created_at: string;
+  updated_at: string;
+  partner_id?: string | null; 
+  category?: string; // Virtual field for consistency
+  location?: string; // Virtual field for mappings
+  is_available?: boolean; // Virtual field for availability
+  rating?: number; // Added for backward compatibility
 }
 
 // Updated Notification interface
@@ -142,27 +142,29 @@ export interface Notification {
 // Updated Event interface to match database schema
 export interface Event {
   id: number;
-  title: string;
-  name?: string;
+  name: string;
   description: string;
   short_description: string;
   date: string;
-  time?: string;
-  start_time?: string;
+  start_time: string;
   end_time?: string;
   location: string;
   price: number;
-  image_url?: string;
-  gallery_images?: string[];
-  is_available: boolean;
-  available_spots?: number;
+  image_url: string;
+  gallery_images?: string[] | null;
   capacity: number;
-  organizer: string;
-  category?: string;
-  created_at?: string;
-  updated_at?: string;
-  is_featured?: boolean;
-  status?: string;
+  available_spots: number;
+  partner_id?: string | null;
+  category: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+  is_featured?: boolean | null;
+  // Virtual fields for backward compatibility
+  title?: string; // Alias for name
+  time?: string; // Alias for start_time
+  organizer?: string; // Default or from partner
+  is_available?: boolean; // Virtual field for availability
+  status?: string; // Added for backward compatibility
 }
 
 // Add Vehicle interface
@@ -200,3 +202,54 @@ export interface Coupon {
   created_at: string;
   updated_at: string;
 }
+
+// Add interface for the discount_coupons table in Supabase
+export interface DiscountCoupon {
+  id: number;
+  code: string;
+  discount_percentage: number;
+  valid_from: string;
+  valid_until: string;
+  current_uses?: number | null;
+  max_uses?: number | null;
+  min_purchase_amount?: number | null;
+  partner_id?: string | null;
+  description?: string | null;
+  applicable_to?: string[] | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+// Interface for traveler preferences since user_preferences doesn't exist
+export interface TravelerPreferences {
+  user_id: string;
+  travel_style?: string;
+  activities?: string[];
+  accommodation_types?: string[];
+  budget_range?: string;
+  travel_frequency?: string;
+  transport_modes?: string[];
+  dietary_restrictions?: {
+    vegetarian: boolean;
+    vegan: boolean;
+    glutenFree: boolean;
+    dairyFree: boolean;
+    other?: string;
+  };
+  accessibility?: {
+    mobilitySupport: boolean;
+    visualAids: boolean;
+    hearingAids: boolean;
+    other?: string;
+  };
+  notifications: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+    marketing: boolean;
+    recommendations: boolean;
+    booking_updates: boolean;
+  };
+  updated_at?: string;
+}
+

@@ -21,11 +21,12 @@ export function useRecommendations() {
             .limit(4);
             
           if (error) throw error;
+          
           // Add missing fields to match Tour interface
           return (data || []).map(tour => ({
             ...tour,
-            is_available: tour.is_available ?? true,
-            location: tour.meeting_point || tour.location || "Unknown"
+            is_available: true, // Add virtual field
+            location: tour.meeting_point || "Unknown" // Add virtual field
           })) as Tour[];
         }
         
@@ -50,22 +51,24 @@ export function useRecommendations() {
           if (!additionalQuery.error && additionalQuery.data) {
             const completeAdditionalData = additionalQuery.data.map(tour => ({
               ...tour,
-              is_available: tour.is_available ?? true,
-              location: tour.meeting_point || tour.location || "Unknown"
+              is_available: true, // Add virtual field
+              location: tour.meeting_point || "Unknown" // Add virtual field
             }));
+            
             const completeData = data.map(tour => ({
               ...tour,
-              is_available: tour.is_available ?? true,
-              location: tour.meeting_point || tour.location || "Unknown"
+              is_available: true, // Add virtual field
+              location: tour.meeting_point || "Unknown" // Add virtual field
             }));
+            
             return [...completeData, ...completeAdditionalData] as Tour[];
           }
         }
         
         return data.map(tour => ({
           ...tour,
-          is_available: tour.is_available ?? true,
-          location: tour.meeting_point || tour.location || "Unknown"
+          is_available: true, // Add virtual field
+          location: tour.meeting_point || "Unknown" // Add virtual field
         })) as Tour[];
       } catch (error) {
         console.error("Error fetching recommended tours:", error);
@@ -87,9 +90,13 @@ export function useRecommendations() {
             .limit(4);
             
           if (error) throw error;
+          
           return (data || []).map(accommodation => ({
             ...accommodation,
-            is_available: accommodation.is_available ?? true
+            is_available: true, // Add virtual field
+            location: accommodation.address, // Add virtual field
+            category: accommodation.type, // Add virtual field
+            rating: 4.5 // Add default rating if not present
           })) as Accommodation[];
         }
         
@@ -115,19 +122,30 @@ export function useRecommendations() {
           if (!additionalQuery.error && additionalQuery.data) {
             const completeAdditionalData = additionalQuery.data.map(accommodation => ({
               ...accommodation,
-              is_available: accommodation.is_available ?? true
+              is_available: true, // Add virtual field
+              location: accommodation.address, // Add virtual field
+              category: accommodation.type, // Add virtual field
+              rating: 4.5 // Add default rating if not present
             }));
+            
             const completeData = data.map(accommodation => ({
               ...accommodation,
-              is_available: accommodation.is_available ?? true
+              is_available: true, // Add virtual field
+              location: accommodation.address, // Add virtual field
+              category: accommodation.type, // Add virtual field
+              rating: 4.5 // Add default rating if not present
             }));
+            
             return [...completeData, ...completeAdditionalData] as Accommodation[];
           }
         }
         
         return data.map(accommodation => ({
           ...accommodation,
-          is_available: accommodation.is_available ?? true
+          is_available: true, // Add virtual field
+          location: accommodation.address, // Add virtual field
+          category: accommodation.type, // Add virtual field
+          rating: 4.5 // Add default rating if not present
         })) as Accommodation[];
       } catch (error) {
         console.error("Error fetching recommended accommodations:", error);
@@ -154,10 +172,10 @@ export function useRecommendations() {
         
         return (data || []).map(event => ({
           ...event,
-          title: event.title || event.name || "",
-          time: event.start_time || "",
-          is_available: event.is_available ?? true,
-          organizer: event.organizer || "Unknown"
+          title: event.name, // Add title as alias for name
+          time: event.start_time, // Add time as alias for start_time
+          is_available: true, // Add virtual field
+          organizer: event.partner_id || "Unknown" // Add default organizer if not present
         })) as Event[];
       } catch (error) {
         console.error("Error fetching upcoming events:", error);

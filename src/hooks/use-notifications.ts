@@ -38,8 +38,8 @@ export const useNotifications = () => {
           userId: notification.user_id,
           title: notification.title,
           message: notification.message,
-          type: notification.type,
-          read: notification.is_read !== undefined ? notification.is_read : false,
+          type: notification.type as "promo" | "booking" | "system",
+          read: notification.is_read === true, // Convert is_read to read
           createdAt: notification.created_at,
         }));
       } catch (error) {

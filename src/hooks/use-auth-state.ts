@@ -11,10 +11,11 @@ export const useAuthState = () => {
   // Initialize the auth state
   useEffect(() => {
     // Set up the auth state change listener first (best practice)
-    const { data: authListener } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log("Auth state changed:", event);
         
+        // Only use synchronous state updates in the callback
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setLoading(false);
@@ -29,7 +30,7 @@ export const useAuthState = () => {
     });
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 

@@ -1,3 +1,4 @@
+
 import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,11 +8,18 @@ import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import ActivityAnalysis from "@/components/dashboard/ActivityAnalysis";
 import { useBookingsList } from "@/hooks/use-bookings-list";
 import { useProfile } from "@/hooks/use-profile";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
-  // Fetch user profile and bookings (will work with demo data)
-  const { profile } = useProfile();
-  const { bookings = [] } = useBookingsList();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  
+  // Only fetch data if user is authenticated
+  const { profile, isLoading: isProfileLoading } = useProfile();
+  const { bookings = [], isLoading: isBookingsLoading } = useBookingsList();
+  
+  // Combined loading state
+  const isLoading = isAuthLoading || isProfileLoading || isBookingsLoading;
   
   // Calculate user metrics from real or demo data
   const calculateUserMetrics = () => {
@@ -25,8 +33,24 @@ const Dashboard = () => {
 
   const userMetrics = calculateUserMetrics();
   
-  // Retire sugestões/fallbacks baseados em demo:
-  const recommendations = []; // Recomendações devem vir do back-end real ou permanecer vazias
+  // Empty recommendations array to avoid unnecessary renders
+  const recommendations = [];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header />
+        <main className="flex-grow w-full pt-20 py-6 sm:py-8 md:py-12 lg:py-16 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue mx-auto mb-4" />
+            <p className="text-gray-600">Carregando seu painel...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

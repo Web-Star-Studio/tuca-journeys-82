@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from "lucide-react";
@@ -15,6 +15,12 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
 }) => {
   const { user, isAdmin, isLoading } = useAuth();
 
+  // Memoize the navigation target to prevent unnecessary recalculations
+  const redirectPath = useMemo(() => {
+    return `${fallbackUrl}?returnTo=/admin/dashboard`;
+  }, [fallbackUrl]);
+  
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -24,14 +30,17 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
     );
   }
 
+  // No user -> redirect to login
   if (!user) {
-    return <Navigate to={`${fallbackUrl}?returnTo=/admin/dashboard`} replace />;
+    return <Navigate to={redirectPath} replace />;
   }
 
+  // User exists but not admin -> redirect to normal dashboard
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Admin user -> render children
   return <>{children}</>;
 };
 

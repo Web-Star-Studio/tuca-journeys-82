@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Partner } from '@/types/partner';
 import { Tour } from '@/types/database';
@@ -249,6 +250,7 @@ export class PartnerService extends BaseApiService {
 
       if (error) throw error;
       return data as Accommodation;
+      
     } catch (error) {
       this.handleError(error, 'Failed to update accommodation');
       return null;
@@ -265,12 +267,15 @@ export class PartnerService extends BaseApiService {
     isMainImage: boolean = false
   ): Promise<string | null> {
     try {
-      // Upload file to storage
+      // Create a folder path using the service type and ID
+      const folderPath = `${serviceId}`;
+      
+      // Upload file to storage - fix: pass only the allowed arguments
+      // Changed to use only 3 arguments (file, bucket, and userId as the optional folder path)
       const uploadResult = await FileStorageService.uploadFile(
         file, 
         `${serviceType}s`, // tours, accommodations, etc.
-        undefined,
-        serviceId
+        folderPath // Use the folder path as the userId parameter for organization
       );
 
       if (!uploadResult) return null;

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,11 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-const DEMO_ACCOUNTS = [
-  { email: "user@example.com", password: "password", label: "Acessar como Usuário" },
-  { email: "admin@tucanoronha.com", password: "admin123456", label: "Acessar como Admin" },
-  { email: "partner@demo.com", password: "partner123", label: "Acessar como Parceiro" }
-];
+const DEMO_ACCOUNTS = []; // Removido todos os acessos rápidos de contas demo
 
 const QuickAccessButtons = () => {
   const { signIn } = useAuth();
@@ -51,6 +46,8 @@ const QuickAccessButtons = () => {
       setLoggingIn(null);
     }
   };
+
+  if (DEMO_ACCOUNTS.length === 0) return null; // Oculta bloco se não há contas rápidas
 
   return (
     <div className="space-y-3">

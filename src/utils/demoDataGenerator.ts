@@ -1,4 +1,3 @@
-
 import { Tour, Accommodation, Product } from '@/types/database';
 
 // Demo data for seeding the database

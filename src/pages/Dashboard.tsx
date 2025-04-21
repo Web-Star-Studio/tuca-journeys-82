@@ -1,4 +1,3 @@
-
 import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,15 +25,8 @@ const Dashboard = () => {
 
   const userMetrics = calculateUserMetrics();
   
-  // Demo recommendations
-  const recommendations = [
-    { id: 1, title: "Passeio de Barco", image: "/tour-sunset.jpg", score: 98 },
-    { id: 2, title: "Mergulho", image: "/tour-diving.jpg", score: 87 },
-    { id: 3, title: "Trilha Ecológica", image: "/tour-trail.jpg", score: 85 },
-    { id: 4, title: "Tour Histórico", image: "/tour-historical.jpg", score: 82 },
-    { id: 5, title: "Observação de Tartarugas", image: "/tour-turtles.jpg", score: 76 },
-    { id: 6, title: "Tour de Caiaque", image: "/tour-kayak.jpg", score: 73 }
-  ];
+  // Retire sugestões/fallbacks baseados em demo:
+  const recommendations = []; // Recomendações devem vir do back-end real ou permanecer vazias
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -44,7 +36,11 @@ const Dashboard = () => {
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
             <DashboardHeader notificationCount={0} />
             <MetricsCards metrics={userMetrics} />
-            <DashboardTabs recommendations={recommendations} />
+            {recommendations.length === 0 ? (
+              <div className="text-center text-gray-500">Nenhuma recomendação disponível.</div>
+            ) : (
+              <DashboardTabs recommendations={recommendations} />
+            )}
             <ActivityAnalysis recentBookings={bookings || []} />
           </div>
         </div>

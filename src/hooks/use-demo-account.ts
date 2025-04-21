@@ -1,6 +1,3 @@
 
-// This hook is no longer needed since we're allowing any login
-export const useDemoAccount = () => {
-  // No-op function as we're allowing any login
-  return null;
-};
+// Arquivo removido, pois não será mais permitido login ou manipulação de contas demo.
+// Retire qualquer importação deste hook nos componentes restantes.

@@ -1,10 +1,8 @@
-
 import { BaseApiService } from './base-api';
 import { Partner } from '@/types/partner';
 import { Tour } from '@/types/database';
 import { Accommodation } from '@/types/database';
 import { FileStorageService } from './file-storage-service';
-import { DemoService } from './demo-service';
 
 export class PartnerService extends BaseApiService {
   /**
@@ -12,24 +10,12 @@ export class PartnerService extends BaseApiService {
    */
   async getPartnerByUserId(userId: string): Promise<Partner | null> {
     try {
-      // Handle demo users
-      if (DemoService.isDemoUser(userId)) {
-        try {
-          const demoPartner = await DemoService.ensureDemoUserHasPartner(userId);
-          return this.getPartnerById(demoPartner.id);
-        } catch (error) {
-          console.error("Error getting demo partner:", error);
-          return null;
-        }
-      }
-      
-      // Regular flow for real users
+      // Removida a lógica de demo user
       const { data, error } = await this.supabase
         .from('partners')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
-
       if (error) throw error;
       return data as Partner;
     } catch (error) {
@@ -62,27 +48,9 @@ export class PartnerService extends BaseApiService {
    */
   async createPartner(partnerData: Partial<Partner>): Promise<Partner | null> {
     try {
-      // Handle demo users
-      if (partnerData.user_id && DemoService.isDemoUser(partnerData.user_id)) {
-        try {
-          const demoPartner = await DemoService.ensureDemoUserHasPartner(partnerData.user_id);
-          
-          // Update the demo partner with the provided data
-          const updatedPartner = await this.updatePartner(demoPartner.id, {
-            business_name: partnerData.business_name || "Demo Partner Business",
-            business_type: partnerData.business_type || "tour",
-            description: partnerData.description,
-            contact_email: partnerData.contact_email,
-            contact_phone: partnerData.contact_phone,
-            website: partnerData.website,
-            address: partnerData.address,
-          });
-          
-          return updatedPartner;
-        } catch (error) {
-          console.error("Error creating demo partner:", error);
-          throw error;
-        }
+      // Removido suporte a DemoService
+      if (!partnerData.business_name || !partnerData.business_type) {
+        throw new Error("Business name and business type are required");
       }
       
       // Regular flow for real users

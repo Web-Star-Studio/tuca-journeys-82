@@ -1,10 +1,8 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partnerService } from '@/services';
 import { Partner } from '@/types/partner';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { DemoService } from '@/services/demo-service';
 
 /**
  * Hook for getting a partner by ID
@@ -22,7 +20,7 @@ export const usePartner = (id?: string) => {
  */
 export const useCurrentPartner = () => {
   const { user } = useAuth();
-  
+  // Não há mais DemoService: use apenas consulta real partnerService.getPartnerByUserId
   return useQuery({
     queryKey: ['currentPartner', user?.id],
     queryFn: () => user?.id ? partnerService.getPartnerByUserId(user.id) : null,
@@ -57,13 +55,6 @@ export const useCreatePartner = () => {
       queryClient.invalidateQueries({ queryKey: ['currentPartner'] });
     },
     onError: (error: any) => {
-      const isDemoUser = user?.id && DemoService.isDemoUser(user.id);
-      if (isDemoUser) {
-        // For demo users, invalidate queries but don't show error
-        queryClient.invalidateQueries({ queryKey: ['currentPartner'] });
-        return;
-      }
-      
       toast.error(`Erro ao criar perfil de parceiro: ${error.message}`);
     }
   });

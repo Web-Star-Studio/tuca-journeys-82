@@ -1,8 +1,4 @@
 
-// Since this is related to Next.js and not supported in this environment,
-// we'll implement an equivalent health check using a regular route component
-// that can be accessed via a URL in our React Router setup
-
 import React, { useEffect, useState } from 'react';
 import { verifySupabaseIntegration } from '@/utils/supabase-health';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

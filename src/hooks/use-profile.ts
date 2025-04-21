@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -43,60 +44,61 @@ export interface ExtendedUserProfile {
 
 export const useProfile = () => {
   const { user } = useAuth();
-  
-  // Query to fetch profile data
+
   const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
-      // In a real app, we'd fetch from an API
-      // For demo, return a placeholder user with all required fields
+      if (!user?.id) return null;
+      // Query actual user_profiles table
+      const { data, error } = await import('@/lib/supabase').then(mod =>
+        mod.supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+      );
+      if (error) throw error;
+      if (!data) return null;
       return {
-        id: "demo-user",
-        name: "Usuário Demo",
-        email: "demo@example.com",
-        phone: "+55 11 99999-9999",
-        address: "Av. Exemplo, 123",
-        city: "São Paulo",
-        state: "SP",
-        zip_code: "01234-567",
-        country: "Brasil",
-        bio: "Olá, sou um usuário demonstrativo.",
-        preferences: {
-          travelStyle: "relaxation",
-          budget_range: "medium",
-          activities: ["beach", "hiking"],
-          notifications: {
-            marketing: true,
-            booking_updates: true,
-            recommendations: true
-          },
-          transportModes: [],
-          dietaryRestrictions: {
-            vegetarian: false,
-            vegan: false,
-            glutenFree: false,
-            dairyFree: false,
-          },
-          accessibility: {
-            mobilitySupport: false,
-            visualAids: false,
-            hearingAids: false,
-          }
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        id: data.id,
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        address: data.address || "",
+        city: data.city || "",
+        state: data.state || "",
+        zip_code: data.zip_code || "",
+        country: data.country || "",
+        bio: "",
+        preferences: data.preferences || undefined,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
       } as ExtendedUserProfile;
     },
     enabled: !!user,
   });
 
-  // Mutation to update profile
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: ExtendedUserProfile) => {
-      // In a real app, we'd call an API
-      console.log('Updating profile:', profileData);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!user?.id) throw new Error('Sem usuário autenticado');
+      // Update at Supabase
+      const { error } = await import('@/lib/supabase').then(mod =>
+        mod.supabase
+          .from('user_profiles')
+          .update({
+            name: profileData.name,
+            phone: profileData.phone,
+            address: profileData.address,
+            city: profileData.city,
+            state: profileData.state,
+            zip_code: profileData.zip_code,
+            country: profileData.country,
+            updated_at: new Date().toISOString(),
+            // preferences and bio can be added here if needed
+          })
+          .eq('id', user.id)
+      );
+      if (error) throw error;
       return { success: true };
     },
     onSuccess: () => {

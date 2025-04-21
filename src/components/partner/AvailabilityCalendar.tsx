@@ -20,9 +20,12 @@ interface AvailabilityCalendarProps {
   accommodationId: number;
 }
 
+// Update the status type to include all possible values
+type AvailabilityStatus = "available" | "unavailable" | "booked";
+
 interface Availability {
   date: Date;
-  status: "available" | "unavailable" | "booked";
+  status: AvailabilityStatus;
   customPrice: number | null;
 }
 
@@ -32,7 +35,8 @@ const AvailabilityCalendar = ({ accommodationId }: AvailabilityCalendarProps) =>
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [customPrice, setCustomPrice] = useState<string>("");
-  const [status, setStatus] = useState<"available" | "unavailable">("available");
+  // Update the status type to match AvailabilityStatus
+  const [status, setStatus] = useState<AvailabilityStatus>("available");
   const { toast } = useToast();
 
   // Load availability data
@@ -51,9 +55,15 @@ const AvailabilityCalendar = ({ accommodationId }: AvailabilityCalendarProps) =>
         
         data?.forEach((item) => {
           const dateString = new Date(item.date).toISOString().split("T")[0];
+          // Ensure the status is one of the allowed values
+          const status: AvailabilityStatus = 
+            item.status === "available" || item.status === "unavailable" || item.status === "booked" 
+              ? item.status as AvailabilityStatus
+              : "available"; // Default to available if the status is unexpected
+              
           availabilityMap[dateString] = {
             date: new Date(item.date),
-            status: item.status,
+            status,
             customPrice: item.custom_price,
           };
         });
@@ -198,9 +208,9 @@ const AvailabilityCalendar = ({ accommodationId }: AvailabilityCalendarProps) =>
                   onSelect={handleDateSelect}
                   className="rounded-md border"
                   components={{
-                    Day: ({ day, ...props }) => (
+                    Day: ({ date, ...props }) => (
                       <div {...props}>
-                        {renderDay(day)}
+                        {renderDay(date)}
                       </div>
                     ),
                   }}
@@ -220,7 +230,7 @@ const AvailabilityCalendar = ({ accommodationId }: AvailabilityCalendarProps) =>
                     <Select
                       value={status}
                       onValueChange={(value) =>
-                        setStatus(value as "available" | "unavailable")
+                        setStatus(value as AvailabilityStatus)
                       }
                     >
                       <SelectTrigger id="status">
@@ -229,6 +239,7 @@ const AvailabilityCalendar = ({ accommodationId }: AvailabilityCalendarProps) =>
                       <SelectContent>
                         <SelectItem value="available">Disponível</SelectItem>
                         <SelectItem value="unavailable">Indisponível</SelectItem>
+                        <SelectItem value="booked">Reservado</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

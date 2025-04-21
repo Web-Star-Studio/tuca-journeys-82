@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
-import { Product } from '@/types/database';
+import { Product } from '@/types';
 
 export const useProductCategories = () => {
   return useQuery({
@@ -69,10 +69,21 @@ export const useProducts = (filterParams?: {
         if (error) throw error;
         return data;
       } else {
-        // Create new product
+        // Create new product with all required fields
+        const requiredProduct = {
+          name: productData.name || 'New Product',
+          description: productData.description || 'Product description',
+          image_url: productData.image_url || '/placeholder.jpg',
+          price: productData.price || 0,
+          category: productData.category || 'other',
+          stock: productData.stock || 0,
+          status: productData.status || 'active',
+          ...productData
+        };
+        
         const { data, error } = await supabase
           .from('products')
-          .insert([productData])
+          .insert([requiredProduct])
           .select()
           .single();
         
@@ -118,13 +129,30 @@ export const useProducts = (filterParams?: {
     }
   });
 
-  // Mutation for updating product availability by partner
+  // Mutation for updating partner product availability
   const updatePartnerProductsMutation = useMutation({
     mutationFn: async ({ partner_id, updates }: { partner_id: string, updates: Partial<Product> }) => {
+      // First, query to get all products from this partner
+      const { data: partnerProducts, error: queryError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('partner_id', partner_id);
+      
+      if (queryError) throw queryError;
+      
+      // Check if we found any products
+      if (!partnerProducts || partnerProducts.length === 0) {
+        return [];
+      }
+      
+      // Get all product IDs
+      const productIds = partnerProducts.map(product => product.id);
+      
+      // Update all products with the provided updates
       const { data, error } = await supabase
         .from('products')
         .update(updates)
-        .eq('partner_id', partner_id)
+        .in('id', productIds)
         .select();
       
       if (error) throw error;

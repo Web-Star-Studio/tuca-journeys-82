@@ -2,9 +2,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile } from '@/types/database';
-
-export type ExtendedUserProfile = UserProfile;
+import { UserProfile } from '@/types';
+import { Json } from '@/integrations/supabase/types';
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -32,7 +31,13 @@ export const useProfile = () => {
       if (!user?.id) throw new Error('User not authenticated');
       
       // Convert updates to a plain object that Supabase can handle
-      const supabaseUpdates = { ...updates };
+      // This ensures preferences get serialized properly for JSON storage
+      const supabaseUpdates: Record<string, any> = { ...updates };
+      
+      // If there are preferences, make sure they're converted to a plain object
+      if (updates.preferences) {
+        supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
+      }
       
       const { data, error } = await supabase
         .from('user_profiles')

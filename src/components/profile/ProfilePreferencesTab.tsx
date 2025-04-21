@@ -8,7 +8,7 @@ import TravelStyleCard from "./preferences/TravelStyleCard";
 import BudgetCard from "./preferences/BudgetCard";
 import ActivitiesCard from "./preferences/ActivitiesCard";
 import NotificationsCard from "./preferences/NotificationsCard";
-import { UserPreferences } from "@/types/database";
+import { UserPreferences } from "@/types";
 
 interface PreferenceState {
   travelStyle: string;
@@ -34,19 +34,19 @@ const ProfilePreferencesTab = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const updatedPreferences: UserPreferences = {
+        travel_style: preferences.travelStyle,
+        budget_range: preferences.budget,
+        activities: preferences.activities,
+        notifications: {
+          marketing: preferences.notifyPromos,
+          booking_updates: preferences.notifyBookings,
+          recommendations: true,
+        },
+      };
+
       await updateProfile({
-        ...profile,
-        preferences: {
-          ...(profile?.preferences || {}),
-          travel_style: preferences.travelStyle,
-          budget_range: preferences.budget,
-          activities: preferences.activities,
-          notifications: {
-            marketing: preferences.notifyPromos,
-            booking_updates: preferences.notifyBookings,
-            recommendations: true,
-          },
-        } as UserPreferences,
+        preferences: updatedPreferences,
       });
       toast.success("Preferências salvas com sucesso");
     } catch (error) {

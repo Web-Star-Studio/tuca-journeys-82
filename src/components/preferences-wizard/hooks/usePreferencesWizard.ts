@@ -3,55 +3,46 @@ import { useState } from "react";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { UserPreferences } from "@/types/database";
+import { UserPreferences } from "@/types";
 
-// Step types
-type TravelStyleStep = {
+// Combined preferences state type to match component usage
+interface PreferencesState {
   travelStyle: string;
-};
-
-type ActivitiesStep = {
-  selectedActivities: string[];
-};
-
-type AccommodationsStep = {
-  selectedAccommodations: string[];
-};
-
-type BudgetStep = {
-  budgetRange: string;
-};
-
-type AccessibilityStep = {
-  accessibilityNeeds: {
-    mobilitySupport: boolean;
-    visualAids: boolean;
-    hearingAids: boolean;
+  budget: string;
+  activities: string[];
+  notifyPromos: boolean;
+  notifyBookings: boolean;
+  transportModes: string[];
+  dietaryRestrictions: {
+    vegetarian?: boolean;
+    vegan?: boolean;
+    gluten_free?: boolean;
+    other?: string;
   };
-};
+  accessibility: {
+    wheelchair?: boolean;
+    limited_mobility?: boolean;
+    other?: string;
+  };
+}
 
-const INITIAL_TRAVEL_STYLE: TravelStyleStep = {
+// Initial state values matching the component usage
+const INITIAL_PREFERENCES: PreferencesState = {
   travelStyle: "relaxation",
-};
-
-const INITIAL_ACTIVITIES: ActivitiesStep = {
-  selectedActivities: [],
-};
-
-const INITIAL_ACCOMMODATIONS: AccommodationsStep = {
-  selectedAccommodations: [],
-};
-
-const INITIAL_BUDGET: BudgetStep = {
-  budgetRange: "medium",
-};
-
-const INITIAL_ACCESSIBILITY: AccessibilityStep = {
-  accessibilityNeeds: {
-    mobilitySupport: false,
-    visualAids: false,
-    hearingAids: false,
+  budget: "medium",
+  activities: [],
+  notifyPromos: true,
+  notifyBookings: true,
+  transportModes: [],
+  dietaryRestrictions: {
+    vegetarian: false,
+    vegan: false,
+    gluten_free: false
   },
+  accessibility: {
+    wheelchair: false,
+    limited_mobility: false
+  }
 };
 
 export const usePreferencesWizard = () => {
@@ -59,41 +50,39 @@ export const usePreferencesWizard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   
-  // Step state
-  const [travelStyle, setTravelStyle] = useState<TravelStyleStep>(INITIAL_TRAVEL_STYLE);
-  const [activities, setActivities] = useState<ActivitiesStep>(INITIAL_ACTIVITIES);
-  const [accommodations, setAccommodations] = useState<AccommodationsStep>(INITIAL_ACCOMMODATIONS);
-  const [budget, setBudget] = useState<BudgetStep>(INITIAL_BUDGET);
-  const [accessibility, setAccessibility] = useState<AccessibilityStep>(INITIAL_ACCESSIBILITY);
+  // Combined preferences state to match component usage
+  const [preferences, setPreferences] = useState<PreferencesState>(INITIAL_PREFERENCES);
   
   const { updatePreferences } = useUserPreferences();
   
-  const nextStep = () => {
-    setCurrentStep((prev) => prev + 1);
-  };
-  
-  const prevStep = () => {
+  const handlePrevious = () => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
   
-  const handleComplete = async () => {
+  const handleNext = () => {
+    setCurrentStep((prev) => Math.min(4, prev + 1));
+  };
+  
+  const handleFinish = async () => {
     setIsSubmitting(true);
     
     try {
-      const preferences: UserPreferences = {
-        travel_style: travelStyle.travelStyle,
-        activities: activities.selectedActivities,
-        accommodation_types: accommodations.selectedAccommodations,
-        budget_range: budget.budgetRange,
-        accessibility: {
-          wheelchair: accessibility.accessibilityNeeds.mobilitySupport,
-          limited_mobility: accessibility.accessibilityNeeds.mobilitySupport, // Using the same field for now
-          other: accessibility.accessibilityNeeds.visualAids || accessibility.accessibilityNeeds.hearingAids ? 
-            "Visual or hearing assistance required" : undefined
+      // Map component preferences to database UserPreferences format
+      const userPreferences: UserPreferences = {
+        travel_style: preferences.travelStyle,
+        activities: preferences.activities,
+        budget_range: preferences.budget,
+        transport_modes: preferences.transportModes,
+        dietary_restrictions: preferences.dietaryRestrictions,
+        accessibility: preferences.accessibility,
+        notifications: {
+          marketing: preferences.notifyPromos,
+          booking_updates: preferences.notifyBookings,
+          recommendations: true
         }
       };
       
-      const success = await updatePreferences(preferences);
+      const success = await updatePreferences(userPreferences);
       
       if (success) {
         toast.success("Preferências salvas com sucesso!");
@@ -111,20 +100,11 @@ export const usePreferencesWizard = () => {
   
   return {
     currentStep,
-    nextStep,
-    prevStep,
-    travelStyle,
-    setTravelStyle,
-    activities,
-    setActivities,
-    accommodations,
-    setAccommodations,
-    budget,
-    setBudget,
-    accessibility,
-    setAccessibility,
-    totalSteps: 5,
-    isSubmitting,
-    handleComplete,
+    preferences,
+    setPreferences,
+    handleNext,
+    handlePrevious,
+    handleFinish,
+    isSubmitting
   };
 };

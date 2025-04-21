@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserPreferences } from '@/types/database';
+import { UserPreferences } from '@/types';
 
 export function useTravelerPreferences() {
   const { user } = useAuth();
@@ -30,7 +30,7 @@ export function useTravelerPreferences() {
       if (!user?.id) throw new Error('User not authenticated');
       
       // Convert preferences to a plain object for Supabase
-      const preferencesObj = { ...preferences };
+      const preferencesObj = JSON.parse(JSON.stringify(preferences));
       
       const { error } = await supabase
         .from('user_profiles')

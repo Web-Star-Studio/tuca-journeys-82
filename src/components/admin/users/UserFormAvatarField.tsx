@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileUpload, ImagePlus, Link } from "lucide-react";
+import { Upload, ImagePlus, Link } from "lucide-react";   // Changed FileUpload to Upload
 import { FileStorageService } from "@/services/file-storage-service";
 import { useToast } from "@/hooks/use-toast";
 
@@ -135,7 +135,7 @@ const UserFormAvatarField: React.FC<UserFormAvatarFieldProps> = ({
                       <>Enviando...</>
                     ) : (
                       <>
-                        <FileUpload className="w-4 h-4 mr-2" />
+                        <Upload className="w-4 h-4 mr-2" />
                         Escolher arquivo
                       </>
                     )}

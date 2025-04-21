@@ -29,9 +29,12 @@ export function useTravelerPreferences() {
     mutationFn: async (preferences: UserPreferences) => {
       if (!user?.id) throw new Error('User not authenticated');
       
+      // Convert preferences to a plain object for Supabase
+      const preferencesObj = { ...preferences };
+      
       const { error } = await supabase
         .from('user_profiles')
-        .update({ preferences })
+        .update({ preferences: preferencesObj })
         .eq('id', user.id);
       
       if (error) throw error;

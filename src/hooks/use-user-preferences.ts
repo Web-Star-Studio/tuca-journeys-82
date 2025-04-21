@@ -32,9 +32,15 @@ export const useUserPreferences = () => {
     
     setIsUpdating(true);
     try {
+      // Convert preferences to a plain object for Supabase
+      const preferencesObj = { 
+        ...(preferences || {}), 
+        ...newPreferences 
+      };
+      
       const { error } = await supabase
         .from('user_profiles')
-        .update({ preferences: newPreferences })
+        .update({ preferences: preferencesObj })
         .eq('id', user.id);
       
       if (error) throw error;

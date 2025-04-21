@@ -1,185 +1,150 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { toast } from "sonner";
-import { Product } from "@/types/product";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Plus, Minus, Package, RotateCcw } from "lucide-react";
-import { useUpdateProductStock } from "@/hooks/use-products";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, X, Plus, Minus } from "lucide-react";
+import { Product } from "@/types/database";
+import { useProducts } from "@/hooks/use-products";
+import { toast } from "sonner";
 
-interface InventoryManagerProps {
-  product: Product;
-}
-
-const InventoryManager = ({ product }: InventoryManagerProps) => {
-  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
-  const [stockAdjustment, setStockAdjustment] = useState<number>(1);
-  const [stockOperation, setStockOperation] = useState<'add' | 'subtract' | 'set'>('add');
+const InventoryManager: React.FC = () => {
+  const [editableStock, setEditableStock] = useState<Record<number, number>>({});
+  const { products, isLoading, updateProductStock } = useProducts();
   
-  const updateStockMutation = useUpdateProductStock();
+  const handleStockChange = (productId: number, value: string) => {
+    const stockValue = parseInt(value, 10);
+    if (!isNaN(stockValue) && stockValue >= 0) {
+      setEditableStock({ ...editableStock, [productId]: stockValue });
+    }
+  };
   
-  const handleStockAdjust = () => {
-    if (stockAdjustment <= 0) {
-      toast.error("O valor deve ser maior que zero");
+  const saveStockChange = async (product: Product) => {
+    const newStock = editableStock[product.id];
+    
+    if (newStock === undefined || newStock === product.stock) {
+      // No change or invalid value
       return;
     }
     
-    updateStockMutation.mutate({
-      productId: product.id,
-      stock: stockAdjustment,
-      operation: stockOperation
-    });
-    
-    setIsStockModalOpen(false);
-  };
-  
-  const getStatusColor = () => {
-    switch (product.status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'out_of_stock':
-        return 'bg-red-100 text-red-800';
-      case 'discontinued':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-blue-100 text-blue-800';
+    try {
+      await updateProductStock({ id: product.id, stock: newStock });
+      toast.success("Estoque atualizado com sucesso");
+      
+      // Clear the editable state for this product
+      const updatedEditableStock = { ...editableStock };
+      delete updatedEditableStock[product.id];
+      setEditableStock(updatedEditableStock);
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      toast.error("Erro ao atualizar o estoque");
     }
   };
+  
+  const incrementStock = (product: Product) => {
+    const currentStock = editableStock[product.id] !== undefined 
+      ? editableStock[product.id] 
+      : product.stock;
+    setEditableStock({ ...editableStock, [product.id]: currentStock + 1 });
+  };
+  
+  const decrementStock = (product: Product) => {
+    const currentStock = editableStock[product.id] !== undefined 
+      ? editableStock[product.id] 
+      : product.stock;
+    if (currentStock > 0) {
+      setEditableStock({ ...editableStock, [product.id]: currentStock - 1 });
+    }
+  };
+  
+  const cancelStockChange = (productId: number) => {
+    const updatedEditableStock = { ...editableStock };
+    delete updatedEditableStock[productId];
+    setEditableStock(updatedEditableStock);
+  };
+  
+  const isStockChanged = (product: Product) => {
+    return editableStock[product.id] !== undefined && editableStock[product.id] !== product.stock;
+  };
+  
+  if (isLoading) {
+    return <div>Carregando inventário...</div>;
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-xl flex justify-between items-center">
-          <span>Gestão de Estoque</span>
-          <span className={`text-sm px-2 py-1 rounded-full ${getStatusColor()}`}>
-            {product.status === 'active' ? 'Em estoque' : 
-             product.status === 'out_of_stock' ? 'Sem estoque' : 'Descontinuado'}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-lg font-medium">Quantidade atual</h4>
-            <p className="text-3xl font-bold">{product.stock || 0} unidades</p>
-          </div>
-          <Package className="h-10 w-10 text-muted-foreground" />
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-1 flex-1"
-            onClick={() => {
-              setStockOperation('add');
-              setStockAdjustment(1);
-              setIsStockModalOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" /> Adicionar
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-1 flex-1"
-            onClick={() => {
-              setStockOperation('subtract');
-              setStockAdjustment(1);
-              setIsStockModalOpen(true);
-            }}
-            disabled={!product.stock || product.stock <= 0}
-          >
-            <Minus className="h-4 w-4" /> Remover
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-1 flex-1"
-            onClick={() => {
-              setStockOperation('set');
-              setStockAdjustment(product.stock || 0);
-              setIsStockModalOpen(true);
-            }}
-          >
-            <RotateCcw className="h-4 w-4" /> Definir
-          </Button>
+      <CardContent className="p-6">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produto</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Estoque Atual</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                        onClick={() => decrementStock(product)}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <Input
+                        type="number"
+                        className="w-20 text-center"
+                        value={editableStock[product.id] !== undefined ? editableStock[product.id] : product.stock}
+                        onChange={(e) => handleStockChange(product.id, e.target.value)}
+                        min={0}
+                      />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                        onClick={() => incrementStock(product)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {isStockChanged(product) && (
+                      <div className="flex space-x-2">
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="text-green-600"
+                          onClick={() => saveStockChange(product)}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="text-red-600"
+                          onClick={() => cancelStockChange(product.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
-      
-      {/* Stock Adjustment Modal */}
-      <Dialog open={isStockModalOpen} onOpenChange={setIsStockModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {stockOperation === 'add' ? 'Adicionar ao estoque' :
-               stockOperation === 'subtract' ? 'Remover do estoque' : 'Definir estoque'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <label htmlFor="stockAdjustment" className="text-sm font-medium">
-                  {stockOperation === 'add' ? 'Quantidade a adicionar' :
-                   stockOperation === 'subtract' ? 'Quantidade a remover' : 'Nova quantidade'}
-                </label>
-                <span className="text-sm text-muted-foreground">
-                  Estoque atual: {product.stock || 0}
-                </span>
-              </div>
-              <Input
-                id="stockAdjustment"
-                type="number"
-                min="1"
-                value={stockAdjustment}
-                onChange={(e) => setStockAdjustment(parseInt(e.target.value) || 0)}
-              />
-            </div>
-            
-            {stockOperation === 'subtract' && (
-              <div className="text-sm text-muted-foreground">
-                {stockAdjustment > (product.stock || 0) ? (
-                  <p className="text-red-500">
-                    A quantidade a remover é maior que o estoque atual. O estoque será zerado.
-                  </p>
-                ) : (
-                  <p>
-                    Novo estoque após remoção: {Math.max(0, (product.stock || 0) - stockAdjustment)} unidades
-                  </p>
-                )}
-              </div>
-            )}
-            
-            {stockOperation === 'add' && (
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  Novo estoque após adição: {(product.stock || 0) + stockAdjustment} unidades
-                </p>
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsStockModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleStockAdjust}
-              disabled={updateStockMutation.isPending || stockAdjustment <= 0}
-            >
-              {updateStockMutation.isPending ? "Atualizando..." : "Confirmar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

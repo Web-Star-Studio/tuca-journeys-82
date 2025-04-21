@@ -1,13 +1,14 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ExtendedUserProfile, useProfile } from "@/hooks/use-profile";
+import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import TravelStyleCard from "./preferences/TravelStyleCard";
 import BudgetCard from "./preferences/BudgetCard";
 import ActivitiesCard from "./preferences/ActivitiesCard";
 import NotificationsCard from "./preferences/NotificationsCard";
+import { UserPreferences } from "@/types/database";
 
 interface PreferenceState {
   travelStyle: string;
@@ -21,7 +22,7 @@ const ProfilePreferencesTab = () => {
   const { profile, updateProfile, isLoading } = useProfile();
   
   const [preferences, setPreferences] = useState<PreferenceState>({
-    travelStyle: profile?.preferences?.travelStyle || 'relaxation',
+    travelStyle: profile?.preferences?.travel_style || 'relaxation',
     notifyPromos: profile?.preferences?.notifications?.marketing || true,
     notifyBookings: profile?.preferences?.notifications?.booking_updates || true,
     budget: profile?.preferences?.budget_range || 'medium',
@@ -34,10 +35,10 @@ const ProfilePreferencesTab = () => {
     setIsSaving(true);
     try {
       await updateProfile({
-        ...(profile as ExtendedUserProfile),
+        ...profile,
         preferences: {
           ...(profile?.preferences || {}),
-          travelStyle: preferences.travelStyle,
+          travel_style: preferences.travelStyle,
           budget_range: preferences.budget,
           activities: preferences.activities,
           notifications: {
@@ -45,7 +46,7 @@ const ProfilePreferencesTab = () => {
             booking_updates: preferences.notifyBookings,
             recommendations: true,
           },
-        },
+        } as UserPreferences,
       });
       toast.success("Preferências salvas com sucesso");
     } catch (error) {

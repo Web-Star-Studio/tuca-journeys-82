@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase-client';
 import { UserProfile } from '@/types/database';
 

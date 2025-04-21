@@ -24,10 +24,20 @@ export const useAccommodation = (id?: string | number) => {
     queryFn: async () => {
       if (!id) throw new Error('Accommodation ID is required');
       
+      let numericId: number;
+      if (typeof id === 'string') {
+        numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+          throw new Error('Invalid accommodation ID');
+        }
+      } else {
+        numericId = id;
+      }
+      
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
-        .eq('id', typeof id === 'string' ? parseInt(id, 10) : id)
+        .eq('id', numericId)
         .maybeSingle();
       
       if (error) throw error;

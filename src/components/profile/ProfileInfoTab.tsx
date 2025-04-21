@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useProfile, ExtendedUserProfile } from "@/hooks/use-profile";
+import { useProfile } from "@/hooks/use-profile";
 import { Loader2 } from "lucide-react";
+import { UserProfile } from "@/types/database";
 
 interface ProfileFormData {
   name: string;
@@ -49,7 +50,7 @@ const ProfileInfoTab = () => {
     
     try {
       await updateProfile({
-        ...profile as ExtendedUserProfile,
+        ...profile as UserProfile,
         name: data.name,
         phone: data.phone,
         address: data.address,

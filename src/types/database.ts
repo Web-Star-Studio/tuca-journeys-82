@@ -99,6 +99,11 @@ export interface UserPreferences {
     other?: string;
   };
   transport_modes?: string[];
+  notifications?: {
+    marketing?: boolean;
+    booking_updates?: boolean;
+    recommendations?: boolean;
+  };
 }
 
 export interface UserProfile {
@@ -117,6 +122,7 @@ export interface UserProfile {
   preferences?: UserPreferences;
   created_at: string;
   updated_at: string;
+  bio?: string;
 }
 
 export interface DatabaseBooking {

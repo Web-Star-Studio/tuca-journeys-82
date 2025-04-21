@@ -2,7 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile, UserPreferences } from '@/types/database';
+import { UserProfile } from '@/types/database';
+
+export type ExtendedUserProfile = UserProfile;
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -29,9 +31,12 @@ export const useProfile = () => {
     mutationFn: async (updates: Partial<UserProfile>) => {
       if (!user?.id) throw new Error('User not authenticated');
       
+      // Convert updates to a plain object that Supabase can handle
+      const supabaseUpdates = { ...updates };
+      
       const { data, error } = await supabase
         .from('user_profiles')
-        .update(updates)
+        .update(supabaseUpdates)
         .eq('id', user.id)
         .select()
         .single();

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,19 +19,20 @@ export class FileStorageService {
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
       let filePath = '';
+      
       // Organize files by category and owner
       if (userId) {
-        filePath = userId ? `${category}/${userId}/${fileName}` : `${category}/${fileName}`;
+        filePath = `${userId}/${fileName}`;
       } else if (itemId) {
-        filePath = `${category}/${itemId}/${fileName}`;
+        filePath = `${itemId}/${fileName}`;
       } else {
-        filePath = `${category}/${fileName}`;
+        filePath = fileName;
       }
 
-      // Upload the file to the right bucket
+      // Upload the file to the correct bucket
       const { error: uploadError } = await supabase
         .storage
-        .from(category)
+        .from(category) // Use the category as bucket name
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -44,7 +46,7 @@ export class FileStorageService {
       // Get the public URL for the file
       const { data } = supabase
         .storage
-        .from(category)
+        .from(category) // Use the same bucket for consistency
         .getPublicUrl(filePath);
 
       return { 
@@ -60,11 +62,11 @@ export class FileStorageService {
   /**
    * Delete file from Supabase storage
    */
-  static async deleteFile(filePath: string): Promise<boolean> {
+  static async deleteFile(bucket: FileCategory, filePath: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .storage
-        .from('public')
+        .from(bucket)
         .remove([filePath]);
 
       if (error) {

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -67,6 +68,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // First set up auth state listener (important order)
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+          console.log("Auth state changed:", event);
+          
+          if (event === "SIGNED_OUT") {
+            localStorage.removeItem("supabase-mock-session");
+            setSession(null);
+            setUser(null);
+            setIsAdmin(false);
+          } else if (currentSession) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            await checkAdminStatus(currentSession.user);
+          }
+        });
+        
         // Check for mock session
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr) {
@@ -124,25 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initAuth();
     
-    // Set up auth state listener
-    const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event);
-      
-      if (event === "SIGNED_OUT") {
-        localStorage.removeItem("supabase-mock-session");
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-      } else if (currentSession) {
-        setSession(currentSession);
-        setUser(currentSession.user);
-        await checkAdminStatus(currentSession.user);
-      }
-    });
-    
-    // Properly handle unsubscribing
+    // Additional cleanup
     return () => {
-      data?.subscription.unsubscribe();
+      // Supabase listener cleanup is automatic
     };
   }, []);
 

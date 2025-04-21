@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -21,7 +22,7 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
-  const { signIn, isLoading } = useAuth();
+  const { signIn } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -171,8 +172,8 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
         </div>
 
         <div>
-          <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
-            {isLoading || isSubmitting ? (
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Entrando...

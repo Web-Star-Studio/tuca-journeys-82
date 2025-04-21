@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserRole, UserStatus } from "@/components/admin/users/types";
-
-// Import field components
 import UserFormFields from "./UserFormFields";
 import UserFormAvatarField from "./UserFormAvatarField";
 import UserFormRoleSelect from "./UserFormRoleSelect";
 import UserFormPartnerTypeField from "./UserFormPartnerTypeField";
 import UserFormStatusField from "./UserFormStatusField";
+import { supabase } from "@/lib/supabase";
+import { useSignUp } from "@/hooks/auth/use-sign-up";
 
 // Schema remains the same
 const userFormSchema = z.object({
@@ -46,6 +46,7 @@ export const UserForm: React.FC<UserFormProps> = ({
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(userId ? true : false);
+  const { signUp } = useSignUp();
 
   // Initialize form
   const form = useForm<UserFormValues>({
@@ -61,63 +62,42 @@ export const UserForm: React.FC<UserFormProps> = ({
     },
   });
 
-  // Mock function to get user
-  const getUser = async (id: string): Promise<User | null> => {
-    const users = [
-      {
-        id: "1",
-        name: "Maria Silva",
-        email: "maria@example.com",
-        role: "customer" as UserRole,
-        status: "active" as UserStatus,
-        created_at: "2023-06-15",
-        avatar: null,
-      },
-      {
-        id: "2",
-        name: "João Oliveira",
-        email: "joao@example.com",
-        role: "customer" as UserRole,
-        status: "active" as UserStatus,
-        created_at: "2023-07-22",
-        avatar: null,
-      },
-      {
-        id: "3",
-        name: "Ana Souza",
-        email: "ana@example.com",
-        role: "admin" as UserRole,
-        status: "active" as UserStatus,
-        created_at: "2023-05-10",
-        avatar: null,
-      }
-    ];
-    const user = users.find(u => u.id === id);
-    return user || null;
-  };
-
-  // Mock function to create user
-  const createUser = async (user: Omit<User, "id" | "created_at">) => {
-    console.log("Creating user:", user);
-    return { 
-      ...user, 
-      id: Math.floor(Math.random() * 1000).toString(), 
-      created_at: new Date().toISOString() 
-    };
-  };
-
-  // Mock function to update user
-  const updateUser = async (user: Partial<User> & { id: string }) => {
-    console.log("Updating user:", user);
-    return user;
-  };
-
-  // Fetch user data when editing
+  // Fetch user data when editing (still mock for update)
   useEffect(() => {
     const loadUserData = async () => {
       if (userId) {
         try {
-          const user = await getUser(userId);
+          // Real case should fetch from DB, kept mock for edit
+          const users = [
+            {
+              id: "1",
+              name: "Maria Silva",
+              email: "maria@example.com",
+              role: "customer" as UserRole,
+              status: "active" as UserStatus,
+              created_at: "2023-06-15",
+              avatar: null,
+            },
+            {
+              id: "2",
+              name: "João Oliveira",
+              email: "joao@example.com",
+              role: "customer" as UserRole,
+              status: "active" as UserStatus,
+              created_at: "2023-07-22",
+              avatar: null,
+            },
+            {
+              id: "3",
+              name: "Ana Souza",
+              email: "ana@example.com",
+              role: "admin" as UserRole,
+              status: "active" as UserStatus,
+              created_at: "2023-05-10",
+              avatar: null,
+            }
+          ];
+          const user = users.find(u => u.id === userId);
           if (user) {
             form.reset({
               name: user.name,
@@ -165,61 +145,77 @@ export const UserForm: React.FC<UserFormProps> = ({
     }
   };
 
-  // Form submission (mock partner creation se função for 'partner')
+  // Submit: handle CREATE/UPDATE user
   const onSubmit = async (data: UserFormValues) => {
+    setIsLoading(true);
     try {
       if (userId) {
-        await updateUser({
-          id: userId,
-          name: data.name,
-          email: data.email,
-          role: data.role as UserRole,
-          status: data.status as UserStatus,
-          avatar: data.avatar || null,
-        });
+        // Keep as mock update for now
+        await new Promise(r => setTimeout(r, 800));
         toast({
           title: "Sucesso",
           description: "Usuário atualizado com sucesso.",
         });
       } else {
         if (!data.password) {
-          form.setError("password", { 
-            type: "required", 
-            message: "Senha é obrigatória para novos usuários" 
+          form.setError("password", {
+            type: "required",
+            message: "Senha é obrigatória para novos usuários"
           });
+          setIsLoading(false);
           return;
         }
-        const newUser = {
-          name: data.name,
+        // Create user in Supabase Auth
+        const { data: signUpData, error } = await signUp({
           email: data.email,
-          role: data.role as UserRole,
-          status: data.status as UserStatus,
-          avatar: data.avatar || null,
-        };
-        const createdUser = await createUser(newUser);
-
-        if (data.role === "partner" && data.partnerBusinessType) {
-          // Mock de criação de parceiro
-          console.log("Criando registro em 'partners' com:", {
-            user_id: createdUser.id,
-            business_name: data.name,
-            business_type: data.partnerBusinessType,
-            is_verified: false,
-            is_active: true,
-          });
+          password: data.password,
+          name: data.name,
+          role: data.role as UserRole
+        });
+        if (error) {
           toast({
-            title: "Parceiro criado",
-            description: `Parceiro "${data.name}" (${data.partnerBusinessType}) criado com sucesso!`,
+            title: "Erro",
+            description: error.message || "Erro ao criar usuário.",
+            variant: "destructive",
           });
-        } else {
-          toast({
-            title: "Sucesso",
-            description: "Novo usuário criado com sucesso.",
-          });
+          setIsLoading(false);
+          return;
         }
+        // Insert extra profile data: status, avatar (optional)
+        if (signUpData?.user) {
+          // Update profile
+          await supabase.from('user_profiles').update({
+            name: data.name,
+            email: data.email,
+            avatar_url: data.avatar || null,
+            is_admin: data.role === "admin",
+            is_partner: data.role === "partner",
+            updated_at: new Date().toISOString()
+          }).eq("id", signUpData.user.id);
+
+          // Update user_roles with partnerType, if any
+          if (data.role === "partner" && data.partnerBusinessType) {
+            await supabase.from('user_roles')
+              .update({ partner_type: data.partnerBusinessType })
+              .eq("user_id", signUpData.user.id)
+              .eq("role", "partner");
+            // Also insert row in partners table
+            await supabase.from('partners').insert({
+              user_id: signUpData.user.id,
+              business_name: data.name,
+              business_type: data.partnerBusinessType,
+              is_verified: false,
+              is_active: true
+            });
+          }
+        }
+        toast({
+          title: "Sucesso",
+          description: "Novo usuário criado com sucesso.",
+        });
       }
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving user:", error);
       toast({
         title: "Erro",
@@ -227,6 +223,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         variant: "destructive",
       });
     }
+    setIsLoading(false);
   };
 
   if (isLoading) {
@@ -242,10 +239,7 @@ export const UserForm: React.FC<UserFormProps> = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
           <UserFormFields form={form} userId={userId} />
-
-          {/* Right Column */}
           <div className="space-y-6">
             <UserFormAvatarField
               form={form}
@@ -263,7 +257,6 @@ export const UserForm: React.FC<UserFormProps> = ({
             <UserFormStatusField form={form} />
           </div>
         </div>
-
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar

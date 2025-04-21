@@ -21,7 +21,15 @@ export class UserService extends BaseApiService {
       throw error;
     }
     
-    return data || null;
+    // Map the database response to match our UserProfile interface
+    if (data) {
+      return {
+        ...data,
+        user_id: data.id // Map id to user_id for backward compatibility
+      } as UserProfile;
+    }
+    
+    return null;
   }
 
   /**
@@ -45,7 +53,11 @@ export class UserService extends BaseApiService {
           throw error;
         }
         
-        return data;
+        // Map the response to match our UserProfile interface
+        return {
+          ...data,
+          user_id: data.id // Map id to user_id for backward compatibility
+        } as UserProfile;
       } else {
         // Create
         const { data, error } = await this.supabase
@@ -58,7 +70,11 @@ export class UserService extends BaseApiService {
           throw error;
         }
         
-        return data;
+        // Map the response to match our UserProfile interface
+        return {
+          ...data,
+          user_id: data.id // Map id to user_id for backward compatibility
+        } as UserProfile;
       }
     } catch (error) {
       console.error('Error creating/updating user profile:', error);

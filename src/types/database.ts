@@ -1,8 +1,5 @@
-
-
 export interface UserProfile {
   id: string;
-  user_id: string;
   name: string;
   email: string;
   phone?: string;
@@ -18,6 +15,9 @@ export interface UserProfile {
   avatar_url?: string;
   created_at: string;
   updated_at: string;
+  is_admin?: boolean;
+  is_partner?: boolean;
+  preferences?: any;
 }
 
 export interface UserPreferences {
@@ -253,3 +253,21 @@ export interface TravelerPreferences {
   updated_at?: string;
 }
 
+// Add Product interface so it can be imported from database.ts
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  category: string;
+  stock: number;
+  status: "active" | "out_of_stock" | "discontinued";
+  weight?: number;
+  dimensions?: string;
+  gallery?: string[];
+  featured?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  partner_id?: string | null;
+}

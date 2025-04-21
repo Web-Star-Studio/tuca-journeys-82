@@ -44,20 +44,25 @@ const accommodationFormSchema = z.object({
 
 type AccommodationFormValues = z.infer<typeof accommodationFormSchema>;
 
-interface AccommodationFormProps {
+export interface AccommodationFormProps {
   accommodationId?: number;
   onSuccess: () => void;
+  onCancel: () => void; // Added onCancel prop
 }
 
 export const AccommodationForm: React.FC<AccommodationFormProps> = ({ 
   accommodationId, 
-  onSuccess
+  onSuccess,
+  onCancel
 }) => {
+  
   const [previewUrl, setPreviewUrl] = useState("");
   const { data: accommodation, isLoading: isLoadingAccommodation } = useAccommodation(accommodationId || 0);
   const createAccommodation = useCreateAccommodation();
   const updateAccommodation = accommodationId ? useUpdateAccommodation(accommodationId) : null;
   const [isLoading, setIsLoading] = useState(accommodationId ? true : false);
+
+  
 
   // Initialize form
   const form = useForm<AccommodationFormValues>({
@@ -77,6 +82,8 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
       gallery: "",
     },
   });
+
+  
 
   // Fetch accommodation data when editing
   useEffect(() => {
@@ -101,6 +108,8 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }
   }, [accommodationId, accommodation, form]);
 
+  
+
   // Update image preview
   useEffect(() => {
     const subscription = form.watch((value) => {
@@ -113,6 +122,8 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
 
   // Form submission
   const onSubmit = async (data: AccommodationFormValues) => {
+    
+
     // Convert string lists to arrays
     const amenitiesArray = data.amenities ? data.amenities.split("\n").map(item => item.trim()).filter(Boolean) : [];
     const galleryArray = data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [];
@@ -159,6 +170,8 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     );
   }
 
+  
+
   const accommodationTypes = [
     "hotel",
     "pousada",
@@ -173,8 +186,9 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
+          
           <div className="space-y-6">
             <FormField
               control={form.control}
@@ -311,7 +325,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
             </div>
           </div>
 
-          {/* Right Column */}
+          
           <div className="space-y-6">
             <FormField
               control={form.control}
@@ -403,7 +417,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => onSuccess()}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
           <Button type="submit">

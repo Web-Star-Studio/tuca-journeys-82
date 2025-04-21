@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -86,8 +85,23 @@ const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }
     
     try {
+      // Ensure all required fields are provided (non-optional)
       const accommodationData = {
-        ...data,
+        title: data.title,
+        description: data.description,
+        short_description: data.short_description,
+        price_per_night: data.price_per_night,
+        type: data.type,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        max_guests: data.max_guests,
+        amenities: data.amenities || [],
+        image_url: data.image_url,
+        gallery_images: data.gallery_images || [],
         partner_id: partner.id,
         rating: accommodation?.rating || 0,
       };

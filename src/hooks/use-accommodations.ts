@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export const useAccommodations = (partnerId?: string) => {
   const { data: currentPartner } = useCurrentPartner();
   const partnerIdToUse = partnerId || currentPartner?.id;
+  const queryClient = useQueryClient();
   
   const { data: accommodations, isLoading, error } = useQuery({
     queryKey: ['accommodations', partnerIdToUse],
@@ -62,18 +63,30 @@ export const useAccommodations = (partnerId?: string) => {
       if (error) throw error;
       return data[0] as Accommodation;
     } else {
-      // Create new accommodation
+      // Create new accommodation with all required fields
+      const newAccommodationData: Omit<Accommodation, 'id' | 'created_at' | 'updated_at'> = {
+        title: accommodationData.title || '',
+        description: accommodationData.description || '',
+        short_description: accommodationData.short_description || '',
+        price_per_night: accommodationData.price_per_night || 0,
+        type: accommodationData.type || '',
+        address: accommodationData.address || '',
+        bedrooms: accommodationData.bedrooms || 1,
+        bathrooms: accommodationData.bathrooms || 1,
+        max_guests: accommodationData.max_guests || 2,
+        amenities: accommodationData.amenities || [],
+        image_url: accommodationData.image_url || '',
+        partner_id: accommodationData.partner_id,
+        rating: accommodationData.rating || 0,
+        gallery_images: accommodationData.gallery_images || []
+      };
+      
       const { data, error } = await supabase
         .from('accommodations')
         .insert({
-          ...(accommodationData as Required<Pick<Accommodation, 
-            'title' | 'description' | 'short_description' | 'price_per_night' | 
-            'type' | 'address' | 'bedrooms' | 'bathrooms' | 'max_guests' | 
-            'amenities' | 'image_url'>> & Partial<Accommodation>),
-          partner_id: accommodationData.partner_id,
-          rating: accommodationData.rating || 0,
+          ...newAccommodationData,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .select();
         
@@ -93,8 +106,6 @@ export const useAccommodations = (partnerId?: string) => {
     return { success: true };
   };
   
-  const queryClient = useQueryClient();
-  
   return { 
     accommodations, 
     isLoading, 
@@ -110,10 +121,12 @@ export const useAccommodation = (accommodationId: number | string) => {
   return useQuery({
     queryKey: ['accommodation', accommodationId],
     queryFn: async () => {
+      const id = typeof accommodationId === 'string' ? parseInt(accommodationId, 10) : accommodationId;
+      
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
-        .eq('id', typeof accommodationId === 'string' ? parseInt(accommodationId, 10) : accommodationId)
+        .eq('id', id)
         .single();
         
       if (error) throw error;

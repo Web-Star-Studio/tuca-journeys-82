@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Search } from "lucide-react";
 import PartnerLayout from "@/components/partner/PartnerLayout";
 import AccommodationsList from "@/components/partner/accommodations/AccommodationsList";
-import { useAccommodations } from "@/hooks/use-accommodations";
+import { useAccommodations } from "@/hooks/accommodations";
 import { useCurrentPartner } from "@/hooks/use-partner";
 import AccommodationFormDialog from "@/components/partner/accommodations/AccommodationFormDialog";
 import { Input } from "@/components/ui/input";

@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { useAccommodations } from "@/hooks/use-accommodations";
+import { useAccommodations } from "@/hooks/accommodations";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter } from "lucide-react";
 import { Accommodation } from "@/types/database";

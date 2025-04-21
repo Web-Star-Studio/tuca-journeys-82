@@ -4,12 +4,22 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useParams } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
-// Define availability types
+// Database Row Type (from Supabase)
+// These types must match what is in the Supabase table.
 type AvailabilityStatus = "available" | "booked" | "maintenance" | "blocked";
+
+interface AccommodationAvailabilityRow {
+  id: number;
+  accommodation_id: number;
+  date: string; // string (ISO date)
+  status: AvailabilityStatus;
+  custom_price: number | null;
+  created_at: string;
+  updated_at: string;
+}
 
 interface DayAvailability {
   date: Date;
@@ -22,8 +32,8 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus>("available");
   const [customPrice, setCustomPrice] = useState<string>("");
-  
-  // Fetch accommodation availability
+
+  // Fetch availability for this accommodation from table
   const { data: availability, isLoading } = useQuery({
     queryKey: ['accommodation-availability', accommodationId],
     queryFn: async () => {
@@ -31,27 +41,26 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
         .from('accommodation_availability')
         .select('*')
         .eq('accommodation_id', accommodationId);
-        
+
       if (error) throw error;
-      
-      // Transform data for calendar
-      const availabilityMap: Record<string, DayAvailability> = {};
-      
-      data?.forEach(item => {
-        const date = new Date(item.date);
-        availabilityMap[date.toISOString().split('T')[0]] = {
-          date,
-          status: item.status as AvailabilityStatus,
-          price: item.custom_price
+
+      // Map data by date for easier lookups
+      const result: Record<string, DayAvailability> = {};
+      (data as AccommodationAvailabilityRow[] | null)?.forEach(item => {
+        const dateStr = item.date;
+        result[dateStr] = {
+          date: new Date(dateStr),
+          status: item.status,
+          price: item.custom_price ?? undefined,
         };
       });
-      
-      return availabilityMap;
+
+      return result;
     },
     enabled: !!accommodationId,
   });
-  
-  // Update availability mutation
+
+  // Save (insert or update) availability
   const updateAvailability = useMutation({
     mutationFn: async ({ date, status, price }: { 
       date: Date; 
@@ -59,65 +68,73 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
       price?: number;
     }) => {
       const dateStr = date.toISOString().split('T')[0];
-      
-      const { data: existing } = await supabase
+
+      // First check if an entry exists for this date
+      const { data: entry, error: selError } = await supabase
         .from('accommodation_availability')
-        .select('id')
+        .select('*')
         .eq('accommodation_id', accommodationId)
         .eq('date', dateStr)
         .maybeSingle();
-        
-      if (existing) {
-        // Update existing record
-        await supabase
+
+      if (selError) throw selError;
+
+      if (entry) {
+        // Update
+        const { error: updError } = await supabase
           .from('accommodation_availability')
-          .update({ 
-            status, 
-            custom_price: price,
+          .update({
+            status,
+            custom_price: price === undefined ? null : price,
             updated_at: new Date().toISOString()
           })
-          .eq('id', existing.id);
+          .eq('id', entry.id);
+
+        if (updError) throw updError;
       } else {
-        // Insert new record
-        await supabase
+        // Insert
+        const { error: insError } = await supabase
           .from('accommodation_availability')
           .insert({
             accommodation_id: accommodationId,
             date: dateStr,
             status,
-            custom_price: price,
+            custom_price: price === undefined ? null : price,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           });
+
+        if (insError) throw insError;
       }
-      
+
       return { date, status, price };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['accommodation-availability', accommodationId]});
       toast.success("Disponibilidade atualizada com sucesso");
     },
-    onError: (error) => {
-      toast.error("Erro ao atualizar disponibilidade: " + error.message);
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar disponibilidade: " + (error.message ?? error.toString()));
     }
   });
-  
-  // Update date availability
+
   const handleUpdateAvailability = () => {
     if (!selectedDate) return;
-    
+
     updateAvailability.mutate({
       date: selectedDate,
       status: selectedStatus,
       price: customPrice ? parseFloat(customPrice) : undefined
     });
   };
-  
-  // Function to get date class based on status
+
+  // Calendar coloring for different statuses
   const getDayClass = (date: Date): string => {
     const dateStr = date.toISOString().split('T')[0];
     const dayAvailability = availability?.[dateStr];
-    
+
     if (!dayAvailability) return "";
-    
+
     switch (dayAvailability.status) {
       case "available":
         return "bg-green-100 hover:bg-green-200";
@@ -164,15 +181,14 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
               blocked: "bg-gray-200"
             }}
             disabled={isLoading}
+            dayClassName={getDayClass}
           />
         </div>
-        
         <div className="flex-1 space-y-4">
           <div>
             <h3 className="text-lg font-medium mb-2">
               {selectedDate ? selectedDate.toLocaleDateString() : 'Selecione uma data'}
             </h3>
-            
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Status</label>
@@ -180,7 +196,7 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
                   <Button
                     type="button"
                     variant={selectedStatus === "available" ? "default" : "outline"}
-                    className={`${selectedStatus === "available" ? "bg-green-500 hover:bg-green-600" : ""}`}
+                    className={selectedStatus === "available" ? "bg-green-500 hover:bg-green-600" : ""}
                     onClick={() => setSelectedStatus("available")}
                   >
                     Disponível
@@ -188,7 +204,7 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
                   <Button
                     type="button"
                     variant={selectedStatus === "blocked" ? "default" : "outline"}
-                    className={`${selectedStatus === "blocked" ? "bg-gray-500 hover:bg-gray-600" : ""}`}
+                    className={selectedStatus === "blocked" ? "bg-gray-500 hover:bg-gray-600" : ""}
                     onClick={() => setSelectedStatus("blocked")}
                   >
                     Bloqueado
@@ -196,7 +212,7 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
                   <Button
                     type="button"
                     variant={selectedStatus === "maintenance" ? "default" : "outline"}
-                    className={`${selectedStatus === "maintenance" ? "bg-orange-500 hover:bg-orange-600" : ""}`}
+                    className={selectedStatus === "maintenance" ? "bg-orange-500 hover:bg-orange-600" : ""}
                     onClick={() => setSelectedStatus("maintenance")}
                   >
                     Manutenção
@@ -204,14 +220,13 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
                   <Button
                     type="button"
                     variant={selectedStatus === "booked" ? "default" : "outline"}
-                    className={`${selectedStatus === "booked" ? "bg-red-500 hover:bg-red-600" : ""}`}
+                    className={selectedStatus === "booked" ? "bg-red-500 hover:bg-red-600" : ""}
                     onClick={() => setSelectedStatus("booked")}
                   >
                     Reservado
                   </Button>
                 </div>
               </div>
-              
               <div>
                 <label htmlFor="customPrice" className="block text-sm font-medium mb-1">
                   Preço Personalizado (opcional)
@@ -231,7 +246,6 @@ const AvailabilityCalendar = ({ accommodationId }: { accommodationId: number }) 
                   Deixe em branco para usar o preço padrão da hospedagem
                 </p>
               </div>
-              
               <Button 
                 className="w-full"
                 onClick={handleUpdateAvailability}

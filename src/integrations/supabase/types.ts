@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accommodation_availability: {
+        Row: {
+          accommodation_id: number
+          created_at: string
+          custom_price: number | null
+          date: string
+          id: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accommodation_id: number
+          created_at?: string
+          custom_price?: number | null
+          date: string
+          id?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accommodation_id?: number
+          created_at?: string
+          custom_price?: number | null
+          date?: string
+          id?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodation_availability_accommodation_id_fkey"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accommodations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accommodations: {
         Row: {
           address: string
@@ -624,6 +662,50 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_schedules: {
+        Row: {
+          available_spots: number
+          created_at: string
+          date: string
+          end_time: string
+          id: number
+          price_override: number | null
+          start_time: string
+          tour_id: number
+          updated_at: string
+        }
+        Insert: {
+          available_spots: number
+          created_at?: string
+          date: string
+          end_time: string
+          id?: number
+          price_override?: number | null
+          start_time: string
+          tour_id: number
+          updated_at?: string
+        }
+        Update: {
+          available_spots?: number
+          created_at?: string
+          date?: string
+          end_time?: string
+          id?: number
+          price_override?: number | null
+          start_time?: string
+          tour_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_schedules_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tours: {
         Row: {
           category: string
@@ -869,6 +951,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vehicle_bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_units: {
+        Row: {
+          created_at: string
+          id: number
+          identifier: string
+          last_maintenance: string | null
+          next_maintenance: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+          vehicle_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          identifier: string
+          last_maintenance?: string | null
+          next_maintenance?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          identifier?: string
+          last_maintenance?: string | null
+          next_maintenance?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_units_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"

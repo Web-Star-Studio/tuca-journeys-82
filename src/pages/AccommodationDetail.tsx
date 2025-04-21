@@ -11,12 +11,13 @@ import AccommodationDetailSidebar from "@/components/accommodation/Accommodation
 import { useAccommodation } from '@/hooks/use-accommodations';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { adaptDatabaseToUIAccommodation } from '@/adapters/accommodation-adapter';
 
 const AccommodationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const { data: accommodation, isLoading, error } = useAccommodation(id);
+  const { data: dbAccommodation, isLoading, error } = useAccommodation(id);
 
   if (isLoading) {
     return (
@@ -30,7 +31,7 @@ const AccommodationDetail = () => {
     );
   }
 
-  if (error || !accommodation) {
+  if (error || !dbAccommodation) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -54,6 +55,9 @@ const AccommodationDetail = () => {
       </div>
     );
   }
+
+  // Convert database accommodation to UI accommodation
+  const accommodation = adaptDatabaseToUIAccommodation(dbAccommodation);
 
   return (
     <div className="min-h-screen">

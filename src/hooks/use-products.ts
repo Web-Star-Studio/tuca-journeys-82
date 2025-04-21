@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { Product } from '@/types';
 
+/**
+ * Hook for fetching and managing products
+ */
 export const useProducts = () => {
   const queryClient = useQueryClient();
 
@@ -90,16 +93,24 @@ export const useProducts = () => {
     },
   });
 
-  const getPartnerProductsMutation = useMutation({
-    mutationFn: async (partnerId: string) => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('partner_id', partnerId);
+  // Helper function to get product categories
+  const getProductCategories = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .order('category', { ascending: true });
 
-      if (error) throw error;
-      return data as Product[];
-    },
+    if (error) throw error;
+    
+    // Get unique categories
+    const categories = [...new Set(data.map(item => item.category))];
+    return categories;
+  };
+
+  // Query for product categories
+  const productCategoriesQuery = useQuery({
+    queryKey: ['product-categories'],
+    queryFn: getProductCategories,
   });
 
   return {
@@ -108,10 +119,10 @@ export const useProducts = () => {
     error: productsQuery.error,
     createProduct: createProductMutation.mutate,
     updateProduct: updateProductMutation.mutate,
-    deleteProduct: deleteProductMutation.mutate,
+    deleteProduct: deleteProductMutation,
     updateProductStock: updateProductStockMutation.mutate,
-    getPartnerProducts: getPartnerProductsMutation.mutate,
-    isPending: createProductMutation.isPending || updateProductMutation.isPending || deleteProductMutation.isPending
+    isPending: createProductMutation.isPending || updateProductMutation.isPending || deleteProductMutation.isPending,
+    useProductCategories: () => productCategoriesQuery
   };
 };
 
@@ -137,7 +148,7 @@ export const useProduct = (id: number | string | undefined) => {
   });
 };
 
-// Alias for deleteProduct
+// Hook for deleting a product
 export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
   
@@ -156,7 +167,7 @@ export const useDeleteProduct = () => {
   });
 };
 
-// Alias for updateProductStock
+// Hook for updating product stock
 export const useUpdateProductStock = () => {
   const queryClient = useQueryClient();
   

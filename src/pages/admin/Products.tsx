@@ -46,16 +46,34 @@ const Products = () => {
     status: ""
   });
   
-  // Use the products hook with search query as filter
-  const { products, isLoading, error, deleteProduct, useProductCategories } = useProducts({
-    search: searchQuery,
-    ...filters
-  });
+  // Use the products hook
+  const { products, isLoading, error } = useProducts();
+  const deleteProduct = useDeleteProduct();
   
-  // Get product categories for filter
-  const { data: categories } = useProductCategories();
+  // Get product categories separately
+  const { data: categories } = useProducts().useProductCategories();
   
   const { toast } = useToast();
+
+  // Apply search and filters locally
+  const filteredProducts = React.useMemo(() => {
+    return products.filter(product => {
+      // Apply search filter
+      const matchesSearch = searchQuery === "" || 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Apply category filter
+      const matchesCategory = filters.category === "" || 
+        product.category === filters.category;
+      
+      // Apply status filter
+      const matchesStatus = filters.status === "" || 
+        product.status === filters.status;
+      
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [products, searchQuery, filters]);
 
   useEffect(() => {
     if (error) {
@@ -82,7 +100,7 @@ const Products = () => {
   const confirmDelete = async () => {
     if (productToDelete) {
       try {
-        await deleteProduct.mutateAsync(productToDelete.id);
+        await deleteProduct.mutate(productToDelete.id);
         setDeleteDialogOpen(false);
         setProductToDelete(null);
         toast({
@@ -226,8 +244,8 @@ const Products = () => {
                   <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : products && products.length > 0 ? (
-              products.map((product) => (
+            ) : filteredProducts && filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.id}</TableCell>
                   <TableCell>

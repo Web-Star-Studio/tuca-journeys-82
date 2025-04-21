@@ -58,8 +58,8 @@ const AccommodationsAdmin = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [accommodationToDelete, setAccommodationToDelete] = React.useState<number | null>(null);
 
-  const deleteAccommodationMutation = useMutation(
-    async (id: number) => {
+  const deleteAccommodationMutation = useMutation({
+    mutationFn: async (id: number) => {
       const { error } = await supabase
         .from('accommodations')
         .delete()
@@ -69,23 +69,21 @@ const AccommodationsAdmin = () => {
         throw error;
       }
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['admin-accommodations']);
-        toast({
-          title: "Hospedagem excluída",
-          description: "Hospedagem excluída com sucesso.",
-        })
-      },
-      onError: (error: any) => {
-        toast({
-          variant: "destructive",
-          title: "Erro ao excluir",
-          description: error.message,
-        })
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-accommodations'] });
+      toast({
+        title: "Hospedagem excluída",
+        description: "Hospedagem excluída com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir",
+        description: error.message,
+      });
+    },
+  });
 
   const handleDelete = (id: number) => {
     setAccommodationToDelete(id);
@@ -163,7 +161,7 @@ const AccommodationsAdmin = () => {
     data: accommodations || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -237,8 +235,8 @@ const AccommodationsAdmin = () => {
             <AlertDialogCancel onClick={() => setAccommodationToDelete(null)}>
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleteAccommodationMutation.isLoading}>
-              {deleteAccommodationMutation.isLoading ? 'Excluindo...' : 'Excluir'}
+            <AlertDialogAction onClick={confirmDelete} disabled={deleteAccommodationMutation.isPending}>
+              {deleteAccommodationMutation.isPending ? 'Excluindo...' : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

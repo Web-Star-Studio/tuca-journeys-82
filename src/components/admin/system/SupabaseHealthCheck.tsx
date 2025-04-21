@@ -1,6 +1,6 @@
 
 import React from 'react';
-import HealthCheck from '@/pages/api/health';
+import HealthCheck from '@/components/system/HealthCheck';
 
 const SupabaseHealthCheck: React.FC = () => {
   return (

@@ -4,9 +4,24 @@ import { verifySupabaseIntegration } from '@/utils/supabase-health';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
-// This component will display system health data
+// Define TypeScript interface for health data
+interface HealthData {
+  status: 'healthy' | 'unhealthy';
+  timestamp: string;
+  details: {
+    connection: {
+      success: boolean;
+      error?: string;
+      connected: boolean;
+    };
+    tables: Record<string, boolean>;
+    auth: boolean;
+    permissions?: boolean;
+  };
+}
+
 const HealthCheck: React.FC = () => {
-  const [healthData, setHealthData] = useState<any>(null);
+  const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,7 +103,7 @@ const HealthCheck: React.FC = () => {
         </div>
         <div>
           <p className="text-sm text-gray-500 mb-2">
-            Last checked: {new Date(healthData?.timestamp).toLocaleString()}
+            Last checked: {healthData ? new Date(healthData.timestamp).toLocaleString() : ''}
           </p>
           <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
             {JSON.stringify(healthData?.details, null, 2)}

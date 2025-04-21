@@ -1,11 +1,25 @@
 
 import { supabase } from "@/lib/supabase";
 
-export const checkSupabaseConnection = async (): Promise<{
+// Define return type for checkSupabaseConnection function
+interface ConnectionResult {
   success: boolean;
   error?: string;
   connected: boolean;
-}> => {
+}
+
+// Define return type for verifySupabaseIntegration function
+interface SupabaseHealthResult {
+  connection: ConnectionResult;
+  tables: Record<string, boolean>;
+  auth: boolean;
+  permissions: boolean;
+}
+
+/**
+ * Checks basic connectivity to Supabase
+ */
+export const checkSupabaseConnection = async (): Promise<ConnectionResult> => {
   try {
     // Test basic connectivity by making a simple request
     const { data, error } = await supabase
@@ -47,7 +61,10 @@ export const checkSupabaseConnection = async (): Promise<{
   }
 };
 
-export const verifySupabaseIntegration = async () => {
+/**
+ * Verifies Supabase integration by checking connection, table access, and auth
+ */
+export const verifySupabaseIntegration = async (): Promise<SupabaseHealthResult> => {
   const results = {
     connection: await checkSupabaseConnection(),
     tables: {} as Record<string, boolean>,

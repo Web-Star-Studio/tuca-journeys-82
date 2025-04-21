@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => ({
       "Content-Security-Policy": [
         "default-src 'self'",
         // Add 'unsafe-inline' and 'unsafe-eval' for development mode
-        `script-src 'self' https://cdn.gpteng.co ${mode === 'development' ? "'unsafe-inline' 'unsafe-eval'" : ''}`,
+        mode === 'development' 
+          ? "script-src 'self' https://cdn.gpteng.co 'unsafe-inline' 'unsafe-eval'" 
+          : "script-src 'self' https://cdn.gpteng.co",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: https://api.mapbox.com https://*.tiles.mapbox.com https://res.cloudinary.com",
@@ -21,7 +23,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
-    react(),
+    react({
+      // Explicitly configure fast refresh for development
+      fastRefresh: mode === 'development',
+    }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),

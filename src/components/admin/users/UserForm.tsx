@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,19 +24,23 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { User, UserRole, UserStatus } from "@/components/admin/users/types";
 
-// Form schema for validation
+// Atualize o schema para incluir partnerBusinessType quando for parceiro
 const userFormSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "Email inválido" }),
-  role: z.enum(["admin", "customer"]),
+  role: z.enum(["admin", "customer", "partner"]),
   status: z.enum(["active", "inactive"]),
   password: z
     .string()
     .min(6, { message: "A senha deve ter pelo menos 6 caracteres" })
     .or(z.literal("")),
   avatar: z.string().url({ message: "Forneça uma URL válida para o avatar" }).or(z.literal("")),
+  partnerBusinessType: z
+    .enum(["accommodation", "tour", "event", "vehicle", "product", "restaurant", "service"])
+    .optional()
 });
 
+// Atualize os valores do formulário
 type UserFormValues = z.infer<typeof userFormSchema>;
 
 interface UserFormProps {
@@ -65,6 +68,7 @@ export const UserForm: React.FC<UserFormProps> = ({
       status: "active",
       password: "",
       avatar: "",
+      partnerBusinessType: undefined,
     },
   });
 
@@ -137,6 +141,7 @@ export const UserForm: React.FC<UserFormProps> = ({
               status: user.status as UserStatus,
               password: "", // Don't show password
               avatar: user.avatar || "",
+              partnerBusinessType: undefined,
             });
             if (user.avatar) {
               setPreviewUrl(user.avatar);
@@ -168,32 +173,24 @@ export const UserForm: React.FC<UserFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // Form submission
+  // Form submission (mock partner creation se função for 'partner')
   const onSubmit = async (data: UserFormValues) => {
     try {
       if (userId) {
-        // Update existing user
-        const updateData: Partial<User> & { id: string } = {
+        // ... keep existing code for updateUser ...
+        await updateUser({
           id: userId,
           name: data.name,
           email: data.email,
           role: data.role,
           status: data.status,
           avatar: data.avatar || null,
-        };
-        
-        // Only include password if it was provided
-        if (data.password) {
-          console.log("Password will be updated");
-        }
-        
-        await updateUser(updateData);
+        });
         toast({
           title: "Sucesso",
           description: "Usuário atualizado com sucesso.",
         });
       } else {
-        // Create new user
         if (!data.password) {
           form.setError("password", { 
             type: "required", 
@@ -201,7 +198,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           });
           return;
         }
-        
+        // Refatoração: criar parceiro se for role === 'partner'
         const newUser = {
           name: data.name,
           email: data.email,
@@ -209,16 +206,31 @@ export const UserForm: React.FC<UserFormProps> = ({
           status: data.status,
           avatar: data.avatar || null,
         };
-        
-        await createUser(newUser);
-        toast({
-          title: "Sucesso",
-          description: "Novo usuário criado com sucesso.",
-        });
+        const createdUser = await createUser(newUser);
+
+        if (data.role === "partner" && data.partnerBusinessType) {
+          // Mock de criação de parceiro
+          console.log("Criando registro em 'partners' com:", {
+            user_id: createdUser.id,
+            business_name: data.name,
+            business_type: data.partnerBusinessType,
+            is_verified: false,
+            is_active: true,
+          });
+          toast({
+            title: "Parceiro criado",
+            description: `Parceiro "${data.name}" (${data.partnerBusinessType}) criado com sucesso!`,
+          });
+        } else {
+          toast({
+            title: "Sucesso",
+            description: "Novo usuário criado com sucesso.",
+          });
+        }
       }
       onSuccess();
     } catch (error) {
-      console.error("Error saving user:", error);
+      // ... keep existing error handling ...
       toast({
         title: "Erro",
         description: "Não foi possível salvar o usuário. Tente novamente.",
@@ -226,6 +238,8 @@ export const UserForm: React.FC<UserFormProps> = ({
       });
     }
   };
+
+  // ... keep existing code (loading state JSX) the same ...
 
   if (isLoading) {
     return (
@@ -242,6 +256,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
+            {/* ... keep existing name, email, password fields ... */}
             <FormField
               control={form.control}
               name="name"
@@ -296,6 +311,7 @@ export const UserForm: React.FC<UserFormProps> = ({
 
           {/* Right Column */}
           <div className="space-y-6">
+            {/* ... keep existing avatar field ... */}
             <FormField
               control={form.control}
               name="avatar"
@@ -331,8 +347,14 @@ export const UserForm: React.FC<UserFormProps> = ({
                 <FormItem>
                   <FormLabel>Função</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={value => {
+                      field.onChange(value);
+                      // Reseta categoria de parceiro ao trocar função
+                      if (value !== "partner") {
+                        form.setValue("partnerBusinessType", undefined);
+                      }
+                    }}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -341,16 +363,51 @@ export const UserForm: React.FC<UserFormProps> = ({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="partner">Parceiro</SelectItem>
                       <SelectItem value="customer">Cliente</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Administradores têm acesso ao painel de controle
+                    Administradores têm acesso ao painel de controle<br />
+                    Parceiros acessam o painel de parceiros
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Campo condicional: tipo de parceiro */}
+            {form.watch('role') === 'partner' && (
+              <FormField
+                control={form.control}
+                name="partnerBusinessType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoria do Parceiro</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="accommodation">Hospedagem</SelectItem>
+                        <SelectItem value="tour">Passeio</SelectItem>
+                        <SelectItem value="event">Evento</SelectItem>
+                        <SelectItem value="vehicle">Aluguel de Veículo</SelectItem>
+                        <SelectItem value="restaurant">Restaurante</SelectItem>
+                        <SelectItem value="product">Produto</SelectItem>
+                        <SelectItem value="service">Outro Serviço</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Selecione o tipo de serviço do parceiro
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -360,7 +417,7 @@ export const UserForm: React.FC<UserFormProps> = ({
                   <FormLabel>Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>

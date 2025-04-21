@@ -1,5 +1,6 @@
 
 import { Booking } from '@/types/bookings';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Service to analyze a user's booking history and extract interest patterns.
@@ -31,45 +32,40 @@ export class UserPreferencesService {
     bookings.forEach(b => {
       const type = b.item_type;
       typeCount[type] = (typeCount[type] || 0) + 1;
-
-      // Category from booking's joined object, if available
-      const category =
-        b.item_type === 'tour'
-          ? (b.tours?.category || '')
-          : b.item_type === 'accommodation'
-          ? (b.accommodations?.type || '')
-          : '';
-      if (category) {
-        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      
+      // Add item name to appropriate history
+      if (b.item_name) {
+        if (type === 'tour') {
+          tourHistory.push(b.item_name);
+        } else if (type === 'accommodation') {
+          accommodationHistory.push(b.item_name);
+        }
+        
+        // Use item_name as destination
+        destinations[b.item_name] = (destinations[b.item_name] || 0) + 1;
       }
-
-      // Destination is tour/accommodation title
-      const destination =
-        b.item_type === 'tour'
-          ? b.tours?.title
-          : b.item_type === 'accommodation'
-          ? b.accommodations?.title
-          : '';
-      if (destination) {
-        destinations[destination] = (destinations[destination] || 0) + 1;
-      }
-      if (type === 'tour' && b.tours?.title) tourHistory.push(b.tours.title);
-      if (type === 'accommodation' && b.accommodations?.title)
-        accommodationHistory.push(b.accommodations.title);
+      
+      // For category, we would need to fetch the category separately or 
+      // have it already included in the booking data
+      // For now, we'll use item_type as a fallback for category
+      const category = type;
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
     });
 
     // Find most frequent type/category/destination
     const mostFrequentType =
-      Object.entries(typeCount).reduce(
-        (max, entry) => (entry[1] > max[1] ? entry : max),
-        ['', 0]
-      )[0] || null;
+      Object.entries(typeCount).length > 0 ?
+        Object.entries(typeCount).reduce(
+          (max, entry) => (entry[1] > max[1] ? entry : max),
+          ['', 0]
+        )[0] : null;
 
     const favoriteCategory =
-      Object.entries(categoryCount).reduce(
-        (max, entry) => (entry[1] > max[1] ? entry : max),
-        ['', 0]
-      )[0] || null;
+      Object.entries(categoryCount).length > 0 ?
+        Object.entries(categoryCount).reduce(
+          (max, entry) => (entry[1] > max[1] ? entry : max),
+          ['', 0]
+        )[0] : null;
 
     const favoriteDestinations = Object.entries(destinations)
       .sort((a, b) => b[1] - a[1])
@@ -88,6 +84,31 @@ export class UserPreferencesService {
       tourHistory,
       accommodationHistory,
     };
+  }
+
+  /**
+   * Fetch extended booking information including tour and accommodation details
+   * @param userId User ID to fetch bookings for
+   * @returns Promise with array of enhanced booking objects
+   */
+  static async getEnhancedUserBookings(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          tours:tour_id (*),
+          accommodations:accommodation_id (*)
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Failed to get enhanced user bookings:', error);
+      return [];
+    }
   }
 }
 

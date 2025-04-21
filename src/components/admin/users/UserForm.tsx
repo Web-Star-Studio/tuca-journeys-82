@@ -4,27 +4,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserRole, UserStatus } from "@/components/admin/users/types";
 
-// Atualize o schema para incluir partnerBusinessType quando for parceiro
+// Import field components
+import UserFormFields from "./UserFormFields";
+import UserFormAvatarField from "./UserFormAvatarField";
+import UserFormRoleSelect from "./UserFormRoleSelect";
+import UserFormPartnerTypeField from "./UserFormPartnerTypeField";
+import UserFormStatusField from "./UserFormStatusField";
+
+// Schema remains the same
 const userFormSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "Email inválido" }),
@@ -39,8 +30,6 @@ const userFormSchema = z.object({
     .enum(["accommodation", "tour", "event", "vehicle", "product", "restaurant", "service"])
     .optional()
 });
-
-// Atualize os valores do formulário
 type UserFormValues = z.infer<typeof userFormSchema>;
 
 interface UserFormProps {
@@ -49,10 +38,10 @@ interface UserFormProps {
   onCancel: () => void;
 }
 
-export const UserForm: React.FC<UserFormProps> = ({ 
-  userId, 
-  onSuccess, 
-  onCancel 
+export const UserForm: React.FC<UserFormProps> = ({
+  userId,
+  onSuccess,
+  onCancel
 }) => {
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
@@ -74,7 +63,6 @@ export const UserForm: React.FC<UserFormProps> = ({
 
   // Mock function to get user
   const getUser = async (id: string): Promise<User | null> => {
-    // In a real app, this would be a database call
     const users = [
       {
         id: "1",
@@ -104,14 +92,12 @@ export const UserForm: React.FC<UserFormProps> = ({
         avatar: null,
       }
     ];
-
     const user = users.find(u => u.id === id);
     return user || null;
   };
 
   // Mock function to create user
   const createUser = async (user: Omit<User, "id" | "created_at">) => {
-    // In a real app, this would be a database call
     console.log("Creating user:", user);
     return { 
       ...user, 
@@ -122,7 +108,6 @@ export const UserForm: React.FC<UserFormProps> = ({
 
   // Mock function to update user
   const updateUser = async (user: Partial<User> & { id: string }) => {
-    // In a real app, this would be a database call
     console.log("Updating user:", user);
     return user;
   };
@@ -139,7 +124,7 @@ export const UserForm: React.FC<UserFormProps> = ({
               email: user.email,
               role: user.role as UserRole,
               status: user.status as UserStatus,
-              password: "", // Don't show password
+              password: "",
               avatar: user.avatar || "",
               partnerBusinessType: undefined,
             });
@@ -173,6 +158,13 @@ export const UserForm: React.FC<UserFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form]);
 
+  // Handler to reset partner type when changing role
+  const handleRoleChange = () => {
+    if (form.getValues("role") !== "partner") {
+      form.setValue("partnerBusinessType", undefined);
+    }
+  };
+
   // Form submission (mock partner creation se função for 'partner')
   const onSubmit = async (data: UserFormValues) => {
     try {
@@ -181,8 +173,8 @@ export const UserForm: React.FC<UserFormProps> = ({
           id: userId,
           name: data.name,
           email: data.email,
-          role: data.role as UserRole,  // Type cast here
-          status: data.status as UserStatus,  // Type cast here
+          role: data.role as UserRole,
+          status: data.status as UserStatus,
           avatar: data.avatar || null,
         });
         toast({
@@ -197,12 +189,11 @@ export const UserForm: React.FC<UserFormProps> = ({
           });
           return;
         }
-        // Refatoração: criar parceiro se for role === 'partner'
         const newUser = {
           name: data.name,
           email: data.email,
-          role: data.role as UserRole,  // Type cast here
-          status: data.status as UserStatus,  // Type cast here
+          role: data.role as UserRole,
+          status: data.status as UserStatus,
           avatar: data.avatar || null,
         };
         const createdUser = await createUser(newUser);
@@ -252,185 +243,24 @@ export const UserForm: React.FC<UserFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@exemplo.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{userId ? "Nova Senha (opcional)" : "Senha"}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder={userId ? "Deixe em branco para manter a senha atual" : "Senha"} 
-                      type="password" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  {userId && (
-                    <FormDescription>
-                      Preencha apenas se desejar alterar a senha existente
-                    </FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <UserFormFields form={form} userId={userId} />
 
           {/* Right Column */}
           <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="avatar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL do Avatar (opcional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="URL do avatar" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Deixe em branco para usar avatar padrão do sistema
-                  </FormDescription>
-                  <FormMessage />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                      <img
-                        src={previewUrl}
-                        alt="Avatar preview"
-                        className="rounded-full h-20 w-20 object-cover"
-                        onError={() => setPreviewUrl("")}
-                      />
-                    </div>
-                  )}
-                </FormItem>
-              )}
+            <UserFormAvatarField
+              form={form}
+              previewUrl={previewUrl}
+              setPreviewUrl={setPreviewUrl}
             />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Função</FormLabel>
-                  <Select
-                    onValueChange={value => {
-                      field.onChange(value);
-                      // Reseta categoria de parceiro ao trocar função
-                      if (value !== "partner") {
-                        form.setValue("partnerBusinessType", undefined);
-                      }
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="partner">Parceiro</SelectItem>
-                      <SelectItem value="customer">Cliente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Administradores têm acesso ao painel de controle<br />
-                    Parceiros acessam o painel de parceiros
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <UserFormRoleSelect
+              form={form}
+              fieldValue={form.watch('role')}
+              setPartnerType={handleRoleChange}
             />
-
-            {/* Campo condicional: tipo de parceiro */}
             {form.watch('role') === 'partner' && (
-              <FormField
-                control={form.control}
-                name="partnerBusinessType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria do Parceiro</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma categoria" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="accommodation">Hospedagem</SelectItem>
-                        <SelectItem value="tour">Passeio</SelectItem>
-                        <SelectItem value="event">Evento</SelectItem>
-                        <SelectItem value="vehicle">Aluguel de Veículo</SelectItem>
-                        <SelectItem value="restaurant">Restaurante</SelectItem>
-                        <SelectItem value="product">Produto</SelectItem>
-                        <SelectItem value="service">Outro Serviço</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Selecione o tipo de serviço do parceiro
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <UserFormPartnerTypeField form={form} />
             )}
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Ativo</SelectItem>
-                      <SelectItem value="inactive">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Usuários inativos não podem fazer login
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <UserFormStatusField form={form} />
           </div>
         </div>
 

@@ -22,34 +22,15 @@ import PartnerMetricsCards from "@/components/partner/dashboard/PartnerMetricsCa
 import PartnerBookingsChart from "@/components/partner/dashboard/PartnerBookingsChart";
 import PartnerCustomersTable from "@/components/partner/dashboard/PartnerCustomersTable";
 import PartnerUpcomingBookings from "@/components/partner/dashboard/PartnerUpcomingBookings";
+import PartnerSpecificMetrics from "@/components/partner/dashboard/PartnerSpecificMetrics";
+import { getPartnerBusinessTypeInfo } from "@/lib/partner-helpers";
 
 const PartnerDashboard: React.FC = () => {
   const { data: partner } = useCurrentPartner();
 
-  const getBusinessTypeInfo = () => {
-    if (!partner?.business_type) return { icon: Package, label: 'Produtos' };
-    
-    switch (partner.business_type) {
-      case 'accommodation': 
-        return { icon: Calendar, label: 'Hospedagens' };
-      case 'tour': 
-        return { icon: Calendar, label: 'Passeios' };
-      case 'vehicle': 
-        return { icon: Truck, label: 'Veículos' };
-      case 'event': 
-        return { icon: CalendarDays, label: 'Eventos' };
-      case 'product': 
-        return { icon: Package, label: 'Produtos' };
-      case 'restaurant': 
-        return { icon: CreditCard, label: 'Reservas' };
-      case 'service': 
-        return { icon: Calendar, label: 'Serviços' };
-      default: 
-        return { icon: Package, label: 'Produtos' };
-    }
-  };
-
-  const businessTypeInfo = getBusinessTypeInfo();
+  const businessTypeInfo = partner?.business_type 
+    ? getPartnerBusinessTypeInfo(partner.business_type)
+    : { icon: Package, label: 'Produtos' };
 
   return (
     <PartnerLayout pageTitle="Dashboard">
@@ -91,29 +72,23 @@ const PartnerDashboard: React.FC = () => {
 
         <PartnerMetricsCards businessType={partner?.business_type} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Reservas Recentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PartnerBookingsChart businessType={partner?.business_type} />
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Clientes por Região</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center p-6">
-                  <BarChart2 className="h-12 w-12 mx-auto text-gray-400" />
-                  <p className="mt-2 text-muted-foreground">Dados insuficientes para exibir o gráfico</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold">Reservas Recentes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PartnerBookingsChart businessType={partner?.business_type} />
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="lg:col-span-1">
+            {partner?.business_type && (
+              <PartnerSpecificMetrics businessType={partner.business_type} />
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

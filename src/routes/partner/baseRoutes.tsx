@@ -10,9 +10,10 @@ import PartnerClients from "@/pages/partner/Clients";
 import PartnerReports from "@/pages/partner/Reports";
 import PartnerChat from "@/pages/partner/Chat";
 import PartnerCoupons from "@/pages/partner/Coupons";
+import PartnerFeedback from "@/pages/partner/Feedback"; 
 import { 
   LayoutDashboard, Calendar, User, Settings, 
-  Users, BarChart2, MessageSquare, Tag 
+  Users, BarChart2, MessageSquare, Tag, Star
 } from "lucide-react";
 
 export const baseRoutes = [
@@ -39,6 +40,12 @@ export const baseRoutes = [
     element: <PartnerClients />,
     label: "Clientes",
     icon: Users,
+  },
+  {
+    path: "/parceiro/feedback",
+    element: <PartnerFeedback />,
+    label: "Feedbacks",
+    icon: Star,
   },
   {
     path: "/parceiro/relatorios",

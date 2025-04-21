@@ -32,3 +32,57 @@ export interface DiscountCode {
   current_uses: number;
   description: string;
 }
+
+export interface PartnerDashboardData {
+  totalBookings: number;
+  totalRevenue: number;
+  pendingBookings: number;
+  totalCustomers: number;
+  recentBookings: any[];
+  customersByRegion: { region: string; count: number }[];
+  monthlySales: { month: string; value: number }[];
+}
+
+// Tipos específicos para cada categoria de parceiro
+export interface AccommodationPartnerData {
+  totalRooms: number;
+  occupancyRate: number;
+  averageStayDuration: number;
+  peakSeasonDates: { start: string; end: string }[];
+}
+
+export interface TourPartnerData {
+  totalTours: number;
+  totalParticipants: number;
+  mostPopularTour: string;
+  upcomingTours: number;
+}
+
+export interface EventPartnerData {
+  totalEvents: number;
+  totalAttendees: number;
+  upcomingEvents: number;
+  averageAttendance: number;
+}
+
+export interface VehiclePartnerData {
+  totalVehicles: number;
+  availableVehicles: number;
+  reservedVehicles: number;
+  mostRequestedVehicle: string;
+}
+
+export interface RestaurantPartnerData {
+  totalTables: number;
+  averageReservationTime: number;
+  peakHours: string[];
+  topSellingItems: string[];
+}
+
+export interface ProductPartnerData {
+  totalProducts: number;
+  topSellingProducts: string[];
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  totalOrders: number;
+}

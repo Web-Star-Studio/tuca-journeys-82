@@ -18,7 +18,7 @@ export const usePartnerDashboard = () => {
     queryFn: () => partnerId ? partnerDashboardService.getDashboardData(partnerId) : null,
     enabled: !!partnerId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (formerly cacheTime)
   });
 
   // Specific data query - only runs when partnerId and business_type are available
@@ -50,7 +50,7 @@ export const usePartnerDashboard = () => {
     },
     enabled: !!partnerId && !!partner?.business_type,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (formerly cacheTime)
   });
 
   // Memoized error state

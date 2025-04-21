@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import QuickAccessButtons from "./QuickAccessButtons";
 import { Loader2 } from "lucide-react";
+import { userService } from "@/services/user-service";
+import { partnerService } from "@/services/partner-service";
 
 interface LoginFormValues {
   email: string;
@@ -40,26 +41,43 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
     setIsSubmitting(true);
-    
+
     try {
       const result = await signIn(data.email, data.password);
-      
+
       if (result.error) {
         throw result.error;
       }
-      
-      // Check if it's an admin, partner or regular user login
-      const isAdmin = data.email === "admin@tucanoronha.com" || data.email === "felipe@webstar.studio";
-      const isPartner = data.email === "partner@demo.com";
-      
-      // Use the callback if provided, otherwise handle navigation directly
+
+      const supabaseUser = result.data?.user;
+      if (!supabaseUser) throw new Error("Usuário não encontrado no login.");
+
+      // Get user roles from Supabase
+      const roles = await userService.getUserRoles(supabaseUser.id);
+
+      const isAdmin = roles.includes("admin");
+      const isPartner = roles.includes("partner");
+
+      let hasPartnerProfile = false;
+
+      // Only check for partner profile if user has partner role
+      if (isPartner) {
+        const partner = await partnerService.getPartnerByUserId(supabaseUser.id);
+        hasPartnerProfile = !!partner;
+      }
+
       if (onSuccessfulLogin) {
+        // Let the custom callback decide, for backward compatibility
         onSuccessfulLogin(isAdmin, isPartner);
       } else {
         if (isAdmin) {
           navigate("/admin/dashboard");
         } else if (isPartner) {
-          navigate("/parceiro/dashboard");
+          if (hasPartnerProfile) {
+            navigate("/parceiro/dashboard");
+          } else {
+            navigate("/parceiro/cadastro");
+          }
         } else {
           navigate("/dashboard");
         }

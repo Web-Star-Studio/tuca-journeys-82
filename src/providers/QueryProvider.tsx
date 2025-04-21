@@ -15,12 +15,6 @@ export const queryClient = new QueryClient({
       retry: 1,
       staleTime: 1000 * 60 * 5, // 5 minutes
       gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
-      onError: (error: any) => {
-        // Global error handling for queries
-        const errorMessage = error?.message || 'An error occurred while fetching data';
-        console.error('Query error:', error);
-        toast.error(errorMessage);
-      }
     },
     mutations: {
       onError: (error: any) => {
@@ -30,12 +24,25 @@ export const queryClient = new QueryClient({
         toast.error(errorMessage);
       }
     }
-  },
+  }
 });
+
+// Global query error handler
+const globalQueryErrorHandler = (error: any) => {
+  // Global error handling for queries
+  const errorMessage = error?.message || 'An error occurred while fetching data';
+  console.error('Query error:', error);
+  toast.error(errorMessage);
+};
 
 export const QueryProvider = ({ children }: QueryProviderProps) => {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider 
+      client={queryClient} 
+      errorHandler={globalQueryErrorHandler}
+    >
+      {children}
+    </QueryClientProvider>
   );
 };
 

@@ -1,180 +1,250 @@
-import React, { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
-import { useAccommodations } from "@/hooks/accommodations";
-import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter } from "lucide-react";
-import { Accommodation } from "@/types/database";
-import { Input } from "@/components/ui/input";
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase-client';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
+import { Accommodation } from '@/types/database';
+import { Link } from 'react-router-dom';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import AccommodationFormDialog from "@/components/admin/accommodations/AccommodationFormDialog";
-import { useQueryClient } from "@tanstack/react-query";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast";
 
-const AdminAccommodations = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [showForm, setShowForm] = useState(false);
-  const [editAccommodationId, setEditAccommodationId] = useState<number | undefined>(undefined);
+const AccommodationsAdmin = () => {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { 
-    accommodations = [], 
-    isLoading, 
-    error 
-  } = useAccommodations();
+  const { data: accommodations, isLoading, error } = useQuery({
+    queryKey: ['admin-accommodations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('accommodations')
+        .select('*');
 
-  // Function to refetch accommodations
-  const refetchAccommodations = () => {
-    queryClient.invalidateQueries({ queryKey: ['accommodations'] });
+      if (error) throw error;
+      return data as Accommodation[];
+    },
+  });
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [accommodationToDelete, setAccommodationToDelete] = React.useState<number | null>(null);
+
+  const deleteAccommodationMutation = useMutation(
+    async (id: number) => {
+      const { error } = await supabase
+        .from('accommodations')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['admin-accommodations']);
+        toast({
+          title: "Hospedagem excluída",
+          description: "Hospedagem excluída com sucesso.",
+        })
+      },
+      onError: (error: any) => {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir",
+          description: error.message,
+        })
+      },
+    }
+  );
+
+  const handleDelete = (id: number) => {
+    setAccommodationToDelete(id);
+    setDeleteDialogOpen(true);
   };
 
-  // Filter accommodations based on search and type
-  const filteredAccommodations = accommodations
-    .filter((acc) =>
-      acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      acc.description.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter((acc) => typeFilter === "all" || acc.type === typeFilter);
-
-  const accommodationTypes = [
-    { value: "all", label: "Todos os tipos" },
-    { value: "hotel", label: "Hotel" },
-    { value: "pousada", label: "Pousada" },
-    { value: "resort", label: "Resort" },
-    { value: "apartamento", label: "Apartamento" },
-    { value: "casa", label: "Casa" },
-  ];
-
-  // Handle accommodation edit
-  const handleEditClick = (accommodation: Accommodation) => {
-    setEditAccommodationId(accommodation.id);
-    setShowForm(true);
+  const confirmDelete = () => {
+    if (accommodationToDelete !== null) {
+      deleteAccommodationMutation.mutate(accommodationToDelete);
+      setDeleteDialogOpen(false);
+      setAccommodationToDelete(null);
+    }
   };
+
+  const columns: ColumnDef<Accommodation>[] = [
+    {
+      accessorKey: "id",
+      header: "ID",
+    },
+    {
+      accessorKey: "title",
+      header: "Título",
+    },
+    {
+      accessorKey: "type",
+      header: "Tipo",
+    },
+    {
+      accessorKey: "price_per_night",
+      header: "Preço por noite",
+      cell: ({ row }) => {
+        const price = parseFloat(row.getValue("price_per_night"));
+        const formatted = new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(price);
+        return <div className="font-medium">{formatted}</div>
+      },
+    },
+    {
+      accessorKey: "bedrooms",
+      header: "Quartos",
+    },
+    {
+      accessorKey: "max_guests",
+      header: "Max. Hóspedes",
+    },
+    {
+      accessorKey: "rating",
+      header: "Avaliação",
+    },
+    {
+      accessorKey: "address", // Use address instead of location
+      header: "Localização",
+    },
+    {
+      id: "actions",
+      header: "Ações",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Link to={`/parceiro/hospedagens/${row.original.id}/disponibilidade`}>
+            <Button variant="ghost" size="icon">
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
+  const table = useReactTable({
+    data: accommodations || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (error) {
+    return <div>Erro ao carregar as hospedagens.</div>;
+  }
 
   return (
-    <AdminLayout pageTitle="Gerenciar Hospedagens">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar hospedagens..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Select
-            value={typeFilter}
-            onValueChange={setTypeFilter}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {accommodationTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <Card>
+      <CardHeader>
+        <CardTitle>Gerenciar Hospedagens</CardTitle>
+        <CardDescription>
+          Visualize, edite e exclua as hospedagens cadastradas.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableCaption>Lista de hospedagens cadastradas.</TableCaption>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="mt-4">
+          <Link to="/admin/nova-hospedagem">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Hospedagem
+            </Button>
+          </Link>
         </div>
-        <Button onClick={() => {
-          setEditAccommodationId(undefined);
-          setShowForm(true);
-        }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Hospedagem
-        </Button>
-      </div>
+      </CardContent>
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-60">
-              <p>Carregando hospedagens...</p>
-            </div>
-          ) : error ? (
-            <div className="flex justify-center items-center h-60">
-              <p className="text-red-500">Erro ao carregar hospedagens. Por favor, tente novamente.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Localização</TableHead>
-                    <TableHead className="text-right">Preço/Noite</TableHead>
-                    <TableHead className="text-right">Avaliação</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAccommodations.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        Nenhuma hospedagem encontrada
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredAccommodations.map((accommodation) => (
-                      <TableRow key={accommodation.id}>
-                        <TableCell className="font-medium">{accommodation.title}</TableCell>
-                        <TableCell className="capitalize">{accommodation.type}</TableCell>
-                        <TableCell>{accommodation.address || accommodation.location}</TableCell>
-                        <TableCell className="text-right">
-                          R$ {accommodation.price_per_night.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">{accommodation.rating}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditClick(accommodation)}
-                          >
-                            Editar
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <AccommodationFormDialog
-        open={showForm}
-        onOpenChange={setShowForm}
-        accommodationId={editAccommodationId}
-        onSuccess={() => {
-          setShowForm(false);
-          refetchAccommodations();
-        }}
-      />
-    </AdminLayout>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. Tem certeza que deseja excluir esta
+              hospedagem?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAccommodationToDelete(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleteAccommodationMutation.isLoading}>
+              {deleteAccommodationMutation.isLoading ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Card>
   );
 };
 
-export default AdminAccommodations;
+export default AccommodationsAdmin;

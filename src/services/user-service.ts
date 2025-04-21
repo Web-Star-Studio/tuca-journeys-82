@@ -1,79 +1,82 @@
-import { BaseApiService } from './base-api';
-import { supabase } from '@/lib/supabase';
+
+import { supabase } from '@/lib/supabase-client';
 import { UserProfile, UserPreferences } from '@/types/database';
-import { DemoService } from './demo-service';
 
-export class UserService extends BaseApiService {
-  /**
-   * Get user roles by user ID
-   */
-  async getUserRoles(userId: string): Promise<string[]> {
-    try {
-      // Handle demo users
-      if (DemoService.isDemoUser(userId)) {
-        const email = await this.getUserEmail(userId);
-        
-        if (email === "admin@tucanoronha.com" || email === "felipe@webstar.studio") {
-          return ["admin"];
-        }
-        
-        if (email === "partner@demo.com") {
-          return ["partner"];
-        }
-        
-        return ["customer"];
-      }
-      
-      // Handle regular users
-      const { data, error } = await this.supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error("Error fetching user roles:", error);
-        return [];
-      }
-
-      return data?.map(item => item.role) || [];
-    } catch (error) {
-      console.error("Error in getUserRoles:", error);
-      return [];
-    }
+export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
   }
+  
+  return data as UserProfile;
+};
 
-  /**
-   * Get user email by user ID
-   */
-  async getUserEmail(userId: string): Promise<string | null> {
-    try {
-      // Handle demo users
-      if (DemoService.isDemoUser(userId)) {
-        // Extract email from localStorage for demo users
-        const mockSession = localStorage.getItem("supabase-mock-session");
-        if (mockSession) {
-          const session = JSON.parse(mockSession);
-          return session.user?.email || null;
-        }
-        return null;
-      }
-      
-      // For real users
-      const { data, error } = await this.supabase
-        .from('user_profiles')
-        .select('email')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-      return data?.email || null;
-    } catch (error) {
-      console.error("Error getting user email:", error);
-      return null;
-    }
+export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating user profile:', error);
+    return null;
   }
+  
+  return data as UserProfile;
+};
 
-  // Add any other user-related methods as needed
-}
+export const getUserPreferences = async (userId: string): Promise<UserPreferences | null> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('preferences')
+    .eq('id', userId)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching user preferences:', error);
+    return null;
+  }
+  
+  return data?.preferences as UserPreferences || null;
+};
 
-export const userService = new UserService();
+export const updateUserPreferences = async (userId: string, preferences: Partial<UserPreferences>): Promise<boolean> => {
+  // First, fetch the current preferences
+  const { data: currentData, error: fetchError } = await supabase
+    .from('user_profiles')
+    .select('preferences')
+    .eq('id', userId)
+    .single();
+  
+  if (fetchError) {
+    console.error('Error fetching current preferences:', fetchError);
+    return false;
+  }
+  
+  // Merge the current preferences with the new ones
+  const mergedPreferences = {
+    ...(currentData?.preferences || {}),
+    ...preferences
+  };
+  
+  // Update with the merged preferences
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ preferences: mergedPreferences })
+    .eq('id', userId);
+  
+  if (error) {
+    console.error('Error updating user preferences:', error);
+    return false;
+  }
+  
+  return true;
+};

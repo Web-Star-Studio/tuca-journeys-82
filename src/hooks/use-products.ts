@@ -1,230 +1,83 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Product } from '@/types/database';
-import { supabase } from '@/lib/supabase';
-import { useCurrentPartner } from './use-partner';
-import { toast } from 'sonner';
 
-export const useProducts = (filters?: { search?: string; category?: string; status?: string }) => {
-  const { data: partner } = useCurrentPartner();
-  const partnerId = partner?.id;
-  
-  const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products', partnerId, filters],
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Product } from '@/types/database';
+import { supabase } from '@/lib/supabase-client';
+
+export const useProducts = (category?: string) => {
+  return useQuery({
+    queryKey: ['products', category],
     queryFn: async () => {
-      if (!partnerId) return [];
+      let query = supabase.from('products').select('*');
       
-      let query = supabase
-        .from('products')
-        .select('*')
-        .eq('partner_id', partnerId);
-        
-      // Apply filters
-      if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      if (category && category !== 'all') {
+        query = query.eq('category', category);
       }
       
-      if (filters?.category) {
-        query = query.eq('category', filters.category);
-      }
+      const { data, error } = await query.order('created_at', { ascending: false });
       
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      
-      const { data, error } = await query;
-        
       if (error) throw error;
       return data as Product[];
     },
-    enabled: !!partnerId,
   });
+};
 
-  // Get product categories for filtering
-  const useProductCategories = () => {
-    return useQuery({
-      queryKey: ['product-categories', partnerId],
-      queryFn: async () => {
-        if (!partnerId) return [];
-        
-        const { data, error } = await supabase
-          .from('products')
-          .select('category')
-          .eq('partner_id', partnerId)
-          .order('category');
-          
-        if (error) throw error;
-        
-        // Extract unique categories
-        const categories = [...new Set(data.map(item => item.category))];
-        return categories;
-      },
-      enabled: !!partnerId,
-    });
-  };
-  
-  // Delete product mutation
-  const deleteProduct = useMutation({
-    mutationFn: async (productId: number) => {
-      const { error } = await supabase
+export const useProduct = (id?: string | number) => {
+  return useQuery({
+    queryKey: ['product', id],
+    queryFn: async () => {
+      if (!id) throw new Error('Product ID is required');
+      
+      const { data, error } = await supabase
         .from('products')
-        .delete()
-        .eq('id', productId);
-        
+        .select('*')
+        .eq('id', typeof id === 'string' ? parseInt(id, 10) : id)
+        .single();
+      
       if (error) throw error;
-      return { success: true, id: productId };
+      return data as Product;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useCreateProduct = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('products')
+        .insert(product)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
-    onError: (error: any) => {
-      toast.error(`Error deleting product: ${error.message}`);
-    }
-  });
-  
-  const queryClient = useQueryClient();
-  
-  return { 
-    products, 
-    isLoading, 
-    error, 
-    deleteProduct,
-    useProductCategories
-  };
-};
-
-export const useProduct = (productId: number | string) => {
-  return useQuery({
-    queryKey: ['product', productId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', typeof productId === 'string' ? parseInt(productId, 10) : productId)
-        .single();
-        
-      if (error) throw error;
-      return data as Product;
-    },
-    enabled: !!productId,
   });
 };
 
-// Rest of the existing functions
-export const useCreateProduct = () => {
-  const queryClient = useQueryClient();
-  const { data: partner } = useCurrentPartner();
-  
-  return useMutation({
-    mutationFn: async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
-      if (!partner?.id) {
-        throw new Error('Partner ID is required');
-      }
-      
-      const { data, error } = await supabase
-        .from('products')
-        .insert({
-          ...productData,
-          partner_id: partner.id,
-        })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      return data as Product;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partner-products'] });
-      toast.success('Produto criado com sucesso!');
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao criar produto: ${error.message}`);
-    },
-  });
-};
-
-export const useUpdateProduct = (productId: number) => {
+export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (productData: Partial<Product>) => {
+    mutationFn: async ({ id, ...updates }: Partial<Product> & { id: number }) => {
       const { data, error } = await supabase
         .from('products')
-        .update({
-          ...productData,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', productId)
+        .update(updates)
+        .eq('id', id)
         .select()
         .single();
-        
+      
       if (error) throw error;
-      return data as Product;
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partner-products'] });
-      queryClient.invalidateQueries({ queryKey: ['product', productId] });
-      toast.success('Produto atualizado com sucesso!');
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao atualizar produto: ${error.message}`);
-    },
-  });
-};
-
-export const useUpdateProductStock = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ 
-      productId, 
-      stock, 
-      operation 
-    }: { 
-      productId: number; 
-      stock: number;
-      operation: 'set' | 'add' | 'subtract'
-    }) => {
-      // First, get the current stock
-      const { data: currentData, error: fetchError } = await supabase
-        .from('products')
-        .select('stock')
-        .eq('id', productId)
-        .single();
-        
-      if (fetchError) throw fetchError;
-      
-      let newStock = stock;
-      
-      // Calculate new stock based on operation
-      if (operation === 'add') {
-        newStock = (currentData.stock || 0) + stock;
-      } else if (operation === 'subtract') {
-        newStock = Math.max(0, (currentData.stock || 0) - stock);
-      }
-      
-      // Update the stock
-      const { data, error } = await supabase
-        .from('products')
-        .update({
-          stock: newStock,
-          updated_at: new Date().toISOString(),
-          // If stock is 0, update status to out_of_stock
-          status: newStock <= 0 ? 'out_of_stock' : 'active'
-        })
-        .eq('id', productId)
-        .select()
-        .single();
-        
-      if (error) throw error;
-      return data as Product;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['partner-products'] });
-      queryClient.invalidateQueries({ queryKey: ['product', data.id] });
-      toast.success('Estoque atualizado com sucesso!');
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao atualizar estoque: ${error.message}`);
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', variables.id] });
     },
   });
 };
@@ -233,21 +86,33 @@ export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (productId: number) => {
+    mutationFn: async (id: number) => {
       const { error } = await supabase
         .from('products')
         .delete()
-        .eq('id', productId);
-        
+        .eq('id', id);
+      
       if (error) throw error;
-      return { success: true };
+      return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partner-products'] });
-      toast.success('Produto excluído com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
-    onError: (error: any) => {
-      toast.error(`Erro ao excluir produto: ${error.message}`);
+  });
+};
+
+export const usePartnerProducts = (partnerId: string) => {
+  return useQuery({
+    queryKey: ['partner-products', partnerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('partner_id', partnerId);
+      
+      if (error) throw error;
+      return data as Product[];
     },
+    enabled: !!partnerId,
   });
 };

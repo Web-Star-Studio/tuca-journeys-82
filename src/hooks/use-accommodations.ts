@@ -27,7 +27,7 @@ export const useAccommodation = (id?: string | number) => {
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
-        .eq('id', id)
+        .eq('id', typeof id === 'string' ? parseInt(id, 10) : id)
         .maybeSingle();
       
       if (error) throw error;

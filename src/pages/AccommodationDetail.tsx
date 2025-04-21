@@ -8,8 +8,7 @@ import AccommodationDetailHeader from "@/components/accommodation/AccommodationD
 import AccommodationDetailGallery from "@/components/accommodation/AccommodationDetailGallery";
 import AccommodationDetailInfo from "@/components/accommodation/AccommodationDetailInfo";
 import AccommodationDetailSidebar from "@/components/accommodation/AccommodationDetailSidebar";
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { useAccommodation } from '@/hooks/use-accommodations';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -17,19 +16,7 @@ const AccommodationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const { data: accommodation, isLoading, error } = useQuery({
-    queryKey: ['accommodation', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accommodations')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: accommodation, isLoading, error } = useAccommodation(id);
 
   if (isLoading) {
     return (

@@ -41,6 +41,9 @@ const AccommodationItem = ({ accommodation }: AccommodationItemProps) => {
     }
   };
 
+  // Determine availability - using is_available if it exists, otherwise assume available
+  const isAvailable = accommodation.is_available !== undefined ? accommodation.is_available : true;
+
   return (
     <>
       <Card className="overflow-hidden">
@@ -93,8 +96,8 @@ const AccommodationItem = ({ accommodation }: AccommodationItemProps) => {
               </p>
               
               <div className="flex items-center gap-2 mt-2">
-                <Badge variant={accommodation.is_available ? "default" : "secondary"}>
-                  {accommodation.is_available ? "Disponível" : "Indisponível"}
+                <Badge variant={isAvailable ? "default" : "secondary"}>
+                  {isAvailable ? "Disponível" : "Indisponível"}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   R$ {accommodation.price_per_night.toLocaleString('pt-BR')} /noite

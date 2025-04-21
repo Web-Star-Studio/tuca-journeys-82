@@ -3,7 +3,7 @@ import { useSignIn } from "./use-sign-in";
 import { useSignUp, SignUpCredentials } from "./use-sign-up";
 import { useSignOut } from "./use-sign-out";
 import { useResetPassword } from "./use-reset-password";
-import { AuthService } from "@/services/auth-service";
+import { AuthService, UserRole } from "@/services/auth-service";
 import { User } from "@supabase/supabase-js";
 
 export const useAuthOperations = () => {
@@ -19,7 +19,7 @@ export const useAuthOperations = () => {
     email: string, 
     password: string, 
     name: string, 
-    role: 'customer' | 'partner' | 'admin' = 'customer'
+    role: UserRole = 'customer'
   ) => {
     const credentials: SignUpCredentials = {
       email,
@@ -41,7 +41,7 @@ export const useAuthOperations = () => {
    * Método para verificar role do usuário
    * Não causa dependência circular pois não é usado durante importação
    */
-  const checkUserRole = async (user: User | null, role: string): Promise<boolean> => {
+  const checkUserRole = async (user: User | null, role: UserRole): Promise<boolean> => {
     if (!user) return false;
     return AuthService.hasRole(user, role);
   };

@@ -35,18 +35,11 @@ export async function seedDatabase(): Promise<SeedResult> {
       }
     }
     
-    // Criar configurações iniciais do sistema
-    const { error: settingsError } = await supabase
-      .from('system_settings')
-      .upsert([
-        { key: 'site_name', value: 'Tuca Noronha' },
-        { key: 'contact_email', value: 'contato@tucanoronha.com' },
-        { key: 'setup_completed', value: 'true' }
-      ]);
-    
-    if (settingsError) throw settingsError;
-    
-    // Salvar flag de inicialização no localStorage (para desenvolvimento)
+    // Salvar as configurações iniciais como itens no LocalStorage
+    // em vez de tentar usar uma tabela inexistente
+    localStorage.setItem('site_name', 'Tuca Noronha');
+    localStorage.setItem('contact_email', 'contato@tucanoronha.com');
+    localStorage.setItem('setup_completed', 'true');
     localStorage.setItem('databaseSeeded', 'true');
     
     return {
@@ -67,14 +60,7 @@ export async function seedDatabase(): Promise<SeedResult> {
  */
 export async function markSetupAsComplete(): Promise<SeedResult> {
   try {
-    // Salvar no Supabase
-    const { error } = await supabase
-      .from('system_settings')
-      .upsert([{ key: 'setup_completed', value: 'true' }]);
-    
-    if (error) throw error;
-    
-    // Para demonstração, salvamos no localStorage também
+    // Salvar no localStorage em vez de uma tabela inexistente
     localStorage.setItem('setupCompleted', 'true');
     
     return {

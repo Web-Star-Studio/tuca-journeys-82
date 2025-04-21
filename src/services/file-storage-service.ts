@@ -2,109 +2,95 @@
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 
-type FileCategory = 'avatars' | 'tours' | 'accommodations' | 'events' | 'products' | 'vehicles' | 'partners';
+/**
+ * Interface para resultados de operações de arquivo
+ */
+interface FileResult {
+  url: string;
+  path: string;
+  size?: number;
+  contentType?: string;
+}
 
+/**
+ * Serviço para gerenciamento de arquivos no Storage
+ */
 export class FileStorageService {
   /**
-   * Upload file to Supabase storage
+   * Faz upload de um arquivo para o bucket especificado
    */
   static async uploadFile(
     file: File,
-    category: FileCategory,
-    userId?: string,
-    itemId?: string | number
-  ): Promise<{ path: string; url: string } | null> {
+    bucket: string,
+    userId?: string
+  ): Promise<FileResult | null> {
     try {
-      // Create file path with unique ID to prevent collisions
+      // Gerar nome de arquivo único
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
-      let filePath = '';
+      const filePath = userId 
+        ? `${userId}/${fileName}`
+        : fileName;
       
-      // Organize files by category and owner
-      if (userId) {
-        filePath = `${userId}/${fileName}`;
-      } else if (itemId) {
-        filePath = `${itemId}/${fileName}`;
-      } else {
-        filePath = fileName;
-      }
-
-      // Upload the file to the correct bucket
-      const { error: uploadError } = await supabase
-        .storage
-        .from(category) // Use the category as bucket name
+      // Fazer upload para o Supabase Storage
+      const { data, error } = await supabase.storage
+        .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-        return null;
-      }
-
-      // Get the public URL for the file
-      const { data } = supabase
-        .storage
-        .from(category) // Use the same bucket for consistency
-        .getPublicUrl(filePath);
-
-      return { 
-        path: filePath,
-        url: data.publicUrl
+      
+      if (error) throw error;
+      
+      // Gerar URL pública para o arquivo
+      const { data: publicUrl } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(data?.path || '');
+      
+      return {
+        url: publicUrl.publicUrl,
+        path: data?.path || '',
+        size: file.size,
+        contentType: file.type
       };
     } catch (error) {
-      console.error('File upload error:', error);
+      console.error('Erro ao fazer upload do arquivo:', error);
       return null;
     }
   }
-
+  
   /**
-   * Delete file from Supabase storage
+   * Remove um arquivo do Storage
    */
-  static async deleteFile(bucket: FileCategory, filePath: string): Promise<boolean> {
+  static async deleteFile(bucket: string, path: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .storage
+      const { error } = await supabase.storage
         .from(bucket)
-        .remove([filePath]);
-
-      if (error) {
-        console.error('Error deleting file:', error);
-        return false;
-      }
-
+        .remove([path]);
+      
+      if (error) throw error;
       return true;
     } catch (error) {
-      console.error('File deletion error:', error);
+      console.error('Erro ao excluir arquivo:', error);
       return false;
     }
   }
-
+  
   /**
-   * Update database record with file reference
+   * Lista arquivos em um diretório específico
    */
-  static async updateFileReference(
-    tableName: "tours" | "accommodations" | "events" | "vehicles" | "partners" | "products" | "user_profiles",
-    columnName: string,
-    recordId: string | number,
-    fileUrl: string
-  ): Promise<boolean> {
+  static async listFiles(bucket: string, prefix?: string): Promise<string[]> {
     try {
-      const { error } = await supabase
-        .from(tableName)
-        .update({ [columnName]: fileUrl })
-        .eq('id', recordId);
-
-      if (error) {
-        console.error('Error updating file reference:', error);
-        return false;
-      }
-
-      return true;
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .list(prefix || '');
+      
+      if (error) throw error;
+      
+      return data.map(item => item.name);
     } catch (error) {
-      console.error('File reference update error:', error);
-      return false;
+      console.error('Erro ao listar arquivos:', error);
+      return [];
     }
   }
 }

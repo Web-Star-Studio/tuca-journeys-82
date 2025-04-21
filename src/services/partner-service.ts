@@ -49,9 +49,29 @@ export class PartnerService extends BaseApiService {
    */
   async createPartner(partnerData: Partial<Partner>): Promise<Partner | null> {
     try {
+      // Ensure required fields are present
+      if (!partnerData.business_name || !partnerData.business_type) {
+        throw new Error("Business name and business type are required");
+      }
+      
+      const insertData = {
+        business_name: partnerData.business_name,
+        business_type: partnerData.business_type,
+        user_id: partnerData.user_id,
+        description: partnerData.description,
+        contact_email: partnerData.contact_email,
+        contact_phone: partnerData.contact_phone,
+        website: partnerData.website,
+        address: partnerData.address,
+        logo_url: partnerData.logo_url,
+        cover_image: partnerData.cover_image,
+        is_verified: partnerData.is_verified ?? false,
+        is_active: partnerData.is_active ?? true,
+      };
+      
       const { data, error } = await this.supabase
         .from('partners')
-        .insert(partnerData)
+        .insert(insertData)
         .select()
         .single();
 
@@ -68,12 +88,17 @@ export class PartnerService extends BaseApiService {
    */
   async updatePartner(partnerId: string, updates: Partial<Partner>): Promise<Partner | null> {
     try {
+      // Filter out any undefined values and add updated_at
+      const updateData = {
+        ...Object.fromEntries(
+          Object.entries(updates).filter(([_, value]) => value !== undefined)
+        ),
+        updated_at: new Date().toISOString()
+      };
+      
       const { data, error } = await this.supabase
         .from('partners')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', partnerId)
         .select()
         .single();

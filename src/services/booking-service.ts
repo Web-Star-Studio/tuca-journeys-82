@@ -51,13 +51,16 @@ export class BookingService extends BaseApiService {
    */
   async cancelBooking(bookingId: string): Promise<Booking | null> {
     try {
+      // Convert string ID to number for the database query
+      const id = typeof bookingId === 'string' ? parseInt(bookingId, 10) : bookingId;
+      
       const { data, error } = await this.supabase
         .from('bookings')
         .update({
           status: 'cancelled',
           updated_at: new Date().toISOString()
         })
-        .eq('id', bookingId)
+        .eq('id', id)
         .select('*')
         .single();
 

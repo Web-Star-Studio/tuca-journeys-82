@@ -12,17 +12,41 @@ interface SeedResult {
  */
 export async function seedDatabase(): Promise<SeedResult> {
   try {
-    // Simulamos um atraso para demonstração
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Configurar buckets de armazenamento
+    const bucketsToCreate = [
+      { id: 'avatars', public: true },
+      { id: 'tours', public: true },
+      { id: 'accommodations', public: true },
+      { id: 'events', public: true },
+      { id: 'products', public: true },
+      { id: 'vehicles', public: true },
+      { id: 'partners', public: true },
+      { id: 'public', public: true }
+    ];
     
-    // Em um ambiente real, inicializaríamos tabelas no Supabase
-    // Exemplo:
-    // await setupUsersTable();
-    // await setupProductsTable();
-    // await setupBookingsTable();
-    // await setupSettingsTable();
+    for (const bucket of bucketsToCreate) {
+      const { error } = await supabase.storage.createBucket(
+        bucket.id, 
+        { public: bucket.public }
+      );
+      
+      if (error && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
     
-    // Para demonstração, apenas salvamos um flag no localStorage
+    // Criar configurações iniciais do sistema
+    const { error: settingsError } = await supabase
+      .from('system_settings')
+      .upsert([
+        { key: 'site_name', value: 'Tuca Noronha' },
+        { key: 'contact_email', value: 'contato@tucanoronha.com' },
+        { key: 'setup_completed', value: 'true' }
+      ]);
+    
+    if (settingsError) throw settingsError;
+    
+    // Salvar flag de inicialização no localStorage (para desenvolvimento)
     localStorage.setItem('databaseSeeded', 'true');
     
     return {
@@ -43,14 +67,14 @@ export async function seedDatabase(): Promise<SeedResult> {
  */
 export async function markSetupAsComplete(): Promise<SeedResult> {
   try {
-    // Em um ambiente real, salvaríamos no Supabase
-    // const { error } = await supabase
-    //   .from('system_settings')
-    //   .upsert([{ key: 'setup_completed', value: 'true' }]);
-    //
-    // if (error) throw error;
+    // Salvar no Supabase
+    const { error } = await supabase
+      .from('system_settings')
+      .upsert([{ key: 'setup_completed', value: 'true' }]);
     
-    // Para demonstração, salvamos no localStorage
+    if (error) throw error;
+    
+    // Para demonstração, salvamos no localStorage também
     localStorage.setItem('setupCompleted', 'true');
     
     return {
@@ -64,31 +88,4 @@ export async function markSetupAsComplete(): Promise<SeedResult> {
       message: "Erro ao finalizar o setup",
     };
   }
-}
-
-/**
- * Exemplos de funções para configurar tabelas específicas (não utilizadas na demo)
- */
-async function setupUsersTable() {
-  // Verificar se a tabela existe e criar se necessário
-  // const { error } = await supabase.rpc('create_users_table_if_not_exists');
-  // if (error) throw error;
-}
-
-async function setupProductsTable() {
-  // Verificar se a tabela existe e criar se necessário
-  // const { error } = await supabase.rpc('create_products_table_if_not_exists');
-  // if (error) throw error;
-}
-
-async function setupBookingsTable() {
-  // Verificar se a tabela existe e criar se necessário
-  // const { error } = await supabase.rpc('create_bookings_table_if_not_exists');
-  // if (error) throw error;
-}
-
-async function setupSettingsTable() {
-  // Verificar se a tabela existe e criar se necessário
-  // const { error } = await supabase.rpc('create_settings_table_if_not_exists');
-  // if (error) throw error;
 }

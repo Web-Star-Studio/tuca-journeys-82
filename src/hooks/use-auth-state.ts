@@ -16,43 +16,18 @@ export const useAuthState = () => {
         console.log("Auth state changed:", event);
         
         setSession(currentSession);
-        setUser(currentSession?.user || null);
+        setUser(currentSession?.user ?? null);
         setLoading(false);
       }
     );
     
-    // Get the initial session
-    const initializeAuth = async () => {
-      setLoading(true);
-      
-      try {
-        // Get the current session from Supabase
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          throw error;
-        }
-        
-        if (data?.session) {
-          console.log("Found Supabase session, setting user state");
-          setSession(data.session);
-          setUser(data.session.user);
-        } else {
-          console.log("No valid session found");
-          setSession(null);
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        setSession(null);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-    initializeAuth();
-    
-    // Cleanup
     return () => {
       authListener?.subscription.unsubscribe();
     };

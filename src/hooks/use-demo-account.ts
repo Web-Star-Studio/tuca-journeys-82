@@ -1,3 +1,3 @@
 
-// Arquivo removido, pois não será mais permitido login ou manipulação de contas demo.
-// Retire qualquer importação deste hook nos componentes restantes.
+// Este arquivo foi removido em produção
+// Não devemos permitir login ou manipulação de contas demo em ambiente de produção

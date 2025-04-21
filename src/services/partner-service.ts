@@ -94,9 +94,25 @@ export class PartnerService extends BaseApiService {
         throw new Error('Business name and type are required');
       }
 
+      // Create a type-safe partner object with required fields
+      const safePartnerData = {
+        business_name: partnerData.business_name,
+        business_type: partnerData.business_type,
+        user_id: partnerData.user_id,
+        description: partnerData.description,
+        contact_email: partnerData.contact_email,
+        contact_phone: partnerData.contact_phone,
+        website: partnerData.website,
+        address: partnerData.address,
+        is_active: partnerData.is_active ?? true,
+        is_verified: partnerData.is_verified ?? false,
+        logo_url: partnerData.logo_url,
+        cover_image: partnerData.cover_image
+      };
+
       const { data, error } = await this.supabase
         .from('partners')
-        .insert(partnerData)
+        .insert(safePartnerData)
         .select()
         .single();
 

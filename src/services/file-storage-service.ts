@@ -1,4 +1,3 @@
-
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -19,7 +18,6 @@ export class FileStorageService {
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
       let filePath = '';
-      
       // Organize files by category and owner
       if (userId) {
         filePath = userId ? `${category}/${userId}/${fileName}` : `${category}/${fileName}`;
@@ -29,10 +27,10 @@ export class FileStorageService {
         filePath = `${category}/${fileName}`;
       }
 
-      // Upload the file
+      // Upload the file to the right bucket
       const { error: uploadError } = await supabase
         .storage
-        .from('public')
+        .from(category)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -46,7 +44,7 @@ export class FileStorageService {
       // Get the public URL for the file
       const { data } = supabase
         .storage
-        .from('public')
+        .from(category)
         .getPublicUrl(filePath);
 
       return { 

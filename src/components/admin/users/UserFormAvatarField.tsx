@@ -17,7 +17,15 @@ const UserFormAvatarField: React.FC<UserFormAvatarFieldProps> = ({ form, preview
       <FormItem>
         <FormLabel>URL do Avatar (opcional)</FormLabel>
         <FormControl>
-          <Input placeholder="URL do avatar" {...field} />
+          <Input
+            placeholder="URL do avatar"
+            {...field}
+            onBlur={(e) => setPreviewUrl(e.target.value)}
+            onChange={e => {
+              field.onChange(e);
+              setPreviewUrl(e.target.value);
+            }}
+          />
         </FormControl>
         <FormDescription>
           Deixe em branco para usar avatar padrão do sistema
@@ -38,5 +46,4 @@ const UserFormAvatarField: React.FC<UserFormAvatarFieldProps> = ({ form, preview
     )}
   />
 );
-
 export default UserFormAvatarField;

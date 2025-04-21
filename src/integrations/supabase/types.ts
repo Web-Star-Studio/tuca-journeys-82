@@ -179,6 +179,20 @@ export type Database = {
             referencedRelation: "tours"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_bookings_accommodation"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accommodations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_bookings_tour"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_messages: {

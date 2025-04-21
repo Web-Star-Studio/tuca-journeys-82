@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -64,9 +63,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
     paymentMethod: 'credit_card',
     termsAccepted: false,
   };
-  
+
   const form = useForm<BookingFormValues>({
-    defaultValues
+    defaultValues,
+    mode: "onBlur"
   });
   
   useEffect(() => {
@@ -172,7 +172,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
       });
       return;
     }
-    
+
+    // Validação adicional: nome e e-mail obrigatórios
+    if (!data.contactName.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, preencha seu nome.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!data.contactEmail.trim() || !data.contactEmail.includes("@")) {
+      toast({
+        title: "Email obrigatório",
+        description: "Por favor, informe um e-mail válido.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!startDate || !endDate) {
       toast({
         title: "Datas obrigatórias",
@@ -181,7 +198,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
       });
       return;
     }
-    
     if (!data.termsAccepted) {
       toast({
         title: "Termos e condições",
@@ -190,9 +206,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
       });
       return;
     }
-    
+    if (guests < minGuests || guests > maxGuests) {
+      toast({
+        title: "Número de hóspedes inválido",
+        description: `Você deve selecionar entre ${minGuests} e ${maxGuests} pessoas.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    
+
     try {
       // Create booking object based on item type
       const bookingData: any = {
@@ -268,7 +292,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     <div className="bg-white shadow-md rounded-lg p-6">
       <h2 className="text-xl font-semibold mb-4">Detalhes da reserva</h2>
       
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" noValidate>
         {/* Date selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -383,8 +407,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
             <Label htmlFor="contactName">Nome</Label>
             <Input 
               id="contactName" 
-              {...form.register("contactName", { required: true })} 
+              {...form.register("contactName", { required: "Nome é obrigatório" })} 
             />
+            {form.formState.errors.contactName && (
+              <p className="text-red-600 text-xs">{form.formState.errors.contactName.message}</p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -392,8 +419,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
             <Input 
               id="contactEmail" 
               type="email" 
-              {...form.register("contactEmail", { required: true })} 
+              {...form.register("contactEmail", { 
+                required: "Email é obrigatório", 
+                pattern: { value: /^[^@]+@[^@]+\.[^@]+$/, message: "Email inválido" }
+              })} 
             />
+            {form.formState.errors.contactEmail && (
+              <p className="text-red-600 text-xs">{form.formState.errors.contactEmail.message}</p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -518,7 +551,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <div className="flex items-center space-x-2">
           <Checkbox 
             id="termsAccepted" 
-            {...form.register("termsAccepted")} 
+            {...form.register("termsAccepted", { required: true })} 
           />
           <label
             htmlFor="termsAccepted"
@@ -527,6 +560,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
             Aceito os termos e condições
           </label>
         </div>
+        {form.formState.errors.termsAccepted && (
+          <p className="text-red-600 text-xs">Aceitar os termos é obrigatório.</p>
+        )}
         
         {/* Submit button */}
         <Button 
@@ -547,5 +583,4 @@ const BookingForm: React.FC<BookingFormProps> = ({
     </div>
   );
 };
-
 export default BookingForm;

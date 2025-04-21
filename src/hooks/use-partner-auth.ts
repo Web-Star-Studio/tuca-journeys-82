@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentPartner } from '@/hooks/use-partner';
@@ -13,38 +13,49 @@ export const usePartnerAuth = () => {
   const { data: partner, isLoading: isPartnerLoading } = useCurrentPartner();
 
   const isLoading = isAuthLoading || isRoleLoading || isPartnerLoading;
+  
+  // Informação memorizada sobre autenticação e perfil de parceiro
+  const authInfo = useMemo(() => {
+    return {
+      isAuthenticated: !!user,
+      isPartner,
+      partner,
+      isDemoPartner: user ? DemoService.isDemoUser(user.id) : false
+    };
+  }, [user, isPartner, partner]);
 
+  // Efeito para navegação conforme status de autenticação
   useEffect(() => {
-    if (!isLoading) {
+    if (isLoading) return;
+    
+    const currentPath = window.location.pathname;
+    const isOnPartnerRoutes = currentPath.startsWith('/parceiro');
+    
+    // Apenas redireciona se estiver em rotas de parceiro
+    if (isOnPartnerRoutes) {
       if (!user) {
-        navigate('/login?returnTo=/parceiro/dashboard');
+        navigate('/login?returnTo=/parceiro/dashboard', { replace: true });
         return;
       }
-
-      // Handle demo partner users differently
-      if (user.id && DemoService.isDemoUser(user.id)) {
-        if (!partner) {
-          // For demo users, don't redirect away from the registration page
-          if (window.location.pathname !== '/parceiro/cadastro') {
-            navigate('/parceiro/cadastro');
-          }
+      
+      // Tratamento especial para usuários demo
+      if (authInfo.isDemoPartner) {
+        if (!partner && currentPath !== '/parceiro/cadastro') {
+          navigate('/parceiro/cadastro', { replace: true });
         }
         return;
       }
-
-      // Regular partner authentication flow
+      
+      // Fluxo padrão para parceiros
       if (!isPartner || !partner) {
-        navigate('/parceiro/cadastro');
-        return;
+        navigate('/parceiro/cadastro', { replace: true });
       }
     }
-  }, [user, partner, isPartner, isLoading, navigate]);
+  }, [user, partner, isPartner, isLoading, navigate, authInfo.isDemoPartner]);
 
   return {
+    ...authInfo,
     isLoading,
-    isAuthenticated: !!user,
-    isPartner,
-    partner,
     user
   };
 };

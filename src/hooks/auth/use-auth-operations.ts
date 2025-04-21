@@ -3,6 +3,8 @@ import { useSignIn } from "./use-sign-in";
 import { useSignUp, SignUpCredentials } from "./use-sign-up";
 import { useSignOut } from "./use-sign-out";
 import { useResetPassword } from "./use-reset-password";
+import { AuthService } from "@/services/auth-service";
+import { User } from "@supabase/supabase-js";
 
 export const useAuthOperations = () => {
   const { signIn } = useSignIn();
@@ -10,8 +12,15 @@ export const useAuthOperations = () => {
   const { signOut } = useSignOut();
   const { resetPassword } = useResetPassword();
 
-  // Enhanced signUp that ensures roles are created
-  const enhancedSignUp = async (email: string, password: string, name: string, role: 'customer' | 'partner' | 'admin' = 'customer') => {
+  /**
+   * Método melhorado de cadastro que garante criação de roles
+   */
+  const enhancedSignUp = async (
+    email: string, 
+    password: string, 
+    name: string, 
+    role: 'customer' | 'partner' | 'admin' = 'customer'
+  ) => {
     const credentials: SignUpCredentials = {
       email,
       password,
@@ -19,7 +28,22 @@ export const useAuthOperations = () => {
       role
     };
     
-    return await signUp(credentials);
+    try {
+      const result = await signUp(credentials);
+      return result;
+    } catch (error) {
+      console.error("Erro no cadastro:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Método para verificar role do usuário
+   * Não causa dependência circular pois não é usado durante importação
+   */
+  const checkUserRole = async (user: User | null, role: string): Promise<boolean> => {
+    if (!user) return false;
+    return AuthService.hasRole(user, role);
   };
 
   return {
@@ -27,5 +51,6 @@ export const useAuthOperations = () => {
     signUp: enhancedSignUp,
     signOut,
     resetPassword,
+    checkUserRole
   };
 };

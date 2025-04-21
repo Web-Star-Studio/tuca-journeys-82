@@ -1,42 +1,49 @@
 
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserPreferences } from '@/types/database';
+import { toast } from 'sonner';
 
 export const useUserPreferences = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [isUpdating, setIsUpdating] = useState(false);
   
   const { data: preferences, isLoading, error } = useQuery({
     queryKey: ['user-preferences', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('preferences')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) throw error;
-      return data?.preferences as UserPreferences | null;
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('preferences')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        return data?.preferences as UserPreferences | null;
+      } catch (error: any) {
+        console.error('Erro ao carregar preferências:', error);
+        return null;
+      }
     },
     enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
   });
   
-  const updatePreferences = async (newPreferences: Partial<UserPreferences>) => {
-    if (!user?.id) return;
-    
-    setIsUpdating(true);
-    try {
-      // Convert preferences to a plain object for Supabase
-      const preferencesObj = { 
-        ...(preferences || {}), 
-        ...newPreferences 
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (newPreferences: Partial<UserPreferences>) => {
+      if (!user?.id) throw new Error('Usuário não autenticado');
+      
+      // Mesclar com preferências existentes
+      const updatedPreferences = {
+        ...(preferences || {}),
+        ...newPreferences
       };
+      
+      // Converter para objeto plano para o Supabase
+      const preferencesObj = JSON.parse(JSON.stringify(updatedPreferences));
       
       const { error } = await supabase
         .from('user_profiles')
@@ -45,20 +52,27 @@ export const useUserPreferences = () => {
       
       if (error) throw error;
       
-      queryClient.invalidateQueries({ queryKey: ['user-preferences', user.id] });
-      return true;
-    } catch (err) {
-      console.error('Error updating preferences:', err);
-      return false;
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+      return updatedPreferences;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['user-preferences', user?.id], data);
+      queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
+      toast.success('Preferências atualizadas com sucesso');
+    },
+    onError: (error: any) => {
+      console.error('Erro ao atualizar preferências:', error);
+      toast.error(`Erro ao salvar preferências: ${error.message || 'Erro desconhecido'}`);
+    },
+  });
   
   return {
     preferences,
-    isLoading: isLoading || isUpdating,
+    isLoading,
     error,
-    updatePreferences,
+    updatePreferences: updatePreferencesMutation.mutate,
+    isUpdating: updatePreferencesMutation.isPending,
   };
 };
+
+// Exportar alias para compatibilidade com código existente
+export const useTravelerPreferences = useUserPreferences;

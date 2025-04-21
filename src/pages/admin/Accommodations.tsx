@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 const AccommodationsAdmin = () => {
   const { toast } = useToast();
@@ -164,84 +165,93 @@ const AccommodationsAdmin = () => {
   });
 
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+      <AdminLayout pageTitle="Gerenciar Hospedagens">
+        <div>Carregando...</div>
+      </AdminLayout>
+    );
   }
 
   if (error) {
-    return <div>Erro ao carregar as hospedagens.</div>;
+    return (
+      <AdminLayout pageTitle="Gerenciar Hospedagens">
+        <div>Erro ao carregar as hospedagens.</div>
+      </AdminLayout>
+    );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gerenciar Hospedagens</CardTitle>
-        <CardDescription>
-          Visualize, edite e exclua as hospedagens cadastradas.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableCaption>Lista de hospedagens cadastradas.</TableCaption>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="mt-4">
-          <Link to="/admin/nova-hospedagem">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Hospedagem
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação é irreversível. Tem certeza que deseja excluir esta
-              hospedagem?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setAccommodationToDelete(null)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleteAccommodationMutation.isPending}>
-              {deleteAccommodationMutation.isPending ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Card>
+    <AdminLayout pageTitle="Gerenciar Hospedagens">
+      <Card>
+        <CardHeader>
+          <CardTitle>Gerenciar Hospedagens</CardTitle>
+          <CardDescription>
+            Visualize, edite e exclua as hospedagens cadastradas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableCaption>Lista de hospedagens cadastradas.</TableCaption>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </TableHead>
+                    )
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="mt-4">
+            <Link to="/admin/nova-hospedagem">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Hospedagem
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação é irreversível. Tem certeza que deseja excluir esta
+                hospedagem?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setAccommodationToDelete(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} disabled={deleteAccommodationMutation.isPending}>
+                {deleteAccommodationMutation.isPending ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Card>
+    </AdminLayout>
   );
 };
 

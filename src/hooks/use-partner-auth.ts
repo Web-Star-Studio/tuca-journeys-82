@@ -3,15 +3,19 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentPartner } from '@/hooks/use-partner';
+import { useAuthorization } from '@/hooks/use-authorization';
 import { DemoService } from '@/services/demo-service';
 
 export const usePartnerAuth = () => {
   const navigate = useNavigate();
   const { user, isLoading: isAuthLoading } = useAuth();
+  const { isPartner, isLoading: isRoleLoading } = useAuthorization();
   const { data: partner, isLoading: isPartnerLoading } = useCurrentPartner();
 
+  const isLoading = isAuthLoading || isRoleLoading || isPartnerLoading;
+
   useEffect(() => {
-    if (!isAuthLoading && !isPartnerLoading) {
+    if (!isLoading) {
       if (!user) {
         navigate('/login?returnTo=/parceiro/dashboard');
         return;
@@ -29,17 +33,17 @@ export const usePartnerAuth = () => {
       }
 
       // Regular partner authentication flow
-      if (!partner) {
+      if (!isPartner || !partner) {
         navigate('/parceiro/cadastro');
         return;
       }
     }
-  }, [user, partner, isAuthLoading, isPartnerLoading, navigate]);
+  }, [user, partner, isPartner, isLoading, navigate]);
 
   return {
-    isLoading: isAuthLoading || isPartnerLoading,
+    isLoading,
     isAuthenticated: !!user,
-    isPartner: !!partner,
+    isPartner,
     partner,
     user
   };

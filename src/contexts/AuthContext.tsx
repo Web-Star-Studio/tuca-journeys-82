@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
-import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
+import { AuthService } from "@/services/auth-service";
 
 interface AuthContextType {
   user: User | null;
@@ -36,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
 
-  // Check if user has admin role - memoized to prevent unnecessary rechecks
+  // Check if user has admin role - using the centralized AuthService
   const checkAdminStatus = async (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
@@ -44,20 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     try {
-      // First check admin status from user metadata or email
-      const adminFromMetadata = 
-        currentUser.user_metadata?.role === 'admin' ||
-        currentUser.app_metadata?.role === 'admin';
-        
-      const adminFromEmail = isAdminEmail(currentUser.email);
-      
-      // If not admin by metadata or email, check in database
-      let isDbAdmin = false;
-      if (!adminFromMetadata && !adminFromEmail) {
-        isDbAdmin = await isUserAdmin(currentUser.id);
-      }
-      
-      setIsAdmin(adminFromMetadata || adminFromEmail || isDbAdmin);
+      const isUserAdmin = await AuthService.isAdmin(currentUser);
+      setIsAdmin(isUserAdmin);
     } catch (error) {
       console.error("Error checking admin status:", error);
       setIsAdmin(false);

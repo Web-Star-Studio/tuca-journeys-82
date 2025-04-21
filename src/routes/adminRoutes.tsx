@@ -14,6 +14,7 @@ import { ProductForm } from '@/components/admin/products/ProductForm';
 import AdminSettings from '@/pages/admin/Settings';
 import { InitialSetup } from '@/components/setup/InitialSetup';
 import SystemHealth from '@/pages/admin/SystemHealth';
+import AdminGuard from '@/components/auth/AdminGuard';
 
 // Import reports from the correct locations
 import RevenueReport from '@/components/admin/reports/RevenueReport';
@@ -27,29 +28,29 @@ export const adminRoutes = (
   <>
     <Route path="/setup" element={<InitialSetup />} />
     <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-    <Route path="/admin/tours" element={<AdminTours />} />
-    <Route path="/admin/tours/new" element={<TourForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/tours/:id" element={<TourForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/accommodations" element={<AdminAccommodations />} />
-    <Route path="/admin/accommodations/new" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/accommodations/:id" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/packages" element={<AdminPackages />} />
-    <Route path="/admin/packages/new" element={<PackageForm packageId={null} onCancel={() => {}} onSuccess={() => {}} />} />
-    <Route path="/admin/packages/:id" element={<PackageForm packageId={0} onCancel={() => {}} onSuccess={() => {}} />} />
-    <Route path="/admin/bookings" element={<AdminBookings />} />
-    <Route path="/admin/users" element={<AdminUsers />} />
-    <Route path="/admin/products" element={<AdminProducts />} />
-    <Route path="/admin/products/new" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/products/:id" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/settings" element={<AdminSettings />} />
-    <Route path="/admin/system-health" element={<SystemHealth />} />
+    <Route path="/admin/dashboard" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+    <Route path="/admin/tours" element={<AdminGuard><AdminTours /></AdminGuard>} />
+    <Route path="/admin/tours/new" element={<AdminGuard><TourForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/tours/:id" element={<AdminGuard><TourForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/accommodations" element={<AdminGuard><AdminAccommodations /></AdminGuard>} />
+    <Route path="/admin/accommodations/new" element={<AdminGuard><AccommodationForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/accommodations/:id" element={<AdminGuard><AccommodationForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/packages" element={<AdminGuard><AdminPackages /></AdminGuard>} />
+    <Route path="/admin/packages/new" element={<AdminGuard><PackageForm packageId={null} onCancel={() => {}} onSuccess={() => {}} /></AdminGuard>} />
+    <Route path="/admin/packages/:id" element={<AdminGuard><PackageForm packageId={0} onCancel={() => {}} onSuccess={() => {}} /></AdminGuard>} />
+    <Route path="/admin/bookings" element={<AdminGuard><AdminBookings /></AdminGuard>} />
+    <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
+    <Route path="/admin/products" element={<AdminGuard><AdminProducts /></AdminGuard>} />
+    <Route path="/admin/products/new" element={<AdminGuard><ProductForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/products/:id" element={<AdminGuard><ProductForm onSuccess={() => {}} onCancel={() => {}} /></AdminGuard>} />
+    <Route path="/admin/settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
+    <Route path="/admin/system-health" element={<AdminGuard><SystemHealth /></AdminGuard>} />
     
     {/* Reports */}
-    <Route path="/admin/reports/revenue" element={<RevenueReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/bookings" element={<BookingsReportContainer dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/packages" element={<PackagesReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/accommodations" element={<AccommodationsReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/users" element={<UsersReport dateRange={{from: undefined, to: undefined}} />} />
+    <Route path="/admin/reports/revenue" element={<AdminGuard><RevenueReport dateRange={{from: undefined, to: undefined}} /></AdminGuard>} />
+    <Route path="/admin/reports/bookings" element={<AdminGuard><BookingsReportContainer dateRange={{from: undefined, to: undefined}} /></AdminGuard>} />
+    <Route path="/admin/reports/packages" element={<AdminGuard><PackagesReport dateRange={{from: undefined, to: undefined}} /></AdminGuard>} />
+    <Route path="/admin/reports/accommodations" element={<AdminGuard><AccommodationsReport dateRange={{from: undefined, to: undefined}} /></AdminGuard>} />
+    <Route path="/admin/reports/users" element={<AdminGuard><UsersReport dateRange={{from: undefined, to: undefined}} /></AdminGuard>} />
   </>
 );

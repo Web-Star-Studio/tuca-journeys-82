@@ -1,8 +1,9 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from "lucide-react";
+import { useAuthorization } from '@/hooks/use-authorization';
 
 interface AdminGuardProps {
   children: React.ReactNode;
@@ -13,12 +14,11 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
   children, 
   fallbackUrl = "/login"
 }) => {
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user } = useAuth();
+  const { isAdmin, isLoading } = useAuthorization();
 
-  // Memoize the navigation target to prevent unnecessary recalculations
-  const redirectPath = useMemo(() => {
-    return `${fallbackUrl}?returnTo=/admin/dashboard`;
-  }, [fallbackUrl]);
+  // Memoize the navigation target
+  const redirectPath = `${fallbackUrl}?returnTo=/admin/dashboard`;
   
   // Loading state
   if (isLoading) {

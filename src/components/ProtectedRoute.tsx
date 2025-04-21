@@ -2,17 +2,23 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthorization } from '@/hooks/use-authorization';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  partnerOnly?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  adminOnly = false 
+  adminOnly = false,
+  partnerOnly = false
 }) => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { isAdmin, isPartner, isLoading: roleLoading } = useAuthorization();
+  
+  const isLoading = authLoading || roleLoading;
 
   if (isLoading) {
     return (
@@ -27,6 +33,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (adminOnly && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (partnerOnly && !isPartner) {
     return <Navigate to="/dashboard" replace />;
   }
 

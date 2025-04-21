@@ -3,7 +3,8 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Users, Calendar, ShoppingCart, Image, Package, 
-  Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight 
+  Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
     { title: "Usuários", icon: Users, path: "/admin/users", dividerAfter: true },
     { title: "Mídia", icon: Image, path: "/admin/media" },
     { title: "Relatórios", icon: BarChart2, path: "/admin/reports" },
+    { title: "Status do Sistema", icon: Activity, path: "/admin/system-health" },
     { title: "Configurações", icon: Settings, path: "/admin/settings" },
   ];
 

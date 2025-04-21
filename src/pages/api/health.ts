@@ -4,7 +4,7 @@ import { verifySupabaseIntegration } from '@/utils/supabase-health';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
-// This component will replace the NextJS API route
+// This component will display system health data
 const HealthCheck: React.FC = () => {
   const [healthData, setHealthData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

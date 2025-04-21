@@ -13,6 +13,7 @@ import AdminProducts from '@/pages/admin/Products';
 import { ProductForm } from '@/components/admin/products/ProductForm';
 import AdminSettings from '@/pages/admin/Settings';
 import { InitialSetup } from '@/components/setup/InitialSetup';
+import SystemHealth from '@/pages/admin/SystemHealth';
 
 // Import reports from the correct locations
 import RevenueReport from '@/components/admin/reports/RevenueReport';
@@ -42,6 +43,7 @@ export const adminRoutes = (
     <Route path="/admin/products/new" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
     <Route path="/admin/products/:id" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
     <Route path="/admin/settings" element={<AdminSettings />} />
+    <Route path="/admin/system-health" element={<SystemHealth />} />
     
     {/* Reports */}
     <Route path="/admin/reports/revenue" element={<RevenueReport dateRange={{from: undefined, to: undefined}} />} />

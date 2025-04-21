@@ -13,8 +13,8 @@ export interface Partner {
   address?: string;
   is_verified: boolean;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   // Additional properties used in components
   name?: string; // For backward compatibility
   category?: string; // For backward compatibility

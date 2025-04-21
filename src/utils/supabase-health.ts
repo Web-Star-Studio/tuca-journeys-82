@@ -61,10 +61,21 @@ export const verifySupabaseIntegration = async () => {
   }
   
   // Test access to critical tables
+  // Using a type-safe approach with explicit table names from the database schema
   try {
-    const tables = ['user_profiles', 'user_roles', 'tours', 'accommodations', 'bookings'];
-    for (const table of tables) {
-      const { error } = await supabase.from(table).select('count(*)', { count: 'exact', head: true });
+    const criticalTables = [
+      'user_profiles', 
+      'user_roles', 
+      'tours', 
+      'accommodations', 
+      'bookings'
+    ] as const;
+    
+    for (const table of criticalTables) {
+      const { error } = await supabase
+        .from(table)
+        .select('count(*)', { count: 'exact', head: true });
+        
       results.tables[table] = !error;
     }
   } catch (error) {

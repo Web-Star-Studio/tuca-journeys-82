@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partnerService } from '@/services';
 import { Partner } from '@/types/partner';
@@ -20,7 +21,7 @@ export const usePartner = (id?: string) => {
  */
 export const useCurrentPartner = () => {
   const { user } = useAuth();
-  // Não há mais DemoService: use apenas consulta real partnerService.getPartnerByUserId
+  
   return useQuery({
     queryKey: ['currentPartner', user?.id],
     queryFn: () => user?.id ? partnerService.getPartnerByUserId(user.id) : null,

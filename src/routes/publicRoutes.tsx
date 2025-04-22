@@ -19,6 +19,7 @@ import Loja from '@/pages/Loja';
 import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
 import AccommodationDetail from '@/pages/AccommodationDetail';
+import Reservar from '@/pages/Reservar';
 
 export const publicRoutes = (
   <>
@@ -27,6 +28,7 @@ export const publicRoutes = (
     <Route path="/cadastro" element={<Register />} />
     <Route path="/esqueci-senha" element={<ResetPassword />} />
     <Route path="/redefinir-senha" element={<ResetPassword />} />
+    <Route path="/reservar" element={<Reservar />} />
     
     {/* Portuguese Routes */}
     <Route path="/passeios" element={<Tours />} />

@@ -1,11 +1,11 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, Map, X } from "lucide-react";
+import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, Map, X, CalendarCheck } from "lucide-react";
 import AuthButtons from "../user-menu/AuthButtons";
 import { useAuth } from "@/contexts/AuthContext";
 import { SheetClose } from "../ui/sheet";
+import { toast } from "sonner";
 
 interface NavigationMenuProps {
   onClose: () => void;
@@ -14,6 +14,13 @@ interface NavigationMenuProps {
 const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
   const location = useLocation();
   const { user } = useAuth();
+
+  const handleReservarClick = () => {
+    onClose();
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer uma reserva");
+    }
+  };
   
   const navigationItems = [
     { path: "/", label: "Home", icon: Home },
@@ -75,10 +82,11 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
       
       <div className="mt-auto border-t pt-6 px-4 mb-4">
         <Link
-          to="/reservar"
+          to={user ? "/reservar" : "/login?returnTo=/reservar"}
           className="w-full flex items-center justify-center px-4 py-3 bg-tuca-ocean-blue text-white rounded-lg hover:bg-tuca-deep-blue transition-colors"
-          onClick={onClose}
+          onClick={handleReservarClick}
         >
+          <CalendarCheck className="h-5 w-5 mr-2" />
           Reservar
         </Link>
         

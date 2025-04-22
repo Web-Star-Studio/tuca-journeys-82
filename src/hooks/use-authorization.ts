@@ -27,10 +27,12 @@ export const useAuthorization = () => {
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutos de cache para reduzir consultas
     retry: 2,
-    onError: (error: any) => {
-      // Esse toast só aparece se houver um erro real, não se o usuário estiver deslogado
-      if (user) {
-        toast.error(error.message || "Erro ao verificar permissões");
+    meta: {
+      onError: (error: any) => {
+        // Esse toast só aparece se houver um erro real, não se o usuário estiver deslogado
+        if (user) {
+          toast.error(error.message || "Erro ao verificar permissões");
+        }
       }
     }
   });

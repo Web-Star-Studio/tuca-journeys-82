@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Upload, ImagePlus, Link } from "lucide-react";   // Changed FileUpload to Upload
-import { FileStorageService } from "@/services/file-storage-service";
+import { Upload, ImagePlus, Link } from "lucide-react";
+import { FileStorageService, FileUploadOptions } from "@/services/file-storage-service";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserFormAvatarFieldProps {
@@ -50,8 +50,9 @@ const UserFormAvatarField: React.FC<UserFormAvatarFieldProps> = ({
 
     try {
       setIsUploading(true);
-      // Fazer upload usando FileStorageService
-      const result = await FileStorageService.uploadFile(file, 'avatars', userId);
+      // Fazer upload usando FileStorageService com opções corretamente tipadas
+      const uploadOptions: FileUploadOptions = { userId };
+      const result = await FileStorageService.uploadFile(file, 'avatars', uploadOptions);
       
       if (result) {
         // Atualizar campo de formulário e preview

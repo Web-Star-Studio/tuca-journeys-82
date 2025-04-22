@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { Route, Navigate } from 'react-router-dom';
 import AdminGuard from '@/components/auth/AdminGuard';
@@ -17,8 +16,10 @@ const AdminUsers = lazy(() => import('@/pages/admin/Users'));
 const AdminProducts = lazy(() => import('@/pages/admin/Products'));
 const ProductForm = lazy(() => import('@/components/admin/products/ProductForm').then(module => ({ default: module.ProductForm })));
 const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
-const InitialSetup = lazy(() => import('@/components/setup/InitialSetup'));
 const SystemHealth = lazy(() => import('@/pages/admin/SystemHealth'));
+
+// Convert InitialSetup to lazy loaded component properly
+// Removed the direct import of InitialSetup, will use the route from setupRoute.tsx instead
 
 // Reports components
 const RevenueReport = lazy(() => import('@/components/admin/reports/RevenueReport'));
@@ -30,14 +31,7 @@ const BookingsReportContainer = lazy(() => import('@/components/admin/reports/bo
 
 export const adminRoutes = (
   <>
-    <Route 
-      path="/setup" 
-      element={
-        <React.Suspense fallback={<LoadingPage />}>
-          <InitialSetup />
-        </React.Suspense>
-      } 
-    />
+    {/* Removed the duplicate /setup route since it's already defined in setupRoute.tsx */}
     <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
     <Route 
       path="/admin/dashboard" 

@@ -5,7 +5,7 @@ import { DatabaseSeedStep } from "./steps/DatabaseSeedStep";
 import { AdminCreationStep } from "./steps/AdminCreationStep";
 import { SetupCompletion } from "./steps/SetupCompletion";
 
-export const InitialSetup = () => {
+const InitialSetup = () => {
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -68,3 +68,5 @@ export const InitialSetup = () => {
     </div>
   );
 };
+
+export default InitialSetup;

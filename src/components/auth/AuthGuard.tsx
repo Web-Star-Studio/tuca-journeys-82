@@ -27,8 +27,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 
   if (!user) {
     // Save the current path for redirection after login
-    const currentPath = location.pathname;
-    return <Navigate to={`${redirectUrl}?returnTo=${currentPath}`} replace />;
+    const currentPath = location.pathname + location.search;
+    return <Navigate to={`${redirectUrl}?returnTo=${encodeURIComponent(currentPath)}`} replace />;
   }
 
   return <>{children}</>;

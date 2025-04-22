@@ -1,6 +1,6 @@
 
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,15 +12,7 @@ interface ProfileLayoutProps {
 
 const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
   
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/login");
-    }
-  }, [user, isLoading, navigate]);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -30,7 +22,7 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
   }
 
   if (!user) {
-    return null; // Will redirect due to the useEffect
+    return <Navigate to="/login?returnTo=/profile" replace />;
   }
 
   return (

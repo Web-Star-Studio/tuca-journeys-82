@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginForm from "@/components/login/LoginForm";
@@ -10,19 +9,31 @@ const Login = () => {
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
   const handleSuccessfulLogin = (redirectToAdmin: boolean, isPartner: boolean = false) => {
-    // Check role-based redirections
+    // Check role-based redirections first
     if (isPartner) {
       navigate("/parceiro/dashboard");
-    } else if (redirectToAdmin) {
+      return;
+    } 
+    
+    if (redirectToAdmin) {
       navigate("/admin/dashboard");
-    } else {
-      // For normal users, respect the returnTo parameter unless it's for partner routes
-      if (returnTo.includes('/parceiro/')) {
-        navigate("/dashboard");
-      } else {
-        navigate(returnTo);
-      }
+      return;
     }
+    
+    // For normal users, respect the returnTo parameter 
+    // unless it's for exclusive role-based routes
+    if (returnTo.startsWith('/parceiro/') && !isPartner) {
+      navigate("/dashboard");
+      return;
+    }
+    
+    if (returnTo.startsWith('/admin/') && !redirectToAdmin) {
+      navigate("/dashboard");
+      return;
+    }
+    
+    // Otherwise go to return path
+    navigate(returnTo);
   };
   
   return (

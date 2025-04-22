@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from "lucide-react";
 import { useAuthorization } from '@/hooks/use-authorization';
@@ -16,9 +16,10 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
 }) => {
   const { user } = useAuth();
   const { isAdmin, isLoading } = useAuthorization();
+  const location = useLocation();
 
-  // Memoize the navigation target
-  const redirectPath = `${fallbackUrl}?returnTo=/admin/dashboard`;
+  // Memoize the navigation target with current path
+  const redirectPath = `${fallbackUrl}?returnTo=${encodeURIComponent(location.pathname)}`;
   
   // Loading state
   if (isLoading) {

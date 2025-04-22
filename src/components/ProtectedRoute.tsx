@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthorization } from '@/hooks/use-authorization';
 import { Loader2 } from "lucide-react";
@@ -18,6 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, isLoading: authLoading } = useAuth();
   const { isAdmin, isPartner, isLoading: roleLoading } = useAuthorization();
+  const location = useLocation();
   
   const isLoading = authLoading || roleLoading;
 
@@ -31,8 +32,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!user) {
-    // Preservamos a URL atual para redirecionamento após login
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(window.location.pathname)}`} replace />;
+    // Preservar a URL atual para redirecionamento após login
+    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   if (adminOnly && !isAdmin) {

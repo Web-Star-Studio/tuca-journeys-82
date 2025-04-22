@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { InitialSetup } from "@/components/setup/InitialSetup";
+import InitialSetup from "@/components/setup/InitialSetup";
 import { useSetupInitialized } from "@/hooks/use-setup-initialized";
 import { Loader2 } from "lucide-react";
 

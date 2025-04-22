@@ -22,6 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   
   const isLoading = authLoading || roleLoading;
 
+  // Mostrar indicador de carregamento
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -31,19 +32,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // Redirecionar para o login se não autenticado
   if (!user) {
     // Preservar a URL atual para redirecionamento após login
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
+    const currentPath = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?returnTo=${currentPath}`} replace />;
   }
 
+  // Verificar restrições de papel
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace state={{ 
+      errorMessage: "Acesso restrito. Você precisa ser administrador para acessar esta página."
+    }} />;
   }
 
   if (partnerOnly && !isPartner) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace state={{ 
+      errorMessage: "Acesso restrito. Você precisa ser parceiro para acessar esta página."
+    }} />;
   }
 
+  // Se tudo estiver ok, renderizar o conteúdo protegido
   return <>{children}</>;
 };
 

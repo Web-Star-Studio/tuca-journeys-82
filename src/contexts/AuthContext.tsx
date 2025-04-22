@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
 import { AuthService } from "@/services/auth-service";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
@@ -39,15 +41,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAdminStatus = async (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
-      return;
+      return false;
     }
     
     try {
       const isUserAdmin = await AuthService.isAdmin(currentUser);
       setIsAdmin(isUserAdmin);
+      return isUserAdmin;
     } catch (error) {
       console.error("Error checking admin status:", error);
       setIsAdmin(false);
+      return false;
     }
   };
 
@@ -57,6 +61,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     const initAuth = async () => {
       try {
+        // Set up the auth state change listener FIRST
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+          if (!mounted) return;
+          
+          console.log("Auth state changed:", event);
+          
+          if (event === "SIGNED_OUT") {
+            localStorage.removeItem("supabase-mock-session");
+            setSession(null);
+            setUser(null);
+            setIsAdmin(false);
+          } else if (currentSession) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            
+            // Use setTimeout to avoid potential deadlocks
+            setTimeout(() => {
+              if (mounted) {
+                checkAdminStatus(currentSession.user);
+              }
+            }, 0);
+          }
+        });
+        
         // First check for mock session to avoid unnecessary API calls
         const mockSessionStr = localStorage.getItem("supabase-mock-session");
         if (mockSessionStr && mounted) {
@@ -104,32 +132,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // No valid session
             setSession(null);
             setUser(null);
+            setIsAdmin(false);
           }
           setIsLoading(false);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error initializing auth:", error);
         if (mounted) {
+          toast.error(`Erro de autenticação: ${error.message || 'Falha ao inicializar autenticação'}`);
           setIsLoading(false);
         }
       }
     };
-
-    // Set up the auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event);
-      
-      if (event === "SIGNED_OUT" && mounted) {
-        localStorage.removeItem("supabase-mock-session");
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-      } else if (currentSession && mounted) {
-        setSession(currentSession);
-        setUser(currentSession.user);
-        await checkAdminStatus(currentSession.user);
-      }
-    });
     
     // Initialize auth state
     initAuth();
@@ -137,7 +151,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Cleanup function to prevent state updates after unmount
     return () => {
       mounted = false;
-      authListener.subscription.unsubscribe();
     };
   }, []);
 
@@ -154,6 +167,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await checkAdminStatus(result.data.user);
         }
         return result;
+      } catch (error: any) {
+        toast.error(`Falha no login: ${error.message || 'Erro desconhecido'}`);
+        throw error;
       } finally {
         setIsLoading(false);
       }
@@ -163,7 +179,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       try {
         const result = await authSignUp(email, password, name);
+        toast.success("Cadastro realizado com sucesso!");
         return result;
+      } catch (error: any) {
+        toast.error(`Falha no cadastro: ${error.message || 'Erro desconhecido'}`);
+        throw error;
       } finally {
         setIsLoading(false);
       }
@@ -176,6 +196,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setSession(null);
         setIsAdmin(false);
+        toast.info("Você foi desconectado com sucesso");
+      } catch (error: any) {
+        toast.error(`Falha ao sair: ${error.message || 'Erro desconhecido'}`);
       } finally {
         setIsLoading(false);
       }
@@ -185,7 +208,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       try {
         const result = await authResetPassword(email);
+        toast.success("E-mail de recuperação enviado com sucesso!");
         return result;
+      } catch (error: any) {
+        toast.error(`Falha ao redefinir senha: ${error.message || 'Erro desconhecido'}`);
+        throw error;
       } finally {
         setIsLoading(false);
       }

@@ -41,11 +41,13 @@ export const useProfile = () => {
     enabled: !!user?.id,
     staleTime: 60 * 1000, // Cache por 1 minuto
     retry: 1, // Tenta uma vez mais em caso de falha, evitando muitas tentativas
-    onError: (error: any) => {
-      // Toast error só é exibido se houver realmente um problema
-      // e não apenas devido a perfil não encontrado
-      if (!error.message.includes("não encontrado")) {
-        toast.error(error.message || "Erro ao carregar perfil");
+    meta: {
+      onError: (error: any) => {
+        // Toast error só é exibido se houver realmente um problema
+        // e não apenas devido a perfil não encontrado
+        if (!error.message.includes("não encontrado")) {
+          toast.error(error.message || "Erro ao carregar perfil");
+        }
       }
     }
   });
@@ -65,9 +67,17 @@ export const useProfile = () => {
       
       // Se o perfil não existir, criar um novo
       if (!existingProfile) {
+        // Converter updates para um objeto simples que o Supabase pode processar
+        const supabaseUpdates: Record<string, any> = { ...updates };
+      
+        // Converter preferências para JSON se existirem
+        if (updates.preferences) {
+          supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
+        }
+        
         const { data, error } = await supabase
           .from('user_profiles')
-          .insert({ id: user.id, ...updates })
+          .insert({ id: user.id, ...supabaseUpdates })
           .select()
           .single();
         

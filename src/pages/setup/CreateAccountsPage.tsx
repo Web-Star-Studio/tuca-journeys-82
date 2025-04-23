@@ -9,13 +9,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   role: z.enum(['admin', 'partner'])
 });
 
@@ -23,7 +24,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 const CreateAccountsPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { signUp } = useSignUp();
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,6 +39,8 @@ const CreateAccountsPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
+    setSuccessMessage('');
+    
     try {
       await signUp({
         email: data.email,
@@ -44,9 +49,11 @@ const CreateAccountsPage = () => {
         role: data.role
       });
       
-      toast.success('Conta criada com sucesso!');
       form.reset();
+      toast.success(`Conta ${data.role} criada com sucesso!`);
+      setSuccessMessage(`Conta ${data.role} criada com sucesso para ${data.email}`);
     } catch (error: any) {
+      console.error("Erro ao criar conta:", error);
       toast.error(error.message || 'Erro ao criar conta');
     } finally {
       setIsSubmitting(false);
@@ -54,12 +61,12 @@ const CreateAccountsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center justify-center">
+      <Card className="w-full max-w-md mb-4">
         <CardHeader>
           <CardTitle>Criar Contas</CardTitle>
           <CardDescription>
-            Página temporária para criar contas de admin e parceiros
+            Página temporária para criar contas de administradores e parceiros
           </CardDescription>
         </CardHeader>
         
@@ -101,7 +108,7 @@ const CreateAccountsPage = () => {
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
                     <FormControl>
-                      <Input placeholder="********" type="password" {...field} />
+                      <Input placeholder="******" type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,7 +140,7 @@ const CreateAccountsPage = () => {
           </Form>
         </CardContent>
         
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-4">
           <Button 
             onClick={form.handleSubmit(onSubmit)}
             disabled={isSubmitting} 
@@ -148,6 +155,19 @@ const CreateAccountsPage = () => {
               'Criar Conta'
             )}
           </Button>
+          
+          {successMessage && (
+            <div className="bg-green-50 text-green-600 p-3 rounded-md flex items-center gap-2 w-full">
+              <CheckCircle className="h-5 w-5" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+          
+          <div className="text-center w-full mt-4">
+            <Link to="/setup" className="text-blue-500 hover:underline">
+              Voltar para Configuração
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     </div>

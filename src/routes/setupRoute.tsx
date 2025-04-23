@@ -1,6 +1,6 @@
 
 import React, { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import LoadingPage from '@/components/utils/LoadingPage';
 
 // Lazy loaded components
@@ -9,6 +9,10 @@ const CreateAccountsPage = lazy(() => import('@/pages/setup/CreateAccountsPage')
 
 export const setupRoute = (
   <>
+    <Route 
+      path="/" 
+      element={<Navigate to="/setup" replace />} 
+    />
     <Route 
       path="/setup" 
       element={

@@ -1,6 +1,5 @@
-
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { UIProvider } from './contexts/UIContext';
 import { CartProvider } from './contexts/CartContext';
@@ -22,13 +21,19 @@ const App: React.FC = () => {
           <ScrollToTop />
           <Suspense fallback={<GlobalLoading />}>
             <Routes>
+              {/* Setup routes take precedence */}
               {setupRoute}
+              
+              {/* Other routes require system initialization */}
               <Route element={<RequireSetup />}>
                 {publicRoutes}
                 {protectedRoutes}
                 {adminRoutes}
                 {partnerRoutes}
               </Route>
+              
+              {/* Fallback route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
           <Toaster position="top-center" richColors closeButton />

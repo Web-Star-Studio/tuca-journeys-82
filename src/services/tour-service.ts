@@ -1,6 +1,6 @@
 
 import { BaseApiService } from './base-api';
-import { Tour } from '@/types/database';
+import { Tour } from '@/types';
 
 /**
  * Service for handling tour-related API calls
@@ -19,12 +19,7 @@ export class TourService extends BaseApiService {
       throw error;
     }
     
-    // Transform to ensure it matches the Tour interface
-    return data.map(tour => ({
-      ...tour,
-      location: tour.meeting_point || 'Unknown Location',
-      is_available: true // Default value as it may be missing in database
-    })) as Tour[];
+    return data;
   }
 
   /**
@@ -42,12 +37,7 @@ export class TourService extends BaseApiService {
       throw error;
     }
     
-    // Transform to ensure it matches the Tour interface
-    return {
-      ...data,
-      location: data.meeting_point || 'Unknown Location',
-      is_available: true // Default value as it may be missing in database
-    } as Tour;
+    return data;
   }
 }
 

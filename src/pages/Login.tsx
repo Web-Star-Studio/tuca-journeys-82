@@ -1,55 +1,48 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import LoginForm from "@/components/login/LoginForm";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const Login = () => {
+  // Use the hook without the invalid prop
+  const { isLoading: authRedirectLoading, isAuthenticated } = useAuthRedirect();
+  
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
-  // Check for error parameter from redirect
-  React.useEffect(() => {
-    const errorMessage = searchParams.get('error');
-    if (errorMessage) {
-      toast.error(decodeURIComponent(errorMessage));
+  // Redirect authenticated users away from login page
+  useEffect(() => {
+    if (!authRedirectLoading && isAuthenticated) {
+      navigate('/dashboard');
     }
-  }, [searchParams]);
+  }, [authRedirectLoading, isAuthenticated, navigate]);
   
-  const handleSuccessfulLogin = (redirectToAdmin: boolean, isPartner: boolean = false) => {
-    try {
-      // Check role-based redirections first
-      if (isPartner) {
-        navigate("/parceiro/dashboard");
-        return;
-      } 
-      
-      if (redirectToAdmin) {
-        navigate("/admin/dashboard");
-        return;
-      }
-      
-      // For normal users, respect the returnTo parameter 
-      // unless it's for exclusive role-based routes
-      if (returnTo.startsWith('/parceiro/') && !isPartner) {
-        navigate("/dashboard");
-        return;
-      }
-      
-      if (returnTo.startsWith('/admin/') && !redirectToAdmin) {
-        navigate("/dashboard");
-        return;
-      }
-      
-      // Otherwise go to return path
+  // Handle successful login
+  const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
+    setIsRedirecting(true);
+    if (redirectToAdmin) {
+      navigate("/admin");
+    } else {
+      // Use the returnTo query param or default to dashboard
       navigate(returnTo);
-    } catch (error) {
-      console.error("Erro de navegação:", error);
-      // Fallback to dashboard if navigation fails
-      navigate("/dashboard");
     }
   };
+  
+  if (authRedirectLoading || isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

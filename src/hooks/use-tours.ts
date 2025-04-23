@@ -1,129 +1,96 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
-import { Tour } from '@/types';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Tour } from '@/types/database';
+import { demoData } from '@/utils/demoDataGenerator';
 
-// Hook for fetching all tours
 export const useTours = () => {
-  const queryClient = useQueryClient();
-
-  const toursQuery = useQuery({
+  // Query to fetch tours
+  const { data: tours, isLoading, error, refetch } = useQuery({
     queryKey: ['tours'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as Tour[];
+      // In a real app, we'd fetch from an API
+      // For demo purposes, return our generated tours
+      return demoData.tours;
     },
   });
 
-  const getTourById = async (id: number): Promise<Tour | null> => {
-    const { data, error } = await supabase
-      .from('tours')
-      .select('*')
-      .eq('id', id)
-      .single();
+  // Mutation to delete a tour
+  const deleteTourMutation = useMutation({
+    mutationFn: async (tourId: number) => {
+      // In a real app, we'd call an API
+      console.log(`Deleting tour: ${tourId}`);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Passeio excluído com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao excluir o passeio');
+      console.error('Error deleting tour:', error);
+    }
+  });
 
-    if (error) throw error;
-    return data as Tour;
+  // Mutation to create or update a tour
+  const saveTourMutation = useMutation({
+    mutationFn: async (tour: Partial<Tour>) => {
+      // In a real app, we'd call an API
+      console.log('Saving tour:', tour);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Passeio salvo com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao salvar o passeio');
+      console.error('Error saving tour:', error);
+    }
+  });
+
+  const deleteTour = (tourId: number) => {
+    deleteTourMutation.mutate(tourId);
   };
 
-  const saveTourMutation = useMutation({
-    mutationFn: async (tourData: Partial<Tour>) => {
-      // Prepare tour data ensuring all required fields are set
-      const preparedData: any = {
-        title: tourData.title || 'New Tour',
-        description: tourData.description || 'Tour description',
-        short_description: tourData.short_description || 'Short description',
-        price: tourData.price || 0,
-        duration: tourData.duration || '1 hour',
-        category: tourData.category || 'adventure',
-        difficulty: tourData.difficulty || 'easy',
-        rating: tourData.rating || 0,
-        min_participants: tourData.min_participants || 1,
-        max_participants: tourData.max_participants || 10,
-        image_url: tourData.image_url || '/placeholder.jpg',
-        gallery_images: tourData.gallery_images || [],
-        includes: tourData.includes || [],
-        excludes: tourData.excludes || [],
-        notes: tourData.notes || [],
-        schedule: tourData.schedule || [],
-        ...tourData
-      };
+  const saveTour = (tour: Partial<Tour>) => {
+    saveTourMutation.mutate(tour);
+  };
 
-      if (tourData.id) {
-        // Update existing tour
-        const { data, error } = await supabase
-          .from('tours')
-          .update(preparedData)
-          .eq('id', tourData.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data as Tour;
-      } else {
-        // Create new tour
-        const { data, error } = await supabase
-          .from('tours')
-          .insert([preparedData])
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data as Tour;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tours'] });
-    },
-  });
-
-  const deleteTourMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await supabase
-        .from('tours')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tours'] });
-    },
-  });
+  const getTourById = (id?: number) => {
+    if (!id || !tours) return null;
+    return tours.find(tour => tour.id === id) || null;
+  };
 
   return {
-    tours: toursQuery.data || [],
-    isLoading: toursQuery.isLoading,
-    error: toursQuery.error,
-    saveTour: saveTourMutation.mutate,
-    deleteTour: deleteTourMutation.mutate,
-    getTourById
+    tours,
+    isLoading,
+    error,
+    deleteTour,
+    saveTour,
+    getTourById,
+    refetch
   };
 };
 
-// Hook for fetching a single tour by ID
-export const useTour = (id: number | string | undefined) => {
+// Add the missing useTour hook for single tour details
+export const useTour = (tourId?: number) => {
   return useQuery({
-    queryKey: ['tour', id],
+    queryKey: ['tour', tourId],
     queryFn: async () => {
-      if (!id) return null;
+      if (!tourId) throw new Error('Tour ID is required');
       
-      const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+      // In a real app, we'd fetch from an API endpoint for a single tour
+      // For demo, find the tour in our demo data
+      const tour = demoData.tours.find(t => t.id === tourId);
+      if (!tour) throw new Error('Tour not found');
       
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('id', numericId)
-        .single();
-      
-      if (error) throw error;
-      return data as Tour;
+      return tour;
     },
-    enabled: !!id,
+    enabled: !!tourId,
   });
 };

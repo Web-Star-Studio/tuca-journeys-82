@@ -1,7 +1,4 @@
 
-// This file is deprecated and will be removed
-// Please use @/integrations/supabase/client instead
-import { supabase } from '@/integrations/supabase/client';
-export { supabase };
+import { supabase } from "@/integrations/supabase/client";
 
-console.warn('Warning: src/lib/supabase.ts is deprecated. Use @/integrations/supabase/client instead.');
+export { supabase };

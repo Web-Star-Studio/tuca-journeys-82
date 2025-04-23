@@ -1,77 +1,143 @@
 
-import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-
-interface SeedResult {
-  success: boolean;
-  message: string;
-}
+import { demoData } from "./demoDataGenerator";
+import { toast } from "sonner";
 
 /**
- * Função para inicializar o banco de dados com dados básicos
+ * Seeds the database with initial data for production/demo purposes
+ * This function should be called once during initial setup
  */
-export async function seedDatabase(): Promise<SeedResult> {
+export const seedDatabase = async () => {
   try {
-    // Configurar buckets de armazenamento
-    const bucketsToCreate = [
-      { id: 'avatars', public: true },
-      { id: 'tours', public: true },
-      { id: 'accommodations', public: true },
-      { id: 'events', public: true },
-      { id: 'products', public: true },
-      { id: 'vehicles', public: true },
-      { id: 'partners', public: true },
-      { id: 'public', public: true }
-    ];
+    console.log("Starting database seeding process...");
     
-    for (const bucket of bucketsToCreate) {
-      const { error } = await supabase.storage.createBucket(
-        bucket.id, 
-        { public: bucket.public }
-      );
+    // Insert tours
+    for (const tour of demoData.tours) {
+      const { error } = await supabase
+        .from('tours')
+        .upsert({
+          title: tour.title,
+          short_description: tour.short_description,
+          description: tour.description,
+          price: tour.price,
+          category: tour.category,
+          duration: tour.duration,
+          max_participants: tour.max_participants,
+          min_participants: tour.min_participants,
+          difficulty: tour.difficulty,
+          rating: tour.rating,
+          image_url: tour.image_url,
+          gallery_images: tour.gallery_images,
+          schedule: tour.schedule,
+          includes: tour.includes,
+          excludes: tour.excludes,
+          notes: tour.notes,
+          meeting_point: tour.meeting_point,
+        });
       
-      if (error && !error.message.includes('already exists')) {
-        throw error;
-      }
+      if (error) throw error;
     }
     
-    // Salvar as configurações iniciais como itens no LocalStorage
-    // em vez de tentar usar uma tabela inexistente
-    localStorage.setItem('site_name', 'Tuca Noronha');
-    localStorage.setItem('contact_email', 'contato@tucanoronha.com');
-    localStorage.setItem('setup_completed', 'true');
-    localStorage.setItem('databaseSeeded', 'true');
+    // Insert accommodations
+    for (const accommodation of demoData.accommodations) {
+      const { error } = await supabase
+        .from('accommodations')
+        .upsert({
+          title: accommodation.title,
+          short_description: accommodation.description,
+          description: accommodation.description,
+          price_per_night: accommodation.price_per_night,
+          type: accommodation.type,
+          max_guests: accommodation.max_guests,
+          bedrooms: accommodation.bedrooms,
+          bathrooms: accommodation.bathrooms,
+          amenities: accommodation.amenities,
+          rating: accommodation.rating,
+          image_url: accommodation.image_url,
+          gallery_images: accommodation.gallery_images,
+          address: accommodation.address,
+        });
+      
+      if (error) throw error;
+    }
     
-    return {
-      success: true,
-      message: "Banco de dados inicializado com sucesso",
-    };
+    // Insert products
+    for (const product of demoData.products) {
+      const { error } = await supabase
+        .from('products')
+        .upsert({
+          name: product.name,
+          description: product.description,
+          image_url: product.image_url,
+          price: product.price,
+          category: product.category,
+          stock: product.stock,
+          status: product.status,
+          featured: product.featured,
+        });
+      
+      if (error) throw error;
+    }
+    
+    console.log("Database seeding completed successfully!");
+    return { success: true };
   } catch (error) {
-    console.error("Erro ao inicializar banco de dados:", error);
-    return {
-      success: false,
-      message: "Erro ao inicializar o banco de dados",
-    };
+    console.error("Error seeding database:", error);
+    toast.error("Erro ao semear o banco de dados");
+    return { success: false, error };
   }
-}
+};
 
 /**
- * Marca o processo de setup como concluído
+ * Creates an initial admin user
+ * @param email Admin email
+ * @param password Admin password
  */
-export async function markSetupAsComplete(): Promise<SeedResult> {
+export const createInitialAdmin = async (email: string, password: string) => {
   try {
-    // Salvar no localStorage em vez de uma tabela inexistente
-    localStorage.setItem('setupCompleted', 'true');
+    // Check if the user already exists
+    const { data: existingUser } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('email', email)
+      .single();
+      
+    if (existingUser) {
+      console.log("Admin user already exists");
+      return { success: true, message: "Admin already exists" };
+    }
     
-    return {
-      success: true,
-      message: "Setup marcado como concluído",
-    };
+    // Register the user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: "Administrador",
+          role: "admin"
+        }
+      }
+    });
+    
+    if (authError) throw authError;
+    
+    if (authData?.user) {
+      // Add admin role to the user
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert([
+          { user_id: authData.user.id, role: 'admin' }
+        ]);
+      
+      if (roleError) throw roleError;
+      
+      console.log("Initial admin user created successfully!");
+      return { success: true };
+    }
+    
+    return { success: false, error: "Failed to create user" };
   } catch (error) {
-    console.error("Erro ao marcar setup como concluído:", error);
-    return {
-      success: false,
-      message: "Erro ao finalizar o setup",
-    };
+    console.error("Error creating initial admin:", error);
+    return { success: false, error };
   }
-}
+};

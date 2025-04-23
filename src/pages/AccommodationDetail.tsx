@@ -1,37 +1,27 @@
 
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
+import { accommodations } from "@/data/accommodations";
 import AccommodationDetailHeader from "@/components/accommodation/AccommodationDetailHeader";
 import AccommodationDetailGallery from "@/components/accommodation/AccommodationDetailGallery";
 import AccommodationDetailInfo from "@/components/accommodation/AccommodationDetailInfo";
 import AccommodationDetailSidebar from "@/components/accommodation/AccommodationDetailSidebar";
-import { useAccommodation } from '@/hooks/use-accommodations';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { adaptDatabaseToUIAccommodation } from '@/adapters/accommodation-adapter';
 
 const AccommodationDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
   
-  const { data: dbAccommodation, isLoading, error } = useAccommodation(id);
+  // Find the accommodation by ID
+  const accommodation = accommodations.find(
+    (acc) => acc.id === Number(id)
+  );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="container mx-auto px-4 py-12 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (error || !dbAccommodation) {
+  // If accommodation not found, show error
+  if (!accommodation) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -56,9 +46,6 @@ const AccommodationDetail = () => {
     );
   }
 
-  // Convert database accommodation to UI accommodation
-  const accommodation = adaptDatabaseToUIAccommodation(dbAccommodation);
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -66,6 +53,7 @@ const AccommodationDetail = () => {
         <AccommodationDetailHeader accommodation={accommodation} />
         <AccommodationDetailGallery accommodation={accommodation} />
 
+        {/* Accommodation Details */}
         <div className="container mx-auto px-4 mb-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <AccommodationDetailInfo accommodation={accommodation} />

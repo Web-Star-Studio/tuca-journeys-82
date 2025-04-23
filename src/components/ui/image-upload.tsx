@@ -2,7 +2,7 @@
 import React, { useState, useRef } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FileStorageService } from "@/services/file-storage-service";
+import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,9 +12,6 @@ interface ImageUploadProps {
   width?: string;
   height?: string;
   className?: string;
-  maxSizeMB?: number; 
-  bucket?: string;
-  allowedFileTypes?: string[];
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -23,9 +20,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   width = "100%",
   height = "240px",
   className = "",
-  maxSizeMB = 5,
-  bucket = "product-images",
-  allowedFileTypes = ["image/jpeg", "image/png", "image/gif"]
 }) => {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -70,26 +64,57 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const uploadImage = async (file: File) => {
-    // Reset error state
-    setError(null);
-    setUploading(true);
-    
-    try {
-      // Use the improved FileStorageService
-      const result = await FileStorageService.uploadFile(file, bucket, {
-        validateType: true,
-        allowedTypes: allowedFileTypes,
-        maxSize: maxSizeMB * 1024 * 1024,
-        customName: `upload-${uuidv4().substring(0, 8)}`
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('O arquivo deve ser uma imagem');
+      toast({
+        title: "Erro de upload",
+        description: "O arquivo selecionado não é uma imagem",
+        variant: "destructive",
       });
-      
-      if (!result) {
-        throw new Error("Upload falhou");
+      return;
+    }
+
+    // Limit file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('A imagem deve ter menos de 5MB');
+      toast({
+        title: "Erro de upload",
+        description: "A imagem é muito grande (limite de 5MB)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      // Create a unique file path
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
       }
-      
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
       // Update preview and notify parent
-      setPreviewUrl(result.url);
-      onImageUploaded(result.url);
+      setPreviewUrl(urlData.publicUrl);
+      onImageUploaded(urlData.publicUrl);
 
       toast({
         title: "Upload concluído",
@@ -97,7 +122,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       });
     } catch (error: any) {
       console.error("Error uploading image:", error);
-      setError(error.message || 'Erro ao fazer upload da imagem');
+      setError('Erro ao fazer upload da imagem');
       toast({
         title: "Erro de upload",
         description: error.message || "Falha ao carregar a imagem",
@@ -174,7 +199,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               Arraste uma imagem ou clique para selecionar
             </p>
             <p className="text-xs text-gray-400">
-              {allowedFileTypes.map(type => type.replace('image/', '').toUpperCase()).join(', ')} (máximo {maxSizeMB}MB)
+              PNG, JPG ou GIF (máximo 5MB)
             </p>
             {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
             <Button 
@@ -193,7 +218,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         ref={fileInputRef}
         type="file"
         onChange={handleFileChange}
-        accept={allowedFileTypes.join(',')}
+        accept="image/*"
         className="hidden"
       />
     </div>

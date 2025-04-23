@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
-import { useProducts, useProduct, useDeleteProduct } from "@/hooks/use-products";
+import { useProducts } from "@/hooks/use-products";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,34 +46,16 @@ const Products = () => {
     status: ""
   });
   
-  // Use the products hook
-  const { products, isLoading, error } = useProducts();
-  const deleteProduct = useDeleteProduct();
+  // Use the products hook with search query as filter
+  const { products, isLoading, error, deleteProduct, useProductCategories } = useProducts({
+    search: searchQuery,
+    ...filters
+  });
   
-  // Get product categories separately
-  const { data: categories } = useProducts().useProductCategories();
+  // Get product categories for filter
+  const { data: categories } = useProductCategories();
   
   const { toast } = useToast();
-
-  // Apply search and filters locally
-  const filteredProducts = React.useMemo(() => {
-    return products.filter(product => {
-      // Apply search filter
-      const matchesSearch = searchQuery === "" || 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Apply category filter
-      const matchesCategory = filters.category === "" || 
-        product.category === filters.category;
-      
-      // Apply status filter
-      const matchesStatus = filters.status === "" || 
-        product.status === filters.status;
-      
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-  }, [products, searchQuery, filters]);
 
   useEffect(() => {
     if (error) {
@@ -100,7 +82,7 @@ const Products = () => {
   const confirmDelete = async () => {
     if (productToDelete) {
       try {
-        await deleteProduct.mutate(productToDelete.id);
+        await deleteProduct.mutateAsync(productToDelete.id);
         setDeleteDialogOpen(false);
         setProductToDelete(null);
         toast({
@@ -139,7 +121,6 @@ const Products = () => {
   };
 
   return (
-    
     <AdminLayout pageTitle="Gerenciar Produtos">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -231,7 +212,7 @@ const Products = () => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              
+              // Loading state
               Array.from({ length: 5 }).map((_, index) => (
                 <TableRow key={`loading-${index}`}>
                   <TableCell><Skeleton className="h-5 w-8" /></TableCell>
@@ -244,8 +225,8 @@ const Products = () => {
                   <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : filteredProducts && filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
+            ) : products && products.length > 0 ? (
+              products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.id}</TableCell>
                   <TableCell>
@@ -320,7 +301,7 @@ const Products = () => {
         </Table>
       </div>
 
-      
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -348,7 +329,7 @@ const Products = () => {
         </DialogContent>
       </Dialog>
 
-      
+      {/* Product Form Dialog */}
       <ProductFormDialog 
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}

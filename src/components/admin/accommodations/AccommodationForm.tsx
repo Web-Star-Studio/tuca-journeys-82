@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
-import { useAccommodation, useCreateAccommodation, useUpdateAccommodation } from "@/hooks/accommodations";
+import { useAccommodations } from "@/hooks/use-accommodations";
 import { Accommodation } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 // Form schema for validation
 const accommodationFormSchema = z.object({
@@ -45,25 +45,21 @@ const accommodationFormSchema = z.object({
 
 type AccommodationFormValues = z.infer<typeof accommodationFormSchema>;
 
-export interface AccommodationFormProps {
+interface AccommodationFormProps {
   accommodationId?: number;
   onSuccess: () => void;
-  onCancel: () => void; // Added onCancel prop
+  onCancel: () => void;
 }
 
 export const AccommodationForm: React.FC<AccommodationFormProps> = ({ 
   accommodationId, 
-  onSuccess,
-  onCancel
+  onSuccess, 
+  onCancel 
 }) => {
-  
   const [previewUrl, setPreviewUrl] = useState("");
-  const { data: accommodation, isLoading: isLoadingAccommodation } = useAccommodation(accommodationId || 0);
-  const createAccommodation = useCreateAccommodation();
-  const updateAccommodation = accommodationId ? useUpdateAccommodation(accommodationId) : null;
+  const { toast } = useToast();
+  const { createAccommodation, updateAccommodation, getAccommodationById } = useAccommodations();
   const [isLoading, setIsLoading] = useState(accommodationId ? true : false);
-
-  
 
   // Initialize form
   const form = useForm<AccommodationFormValues>({
@@ -84,32 +80,44 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     },
   });
 
-  
-
   // Fetch accommodation data when editing
   useEffect(() => {
-    if (accommodationId && accommodation) {
-      form.reset({
-        title: accommodation.title,
-        description: accommodation.description,
-        image_url: accommodation.image_url,
-        type: accommodation.type,
-        price_per_night: accommodation.price_per_night,
-        bedrooms: accommodation.bedrooms,
-        bathrooms: accommodation.bathrooms,
-        capacity: accommodation.max_guests,
-        location: accommodation.address,
-        rating: accommodation.rating || 0,
-        amenities: accommodation.amenities?.join("\n") || "",
-        gallery: accommodation.gallery_images?.join("\n") || "",
-      });
-      
-      setPreviewUrl(accommodation.image_url);
-      setIsLoading(false);
-    }
-  }, [accommodationId, accommodation, form]);
+    const loadAccommodationData = async () => {
+      if (accommodationId) {
+        try {
+          const accommodation = await getAccommodationById(accommodationId);
+          if (accommodation) {
+            form.reset({
+              title: accommodation.title,
+              description: accommodation.description,
+              image_url: accommodation.image_url,
+              type: accommodation.type,
+              price_per_night: accommodation.price_per_night,
+              bedrooms: accommodation.bedrooms,
+              bathrooms: accommodation.bathrooms,
+              capacity: accommodation.max_guests,
+              location: accommodation.address,
+              rating: accommodation.rating,
+              amenities: accommodation.amenities?.join("\n") || "",
+              gallery: accommodation.gallery_images?.join("\n") || "",
+            });
+            setPreviewUrl(accommodation.image_url);
+          }
+        } catch (error) {
+          console.error("Error loading accommodation:", error);
+          toast({
+            title: "Erro",
+            description: "Não foi possível carregar os dados da hospedagem.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  
+    loadAccommodationData();
+  }, [accommodationId, form, getAccommodationById, toast]);
 
   // Update image preview
   useEffect(() => {
@@ -123,46 +131,69 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
 
   // Form submission
   const onSubmit = async (data: AccommodationFormValues) => {
-    
-
     // Convert string lists to arrays
     const amenitiesArray = data.amenities ? data.amenities.split("\n").map(item => item.trim()).filter(Boolean) : [];
     const galleryArray = data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [];
 
     try {
-      const accommodationData = {
-        title: data.title,
-        description: data.description,
-        short_description: data.description.substring(0, 100),
-        price_per_night: data.price_per_night,
-        image_url: data.image_url,
-        location: data.location,
-        address: data.location,
-        type: data.type,
-        category: data.type,
-        is_available: true,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        max_guests: data.capacity,
-        amenities: amenitiesArray,
-        gallery_images: galleryArray,
-        rating: data.rating
-      };
-      
       if (accommodationId) {
-        await updateAccommodation?.mutateAsync(accommodationData);
+        // Update existing accommodation
+        await updateAccommodation({ 
+          id: accommodationId,
+          title: data.title,
+          description: data.description,
+          short_description: data.description.substring(0, 100),
+          price_per_night: data.price_per_night,
+          image_url: data.image_url,
+          type: data.type,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          max_guests: data.capacity,
+          address: data.location,
+          amenities: amenitiesArray,
+          gallery_images: galleryArray,
+          rating: data.rating
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Hospedagem atualizada com sucesso.",
+        });
       } else {
-        await createAccommodation.mutateAsync(accommodationData);
+        // Create new accommodation
+        await createAccommodation({ 
+          title: data.title,
+          description: data.description,
+          short_description: data.description.substring(0, 100),
+          price_per_night: data.price_per_night,
+          image_url: data.image_url,
+          type: data.type,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          max_guests: data.capacity,
+          address: data.location,
+          amenities: amenitiesArray,
+          gallery_images: galleryArray,
+          rating: data.rating
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Nova hospedagem criada com sucesso.",
+        });
       }
-      
       onSuccess();
     } catch (error) {
       console.error("Error saving accommodation:", error);
-      toast.error("Não foi possível salvar a hospedagem. Tente novamente.");
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a hospedagem. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
-  if (isLoading || isLoadingAccommodation) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
         <Loader2 className="h-8 w-8 animate-spin mr-2" />
@@ -170,8 +201,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
       </div>
     );
   }
-
-  
 
   const accommodationTypes = [
     "hotel",
@@ -187,9 +216,8 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+          {/* Left Column */}
           <div className="space-y-6">
             <FormField
               control={form.control}
@@ -326,7 +354,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
             </div>
           </div>
 
-          
+          {/* Right Column */}
           <div className="space-y-6">
             <FormField
               control={form.control}
@@ -430,4 +458,3 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
   );
 };
 
-export default AccommodationForm;

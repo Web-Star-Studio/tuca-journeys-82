@@ -1,128 +1,157 @@
 
-import { useNotifications as useContextNotifications } from "@/contexts/NotificationContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { Notification } from "@/contexts/NotificationContext";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: 'booking' | 'promo' | 'system' | 'recommendation';
+  read: boolean;
+  link?: string;
+  date: string;
+  created_at: string;
+}
 
 export const useNotifications = () => {
   const { user } = useAuth();
-  const contextNotifications = useContextNotifications();
-  const { toast } = useToast();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   
-  // Use React Query to fetch notifications from Supabase
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['notifications', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!user?.id) return;
       
+      setIsLoading(true);
       try {
-        // For demo users, return mock notifications
-        if (user.id.startsWith('demo-')) {
-          return contextNotifications.notifications;
-        }
-        
-        // For real users, fetch from Supabase
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-          
-        if (error) throw error;
-        
-        // Map Supabase results to our Notification type
-        return (data || []).map(notification => ({
-          id: String(notification.id),
-          userId: notification.user_id,
-          title: notification.title,
-          message: notification.message,
-          type: notification.type as "promo" | "booking" | "system",
-          read: notification.is_read === true, // Convert is_read to read
-          createdAt: notification.created_at,
-        }));
+        // In a real app, we would fetch from Supabase
+        // For now, use demo data
+        const mockNotifications = generateMockNotifications(user.id);
+        setNotifications(mockNotifications);
+        setUnreadCount(mockNotifications.filter(n => !n.read).length);
       } catch (error) {
         console.error('Error fetching notifications:', error);
-        return contextNotifications.notifications;
+      } finally {
+        setIsLoading(false);
       }
-    },
-    enabled: !!user && !contextNotifications.loading,
-  });
+    };
+
+    fetchNotifications();
+    
+    // Setup real-time updates for notifications
+    const setupRealtimeNotifications = () => {
+      if (!user?.id) return;
+      
+      const channel = supabase
+        .channel('public:notifications')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        }, (payload) => {
+          const newNotification = payload.new as Notification;
+          setNotifications(prev => [newNotification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+        })
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+    
+    // Skip for now since we're using mock data
+    // return setupRealtimeNotifications();
+  }, [user?.id]);
   
-  // Create a notification
-  const createNotification = async (notification: {
-    title: string;
-    message: string;
-    type: "promo" | "booking" | "system";
-  }) => {
-    if (!user) return null;
+  // Mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    if (!user?.id) return;
     
     try {
-      // Use context method for all users (which will handle demo users)
-      contextNotifications.addNotification({
-        userId: user.id,
-        title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        read: false,
-      });
-      
-      // For real users, also save to Supabase
-      if (!user.id.startsWith('demo-')) {
-        const { error } = await supabase
-          .from('notifications')
-          .insert([{
-            user_id: user.id,
-            title: notification.title,
-            message: notification.message,
-            type: notification.type,
-            is_read: false, // Fixed: is_read instead of read
-          }]);
-          
-        if (error) throw error;
-      }
-      
-      // Refresh notifications
-      refetch();
-      
-      return true;
+      // In a real app, we would update in Supabase
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error creating notification:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar a notificação.",
-        variant: "destructive",
-      });
-      return null;
+      console.error('Error marking notification as read:', error);
     }
   };
   
-  // Helper method to send a booking notification
-  const sendBookingNotification = async (bookingId: string, serviceName: string) => {
-    return createNotification({
-      title: "Reserva confirmada",
-      message: `Sua reserva para ${serviceName} foi confirmada! Confira os detalhes.`,
-      type: "booking"
-    });
+  // Mark all notifications as read
+  const markAllAsRead = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // In a real app, we would update in Supabase
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   };
   
-  // Helper method to send a promotional notification
-  const sendPromoNotification = async (title: string, message: string) => {
-    return createNotification({
-      title,
-      message,
-      type: "promo"
-    });
+  // Mock notification data generator
+  const generateMockNotifications = (userId: string): Notification[] => {
+    const now = new Date();
+    return [
+      {
+        id: '1',
+        user_id: userId,
+        title: 'Reserva confirmada!',
+        message: 'Sua reserva para o Passeio de Barco foi confirmada. Confira os detalhes.',
+        type: 'booking',
+        read: false,
+        link: '/bookings/123',
+        date: 'Hoje, 14:30',
+        created_at: now.toISOString()
+      },
+      {
+        id: '2',
+        user_id: userId,
+        title: 'Oferta exclusiva!',
+        message: 'Aproveite 15% de desconto em passeios de mergulho este mês.',
+        type: 'promo',
+        read: false,
+        link: '/tours/diving',
+        date: 'Ontem, 10:15',
+        created_at: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: '3',
+        user_id: userId,
+        title: 'Com base no seu perfil...',
+        message: 'Recomendamos o novo tour de observação de tartarugas. Combina com suas preferências!',
+        type: 'recommendation',
+        read: true,
+        link: '/tours/turtles',
+        date: '3 dias atrás',
+        created_at: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: '4',
+        user_id: userId,
+        title: 'Manutenção programada',
+        message: 'Nosso sistema estará em manutenção no dia 15/05 das 02:00 às 04:00.',
+        type: 'system',
+        read: true,
+        date: '1 semana atrás',
+        created_at: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
   };
-
+  
   return {
-    ...contextNotifications,
-    notifications: data || contextNotifications.notifications,
-    isLoading: isLoading || contextNotifications.loading,
-    createNotification,
-    sendBookingNotification,
-    sendPromoNotification,
-    refetch
+    notifications,
+    isLoading,
+    unreadCount,
+    markAsRead,
+    markAllAsRead
   };
 };

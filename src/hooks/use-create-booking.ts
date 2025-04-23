@@ -16,10 +16,6 @@ export const useCreateBooking = () => {
   
   return useMutation({
     mutationFn: (bookingData: CreateBookingDTO) => {
-      // Make sure number_of_guests is properly set if not provided
-      if (bookingData.guests && !bookingData.number_of_guests) {
-        bookingData.number_of_guests = bookingData.guests;
-      }
       return bookingService.createBooking(bookingData);
     },
     onSuccess: () => {

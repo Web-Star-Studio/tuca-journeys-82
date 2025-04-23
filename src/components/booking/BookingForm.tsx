@@ -1,586 +1,398 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { useForm } from 'react-hook-form';
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
-import { BookingFormValues, CouponData } from "@/types/bookingForm";
-import { addDays, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar } from "../ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Switch } from "../ui/switch";
-import { Checkbox } from "../ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/lib/supabase';
-import { useNavigate } from "react-router-dom";
-import { DiscountCoupon } from '@/types/database';
-import { useNotifications } from '@/hooks/use-notifications';
+import { tours } from "@/data/tours";
+import { accommodations } from "@/data/accommodations";
 
-export interface BookingFormProps {
-  itemId: number;
-  itemType: 'tour' | 'accommodation' | 'event' | 'vehicle';
-  itemName: string;
-  basePrice: number;
-  minGuests?: number;
-  maxGuests?: number;
-  onSuccess?: (bookingId: string) => void;
-}
+// Define the form schema
+const bookingFormSchema = z.object({
+  name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  email: z.string().email({ message: "Email inválido" }),
+  phone: z.string().min(10, { message: "Telefone deve ter pelo menos 10 dígitos" }),
+  tourId: z.string().optional(),
+  accommodationId: z.string().optional(),
+  checkInDate: z.date({ required_error: "Data de check-in é obrigatória" }),
+  checkOutDate: z.date({ required_error: "Data de check-out é obrigatória" }),
+  guests: z.string().min(1, { message: "Número de hóspedes é obrigatório" }),
+  specialRequests: z.string().optional(),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: "Você deve aceitar os termos e condições",
+  }),
+});
 
-const BookingForm: React.FC<BookingFormProps> = ({
-  itemId,
-  itemType,
-  itemName,
-  basePrice,
-  minGuests = 1,
-  maxGuests = 10,
-  onSuccess
-}) => {
+type BookingFormValues = z.infer<typeof bookingFormSchema>;
+
+const BookingForm = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { sendBookingNotification } = useNotifications();
-  
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-  const [endDate, setEndDate] = useState<Date | undefined>(addDays(new Date(), 1));
-  const [guests, setGuests] = useState(minGuests);
-  const [totalPrice, setTotalPrice] = useState(basePrice);
-  const [isLoading, setIsLoading] = useState(false);
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
-  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
-  
-  const defaultValues = {
-    contactName: profile?.name || user?.email?.split('@')[0] || '',
-    contactEmail: profile?.email || user?.email || '',
-    contactPhone: profile?.phone || '',
-    specialRequests: '',
-    paymentMethod: 'credit_card',
-    termsAccepted: false,
-  };
+  const { toast } = useToast();
 
+  // Initialize form with default values
   const form = useForm<BookingFormValues>({
-    defaultValues,
-    mode: "onBlur"
+    resolver: zodResolver(bookingFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      tourId: undefined,
+      accommodationId: undefined,
+      checkInDate: new Date(),
+      checkOutDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+      guests: "2",
+      specialRequests: "",
+      termsAccepted: false,
+    },
   });
-  
+
+  // Update form values when profile is loaded
   useEffect(() => {
-    // Calculate nights/days
-    const days = endDate && startDate 
-      ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-      : 1;
-      
-    // Calculate base total
-    let calculatedPrice = basePrice;
-    
-    if (itemType === 'accommodation') {
-      calculatedPrice = basePrice * days;
+    if (profile) {
+      form.setValue("name", profile.name || "");
+      form.setValue("email", profile.email || "");
+      form.setValue("phone", profile.phone || "");
     }
-    
-    calculatedPrice = calculatedPrice * guests;
-    
-    // Apply coupon discount if available
-    if (appliedCoupon) {
-      const discountAmount = (calculatedPrice * appliedCoupon.discountPercentage) / 100;
-      calculatedPrice -= discountAmount;
-    }
-    
-    setTotalPrice(calculatedPrice);
-  }, [startDate, endDate, guests, basePrice, appliedCoupon, itemType]);
-  
-  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= minGuests && value <= maxGuests) {
-      setGuests(value);
-    }
-  };
+  }, [profile, form]);
 
-  const verifyCoupon = async () => {
-    if (!couponCode.trim()) return;
-    
-    setIsCheckingCoupon(true);
+  // Function to handle form submission
+  const onSubmit = async (data: BookingFormValues) => {
+    setIsSubmitting(true);
     
     try {
-      // Check discount_coupons table instead of coupons
-      const { data, error } = await supabase
-        .from('discount_coupons')
-        .select('*')
-        .eq('code', couponCode.trim())
-        .single();
+      // Here we would typically send the data to a backend API
+      console.log("Booking form data:", data);
       
-      if (error) throw error;
-      
-      if (!data) {
-        toast({
-          title: "Cupom não encontrado",
-          description: "O código informado não existe.",
-          variant: "destructive",
-        });
-        setAppliedCoupon(null);
-        return;
-      }
-      
-      const coupon = data as DiscountCoupon;
-      
-      // Check if coupon is valid
-      const now = new Date();
-      const validFrom = new Date(coupon.valid_from);
-      const validUntil = new Date(coupon.valid_until);
-      
-      if (now < validFrom || now > validUntil) {
-        toast({
-          title: "Cupom expirado",
-          description: "Este cupom não é mais válido.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Apply the coupon
-      setAppliedCoupon({
-        code: coupon.code,
-        discountPercentage: coupon.discount_percentage
-      });
-      
+      // Show success toast
       toast({
-        title: "Cupom aplicado",
-        description: `Desconto de ${coupon.discount_percentage}% aplicado.`,
+        title: "Reserva iniciada",
+        description: "Sua solicitação de reserva foi enviada com sucesso!",
       });
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Redirect to booking confirmation page
+        navigate("/reserva-confirmada");
+      }, 1500);
     } catch (error) {
-      console.error("Error verifying coupon:", error);
+      console.error("Error submitting booking form:", error);
       toast({
-        title: "Erro ao verificar cupom",
-        description: "Não foi possível verificar o cupom. Tente novamente.",
+        title: "Erro ao enviar reserva",
+        description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
-      setIsCheckingCoupon(false);
-    }
-  };
-  
-  const handleSubmit = async (data: BookingFormValues) => {
-    if (!user) {
-      toast({
-        title: "É necessário estar logado",
-        description: "Faça login para realizar uma reserva.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validação adicional: nome e e-mail obrigatórios
-    if (!data.contactName.trim()) {
-      toast({
-        title: "Nome obrigatório",
-        description: "Por favor, preencha seu nome.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!data.contactEmail.trim() || !data.contactEmail.includes("@")) {
-      toast({
-        title: "Email obrigatório",
-        description: "Por favor, informe um e-mail válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!startDate || !endDate) {
-      toast({
-        title: "Datas obrigatórias",
-        description: "Selecione as datas de início e fim.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!data.termsAccepted) {
-      toast({
-        title: "Termos e condições",
-        description: "Você precisa aceitar os termos e condições.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (guests < minGuests || guests > maxGuests) {
-      toast({
-        title: "Número de hóspedes inválido",
-        description: `Você deve selecionar entre ${minGuests} e ${maxGuests} pessoas.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Create booking object based on item type
-      const bookingData: any = {
-        user_id: user.id,
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        end_date: format(endDate, 'yyyy-MM-dd'),
-        guests: guests,
-        total_price: totalPrice,
-        status: 'confirmed',
-        payment_status: 'paid',
-        payment_method: data.paymentMethod,
-        special_requests: data.specialRequests || null,
-      };
-      
-      // Add the corresponding item ID field based on type
-      switch (itemType) {
-        case 'tour':
-          bookingData.tour_id = itemId;
-          break;
-        case 'accommodation':
-          bookingData.accommodation_id = itemId;
-          break;
-        case 'event':
-          bookingData.event_id = itemId;
-          break;
-        case 'vehicle':
-          bookingData.vehicle_id = itemId;
-          break;
-      }
-      
-      // Add coupon if applied
-      if (appliedCoupon) {
-        bookingData.coupon_code = appliedCoupon.code;
-        bookingData.coupon_discount = appliedCoupon.discountPercentage;
-      }
-      
-      // Save booking to database
-      const { data: booking, error } = await supabase
-        .from('bookings')
-        .insert(bookingData)
-        .select()
-        .single();
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Reserva confirmada",
-        description: "Sua reserva foi realizada com sucesso!",
-      });
-      
-      // Send notification
-      await sendBookingNotification(booking.id.toString(), itemName);
-      
-      // Call onSuccess callback or redirect
-      if (onSuccess) {
-        onSuccess(booking.id.toString());
-      } else {
-        navigate(`/confirmacao?id=${booking.id}`);
-      }
-    } catch (error: any) {
-      console.error("Error creating booking:", error);
-      toast({
-        title: "Erro ao criar reserva",
-        description: error.message || "Não foi possível finalizar sua reserva. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Detalhes da reserva</h2>
+    <div className="w-full max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-sm">
+      <h2 className="text-2xl md:text-3xl font-serif font-bold mb-6 text-tuca-deep-blue">
+        Solicitar Reserva
+      </h2>
       
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" noValidate>
-        {/* Date selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Data de início</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? (
-                    format(startDate, "PPP", { locale: ptBR })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={(date) => {
-                    setStartDate(date);
-                    if (date && endDate && date > endDate) {
-                      setEndDate(addDays(date, 1));
-                    }
-                  }}
-                  disabled={(date) => date < new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="endDate">Data de término</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? (
-                    format(endDate, "PPP", { locale: ptBR })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(date) => 
-                    date < new Date() || (startDate ? date <= startDate : false)
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        
-        {/* Guests */}
-        <div className="space-y-2">
-          <Label htmlFor="guests">Número de pessoas</Label>
-          <div className="flex items-center">
-            <Button 
-              type="button"
-              variant="outline" 
-              size="icon"
-              onClick={() => guests > minGuests && setGuests(guests - 1)}
-              disabled={guests <= minGuests}
-            >
-              -
-            </Button>
-            <Input 
-              id="guests" 
-              type="number" 
-              min={minGuests} 
-              max={maxGuests} 
-              value={guests} 
-              onChange={handleGuestsChange}
-              className="w-20 text-center mx-2"
-            />
-            <Button 
-              type="button"
-              variant="outline" 
-              size="icon"
-              onClick={() => guests < maxGuests && setGuests(guests + 1)}
-              disabled={guests >= maxGuests}
-            >
-              +
-            </Button>
-          </div>
-        </div>
-        
-        {/* Contact information */}
-        <div className="space-y-2">
-          <h3 className="font-medium">Informações de contato</h3>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contactName">Nome</Label>
-            <Input 
-              id="contactName" 
-              {...form.register("contactName", { required: "Nome é obrigatório" })} 
-            />
-            {form.formState.errors.contactName && (
-              <p className="text-red-600 text-xs">{form.formState.errors.contactName.message}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contactEmail">Email</Label>
-            <Input 
-              id="contactEmail" 
-              type="email" 
-              {...form.register("contactEmail", { 
-                required: "Email é obrigatório", 
-                pattern: { value: /^[^@]+@[^@]+\.[^@]+$/, message: "Email inválido" }
-              })} 
-            />
-            {form.formState.errors.contactEmail && (
-              <p className="text-red-600 text-xs">{form.formState.errors.contactEmail.message}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contactPhone">Telefone</Label>
-            <Input 
-              id="contactPhone" 
-              {...form.register("contactPhone")} 
-            />
-          </div>
-        </div>
-        
-        {/* Special requests */}
-        <div className="space-y-2">
-          <Label htmlFor="specialRequests">Pedidos especiais</Label>
-          <Textarea 
-            id="specialRequests" 
-            {...form.register("specialRequests")} 
-            placeholder="Algum pedido especial? Informe aqui."
-          />
-        </div>
-        
-        {/* Coupon code */}
-        <div className="space-y-2">
-          <Label htmlFor="couponCode">Cupom de desconto</Label>
-          <div className="flex space-x-2">
-            <Input 
-              id="couponCode" 
-              value={couponCode} 
-              onChange={(e) => setCouponCode(e.target.value)} 
-              className="flex-1"
-              disabled={!!appliedCoupon}
-            />
-            <Button 
-              type="button" 
-              variant="secondary" 
-              onClick={verifyCoupon} 
-              disabled={isCheckingCoupon || !couponCode.trim() || !!appliedCoupon}
-              className="whitespace-nowrap"
-            >
-              {isCheckingCoupon ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verificando...
-                </>
-              ) : appliedCoupon ? "Aplicado" : "Aplicar"}
-            </Button>
-          </div>
-          {appliedCoupon && (
-            <p className="text-sm text-green-600">
-              Cupom aplicado: {appliedCoupon.discountPercentage}% de desconto
-            </p>
-          )}
-        </div>
-        
-        {/* Payment method */}
-        <div className="space-y-2">
-          <Label>Método de pagamento</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2 border p-3 rounded">
-              <input 
-                type="radio" 
-                id="credit_card" 
-                value="credit_card" 
-                {...form.register("paymentMethod")} 
-                defaultChecked 
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Personal Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Informações Pessoais</h3>
+              
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seu nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="credit_card" className="cursor-pointer">Cartão de crédito</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2 border p-3 rounded">
-              <input 
-                type="radio" 
-                id="pix" 
-                value="pix" 
-                {...form.register("paymentMethod")} 
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="seu@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="pix" className="cursor-pointer">PIX</Label>
-            </div>
-          </div>
-        </div>
-        
-        {/* Booking summary */}
-        <div className="bg-gray-50 p-4 rounded">
-          <h3 className="font-medium mb-2">Resumo da reserva</h3>
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span>Item:</span>
-              <span className="font-medium">{itemName}</span>
-            </div>
-            
-            <div className="flex justify-between">
-              <span>Período:</span>
-              <span>
-                {startDate && endDate ? (
-                  <>
-                    {format(startDate, 'dd/MM/yyyy')} até {format(endDate, 'dd/MM/yyyy')}
-                  </>
-                ) : 'Selecione as datas'}
-              </span>
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(xx) xxxxx-xxxx" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
-            <div className="flex justify-between">
-              <span>Pessoas:</span>
-              <span>{guests}</span>
-            </div>
-            
-            {appliedCoupon && (
-              <div className="flex justify-between text-green-600">
-                <span>Desconto:</span>
-                <span>{appliedCoupon.discountPercentage}%</span>
+            {/* Booking Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Detalhes da Reserva</h3>
+              
+              <FormField
+                control={form.control}
+                name="tourId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Passeio (opcional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um passeio" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum passeio</SelectItem>
+                        {tours.map((tour) => (
+                          <SelectItem key={tour.id} value={tour.id.toString()}>
+                            {tour.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="accommodationId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hospedagem (opcional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma hospedagem" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhuma hospedagem</SelectItem>
+                        {accommodations.map((accommodation) => (
+                          <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
+                            {accommodation.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="checkInDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Check-in</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full pl-3 text-left font-normal ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="checkOutDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Check-out</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full pl-3 text-left font-normal ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => {
+                              const checkIn = form.getValues("checkInDate");
+                              return date < checkIn || date < new Date();
+                            }}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            )}
-            
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total:</span>
-              <span>R$ {totalPrice.toFixed(2)}</span>
+              
+              <FormField
+                control={form.control}
+                name="guests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de Hóspedes</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o número de hóspedes" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                          (num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? "pessoa" : "pessoas"}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
-        </div>
-        
-        {/* Terms and conditions */}
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="termsAccepted" 
-            {...form.register("termsAccepted", { required: true })} 
+          
+          <FormField
+            control={form.control}
+            name="specialRequests"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Solicitações Especiais</FormLabel>
+                <FormControl>
+                  <textarea
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Informe qualquer solicitação especial para sua estadia..."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <label
-            htmlFor="termsAccepted"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          
+          <FormField
+            control={form.control}
+            name="termsAccepted"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Eu concordo com os{" "}
+                    <a
+                      href="#"
+                      className="text-tuca-ocean-blue hover:underline"
+                    >
+                      termos e condições
+                    </a>
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+          
+          <Button
+            type="submit"
+            className="w-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90 py-6 text-lg"
+            disabled={isSubmitting}
           >
-            Aceito os termos e condições
-          </label>
-        </div>
-        {form.formState.errors.termsAccepted && (
-          <p className="text-red-600 text-xs">Aceitar os termos é obrigatório.</p>
-        )}
-        
-        {/* Submit button */}
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processando...
-            </>
-          ) : (
-            "Finalizar reserva"
-          )}
-        </Button>
-      </form>
+            {isSubmitting ? "Enviando..." : "Enviar Solicitação de Reserva"}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 };
+
 export default BookingForm;

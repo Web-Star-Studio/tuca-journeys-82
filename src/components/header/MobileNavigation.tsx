@@ -1,10 +1,8 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import AuthButtons from "../user-menu/AuthButtons";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { CalendarCheck } from "lucide-react";
-import { toast } from "sonner";
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -15,13 +13,6 @@ const MobileNavigation = ({ isOpen, onClose }: MobileNavigationProps) => {
   const { user } = useAuth();
   
   if (!isOpen) return null;
-
-  const handleReservarClick = () => {
-    onClose();
-    if (!user) {
-      toast.error("Você precisa estar logado para fazer uma reserva");
-    }
-  };
 
   return (
     <div className="md:hidden bg-white text-gray-900 shadow-lg p-4 animate-fade-in">
@@ -103,13 +94,11 @@ const MobileNavigation = ({ isOpen, onClose }: MobileNavigationProps) => {
         >
           Lista de Desejos
         </Link>
-        
         <Link
-          to={user ? "/reservar" : "/login?returnTo=/reservar"}
-          className="px-4 py-2 bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue text-white rounded-full flex items-center justify-center"
-          onClick={handleReservarClick}
+          to="/reservar"
+          className="px-4 py-2 bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue text-white rounded-full"
+          onClick={onClose}
         >
-          <CalendarCheck className="w-4 h-4 mr-2" />
           Reservar
         </Link>
         

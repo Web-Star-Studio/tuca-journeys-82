@@ -1,48 +1,40 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-type NavigationContextType = {
-  previousPath: string | null;
-  setPreviousPath: (path: string) => void;
-  isMaintenanceModeActive: boolean;
-  toggleMaintenanceMode: () => void;
-};
-
-const NavigationContext = createContext<NavigationContextType>({
-  previousPath: null,
-  setPreviousPath: () => {},
-  isMaintenanceModeActive: false,
-  toggleMaintenanceMode: () => {},
+// Create a local navigation context instead of importing from AuthContext
+export const NavigationContext = createContext<{
+  navigateToLogin: () => void;
+}>({
+  navigateToLogin: () => {},
 });
 
-export const useNavigation = () => useContext(NavigationContext);
+export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const navigate = useNavigate();
 
-export const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [previousPath, setPreviousPath] = useState<string | null>(null);
-  const [isMaintenanceModeActive, setIsMaintenanceModeActive] = useState(false);
-  const location = useLocation();
-
-  const toggleMaintenanceMode = () => {
-    setIsMaintenanceModeActive(!isMaintenanceModeActive);
+  const navigateToLogin = () => {
+    navigate('/login');
   };
 
-  React.useEffect(() => {
-    setPreviousPath(location.pathname);
-  }, [location]);
+  const contextValue = {
+    navigateToLogin,
+  };
 
   return (
-    <NavigationContext.Provider
-      value={{
-        previousPath,
-        setPreviousPath,
-        isMaintenanceModeActive,
-        toggleMaintenanceMode,
-      }}
-    >
+    <NavigationContext.Provider value={contextValue}>
       {children}
     </NavigationContext.Provider>
   );
 };
 
-export default NavigationProvider;
+export const useNavigation = () => {
+  const context = useContext(NavigationContext);
+
+  if (!context) {
+    throw new Error('useNavigation must be used within a NavigationProvider');
+  }
+
+  return context;
+};

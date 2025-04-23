@@ -1,6 +1,6 @@
 
 import { BaseApiService } from './base-api';
-import { Accommodation } from '@/types/database';
+import { Accommodation } from '@/types';
 
 /**
  * Service for handling accommodation-related API calls
@@ -19,13 +19,7 @@ export class AccommodationService extends BaseApiService {
       throw error;
     }
     
-    // Transform to ensure it matches the Accommodation interface
-    return data.map(accommodation => ({
-      ...accommodation,
-      location: accommodation.address || 'Unknown Location',
-      is_available: true, // Default value as it's missing in database
-      category: accommodation.type || 'Standard'
-    })) as Accommodation[];
+    return data;
   }
 
   /**
@@ -43,13 +37,7 @@ export class AccommodationService extends BaseApiService {
       throw error;
     }
     
-    // Transform to ensure it matches the Accommodation interface
-    return {
-      ...data,
-      location: data.address || 'Unknown Location',
-      is_available: true, // Default value as it's missing in database
-      category: data.type || 'Standard'
-    } as Accommodation;
+    return data;
   }
 }
 

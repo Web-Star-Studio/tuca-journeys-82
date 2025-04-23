@@ -1,120 +1,102 @@
 
-import { supabase } from '@/lib/supabase-client';
-import { UserProfile } from '@/types/database';
+import { BaseApiService } from './base-api';
+import { UserProfile } from '@/types';
 
-// Additional export for userService
-export const userService = {
-  getUserProfile,
-  updateUserProfile,
-  getUserPreferences,
-  updateUserPreferences,
-  getUserRoles
-};
-
-// Add the missing getUserRoles function
-async function getUserRoles(userId: string): Promise<string[]> {
-  try {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-    
-    if (error) throw error;
-    
-    return data.map(item => item.role);
-  } catch (error) {
-    console.error('Error fetching user roles:', error);
-    return [];
-  }
-}
-
-async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  try {
-    const { data, error } = await supabase
+/**
+ * Service for handling user-related API calls
+ */
+export class UserService extends BaseApiService {
+  /**
+   * Get a user's profile
+   */
+  async getUserProfile(userId: string): Promise<UserProfile | null> {
+    const { data, error } = await this.supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
     
-    if (error) {
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the error for "no rows returned"
       console.error('Error fetching user profile:', error);
-      return null;
+      throw error;
     }
     
-    return data as UserProfile;
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return null;
+    return data || null;
   }
-}
 
-async function updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
-  try {
-    // Convert preferences to a plain object for JSON storage
-    const supabaseUpdates: Record<string, any> = { ...updates };
+  /**
+   * Create or update a user's profile
+   */
+  async createOrUpdateUserProfile(profile: Partial<UserProfile> & { id: string }): Promise<UserProfile> {
+    // Check if profile exists
+    try {
+      const existingProfile = await this.getUserProfile(profile.id);
       
-    // If there are preferences, make sure they're converted to a plain object
-    if (updates.preferences) {
-      supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
+      if (existingProfile) {
+        // Update
+        const { data, error } = await this.supabase
+          .from('user_profiles')
+          .update(profile)
+          .eq('id', profile.id)
+          .select()
+          .single();
+        
+        if (error) {
+          throw error;
+        }
+        
+        return data;
+      } else {
+        // Create
+        const { data, error } = await this.supabase
+          .from('user_profiles')
+          .insert([profile])
+          .select()
+          .single();
+        
+        if (error) {
+          throw error;
+        }
+        
+        return data;
+      }
+    } catch (error) {
+      console.error('Error creating/updating user profile:', error);
+      throw error;
     }
-    
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .update(supabaseUpdates)
-      .eq('id', userId)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Error updating user profile:', error);
-      return null;
-    }
-    
-    return data as UserProfile;
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    return null;
   }
-}
 
-async function getUserPreferences(userId: string): Promise<any | null> {
-  try {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('preferences')
-      .eq('id', userId)
-      .single();
+  /**
+   * Get all roles for a user
+   */
+  async getUserRoles(userId: string): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId);
     
     if (error) {
-      console.error('Error fetching user preferences:', error);
-      return null;
+      console.error('Error fetching user roles:', error);
+      throw error;
     }
     
-    return data?.preferences || null;
-  } catch (error) {
-    console.error('Error fetching user preferences:', error);
-    return null;
+    return data.map(item => item.role);
   }
-}
 
-async function updateUserPreferences(userId: string, preferences: any): Promise<boolean> {
-  try {
-    // Convert to plain object for JSON storage
-    const preferencesObj = JSON.parse(JSON.stringify(preferences));
+  /**
+   * Check if a user has a specific role
+   */
+  async hasRole(userId: string, roleName: string): Promise<boolean> {
+    if (!userId) return false;
     
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({ preferences: preferencesObj })
-      .eq('id', userId);
-    
-    if (error) {
-      console.error('Error updating user preferences:', error);
+    try {
+      const roles = await this.getUserRoles(userId);
+      return roles.includes(roleName);
+    } catch (error) {
+      console.error('Error checking user role:', error);
       return false;
     }
-    
-    return true;
-  } catch (error) {
-    console.error('Error updating user preferences:', error);
-    return false;
   }
 }
+
+export const userService = new UserService();

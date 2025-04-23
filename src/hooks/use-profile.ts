@@ -1,127 +1,62 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile } from '@/types';
 import { toast } from 'sonner';
+import { demoData } from '@/utils/demoDataGenerator';
 
 export const useProfile = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   
-  const { 
-    data: profile, 
-    isLoading, 
-    error,
-    refetch 
-  } = useQuery({
+  // Query to fetch profile data
+  const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      // In a real app, we'd fetch from an API
+      // For demo, return the first demo user or create a placeholder
+      if (demoData.users.length > 0) {
+        return demoData.users[0];
+      }
       
-      try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle(); // Using maybeSingle instead of single for safety
-        
-        if (error) throw error;
-        
-        // If no profile exists yet, return null instead of throwing an error
-        if (!data) return null;
-        
-        return data as UserProfile;
-      } catch (error: any) {
-        console.error('Erro ao carregar perfil:', error.message);
-        // We're rethrowing to let react-query handle retries
-        throw new Error(`Falha ao carregar perfil: ${error.message}`);
-      }
+      return {
+        id: "demo-user",
+        name: "Usuário Demo",
+        email: "demo@example.com",
+        phone: "+55 11 99999-9999",
+        address: "Av. Exemplo, 123",
+        city: "São Paulo",
+        state: "SP",
+        zip_code: "01234-567",
+        country: "Brasil",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
     },
-    enabled: !!user?.id,
-    staleTime: 60 * 1000, // Cache por 1 minuto
-    retry: 1, // Tenta uma vez mais em caso de falha, evitando muitas tentativas
-    meta: {
-      onError: (error: any) => {
-        // Toast error só é exibido se houver realmente um problema
-        // e não apenas devido a perfil não encontrado
-        if (!error.message.includes("não encontrado")) {
-          toast.error(error.message || "Erro ao carregar perfil");
-        }
-      }
+    enabled: !!user,
+  });
+
+  // Mutation to update profile
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: any) => {
+      // In a real app, we'd call an API
+      console.log('Updating profile:', profileData);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Perfil atualizado com sucesso');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar o perfil');
+      console.error('Error updating profile:', error);
     }
   });
-  
-  const updateProfile = useMutation({
-    mutationFn: async (updates: Partial<UserProfile>) => {
-      if (!user?.id) throw new Error('Usuário não autenticado');
-      
-      // Verificar se o perfil existe antes de tentar atualizar
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (fetchError) throw fetchError;
-      
-      // Se o perfil não existir, criar um novo
-      if (!existingProfile) {
-        // Converter updates para um objeto simples que o Supabase pode processar
-        const supabaseUpdates: Record<string, any> = { ...updates };
-      
-        // Converter preferências para JSON se existirem
-        if (updates.preferences) {
-          supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
-        }
-        
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .insert({ id: user.id, ...supabaseUpdates })
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
-      }
-      
-      // Converter updates para um objeto simples que o Supabase pode processar
-      const supabaseUpdates: Record<string, any> = { ...updates };
-      
-      // Verificar se há preferências e convertê-las para objeto JSON
-      if (updates.preferences) {
-        supabaseUpdates.preferences = JSON.parse(JSON.stringify(updates.preferences));
-      }
-      
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .update(supabaseUpdates)
-        .eq('id', user.id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['profile', user?.id], data);
-      queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
-      toast.success('Perfil atualizado com sucesso');
-    },
-    onError: (error: any) => {
-      console.error('Erro ao atualizar perfil:', error);
-      toast.error(`Erro ao atualizar perfil: ${error.message || 'Erro desconhecido'}`);
-    },
-    retry: 0, // Sem retry para mutations para evitar operações duplicadas
-  });
-  
+
   return {
     profile,
     isLoading,
     error,
-    updateProfile: updateProfile.mutate,
-    isUpdating: updateProfile.isPending,
-    refetchProfile: refetch,
-    createProfile: (data: Partial<UserProfile>) => updateProfile.mutate(data)
+    updateProfile: (data: any) => updateProfileMutation.mutate(data)
   };
 };

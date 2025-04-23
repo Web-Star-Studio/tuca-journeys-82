@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,32 +17,20 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Partner, DiscountCode } from "@/types/partner";
+import { Partner } from "@/types/partner";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 
-// Sample partners data (same as in Partners.tsx) but aligned with our Partner type
-const partners: Array<Partner & { 
-  category?: string;
-  name?: string;
-  featured?: boolean;
-  discount_codes?: DiscountCode[] 
-}> = [
+// Sample partners data (same as in Partners.tsx)
+const partners: Partner[] = [
   {
-    id: "1", // Changed from number to string to match Partner type
-    user_id: "user-1",
-    business_name: "Mergulho Noronha",
-    business_type: "tour",
-    name: "Mergulho Noronha", // Added for backward compatibility
+    id: 1,
+    name: "Mergulho Noronha",
     description: "Empresa especializada em mergulhos guiados e cursos de mergulho em Fernando de Noronha.",
     logo_url: "/tour-diving.jpg",
     website: "https://www.mergulhonoronha.com.br",
-    category: "Aventura", // Added for UI compatibility
-    featured: true, // Added for UI compatibility
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    category: "Aventura",
+    featured: true,
     discount_codes: [
       {
         id: 101,
@@ -66,20 +55,13 @@ const partners: Array<Partner & {
     ]
   },
   {
-    id: "2", // Changed from number to string
-    user_id: "user-2",
-    business_name: "Pousada Maravilha",
-    business_type: "accommodation",
-    name: "Pousada Maravilha", // Added for backward compatibility
+    id: 2,
+    name: "Pousada Maravilha",
     description: "Pousada luxuosa com vista para o mar e serviço premium em Fernando de Noronha.",
     logo_url: "/accommodation-luxury.jpg",
     website: "https://www.pousadamaravilha.com.br",
-    category: "Hospedagem", // Added for UI compatibility
+    category: "Hospedagem",
     address: "Rua da Praia, 123, Fernando de Noronha",
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
     discount_codes: [
       {
         id: 201,
@@ -94,21 +76,14 @@ const partners: Array<Partner & {
     ]
   },
   {
-    id: "3",
-    user_id: "user-3",
-    business_name: "Restaurante Mar Azul",
-    business_type: "restaurant",
-    name: "Restaurante Mar Azul", // Added for backward compatibility
+    id: 3,
+    name: "Restaurante Mar Azul",
     description: "Restaurante especializado em frutos do mar frescos com vista panorâmica para o oceano.",
     logo_url: "/product-tshirt.jpg",
     website: "https://www.restaurantemarazul.com.br",
-    category: "Gastronomia", // Added for UI compatibility
+    category: "Gastronomia",
     address: "Av. Beira Mar, 500, Fernando de Noronha",
-    featured: true, // Added for UI compatibility
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    featured: true,
     discount_codes: [
       {
         id: 301,
@@ -130,19 +105,12 @@ const partners: Array<Partner & {
     ]
   },
   {
-    id: "4",
-    user_id: "user-4",
-    business_name: "Buggy Noronha Tours",
-    business_type: "vehicle",
-    name: "Buggy Noronha Tours", // Added for backward compatibility
+    id: 4,
+    name: "Buggy Noronha Tours",
     description: "Aluguel de buggys e tours guiados por toda a ilha de Fernando de Noronha.",
     logo_url: "/tour-buggy.jpg",
     website: "https://www.buggynoronhatours.com.br",
-    category: "Transporte", // Added for UI compatibility
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    category: "Transporte",
     discount_codes: [
       {
         id: 401,
@@ -155,19 +123,12 @@ const partners: Array<Partner & {
     ]
   },
   {
-    id: "5",
-    user_id: "user-5",
-    business_name: "Eco Ilha Souvenirs",
-    business_type: "product",
-    name: "Eco Ilha Souvenirs", // Added for backward compatibility
+    id: 5,
+    name: "Eco Ilha Souvenirs",
     description: "Loja de lembranças e produtos sustentáveis produzidos por artesãos locais.",
     logo_url: "/product-hat.jpg",
     website: "https://www.ecoilhasouvenirs.com.br",
-    category: "Compras", // Added for UI compatibility
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    category: "Compras",
     discount_codes: [
       {
         id: 501,
@@ -190,20 +151,13 @@ const partners: Array<Partner & {
     ]
   },
   {
-    id: "6",
-    user_id: "user-6",
-    business_name: "SPA Oceânico",
-    business_type: "service",
-    name: "SPA Oceânico", // Added for backward compatibility
+    id: 6,
+    name: "SPA Oceânico",
     description: "Spa de luxo oferecendo tratamentos relaxantes e terapêuticos com vista para o oceano.",
     logo_url: "/tour-sunset.jpg",
     website: "https://www.spaoceaniconoronha.com.br",
-    category: "Bem-estar", // Added for UI compatibility
-    featured: true, // Added for UI compatibility
-    is_verified: true,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    category: "Bem-estar",
+    featured: true,
     discount_codes: [
       {
         id: 601,
@@ -220,8 +174,8 @@ const partners: Array<Partner & {
 ];
 
 // Extended detailed information for partners (in a real app, this would come from the database)
-const partnerDetails: Record<string, any> = {
-  "1": { // Changed from number to string to match Partner type
+const partnerDetails = {
+  1: {
     longDescription: "Mergulho Noronha é a empresa líder em mergulho autônomo e livre em Fernando de Noronha, com mais de 15 anos de experiência. Oferecemos cursos para todos os níveis, desde iniciantes até mergulhadores avançados, sempre com equipamentos de última geração e instrutores certificados internacionalmente. Nossa equipe de biólogos marinhos garante uma experiência educativa, ajudando a identificar espécies e explicando sobre o ecossistema único de Noronha. Priorizamos a segurança e o respeito ao meio ambiente em todas as nossas operações.",
     gallery: ["/tour-diving.jpg", "/tour-underwater.jpg", "/tour-turtles.jpg"],
     contactInfo: {
@@ -237,7 +191,7 @@ const partnerDetails: Record<string, any> = {
       "Fotografia submarina profissional disponível"
     ]
   },
-  "2": {
+  2: {
     longDescription: "A Pousada Maravilha é um refúgio de luxo em Fernando de Noronha, oferecendo acomodações exclusivas com vista panorâmica para o mar. Nossas suítes e bangalôs são espaçosos e decorados com elegância, combinando o conforto moderno com elementos naturais da ilha. O restaurante da pousada serve gastronomia contemporânea com ingredientes locais e o nosso spa oferece tratamentos relaxantes inspirados nas tradições brasileiras. Localizada próxima às principais praias, a Pousada Maravilha é o local perfeito para uma estadia inesquecível no paraíso.",
     gallery: ["/accommodation-luxury.jpg", "/hero-noronha-beach.jpg", "/hero-noronha-1.jpg"],
     contactInfo: {
@@ -253,7 +207,7 @@ const partnerDetails: Record<string, any> = {
       "Traslados gratuitos de/para o aeroporto"
     ]
   },
-  "3": {
+  3: {
     longDescription: "O Restaurante Mar Azul é conhecido como o melhor restaurante de frutos do mar em Fernando de Noronha. Com uma localização privilegiada à beira-mar, oferecemos uma experiência gastronômica única com vista para o pôr do sol. Nossa cozinha é liderada pelo Chef Paulo Santos, que combina técnicas contemporâneas com sabores tradicionais, sempre utilizando peixes e frutos do mar frescos capturados diariamente. O cardápio é complementado por uma extensa carta de vinhos nacionais e importados. Nosso ambiente é elegante mas descontraído, perfeito para jantares românticos ou celebrações especiais.",
     gallery: ["/hero-noronha-2.jpg", "/hero-noronha-sunset.jpg", "/hero-noronha-aerial.jpg"],
     contactInfo: {
@@ -269,7 +223,7 @@ const partnerDetails: Record<string, any> = {
       "Música ao vivo nos fins de semana"
     ]
   },
-  "4": {
+  4: {
     longDescription: "Buggy Noronha Tours oferece a maneira mais conveniente e divertida de explorar Fernando de Noronha. Com nossa frota de buggys modernos e bem mantidos, você terá a liberdade de visitar todas as praias e mirantes no seu próprio ritmo. Além do aluguel de veículos, oferecemos tours guiados com motoristas locais experientes que conhecem todos os segredos da ilha. Nossos pacotes incluem mapas detalhados, dicas personalizadas e assistência 24 horas. Todos os nossos buggys são revisados diariamente para garantir sua segurança e conforto durante sua aventura em Noronha.",
     gallery: ["/tour-buggy.jpg", "/tour-trail.jpg", "/hero-noronha-1.jpg"],
     contactInfo: {
@@ -285,7 +239,7 @@ const partnerDetails: Record<string, any> = {
       "Preços especiais para hospedagens parceiras"
     ]
   },
-  "5": {
+  5: {
     longDescription: "A Eco Ilha Souvenirs é uma loja de presentes e lembranças com forte compromisso ambiental. Todos os nossos produtos são cuidadosamente selecionados ou produzidos para refletir a beleza natural e cultural de Fernando de Noronha, sempre com foco na sustentabilidade. Trabalhamos com artesãos locais para criar peças exclusivas como joias, esculturas, pinturas e têxteis que capturam a essência da ilha. Também oferecemos uma linha de produtos ecológicos como garrafas reutilizáveis, protetores solares naturais e roupas feitas com materiais sustentáveis. Uma porcentagem de todas as vendas é destinada a projetos de conservação ambiental em Noronha.",
     gallery: ["/product-hat.jpg", "/product-tshirt.jpg", "/product-mug.jpg"],
     contactInfo: {
@@ -301,7 +255,7 @@ const partnerDetails: Record<string, any> = {
       "Embalagens biodegradáveis"
     ]
   },
-  "6": {
+  6: {
     longDescription: "O SPA Oceânico é um oásis de tranquilidade em Fernando de Noronha, projetado para rejuvenescer corpo e mente enquanto você contempla vistas deslumbrantes do oceano Atlântico. Nossos tratamentos exclusivos utilizam ingredientes naturais da ilha, como algas marinhas, areia vulcânica e óleos essenciais de plantas locais. Oferecemos uma ampla gama de serviços, desde massagens terapêuticas e tratamentos faciais até rituais de bem-estar inspirados em tradições antigas. Nossas instalações incluem saunas, hidromassagem com vista para o mar, sala de relaxamento e uma piscina de imersão natural. Nossos terapeutas são altamente qualificados e treinados nas melhores técnicas de spa do mundo.",
     gallery: ["/tour-sunset.jpg", "/hero-noronha-beach.jpg", "/hero-noronha-2.jpg"],
     contactInfo: {
@@ -319,20 +273,12 @@ const partnerDetails: Record<string, any> = {
   }
 };
 
-// Cast our partner to include additional UI properties
-type ExtendedPartner = Partner & {
-  category?: string;
-  name?: string;
-  featured?: boolean;
-  discount_codes?: DiscountCode[];
-};
-
 const PartnerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
   // Find the partner by ID
-  const partner = partners.find(p => p.id === id) as ExtendedPartner | undefined;
+  const partner = partners.find(p => p.id === Number(id));
   
   // If partner not found, show error
   if (!partner) {
@@ -350,7 +296,7 @@ const PartnerDetail = () => {
   }
   
   // Get additional details
-  const details = partnerDetails[partner?.id as string];
+  const details = partnerDetails[partner.id as keyof typeof partnerDetails];
   
   // Function to copy discount code to clipboard
   const copyToClipboard = (code: string) => {
@@ -368,9 +314,7 @@ const PartnerDetail = () => {
   };
   
   // Find other partners in the same category
-  const relatedPartners = partners
-    .filter(p => p.category === partner?.category && p.id !== partner?.id)
-    .slice(0, 3);
+  const relatedPartners = partners.filter(p => p.category === partner.category && p.id !== partner.id).slice(0, 3);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -390,15 +334,15 @@ const PartnerDetail = () => {
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div className="relative h-48 md:h-64 bg-gray-100">
               <img 
-                src={partner?.logo_url} 
-                alt={partner?.business_name} 
+                src={partner.logo_url} 
+                alt={partner.name} 
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                 <div className="p-6 text-white">
-                  <Badge className="mb-2 bg-tuca-green">{partner?.category}</Badge>
-                  <h1 className="text-3xl font-bold mb-1">{partner?.business_name}</h1>
-                  {partner?.featured && (
+                  <Badge className="mb-2 bg-tuca-green">{partner.category}</Badge>
+                  <h1 className="text-3xl font-bold mb-1">{partner.name}</h1>
+                  {partner.featured && (
                     <Badge className="bg-tuca-coral">Parceiro Destaque</Badge>
                   )}
                 </div>
@@ -414,7 +358,7 @@ const PartnerDetail = () => {
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 className="text-2xl font-bold mb-4">Sobre o Parceiro</h2>
                 <p className="text-gray-700 whitespace-pre-line mb-6">
-                  {details.longDescription || partner?.description}
+                  {details.longDescription || partner.description}
                 </p>
                 
                 {/* Highlights */}
@@ -422,7 +366,7 @@ const PartnerDetail = () => {
                   <div className="mb-6">
                     <h3 className="text-lg font-medium mb-3">Destaques</h3>
                     <ul className="space-y-2">
-                      {details.highlights.map((highlight: string, index: number) => (
+                      {details.highlights.map((highlight, index) => (
                         <li key={index} className="flex items-start">
                           <Check className="h-5 w-5 text-tuca-green mr-2 flex-shrink-0 mt-0.5" />
                           <span>{highlight}</span>
@@ -453,10 +397,10 @@ const PartnerDetail = () => {
                         </div>
                       )}
                       
-                      {partner?.address && (
+                      {partner.address && (
                         <div className="flex items-center">
                           <MapPin className="h-5 w-5 text-tuca-ocean-blue mr-2" />
-                          <span>{partner?.address}</span>
+                          <span>{partner.address}</span>
                         </div>
                       )}
                       
@@ -471,12 +415,12 @@ const PartnerDetail = () => {
                     <div className="mt-4 flex items-center">
                       <Globe className="h-5 w-5 text-tuca-ocean-blue mr-2" />
                       <a 
-                        href={partner?.website}
+                        href={partner.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-tuca-ocean-blue hover:underline flex items-center"
                       >
-                        {partner?.website}
+                        {partner.website}
                         <ExternalLink className="h-3 w-3 ml-1" />
                       </a>
                     </div>
@@ -489,11 +433,11 @@ const PartnerDetail = () => {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                   <h2 className="text-2xl font-bold mb-4">Galeria</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {details.gallery.map((image: string, index: number) => (
+                    {details.gallery.map((image, index) => (
                       <div key={index} className="rounded-lg overflow-hidden h-48">
                         <img 
                           src={image} 
-                          alt={`${partner?.business_name} - Imagem ${index + 1}`} 
+                          alt={`${partner.name} - Imagem ${index + 1}`} 
                           className="w-full h-full object-cover hover:scale-105 transition-transform"
                         />
                       </div>
@@ -516,12 +460,12 @@ const PartnerDetail = () => {
                         <div className="h-32">
                           <img 
                             src={relPartner.logo_url} 
-                            alt={relPartner.business_name} 
+                            alt={relPartner.name} 
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="p-4">
-                          <h3 className="font-medium mb-1">{relPartner.business_name}</h3>
+                          <h3 className="font-medium mb-1">{relPartner.name}</h3>
                           <Badge variant="outline" className="text-xs">{relPartner.category}</Badge>
                         </div>
                       </div>
@@ -541,7 +485,7 @@ const PartnerDetail = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {partner?.discount_codes?.map((code) => {
+                  {partner.discount_codes.map((code) => {
                     const expired = isCodeExpired(code.expires_at);
                     
                     return (
@@ -617,7 +561,7 @@ const PartnerDetail = () => {
                   <Button 
                     className="w-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90"
                     onClick={() => {
-                      window.open(partner?.website, '_blank');
+                      window.open(partner.website, '_blank');
                     }}
                   >
                     <Globe className="h-4 w-4 mr-2" />

@@ -1,34 +1,40 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 import { bookingService } from '@/services';
 import { toast } from 'sonner';
 
 /**
  * Hook for cancelling a booking
+ * 
+ * @returns Mutation for cancelling a booking
  */
 export const useCancelBooking = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const mutation = useMutation({
-    mutationFn: (bookingId: string) => {
-      return bookingService.cancelBooking(bookingId);
+    mutationFn: async (bookingId: string) => {
+      if (!user) throw new Error('User not authenticated');
+      return await bookingService.cancelBooking(bookingId, user.id);
     },
-    onSuccess: (data) => {
-      toast.success('Reserva cancelada com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      // Using optional chaining to safely access id property
-      if (data?.id) {
-        queryClient.setQueryData(['booking', data.id], data);
-      }
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['bookings', user?.id] });
+      toast.success('Reserva cancelada com sucesso');
     },
-    onError: (error: any) => {
-      toast.error(`Erro ao cancelar reserva: ${error.message}`);
+    onError: (error) => {
+      console.error('Error cancelling booking:', error);
+      toast.error('Erro ao cancelar a reserva');
     }
   });
-  
+
+  const cancelBooking = (id: string) => {
+    mutation.mutate(id);
+  };
+
   return {
-    cancelBooking: mutation.mutate,
-    isCancelling: mutation.isPending,
-    ...mutation
+    cancelBooking,
+    isCancelling: mutation.isPending
   };
 };

@@ -1,24 +1,36 @@
 
+// Testimonials data
 export const testimonials = [
   {
     id: 1,
-    name: "Maria Silva",
-    image: "/lovable-uploads/1da99f74-2aae-4813-af7f-d1cd24839a2d.png",
-    comment: "Minha viagem para Fernando de Noronha foi incrível! O atendimento da equipe Tuca foi excepcional do início ao fim.",
-    rating: 5
+    name: "Mariana Silva",
+    image: "/lovable-uploads/534474aa-fd6f-45c3-9cee-b4fa0aa10f59.png",
+    comment:
+      "A viagem com a Tuca Noronha superou todas as minhas expectativas! O atendimento foi impecável desde o primeiro contato, e os passeios sugeridos foram perfeitos para o que eu buscava.",
+    rating: 5,
   },
   {
     id: 2,
-    name: "João Oliveira",
-    image: "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
-    comment: "Os passeios foram muito bem organizados e os guias muito preparados. Recomendo a todos!",
-    rating: 5
+    name: "Carlos e Juliana",
+    image: "/lovable-uploads/e2d7ced5-5054-4e84-af39-57c7c1bb222a.png",
+    comment:
+      "Planejamos nossa lua de mel com a Tuca Noronha e foi a melhor decisão. Cada detalhe foi pensado com carinho, desde a pousada com vista para o mar até os passeios românticos.",
+    rating: 5,
   },
   {
     id: 3,
-    name: "Ana Costa",
-    image: "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
-    comment: "Minha hospedagem era exatamente como nas fotos. Uma experiência incrível que vou repetir com certeza!",
-    rating: 4
-  }
+    name: "Família Oliveira",
+    image: "/lovable-uploads/8031b127-9390-44b5-865c-93c4a4fb19dc.png",
+    comment:
+      "Viajar com crianças pode ser desafiador, mas a equipe da Tuca facilitou tudo! Roteiros adaptados para as crianças, hospedagem confortável e atendimento personalizado.",
+    rating: 4,
+  },
+  {
+    id: 4,
+    name: "Patricia Mendes",
+    image: "/lovable-uploads/cd81e007-b687-426e-9059-a599e95ea9f8.png",
+    comment:
+      "Sou viajante solo e me preocupava com a logística, mas a Tuca Noronha cuidou de tudo. Me senti segura e aproveitei cada momento nesse paraíso!",
+    rating: 5,
+  },
 ];

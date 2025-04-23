@@ -1,31 +1,21 @@
 
-import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { createQueryClient } from '@/lib/query-client-config';
-import { handleQueryError, handleMutationError } from '@/lib/query-error-handlers';
+import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 interface QueryProviderProps {
   children: React.ReactNode;
 }
-
-// Create a client instance
-export const queryClient = createQueryClient();
-
-// Configure global error handlers
-queryClient.setDefaultOptions({
-  queries: {
-    ...queryClient.getDefaultOptions().queries,
-    meta: {
-      onError: handleQueryError
-    }
-  },
-  mutations: {
-    ...queryClient.getDefaultOptions().mutations,
-    meta: {
-      onError: handleMutationError
-    }
-  }
-});
 
 export const QueryProvider = ({ children }: QueryProviderProps) => {
   return (
@@ -34,6 +24,3 @@ export const QueryProvider = ({ children }: QueryProviderProps) => {
     </QueryClientProvider>
   );
 };
-
-export default QueryProvider;
-

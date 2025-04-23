@@ -1,10 +1,51 @@
-
+import React from 'react';
 import { supabase } from "./supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 /**
- * Verifica se o email é de um administrador
+ * Check if the current user has a specific role
+ * @param userId User ID to check
+ * @param role Role to check for
+ * @returns Boolean indicating if the user has the role
  */
-export const isAdminEmail = (email: string | undefined | null): boolean => {
+export const hasRole = async (userId: string, role: string): Promise<boolean> => {
+  if (!userId) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', role)
+      .single();
+    
+    if (error) {
+      console.error('Error checking user role:', error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking user role:', error);
+    return false;
+  }
+};
+
+/**
+ * Check if a user is an admin by checking the user_roles table
+ */
+export const isUserAdmin = async (userId: string): Promise<boolean> => {
+  return await hasRole(userId, 'admin');
+};
+
+/**
+ * Check if the given email matches the admin email
+ * This is a fallback for demo purposes
+ */
+export const isAdminEmail = (email: string | undefined): boolean => {
   if (!email) return false;
   
   const adminEmails = [
@@ -12,73 +53,75 @@ export const isAdminEmail = (email: string | undefined | null): boolean => {
     'felipe@webstar.studio'
   ];
   
-  return adminEmails.includes(email.toLowerCase());
+  return adminEmails.includes(email);
 };
 
 /**
- * Verifica se o usuário tem função de administrador no banco de dados
+ * Set admin role for a user in the user_roles table
+ * This function should be used for newly registered admin users
  */
-export async function isUserAdmin(userId: string): Promise<boolean> {
+export const setAdminRole = async (userId: string): Promise<boolean> => {
   try {
-    // Verificar se o usuário tem a função 'admin' na tabela user_roles
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
+      .insert([
+        { 
+          user_id: userId, 
+          role: 'admin'
+        }
+      ]);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error setting admin role:', error);
+      return false;
+    }
     
-    // Se encontrou um registro, o usuário é admin
-    return !!data;
+    return true;
   } catch (error) {
-    console.error('Erro ao verificar permissões de admin:', error);
+    console.error('Error setting admin role:', error);
     return false;
   }
-}
+};
 
 /**
- * Verifica se o usuário é um parceiro verificado
+ * Check if the current user has admin access, checking both session data and custom claims
  */
-export async function isUserPartner(userId: string): Promise<boolean> {
-  try {
-    const { data, error } = await supabase
-      .from('partners')
-      .select('id, is_verified')
-      .eq('user_id', userId)
-      .maybeSingle();
-    
-    if (error) throw error;
-    
-    // Usuário é parceiro e está verificado
-    return !!data && data.is_verified === true;
-  } catch (error) {
-    console.error('Erro ao verificar status de parceiro:', error);
-    return false;
-  }
-}
+export const checkAdminAccess = async (userId: string): Promise<boolean> => {
+  return await isUserAdmin(userId);
+};
 
 /**
- * Verifica se o usuário tem uma função específica
+ * Add protection to admin routes by redirecting non-admin users
  */
-export async function hasUserRole(userId: string, role: 'admin' | 'partner' | 'customer'): Promise<boolean> {
-  try {
-    if (!userId) return false;
+export const withAdminProtection = (Component: React.ComponentType) => {
+  const ProtectedComponent: React.FC<any> = (props) => {
+    const { user, isAdmin, isLoading } = useAuth();
+    const navigate = useNavigate();
     
-    // Verificar direto na tabela de user_roles
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', role)
-      .maybeSingle();
+    useEffect(() => {
+      if (!isLoading) {
+        if (!user) {
+          navigate('/login');
+        } else if (!isAdmin) {
+          navigate('/dashboard');
+        }
+      }
+    }, [user, isAdmin, isLoading, navigate]);
+
+    if (isLoading) {
+      return (
+        React.createElement("div", { className: "min-h-screen flex items-center justify-center" },
+          React.createElement(Loader2, { className: "h-12 w-12 animate-spin text-tuca-ocean-blue" })
+        )
+      );
+    }
     
-    if (error) throw error;
+    if (!user || !isAdmin) {
+      return null; // Will redirect due to the useEffect
+    }
     
-    return !!data;
-  } catch (error) {
-    console.error(`Erro ao verificar se usuário tem função ${role}:`, error);
-    return false;
-  }
-}
+    return React.createElement(Component, props);
+  };
+  
+  return ProtectedComponent;
+};

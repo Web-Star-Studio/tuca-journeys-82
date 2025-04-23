@@ -15,7 +15,6 @@ export const useSignIn = () => {
       const isDemoAccount = [
         "user@example.com",
         "admin@tucanoronha.com",
-        "partner@demo.com",
         "felipe@webstar.studio"
       ].includes(email);
       
@@ -24,17 +23,16 @@ export const useSignIn = () => {
         
         // Create a mock user and session for demo purposes
         const isAdmin = email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
-        const isPartner = email === "partner@demo.com";
         
         const mockUser: User = {
           id: `demo-${Date.now()}`,
           app_metadata: { 
             provider: "demo",
-            ...(isAdmin ? { role: "admin" } : isPartner ? { role: "partner" } : {})
+            ...(isAdmin ? { role: "admin" } : {})
           },
           user_metadata: {
-            name: isAdmin ? "Demo Admin" : isPartner ? "Demo Partner" : "Demo User",
-            role: isAdmin ? "admin" : isPartner ? "partner" : "user"
+            name: isAdmin ? "Demo Admin" : "Demo User",
+            role: isAdmin ? "admin" : "user"
           },
           aud: "authenticated",
           created_at: new Date().toISOString(),
@@ -59,7 +57,7 @@ export const useSignIn = () => {
         
         toast({
           title: "Login de demonstração",
-          description: `Bem-vindo, ${isAdmin ? "Administrador" : isPartner ? "Parceiro" : "Usuário"} Demo!`,
+          description: `Bem-vindo, ${isAdmin ? "Administrador" : "Usuário"} Demo!`,
         });
         
         return { data: { user: mockUser, session: mockSession }, error: null };

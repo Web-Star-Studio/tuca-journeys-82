@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import UserFilters from "@/components/admin/users/UserFilters";
 import UsersTable from "@/components/admin/users/UsersTable";
 import DeleteUserDialog from "@/components/admin/users/DeleteUserDialog";
 import UserFormDialog from "@/components/admin/users/UserFormDialog";
-import { User, UserRole, UserStatus } from "@/components/admin/users/types";
+import { User } from "@/components/admin/users/types";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -39,29 +40,29 @@ const Users = () => {
             .eq('user_id', profile.id);
           
           const role = roles && roles.length > 0 
-            ? roles[0].role as UserRole 
-            : 'customer' as UserRole;
+            ? roles[0].role 
+            : 'customer';
             
           return {
             id: profile.id,
             name: profile.name || 'User',
             email: profile.email || '',
             role: role,
-            status: 'active' as UserStatus, // Type cast to UserStatus
+            status: 'active', // You could add a status field to profiles if needed
             created_at: profile.created_at,
             avatar: null // You could add an avatar field to profiles
-          } as User;
+          };
         } catch (e) {
           console.error("Error fetching user role:", e);
           return {
             id: profile.id,
             name: profile.name || 'User',
             email: profile.email || '',
-            role: 'customer' as UserRole,
-            status: 'active' as UserStatus,
+            role: 'customer',
+            status: 'active',
             created_at: profile.created_at,
             avatar: null
-          } as User;
+          };
         }
       }));
       

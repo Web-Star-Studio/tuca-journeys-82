@@ -47,8 +47,7 @@ const BookingDetailDrawer = ({
                   <span className="font-medium capitalize">
                     {booking.item_type === "tour" && "Passeio"}
                     {booking.item_type === "accommodation" && "Hospedagem"}
-                    {booking.item_type === "event" && "Evento"}
-                    {booking.item_type === "vehicle" && "Veículo"}
+                    {booking.item_type === "package" && "Pacote"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2">

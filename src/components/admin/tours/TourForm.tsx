@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
 import { TourFormValues, tourFormSchema, tourCategories, difficultyLevels } from "./TourFormTypes";
 import TourBasicInfoForm from "./form/TourBasicInfoForm";
@@ -12,7 +13,6 @@ import TourFormActions from "./form/TourFormActions";
 import { Form } from "@/components/ui/form";
 import { Tour } from "@/types/database";
 import { stringToArray } from "@/utils/formUtils";
-import { useTours } from "@/hooks/use-tours";
 
 interface TourFormProps {
   tourId?: number;
@@ -23,8 +23,7 @@ interface TourFormProps {
 export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel }) => {
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
-  const toursHook = useTours();
-  const { saveTour, getTourById } = toursHook;
+  const { saveTour, getTourById } = useTours();
   const [isLoading, setIsLoading] = useState(tourId ? true : false);
 
   // Initialize form

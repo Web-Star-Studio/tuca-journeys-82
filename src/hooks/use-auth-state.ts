@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
@@ -7,51 +7,54 @@ export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
-  // Usar uma ref para controlar se o componente está montado
-  const isMounted = useRef<boolean>(true);
 
-  // Inicializar o estado de autenticação
+  // Initialize the auth state
   useEffect(() => {
-    // Função para verificar a sessão atual
-    const checkCurrentSession = async () => {
-      try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        
-        // Verificar se o componente ainda está montado
-        if (isMounted.current) {
-          setSession(sessionData.session);
-          setUser(sessionData.session?.user ?? null);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-        if (isMounted.current) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Configurar o listener para mudanças de estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    // Set up the auth state change listener first (best practice)
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log("Estado de autenticação alterado:", event);
+        console.log("Auth state changed:", event);
         
-        if (isMounted.current) {
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          setLoading(false);
-        }
+        setSession(currentSession);
+        setUser(currentSession?.user || null);
+        setLoading(false);
       }
     );
     
-    // Verificar sessão existente
-    checkCurrentSession();
+    // Get the initial session
+    const initializeAuth = async () => {
+      setLoading(true);
+      
+      try {
+        // Get the current session from Supabase
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
+        }
+        
+        if (data?.session) {
+          console.log("Found Supabase session, setting user state");
+          setSession(data.session);
+          setUser(data.session.user);
+        } else {
+          console.log("No valid session found");
+          setSession(null);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        setSession(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    initializeAuth();
+    
     // Cleanup
     return () => {
-      isMounted.current = false;
-      subscription.unsubscribe();
+      authListener?.subscription.unsubscribe();
     };
   }, []);
 

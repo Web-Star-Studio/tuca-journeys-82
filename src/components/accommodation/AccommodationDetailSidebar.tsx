@@ -99,7 +99,7 @@ const AccommodationDetailSidebar = ({ accommodation }: AccommodationDetailSideba
       
       const totalPrice = calculateTotalPrice();
       const bookingData: CreateBookingDTO = {
-        user_id: user.uid,
+        user_id: user.id, // Changed from user.uid to user.id
         accommodation_id: accommodation.id,
         start_date: checkInDate.toISOString(),
         end_date: checkOutDate.toISOString(),
@@ -264,3 +264,4 @@ const AccommodationDetailSidebar = ({ accommodation }: AccommodationDetailSideba
 };
 
 export default AccommodationDetailSidebar;
+

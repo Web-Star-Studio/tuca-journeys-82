@@ -14,11 +14,20 @@ import { accommodationService } from "@/services/accommodation-service";
 import { Accommodation } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
 
+// Create a type that combines both the database Accommodation type and the static Accommodation type
+interface AccommodationWithUIFields extends Accommodation {
+  capacity?: number;
+  perNight?: boolean;
+  featured?: boolean;
+  image?: string;
+  price?: number;
+}
+
 const AccommodationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [accommodation, setAccommodation] = useState<Accommodation | null>(null);
+  const [accommodation, setAccommodation] = useState<AccommodationWithUIFields | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -38,7 +47,15 @@ const AccommodationDetail = () => {
         // Try to fetch from API
         try {
           const data = await accommodationService.getAccommodationById(accommodationId);
-          setAccommodation(data);
+          setAccommodation({
+            ...data,
+            // Add UI fields for compatibility with the components
+            capacity: data.max_guests,
+            price: data.price_per_night,
+            perNight: true,
+            featured: false,
+            image: data.image_url
+          });
         } catch (apiError) {
           console.error("Error fetching from API:", apiError);
           
@@ -49,7 +66,7 @@ const AccommodationDetail = () => {
             throw new Error("Accommodation not found");
           }
           
-          // Map static data to database format
+          // Map static data to database format + UI fields
           setAccommodation({
             id: staticAccommodation.id,
             title: staticAccommodation.title,
@@ -67,7 +84,13 @@ const AccommodationDetail = () => {
             rating: staticAccommodation.rating,
             type: "hotel",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            // UI fields
+            capacity: staticAccommodation.capacity,
+            price: staticAccommodation.price,
+            perNight: true,
+            featured: staticAccommodation.featured,
+            image: staticAccommodation.image
           });
         }
       } catch (err) {
@@ -156,3 +179,4 @@ const AccommodationDetail = () => {
 };
 
 export default AccommodationDetail;
+

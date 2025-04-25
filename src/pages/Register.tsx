@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -69,10 +68,28 @@ const Register = () => {
     }
   };
 
-  const handlePreferencesSaved = (preferences: TravelPreference) => {
-    setRegistrationComplete(true);
-    toast.success("Registro completo! Bem-vindo a Fernando de Noronha!");
-    setTimeout(() => navigate("/dashboard"), 1500);
+  const handlePreferencesSaved = async (preferences: TravelPreference) => {
+    try {
+      // Save preferences to user's profile
+      const { data: userPreferences, error: preferencesError } = await supabase
+        .from('travel_preferences')
+        .insert([{
+          user_id: user?.id,
+          ...preferences,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .single();
+
+      if (preferencesError) throw preferencesError;
+
+      setRegistrationComplete(true);
+      toast.success("Registro completo! Bem-vindo a Fernando de Noronha!");
+      setTimeout(() => navigate("/dashboard"), 1500);
+    } catch (error: any) {
+      console.error("Error saving preferences:", error);
+      toast.error("Erro ao salvar preferências. Tente novamente.");
+    }
   };
 
   if (isLoading) {

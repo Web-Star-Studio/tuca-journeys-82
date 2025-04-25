@@ -31,6 +31,7 @@ const EventSearchFilter = ({
   setSelectedCategory,
   // Add fallback handling for the new props
   activeCategory,
+  categories: categoryOptions,
   onSearchChange,
   onCategoryChange
 }: EventSearchFilterProps) => {
@@ -49,6 +50,9 @@ const EventSearchFilter = ({
   // Use activeCategory as fallback if provided
   const effectiveCategory = activeCategory || selectedCategory;
   
+  // Use provided categories or default to imported categories
+  const categoriesList = categoryOptions || categories;
+  
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="relative flex-1">
@@ -65,7 +69,7 @@ const EventSearchFilter = ({
           <SelectValue placeholder="Categoria" />
         </SelectTrigger>
         <SelectContent>
-          {categories.map((category) => (
+          {categoriesList.map((category) => (
             <SelectItem key={category} value={category}>
               {category}
             </SelectItem>

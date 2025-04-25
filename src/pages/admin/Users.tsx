@@ -44,9 +44,9 @@ const Users = () => {
             : 'customer';
           
           // Add a status field explicitly since it doesn't exist in the database schema
-          // We'll derive it from other properties or default to 'active'
-          const status = profile.is_active !== undefined ? 
-            (profile.is_active ? 'active' : 'inactive') : 'active';
+          // Since is_active doesn't exist, we'll determine status based on is_admin property
+          // or simply default to 'active' for this demo
+          const status = 'active'; // Default all users to active since is_active isn't available
             
           return {
             id: profile.id,

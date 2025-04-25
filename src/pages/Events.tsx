@@ -58,6 +58,10 @@ const Events = () => {
             {/* Search and Filter */}
             <EventSearchFilter 
               searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedCategory={activeCategory}  
+              setSelectedCategory={setActiveCategory}
+              // These are optional props that will be used by the component
               activeCategory={activeCategory}
               categories={categories}
               onSearchChange={setSearchQuery}

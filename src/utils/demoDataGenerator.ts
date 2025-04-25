@@ -208,7 +208,7 @@ export function generateDemoData(): DemoData {
     }
   ];
 
-  // Generate bookings data with more realistic dates and statuses
+  // Generate more realistic bookings data
   const bookings: Booking[] = [
     {
       id: "booking-001",
@@ -216,13 +216,13 @@ export function generateDemoData(): DemoData {
       user_email: "joao@example.com",
       item_type: "tour",
       item_name: "Passeio de Barco ao Pôr do Sol",
-      start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
-      end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days from now
+      end_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
       guests: 2,
       total_price: 700,
       status: "confirmed",
       payment_status: "paid",
-      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString() // 14 days ago
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days ago
     },
     {
       id: "booking-002",
@@ -230,13 +230,13 @@ export function generateDemoData(): DemoData {
       user_email: "joao@example.com",
       item_type: "accommodation",
       item_name: "Pousada Vista Mar",
-      start_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-      end_date: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start_date: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days from now
+      end_date: new Date(Date.now() + 50 * 24 * 60 * 60 * 1000).toISOString(),
       guests: 2,
       total_price: 4250,
       status: "confirmed",
       payment_status: "paid",
-      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days ago
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString() // 60 days ago
     },
     {
       id: "booking-003",
@@ -244,13 +244,13 @@ export function generateDemoData(): DemoData {
       user_email: "joao@example.com",
       item_type: "tour",
       item_name: "Mergulho na Baía dos Porcos",
-      start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
-      end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+      end_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       guests: 1,
       total_price: 480,
-      status: "pending",
-      payment_status: "pending",
-      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
+      status: "confirmed",
+      payment_status: "paid",
+      created_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString() // 35 days ago
     },
     {
       id: "booking-004",
@@ -258,16 +258,16 @@ export function generateDemoData(): DemoData {
       user_email: "joao@example.com",
       item_type: "package",
       item_name: "Escapada Romântica",
-      start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
-      end_date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
+      end_date: new Date(Date.now() + 95 * 24 * 60 * 60 * 1000).toISOString(),
       guests: 2,
       total_price: 4899,
       status: "confirmed",
       payment_status: "paid",
-      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString() // 60 days ago
+      created_at: new Date().toISOString() // Today
     }
   ];
-  
+
   // Generate products data
   const products: Product[] = [
     {

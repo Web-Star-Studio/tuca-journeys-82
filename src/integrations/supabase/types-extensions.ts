@@ -1,3 +1,4 @@
+
 import { Database as OriginalDatabase } from './types';
 
 // Extend the original Database type with our custom tables
@@ -15,16 +16,264 @@ export interface Database extends OriginalDatabase {
       flight_bookings: OriginalDatabase['public']['Tables']['flight_bookings'];
       flights: OriginalDatabase['public']['Tables']['flights'];
       notifications: OriginalDatabase['public']['Tables']['notifications'];
-      packages: OriginalDatabase['public']['Tables']['packages'];
       partners: OriginalDatabase['public']['Tables']['partners'];
       products: OriginalDatabase['public']['Tables']['products'];
       reviews: OriginalDatabase['public']['Tables']['reviews'];
-      tour_bookings: OriginalDatabase['public']['Tables']['tour_bookings'];
       tours: OriginalDatabase['public']['Tables']['tours'];
       user_profiles: OriginalDatabase['public']['Tables']['user_profiles'];
       wishlist_items: OriginalDatabase['public']['Tables']['wishlist_items'];
       
-      // Add our new travel_preferences table
+      // Add missing tables that are referenced in the codebase
+      user_roles: {
+        Row: {
+          id: string;
+          user_id: string;
+          role: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          role: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          role?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      
+      tour_schedules: {
+        Row: {
+          id: number;
+          tour_id: number;
+          date: string;
+          available_spots: number;
+          price: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          tour_id: number;
+          date: string;
+          available_spots: number;
+          price: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          tour_id?: number;
+          date?: string;
+          available_spots?: number;
+          price?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_schedules_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      tour_bookings: {
+        Row: {
+          id: number;
+          booking_id: number;
+          tour_schedule_id: number;
+          guests: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          booking_id: number;
+          tour_schedule_id: number;
+          guests: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          booking_id?: number;
+          tour_schedule_id?: number;
+          guests?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_bookings_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tour_bookings_tour_schedule_id_fkey";
+            columns: ["tour_schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_schedules";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      user_coupons: {
+        Row: {
+          id: string;
+          user_id: string;
+          coupon_id: string;
+          is_used: boolean;
+          used_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          coupon_id: string;
+          is_used?: boolean;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          coupon_id?: string;
+          is_used?: boolean;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_coupons_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_coupons_coupon_id_fkey";
+            columns: ["coupon_id"];
+            isOneToOne: false;
+            referencedRelation: "discount_coupons";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      vehicle_bookings: {
+        Row: {
+          id: number;
+          booking_id: number;
+          vehicle_id: number;
+          start_date: string;
+          end_date: string;
+          price: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          booking_id: number;
+          vehicle_id: number;
+          start_date: string;
+          end_date: string;
+          price: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          booking_id?: number;
+          vehicle_id?: number;
+          start_date?: string;
+          end_date?: string;
+          price?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_bookings_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      packages: {
+        Row: {
+          id: number;
+          name: string;
+          title: string;
+          description: string;
+          short_description: string;
+          price: number;
+          image_url: string;
+          duration: number;
+          max_guests: number;
+          itinerary: any;
+          includes: string[];
+          excludes: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          title: string;
+          description: string;
+          short_description: string;
+          price: number;
+          image_url: string;
+          duration: number;
+          max_guests: number;
+          itinerary?: any;
+          includes?: string[];
+          excludes?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          title?: string;
+          description?: string;
+          short_description?: string;
+          price?: number;
+          image_url?: string;
+          duration?: number;
+          max_guests?: number;
+          itinerary?: any;
+          includes?: string[];
+          excludes?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      
+      // Add our travel_preferences table
       travel_preferences: {
         Row: {
           id: string;
@@ -35,12 +284,12 @@ export interface Database extends OriginalDatabase {
           activities: string[];
           accommodation_types: string[];
           budget_range: string;
-          dietary_restrictions?: string[];
-          special_requests?: string;
+          dietary_restrictions?: string[] | null;
+          special_requests?: string | null;
           travel_dates?: {
             start_date?: string;
             end_date?: string;
-          };
+          } | null;
           created_at: string;
           updated_at: string;
         };
@@ -53,12 +302,12 @@ export interface Database extends OriginalDatabase {
           activities: string[];
           accommodation_types: string[];
           budget_range: string;
-          dietary_restrictions?: string[];
-          special_requests?: string;
+          dietary_restrictions?: string[] | null;
+          special_requests?: string | null;
           travel_dates?: {
             start_date?: string;
             end_date?: string;
-          };
+          } | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -71,12 +320,12 @@ export interface Database extends OriginalDatabase {
           activities?: string[];
           accommodation_types?: string[];
           budget_range?: string;
-          dietary_restrictions?: string[];
-          special_requests?: string;
+          dietary_restrictions?: string[] | null;
+          special_requests?: string | null;
           travel_dates?: {
             start_date?: string;
             end_date?: string;
-          };
+          } | null;
           created_at?: string;
           updated_at?: string;
         };

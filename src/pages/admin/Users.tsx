@@ -48,7 +48,7 @@ const Users = () => {
             name: profile.name || 'User',
             email: profile.email || '',
             role: role,
-            status: 'active', // You could add a status field to profiles if needed
+            status: profile.status || 'active', // Add fallback for status
             created_at: profile.created_at,
             avatar: null // You could add an avatar field to profiles
           };

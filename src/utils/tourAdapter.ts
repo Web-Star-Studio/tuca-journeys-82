@@ -20,6 +20,6 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
     schedule: dbTour.schedule,
     requirements: dbTour.notes,
     location: dbTour.meeting_point,
-    featured: false // Default to false since DB schema doesn't have this field
+    featured: dbTour.featured || false
   };
 };

@@ -41,6 +41,9 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
     setIsSubmitting(true);
     
     try {
+      // Clear any existing sessions before attempting login
+      localStorage.removeItem("supabase-mock-session");
+      
       const result = await signIn(data.email, data.password);
       
       if (result.error) {

@@ -12,18 +12,29 @@ const DEMO_ACCOUNTS = [
 ];
 
 const QuickAccessButtons = () => {
-  const { signIn, isLoading } = useAuth();
+  const { signIn } = useAuth();
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleDemoLogin = async (email: string, password: string) => {
     setLoggingIn(email);
     try {
-      await signIn(email, password);
+      // Clear any existing sessions before attempting login
+      localStorage.removeItem("supabase-mock-session");
+      
+      const result = await signIn(email, password);
+      
       toast({
         title: "Login de demonstração",
         description: `Você está acessando como ${email.includes("admin") || email === "felipe@webstar.studio" ? "administrador" : "usuário"} demo.`,
       });
+      
+      // After successful login, redirect based on user type
+      if (email.includes("admin") || email === "felipe@webstar.studio") {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/dashboard";
+      }
     } catch (error: any) {
       console.error("Demo login error:", error);
       toast({
@@ -53,7 +64,7 @@ const QuickAccessButtons = () => {
             key={account.email}
             variant="outline"
             className="w-full"
-            disabled={isLoading || !!loggingIn}
+            disabled={!!loggingIn}
             onClick={() => handleDemoLogin(account.email, account.password)}
           >
             {loggingIn === account.email ? (

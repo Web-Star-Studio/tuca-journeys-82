@@ -10,6 +10,7 @@ import ConversationalForm from "@/components/registration/ConversationalForm";
 import { TravelPreference } from "@/types/user-preferences";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase"; // Add the correct import
 
 interface RegisterFormValues {
   name: string;

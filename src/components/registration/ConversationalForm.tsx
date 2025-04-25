@@ -18,6 +18,9 @@ const ConversationalForm: React.FC<ConversationalFormProps> = ({ onComplete }) =
     accommodation_types: [],
     budget_range: '',
     travel_frequency: '',
+    // These two fields are required by the type but can be set later
+    group_size: 0,
+    trip_duration: 0,
   });
 
   const handleActivityChange = (checked: boolean, activity: string) => {

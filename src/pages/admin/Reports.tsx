@@ -37,7 +37,7 @@ const Reports = () => {
 
   return (
     <AdminLayout pageTitle="Relatórios">
-      <div className="space-y-6">
+      <div className="space-y-6 w-full overflow-hidden">
         <Tabs
           defaultValue={activeTab}
           value={activeTab}

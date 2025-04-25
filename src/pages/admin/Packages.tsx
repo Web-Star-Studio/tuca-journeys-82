@@ -74,50 +74,52 @@ const AdminPackages = () => {
 
   return (
     <AdminLayout pageTitle="Gerenciar Pacotes">
-      <PackageSearch
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-        onAddNewClick={() => setShowPackageForm(true)}
-      />
+      <div className="w-full overflow-hidden">
+        <PackageSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          onAddNewClick={() => setShowPackageForm(true)}
+        />
 
-      <PackageTable
-        packages={filteredPackages}
-        isLoading={isLoading}
-        error={error}
-        onEditClick={handleEditClick}
-        onDeleteClick={handleDeleteClick}
-      />
+        <PackageTable
+          packages={filteredPackages}
+          isLoading={isLoading}
+          error={error}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
+        />
 
-      {/* Package Form Dialog */}
-      <Dialog open={showPackageForm} onOpenChange={setShowPackageForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {packageToEdit ? "Editar Pacote" : "Novo Pacote"}
-            </DialogTitle>
-            <DialogDescription>
-              {packageToEdit
-                ? "Edite os detalhes do pacote abaixo."
-                : "Preencha os detalhes do novo pacote abaixo."}
-            </DialogDescription>
-          </DialogHeader>
-          <PackageForm
-            packageId={packageToEdit}
-            onCancel={handleFormClose}
-            onSuccess={handleFormClose}
-          />
-        </DialogContent>
-      </Dialog>
+        {/* Package Form Dialog */}
+        <Dialog open={showPackageForm} onOpenChange={setShowPackageForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {packageToEdit ? "Editar Pacote" : "Novo Pacote"}
+              </DialogTitle>
+              <DialogDescription>
+                {packageToEdit
+                  ? "Edite os detalhes do pacote abaixo."
+                  : "Preencha os detalhes do novo pacote abaixo."}
+              </DialogDescription>
+            </DialogHeader>
+            <PackageForm
+              packageId={packageToEdit}
+              onCancel={handleFormClose}
+              onSuccess={handleFormClose}
+            />
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <PackageDeleteDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirmDelete={confirmDelete}
-        isDeleting={deletePackageMutation.isPending}
-      />
+        {/* Delete Confirmation Dialog */}
+        <PackageDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirmDelete={confirmDelete}
+          isDeleting={deletePackageMutation.isPending}
+        />
+      </div>
     </AdminLayout>
   );
 };

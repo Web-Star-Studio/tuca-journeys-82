@@ -44,9 +44,9 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
         <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <div className={`flex-1 transition-all duration-300 overflow-x-hidden ${collapsed ? "ml-20" : "ml-64"}`}>
+        <div className={`flex-1 transition-all duration-300 overflow-hidden ${collapsed ? "ml-20" : "ml-64"}`}>
           <AdminHeader pageTitle={pageTitle} />
           <main className="p-6 overflow-x-hidden w-full">
             {children}

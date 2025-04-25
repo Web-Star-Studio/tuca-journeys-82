@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -24,6 +25,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSignOut } from "@/hooks/auth/use-sign-out";
 
 interface UserDropdownItem {
   label: string;
@@ -40,6 +42,7 @@ interface UserDropdownContentProps {
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { signOut } = useSignOut();
 
   // Define menu items based on user role
   const menuItems = isAdmin ? [
@@ -72,7 +75,12 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   };
 
   const handleSignOut = async () => {
-    await onSignOut();
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const truncateEmail = (email: string) => {

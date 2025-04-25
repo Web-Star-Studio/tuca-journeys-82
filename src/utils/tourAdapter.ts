@@ -20,6 +20,7 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
     schedule: dbTour.schedule,
     requirements: dbTour.notes,
     location: dbTour.meeting_point,
-    featured: dbTour.featured || false
+    // Use a proper fallback if featured is missing in DBTour type
+    featured: dbTour.is_available !== undefined ? dbTour.is_available : false
   };
 };

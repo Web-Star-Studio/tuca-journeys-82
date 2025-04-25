@@ -14,7 +14,7 @@ export const adaptDBEventToComponentEvent = (dbEvent: any): Event => {
     price: dbEvent.price,
     image_url: dbEvent.image_url || dbEvent.image,
     category: dbEvent.category,
-    featured: dbEvent.featured || false,
+    featured: dbEvent.featured || dbEvent.is_featured || false,
     capacity: dbEvent.capacity || 100,
     available_spots: dbEvent.available_spots || 50,
     organizer: dbEvent.organizer || 'Fernando de Noronha',

@@ -42,15 +42,20 @@ const Users = () => {
           const role = roles && roles.length > 0 
             ? roles[0].role 
             : 'customer';
+          
+          // Add a status field explicitly since it doesn't exist in the database schema
+          // We'll derive it from other properties or default to 'active'
+          const status = profile.is_active !== undefined ? 
+            (profile.is_active ? 'active' : 'inactive') : 'active';
             
           return {
             id: profile.id,
             name: profile.name || 'User',
             email: profile.email || '',
             role: role,
-            status: profile.status || 'active', // Add fallback for status
+            status: status, // Add computed status field
             created_at: profile.created_at,
-            avatar: null // You could add an avatar field to profiles
+            avatar: profile.avatar_url || null
           };
         } catch (e) {
           console.error("Error fetching user role:", e);
@@ -59,9 +64,9 @@ const Users = () => {
             name: profile.name || 'User',
             email: profile.email || '',
             role: 'customer',
-            status: 'active',
+            status: 'active', // Default status
             created_at: profile.created_at,
-            avatar: null
+            avatar: profile.avatar_url || null
           };
         }
       }));

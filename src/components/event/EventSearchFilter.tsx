@@ -17,14 +17,38 @@ interface EventSearchFilterProps {
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
+  // Add these new props to match Events.tsx
+  activeCategory?: string;
+  categories?: string[];
+  onSearchChange?: (query: string) => void;
+  onCategoryChange?: (category: string) => void;
 }
 
 const EventSearchFilter = ({ 
   searchQuery, 
   setSearchQuery, 
   selectedCategory, 
-  setSelectedCategory 
+  setSelectedCategory,
+  // Add fallback handling for the new props
+  activeCategory,
+  onSearchChange,
+  onCategoryChange
 }: EventSearchFilterProps) => {
+  // Handle both API styles
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (onSearchChange) onSearchChange(value);
+  };
+  
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (onCategoryChange) onCategoryChange(value);
+  };
+  
+  // Use activeCategory as fallback if provided
+  const effectiveCategory = activeCategory || selectedCategory;
+  
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="relative flex-1">
@@ -33,10 +57,10 @@ const EventSearchFilter = ({
           placeholder="Buscar eventos..."
           className="pl-10"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
         />
       </div>
-      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+      <Select value={effectiveCategory} onValueChange={handleCategoryChange}>
         <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Categoria" />
         </SelectTrigger>

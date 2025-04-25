@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Remove any mock sessions from previous uses
+        // Remove any mock sessions - important to prevent auto login
         localStorage.removeItem("supabase-mock-session");
         
         // Check for real Supabase session

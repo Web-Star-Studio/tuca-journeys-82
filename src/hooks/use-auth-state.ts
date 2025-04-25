@@ -15,8 +15,13 @@ export const useAuthState = () => {
       (event, currentSession) => {
         console.log("Auth state changed:", event);
         
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
+        if (event === "SIGNED_OUT") {
+          setSession(null);
+          setUser(null);
+        } else if (currentSession) {
+          setSession(currentSession);
+          setUser(currentSession?.user || null);
+        }
         setLoading(false);
       }
     );
@@ -26,7 +31,7 @@ export const useAuthState = () => {
       setLoading(true);
       
       try {
-        // Clean up any old mock sessions first
+        // Make sure we clean up any lingering mock sessions from previous uses
         localStorage.removeItem("supabase-mock-session");
         
         // Get the current session from Supabase

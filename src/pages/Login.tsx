@@ -1,17 +1,27 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginForm from "@/components/login/LoginForm";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isLoading } = useAuth();
   
   // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo');
+  
+  // Only redirect if user is already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      setIsRedirecting(true);
+      navigate(returnTo || '/dashboard');
+    }
+  }, [user, isLoading, navigate, returnTo]);
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
@@ -24,7 +34,7 @@ const Login = () => {
     }
   };
   
-  if (isRedirecting) {
+  if (isLoading || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />

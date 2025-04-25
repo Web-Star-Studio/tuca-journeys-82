@@ -1,6 +1,8 @@
 
 import { Event } from "@/types/event";
 
+export const categories = ["Todas", "Música", "Esporte", "Cultural", "Educativo", "Gastronomia", "Festival"];
+
 export const events: Event[] = [
   {
     id: 1,

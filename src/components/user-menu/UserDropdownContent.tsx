@@ -25,6 +25,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { SignOutResult } from "@/types/auth";
 
 interface UserDropdownItem {
   label: string;
@@ -35,7 +36,7 @@ interface UserDropdownItem {
 
 interface UserDropdownContentProps {
   user: User;
-  onSignOut: () => Promise<void>;
+  onSignOut: () => Promise<SignOutResult>;
 }
 
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
@@ -66,7 +67,10 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   };
 
   const handleSignOut = async () => {
-    await onSignOut();
+    const result = await onSignOut();
+    if (result.success) {
+      navigate('/login');
+    }
   };
 
   const truncateEmail = (email: string) => {

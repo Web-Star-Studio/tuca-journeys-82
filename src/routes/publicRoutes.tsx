@@ -15,6 +15,7 @@ import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
 import Mapa from '@/pages/Mapa';
 import Hospedagens from '@/pages/Hospedagens';
+import AccommodationDetail from '@/pages/AccommodationDetail';
 import Wishlist from '@/pages/Wishlist';
 import Loja from '@/pages/Loja';
 import ProductDetails from '@/pages/ProductDetails';
@@ -32,7 +33,7 @@ export const publicRoutes = (
     <Route path="/passeios" element={<Tours />} />
     <Route path="/passeios/:id" element={<TourDetail />} />
     <Route path="/hospedagens" element={<Hospedagens />} />
-    <Route path="/hospedagens/:id" element={<TourDetail />} />
+    <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
     <Route path="/pacotes" element={<Packages />} />
     <Route path="/pacotes/:id" element={<PackageDetail />} />
     <Route path="/sobre" element={<About />} />

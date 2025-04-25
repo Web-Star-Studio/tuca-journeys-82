@@ -96,7 +96,7 @@ const ReservarPage = () => {
               {featuredTours.map(tour => (
                 <div key={tour.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all">
                   <img 
-                    src={tour.image_url} 
+                    src={tour.image} 
                     alt={tour.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />

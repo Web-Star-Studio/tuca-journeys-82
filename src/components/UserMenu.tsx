@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -15,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Settings, Heart, ShoppingBag } from 'lucide-react';
 
 const UserMenu = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   const handleLogout = async () => {
@@ -64,9 +63,9 @@ const UserMenu = () => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="cursor-pointer flex w-full items-center">
+          <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="cursor-pointer flex w-full items-center">
             <User className="mr-2 h-4 w-4" />
-            Painel do Usuário
+            {isAdmin ? "Painel Admin" : "Painel do Usuário"}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

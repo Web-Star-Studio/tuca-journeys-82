@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,19 @@ import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
 import EventsGrid from "@/components/event/EventsGrid";
 
 const Reservar = () => {
+  const [sortBy, setSortBy] = useState("priceAsc");
+  
+  // Handler for sorting changes
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+  };
+  
+  // Mock reset filters function
+  const resetFilters = () => {
+    // In a real application, this would reset any active filters
+    console.log("Filters reset");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -26,15 +39,20 @@ const Reservar = () => {
             </TabsList>
             
             <TabsContent value="tours">
-              <TourGrid tours={tours} />
+              <TourGrid 
+                tours={tours} 
+                resetFilters={resetFilters}
+                sortBy={sortBy}
+                onSortChange={handleSortChange}
+              />
             </TabsContent>
             
             <TabsContent value="accommodations">
               <AccommodationsGrid 
                 filteredAccommodations={accommodations}
-                resetFilters={() => {}}
-                onSortChange={() => {}}
-                sortBy="priceAsc"
+                resetFilters={resetFilters}
+                onSortChange={handleSortChange}
+                sortBy={sortBy}
               />
             </TabsContent>
             

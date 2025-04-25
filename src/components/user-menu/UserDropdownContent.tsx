@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -79,7 +78,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
       await signOut();
       navigate('/login');
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('Erro durante o logout:', error);
     }
   };
 
@@ -113,7 +112,10 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
         ))}
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
+      <DropdownMenuItem 
+        className="cursor-pointer" 
+        onClick={handleSignOut}
+      >
         <LogOut className="mr-2 h-4 w-4" />
         <span>Sair</span>
       </DropdownMenuItem>

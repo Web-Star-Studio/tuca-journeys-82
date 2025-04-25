@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -25,7 +24,7 @@ const UserMenu = () => {
       await signOut();
       navigate('/login');
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('Erro durante o logout:', error);
     }
   };
 
@@ -94,7 +93,10 @@ const UserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+        <DropdownMenuItem 
+          onClick={handleLogout} 
+          className="cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

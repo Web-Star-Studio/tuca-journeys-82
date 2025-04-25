@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/types/product';
@@ -40,7 +39,8 @@ export function useProducts(filters?: ProductFilters) {
       }
       
       return data || [];
-    }
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
   
   // Create a new product

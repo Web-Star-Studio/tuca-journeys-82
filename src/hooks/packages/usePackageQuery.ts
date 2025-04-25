@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { Package } from '@/data/types/packageTypes';
 import { packages, getPackageById, getPackagesByCategory } from '@/data/packages';
@@ -17,7 +16,7 @@ export const usePackageQuery = (category?: string) => {
       }
       return packages;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 };
 

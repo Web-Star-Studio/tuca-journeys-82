@@ -91,19 +91,21 @@ const AdminPackages = () => {
 
         {/* Package Form Dialog */}
         <Dialog open={showPackageForm} onOpenChange={setShowPackageForm}>
-          <PackageForm
-            packageId={packageToEdit}
-            onCancel={() => setShowPackageForm(false)}
-            onSuccess={() => {
-              setShowPackageForm(false);
-              toast({
-                title: packageToEdit ? "Pacote atualizado" : "Pacote criado",
-                description: packageToEdit 
-                  ? "O pacote foi atualizado com sucesso." 
-                  : "O pacote foi criado com sucesso."
-              });
-            }}
-          />
+          {showPackageForm && (
+            <PackageForm
+              packageId={packageToEdit}
+              onCancel={() => setShowPackageForm(false)}
+              onSuccess={() => {
+                setShowPackageForm(false);
+                toast({
+                  title: packageToEdit ? "Pacote atualizado" : "Pacote criado",
+                  description: packageToEdit 
+                    ? "O pacote foi atualizado com sucesso." 
+                    : "O pacote foi criado com sucesso."
+                });
+              }}
+            />
+          )}
         </Dialog>
 
         {/* Delete Confirmation Dialog */}

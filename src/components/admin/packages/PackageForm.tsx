@@ -10,6 +10,7 @@ import FormActions from "./form/FormActions";
 import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
 import { usePackageForm } from "@/hooks/packages/usePackageForm";
 import { usePackageDetail } from "@/hooks/use-packages";
+import { Form } from "@/components/ui/form";
 
 interface PackageFormProps {
   packageId: number | null;
@@ -42,56 +43,58 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)}>
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
-        <TabsList className="w-full grid grid-cols-4 mb-6">
-          <TabsTrigger value="basic-info">Informações</TabsTrigger>
-          <TabsTrigger value="highlights">Destaques e Datas</TabsTrigger>
-          <TabsTrigger value="details">O que Inclui/Não Inclui</TabsTrigger>
-          <TabsTrigger value="itinerary">Itinerário</TabsTrigger>
-        </TabsList>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-4 mb-6">
+            <TabsTrigger value="basic-info">Informações</TabsTrigger>
+            <TabsTrigger value="highlights">Destaques e Datas</TabsTrigger>
+            <TabsTrigger value="details">O que Inclui/Não Inclui</TabsTrigger>
+            <TabsTrigger value="itinerary">Itinerário</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basic-info" className="space-y-6">
+            <BasicInfoForm form={form} previewUrl={previewUrl} />
+          </TabsContent>
+          
+          <TabsContent value="highlights" className="space-y-6">
+            <HighlightsForm 
+              form={form} 
+              highlightsArray={highlightsArray}
+              datesArray={datesArray}
+            />
+          </TabsContent>
+          
+          <TabsContent value="details" className="space-y-6">
+            <DetailsForm 
+              form={form} 
+              includesArray={includesArray}
+              excludesArray={excludesArray}
+            />
+          </TabsContent>
+          
+          <TabsContent value="itinerary" className="space-y-6">
+            <ItineraryForm 
+              form={form} 
+              itineraryArray={itineraryArray}
+            />
+          </TabsContent>
+        </Tabs>
         
-        <TabsContent value="basic-info" className="space-y-6">
-          <BasicInfoForm form={form} previewUrl={previewUrl} />
-        </TabsContent>
-        
-        <TabsContent value="highlights" className="space-y-6">
-          <HighlightsForm 
-            form={form} 
-            highlightsArray={highlightsArray}
-            datesArray={datesArray}
-          />
-        </TabsContent>
-        
-        <TabsContent value="details" className="space-y-6">
-          <DetailsForm 
-            form={form} 
-            includesArray={includesArray}
-            excludesArray={excludesArray}
-          />
-        </TabsContent>
-        
-        <TabsContent value="itinerary" className="space-y-6">
-          <ItineraryForm 
-            form={form} 
-            itineraryArray={itineraryArray}
-          />
-        </TabsContent>
-      </Tabs>
-      
-      <FormActions 
-        isSubmitting={isSubmitting} 
-        packageId={packageId}
-        onCancel={onCancel}
-        submitLabel={packageId ? "Salvar Alterações" : "Criar Pacote"}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-    </form>
+        <FormActions 
+          isSubmitting={isSubmitting} 
+          packageId={packageId}
+          onCancel={onCancel}
+          submitLabel={packageId ? "Salvar Alterações" : "Criar Pacote"}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </form>
+    </Form>
   );
 };
 

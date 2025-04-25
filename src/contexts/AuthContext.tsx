@@ -68,7 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Only check for real Supabase session - no mock session checking
+        // Remove any mock sessions from previous uses
+        localStorage.removeItem("supabase-mock-session");
+        
+        // Check for real Supabase session
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
         
@@ -87,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Error initializing auth:", error);
         setSession(null);
         setUser(null);
+        setIsAdmin(false);
       } finally {
         setIsLoading(false);
       }
@@ -148,6 +152,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authSignOut();
+      // Ensure we clear any potential mock sessions on sign out
+      localStorage.removeItem("supabase-mock-session");
       setUser(null);
       setSession(null);
       setIsAdmin(false);

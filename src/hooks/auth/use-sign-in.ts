@@ -11,7 +11,7 @@ export const useSignIn = () => {
     try {
       console.log("Attempting to sign in with:", email);
       
-      // Check if this is a demo account
+      // Check if this is a demo account and if the password matches
       const isDemoAccount = [
         "user@example.com",
         "admin@tucanoronha.com",

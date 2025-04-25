@@ -14,6 +14,7 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
     rating: dbTour.rating,
     category: dbTour.category,
     maxParticipants: dbTour.max_participants,
+    minParticipants: dbTour.min_participants,
     inclusions: dbTour.includes,
     exclusions: dbTour.excludes,
     schedule: dbTour.schedule,

@@ -1,10 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import AccommodationForm from "@/components/admin/accommodations/AccommodationForm";
+import { AccommodationForm } from "@/components/admin/accommodations/AccommodationForm";
 import AccommodationList from "@/components/admin/accommodations/AccommodationList";
 import AccommodationSearch from "@/components/admin/accommodations/AccommodationSearch";
 import AccommodationDeleteDialog from "@/components/admin/accommodations/AccommodationDeleteDialog";
@@ -20,12 +20,25 @@ const AdminAccommodations = () => {
   
   const { toast } = useToast();
   const { 
-    data: accommodations, 
+    data: accommodations,
     isLoading, 
-    isError,
     error,
-    deleteAccommodation: deleteAccommodationMutation
+    isError,
+    deleteAccommodation
   } = useAccommodations(typeFilter === "all" ? "" : typeFilter);
+
+  useEffect(() => {
+    // Fetch accommodations when component mounts or type filter changes
+    const fetchData = async () => {
+      try {
+        await fetchAccommodations();
+      } catch (error) {
+        console.error("Error fetching accommodations:", error);
+      }
+    };
+    
+    fetchData();
+  }, [typeFilter]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -48,7 +61,7 @@ const AdminAccommodations = () => {
 
   const confirmDelete = () => {
     if (accommodationToDelete) {
-      deleteAccommodationMutation.mutate(accommodationToDelete.id, {
+      deleteAccommodation.mutate(accommodationToDelete.id, {
         onSuccess: () => {
           toast({
             title: "Hospedagem excluída",
@@ -119,7 +132,7 @@ const AdminAccommodations = () => {
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onConfirmDelete={confirmDelete}
-          isDeleting={deleteAccommodationMutation.isPending}
+          isDeleting={deleteAccommodation.isPending}
         />
       </div>
     </AdminLayout>

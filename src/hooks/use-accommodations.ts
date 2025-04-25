@@ -23,7 +23,7 @@ interface AccommodationUpdate extends Partial<AccommodationCreate> {
   id: number;
 }
 
-export const useAccommodations = () => {
+export const useAccommodations = (typeFilter: string = '') => {
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -32,8 +32,14 @@ export const useAccommodations = () => {
     setIsLoading(true);
     try {
       const data = await getAccommodationsFromDB();
-      setAccommodations(data);
-      return data;
+      
+      // Apply type filter if provided
+      const filteredData = typeFilter 
+        ? data.filter(acc => acc.type === typeFilter)
+        : data;
+        
+      setAccommodations(filteredData);
+      return filteredData;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch accommodations');
       setError(error);
@@ -93,13 +99,32 @@ export const useAccommodations = () => {
     return updatedAccommodation;
   };
 
+  const deleteAccommodation = async (id: number) => {
+    // In a real application, this would make an API call
+    console.log('Deleting accommodation with ID:', id);
+    
+    // Update the local state by filtering out the deleted accommodation
+    setAccommodations(accommodations.filter(acc => acc.id !== id));
+    
+    return { success: true };
+  };
+
+  // Add the isError property for consistency with React Query pattern
+  const isError = error !== null;
+
   return {
+    data: accommodations,
     accommodations,
     isLoading,
     error,
+    isError,
     fetchAccommodations,
     getAccommodationById,
     createAccommodation,
-    updateAccommodation
+    updateAccommodation,
+    deleteAccommodation: {
+      mutate: deleteAccommodation,
+      isPending: false, // Simplified - in a real app this would be stateful
+    }
   };
 };

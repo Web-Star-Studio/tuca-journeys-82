@@ -20,10 +20,11 @@ const AdminAccommodations = () => {
   
   const { toast } = useToast();
   const { 
-    data: accommodations,
+    accommodations,
     isLoading, 
     error,
     isError,
+    fetchAccommodations,
     deleteAccommodation
   } = useAccommodations(typeFilter === "all" ? "" : typeFilter);
 
@@ -38,7 +39,7 @@ const AdminAccommodations = () => {
     };
     
     fetchData();
-  }, [typeFilter]);
+  }, [typeFilter, fetchAccommodations]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -61,23 +62,12 @@ const AdminAccommodations = () => {
 
   const confirmDelete = () => {
     if (accommodationToDelete) {
-      deleteAccommodation.mutate(accommodationToDelete.id, {
-        onSuccess: () => {
-          toast({
-            title: "Hospedagem excluída",
-            description: "A hospedagem foi excluída com sucesso."
-          });
-          setDeleteDialogOpen(false);
-          setAccommodationToDelete(null);
-        },
-        onError: (error) => {
-          toast({
-            title: "Erro",
-            description: "Não foi possível excluir a hospedagem. Tente novamente.",
-            variant: "destructive"
-          });
-          console.error("Error deleting accommodation:", error);
-        }
+      deleteAccommodation.mutate(accommodationToDelete.id);
+      setDeleteDialogOpen(false);
+      setAccommodationToDelete(null);
+      toast({
+        title: "Hospedagem excluída",
+        description: "A hospedagem foi excluída com sucesso."
       });
     }
   };

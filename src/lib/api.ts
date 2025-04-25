@@ -1,6 +1,5 @@
-
 import { supabase } from '@/lib/supabase';
-import { Tour, Accommodation, Booking, UserProfile } from '@/types/database';
+import { Tour, Accommodation, UserProfile } from '@/types/database';
 import { Package } from '@/data/types/packageTypes';
 
 // Tours API
@@ -79,7 +78,7 @@ export const getAccommodationByIdFromDB = async (id: number) => {
 };
 
 // Bookings API
-export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>) => {
+export const createBooking = async (booking: Omit<any, 'id' | 'created_at' | 'updated_at'>) => {
   console.log("Creating booking:", booking);
   
   // Create a booking object that matches the database schema
@@ -92,7 +91,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     end_date: booking.end_date,
     guests: booking.number_of_guests, // Map from number_of_guests to guests
     total_price: booking.total_price,
-    status: booking.status,
+    status: booking.status as 'confirmed' | 'pending' | 'cancelled',
     payment_status: booking.status === 'confirmed' ? 'paid' : 'pending',
     payment_method: booking.payment_method || null,
     special_requests: booking.special_requests || null
@@ -110,7 +109,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
   }
   
   // Map the response back to the Booking interface expected by the app
-  const responseBooking: Booking = {
+  const responseBooking = {
     id: data.id.toString(),
     user_id: data.user_id,
     tour_id: data.tour_id,
@@ -119,7 +118,7 @@ export const createBooking = async (booking: Omit<Booking, 'id' | 'created_at' |
     end_date: data.end_date,
     number_of_guests: data.guests, // Map from guests to number_of_guests
     total_price: data.total_price,
-    status: data.status,
+    status: mapBookingStatus(data.status),
     notes: data.special_requests || undefined,
     created_at: data.created_at,
     updated_at: data.updated_at
@@ -146,7 +145,7 @@ export const getUserBookings = async (userId: string) => {
   }
   
   // Map the database bookings to the Booking interface
-  const bookings: Booking[] = data.map(dbBooking => ({
+  const bookings = data.map(dbBooking => ({
     id: dbBooking.id.toString(),
     user_id: dbBooking.user_id,
     tour_id: dbBooking.tour_id,
@@ -155,7 +154,7 @@ export const getUserBookings = async (userId: string) => {
     end_date: dbBooking.end_date,
     number_of_guests: dbBooking.guests, // Map from guests to number_of_guests
     total_price: dbBooking.total_price,
-    status: dbBooking.status,
+    status: mapBookingStatus(dbBooking.status),
     notes: dbBooking.special_requests || undefined,
     created_at: dbBooking.created_at,
     updated_at: dbBooking.updated_at,
@@ -165,6 +164,23 @@ export const getUserBookings = async (userId: string) => {
   
   return bookings;
 };
+
+// Helper function to map booking status from database
+function mapBookingStatus(status: string): 'confirmed' | 'pending' | 'cancelled' {
+  switch(status.toLowerCase()) {
+    case 'confirmed':
+      return 'confirmed';
+    case 'cancelled':
+    case 'canceled': // Handle potential spelling variations
+      return 'cancelled';
+    case 'pending':
+      return 'pending';
+    default:
+      // Default to pending for any unknown status
+      console.warn(`Unknown booking status: ${status}, defaulting to 'pending'`);
+      return 'pending';
+  }
+}
 
 // User profiles
 export const getUserProfile = async (userId: string) => {

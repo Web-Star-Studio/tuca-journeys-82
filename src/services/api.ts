@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { UIBooking, DatabaseBooking, Tour, Accommodation, UserProfile } from '@/types';
 import { BookingDB, CreateBookingDTO } from '@/types/bookings';
@@ -99,7 +98,7 @@ class ApiService {
     }
     
     // Transform database bookings into the application booking model
-    return (data || []).map((bookingDB: BookingDB) => this.mapBookingFromDB(bookingDB));
+    return (data || []).map((bookingDB: any) => this.mapBookingFromDB(bookingDB));
   }
 
   async createBooking(bookingData: CreateBookingDTO): Promise<UIBooking> {
@@ -114,7 +113,7 @@ class ApiService {
       throw error;
     }
     
-    return this.mapBookingFromDB(data as BookingDB);
+    return this.mapBookingFromDB(data);
   }
 
   async cancelBooking(bookingId: string, userId: string): Promise<UIBooking> {
@@ -138,11 +137,14 @@ class ApiService {
       throw error;
     }
     
-    return this.mapBookingFromDB(data as BookingDB);
+    return this.mapBookingFromDB(data);
   }
 
   // Helper method to map database booking to application booking model
-  private mapBookingFromDB(bookingDB: BookingDB): UIBooking {
+  private mapBookingFromDB(bookingDB: any): UIBooking {
+    const bookingStatus = this.mapBookingStatus(bookingDB.status);
+    const paymentStatus = this.mapPaymentStatus(bookingDB.payment_status);
+    
     return {
       id: bookingDB.id.toString(),
       user_id: bookingDB.user_id,
@@ -154,17 +156,54 @@ class ApiService {
       end_date: bookingDB.end_date,
       guests: bookingDB.guests,
       total_price: bookingDB.total_price,
-      status: bookingDB.status as 'confirmed' | 'pending' | 'cancelled',
-      payment_status: bookingDB.payment_status as 'paid' | 'pending' | 'refunded',
+      status: bookingStatus,
+      payment_status: paymentStatus,
       payment_method: bookingDB.payment_method,
       special_requests: bookingDB.special_requests,
       created_at: bookingDB.created_at,
       updated_at: bookingDB.updated_at,
       tour_id: bookingDB.tour_id,
       accommodation_id: bookingDB.accommodation_id,
-      tours: bookingDB.tours,
-      accommodations: bookingDB.accommodations
+      tours: bookingDB.tours || null,
+      accommodations: bookingDB.accommodations || null
     };
+  }
+  
+  /**
+   * Map booking status from database to application model
+   */
+  private mapBookingStatus(status: string): 'confirmed' | 'pending' | 'cancelled' {
+    switch(status.toLowerCase()) {
+      case 'confirmed':
+        return 'confirmed';
+      case 'cancelled':
+      case 'canceled': // Handle potential spelling variations
+        return 'cancelled';
+      case 'pending':
+        return 'pending';
+      default:
+        // Default to pending for any unknown status
+        console.warn(`Unknown booking status: ${status}, defaulting to 'pending'`);
+        return 'pending';
+    }
+  }
+  
+  /**
+   * Map payment status from database to application model
+   */
+  private mapPaymentStatus(status: string): 'paid' | 'pending' | 'refunded' {
+    switch(status.toLowerCase()) {
+      case 'paid':
+        return 'paid';
+      case 'refunded':
+        return 'refunded';
+      case 'pending':
+        return 'pending';
+      default:
+        // Default to pending for any unknown status
+        console.warn(`Unknown payment status: ${status}, defaulting to 'pending'`);
+        return 'pending';
+    }
   }
 
   // User profiles

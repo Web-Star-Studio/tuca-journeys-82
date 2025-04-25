@@ -21,8 +21,8 @@ export interface Booking {
   updated_at?: string;
   tour_id?: number | null;
   accommodation_id?: number | null;
-  tours?: Tour;
-  accommodations?: Accommodation;
+  tours?: Tour | null;
+  accommodations?: Accommodation | null;
 }
 
 // Define a new interface for the database booking structure
@@ -41,8 +41,8 @@ export interface BookingDB {
   special_requests?: string | null;
   created_at: string;
   updated_at: string;
-  tours?: Tour;
-  accommodations?: Accommodation;
+  tours?: Tour | null;
+  accommodations?: Accommodation | null;
 }
 
 // Type for creating a booking
@@ -54,8 +54,8 @@ export interface CreateBookingDTO {
   end_date: string;
   guests: number;
   total_price: number;
-  status: string;
-  payment_status: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+  payment_status: 'paid' | 'pending' | 'refunded';
   payment_method?: string | null;
   special_requests?: string | null;
 }

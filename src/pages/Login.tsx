@@ -9,7 +9,7 @@ const Login = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   
   // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
@@ -21,7 +21,6 @@ const Login = () => {
     if (redirectToAdmin) {
       navigate("/admin/dashboard");
     } else {
-      // Use the returnTo query param or default to dashboard
       navigate(returnTo || '/dashboard');
     }
   };

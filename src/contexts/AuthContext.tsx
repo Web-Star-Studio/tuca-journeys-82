@@ -65,60 +65,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state when component mounts
   useEffect(() => {
-    // Clear any mock sessions on mount
-    localStorage.removeItem("supabase-mock-session");
-    
     const initAuth = async () => {
       try {
-        // Remove any mock sessions - important to prevent auto login
-        localStorage.removeItem("supabase-mock-session");
+        setIsLoading(true);
         
-        // Sign out any existing session to force re-login
+        // Clear any mock sessions and sign out on mount to prevent auto-login
+        localStorage.removeItem("supabase-mock-session");
         await supabase.auth.signOut();
         
-        setSession(null);
+        // Reset all auth state
         setUser(null);
+        setSession(null);
         setIsAdmin(false);
       } catch (error) {
         console.error("Error initializing auth:", error);
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Set up auth state listener first
-    const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    // Initialize auth first
+    initAuth();
+
+    // Set up auth state listener after initialization
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (event === "SIGNED_OUT") {
-        // Clear everything on sign out
         localStorage.removeItem("supabase-mock-session");
-        setSession(null);
         setUser(null);
+        setSession(null);
         setIsAdmin(false);
-      } else if (currentSession) {
-        setSession(currentSession);
+      } else if (event === "SIGNED_IN" && currentSession) {
         setUser(currentSession.user);
+        setSession(currentSession);
         await checkAdminStatus(currentSession.user);
       }
     });
-    
-    // Initialize auth
-    initAuth();
-    
-    // Properly handle unsubscribing
+
     return () => {
-      data?.subscription.unsubscribe();
+      authListener?.subscription.unsubscribe();
     };
   }, []);
 
-  // Wrap the auth operations
+  // Auth operation wrappers
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Clear any existing sessions before attempting new login
+      localStorage.removeItem("supabase-mock-session");
+      await supabase.auth.signOut();
+      
       const result = await authSignIn(email, password);
       if (result.data?.user) {
         setUser(result.data.user);

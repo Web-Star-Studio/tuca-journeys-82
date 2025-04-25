@@ -9,17 +9,22 @@ import { Loader2 } from "lucide-react";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { useProfile } from "@/hooks/use-profile";
 import { useBookingsList } from "@/hooks/use-bookings-list";
+import { getDashboardMetrics } from "@/utils/dashboardDemoData";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-  // Use the auth redirect hook to protect this page
+  // Ensure only authenticated users can access this page
   const { isLoading: authLoading, user } = useAuthRedirect({
     requiredAuth: true
   });
   
   // Fetch user profile and bookings
   const { profile, isLoading: profileLoading } = useProfile();
-  const { bookings = [], isLoading: bookingsLoading, error: bookingsError } = useBookingsList();
+  const { 
+    bookings = [], 
+    isLoading: bookingsLoading, 
+    error: bookingsError 
+  } = useBookingsList();
   
   // Show error toast if bookings fetch fails
   useEffect(() => {
@@ -30,37 +35,8 @@ const Dashboard = () => {
   }, [bookingsError]);
   
   // Calculate user metrics from real data
-  const calculateUserMetrics = () => {
-    // Default values
-    const metrics = {
-      reservasAtivas: 0,
-      pontosAcumulados: 0,
-      diasAteProximaViagem: 0,
-      statusPerfil: 0
-    };
-    
-    // Calculate profile completeness
-    if (profile) {
-      let completedFields = 0;
-      const totalFields = 8; // name, email, phone, address, city, state, zip_code, country
-      if (profile.name) completedFields++;
-      if (profile.email) completedFields++;
-      if (profile.phone) completedFields++;
-      if (profile.address) completedFields++;
-      if (profile.city) completedFields++;
-      if (profile.state) completedFields++;
-      if (profile.zip_code) completedFields++;
-      if (profile.country) completedFields++;
-      
-      metrics.statusPerfil = Math.round((completedFields / totalFields) * 100);
-    }
-    
-    return metrics;
-  };
+  const userMetrics = getDashboardMetrics(bookings);
 
-  const isLoading = authLoading || profileLoading || bookingsLoading;
-  const userMetrics = calculateUserMetrics();
-  
   // Generate personalized recommendations based on user behavior and preferences
   const recommendations = [
     { id: 1, title: "Passeio de Barco", image: "/tour-sunset.jpg", score: 98 },
@@ -70,6 +46,8 @@ const Dashboard = () => {
     { id: 5, title: "Observação de Tartarugas", image: "/tour-turtles.jpg", score: 76 },
     { id: 6, title: "Tour de Caiaque", image: "/tour-kayak.jpg", score: 73 }
   ];
+
+  const isLoading = authLoading || profileLoading || bookingsLoading;
 
   if (authLoading) {
     return (
@@ -89,7 +67,7 @@ const Dashboard = () => {
       <main className="flex-grow w-full pt-20 py-6 sm:py-8 md:py-12 lg:py-16">
         <div className="container px-4 mx-auto">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-            <DashboardHeader notificationCount={0} />
+            <DashboardHeader notificationCount={3} />
             
             {isLoading ? (
               <div className="py-12 flex justify-center">

@@ -1,4 +1,3 @@
-
 import { Tour } from "@/types/database";
 import { Accommodation } from "@/types/database";
 import { Booking } from "@/types/bookings";
@@ -209,7 +208,7 @@ export function generateDemoData(): DemoData {
     }
   ];
 
-  // Generate bookings data
+  // Generate bookings data with more realistic dates and statuses
   const bookings: Booking[] = [
     {
       id: "booking-001",
@@ -217,69 +216,55 @@ export function generateDemoData(): DemoData {
       user_email: "joao@example.com",
       item_type: "tour",
       item_name: "Passeio de Barco ao Pôr do Sol",
-      start_date: "2023-10-15",
-      end_date: "2023-10-15",
+      start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+      end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       guests: 2,
       total_price: 700,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-09-01T14:30:00Z"
+      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString() // 14 days ago
     },
     {
       id: "booking-002",
-      user_name: "Maria Oliveira",
-      user_email: "maria@example.com",
+      user_name: "João Silva",
+      user_email: "joao@example.com",
       item_type: "accommodation",
       item_name: "Pousada Vista Mar",
-      start_date: "2023-11-10",
-      end_date: "2023-11-15",
+      start_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      end_date: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       guests: 2,
       total_price: 4250,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-08-25T10:15:00Z"
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days ago
     },
     {
       id: "booking-003",
-      user_name: "Pedro Santos",
-      user_email: "pedro@example.com",
-      item_type: "package",
-      item_name: "Escapada Romântica",
-      start_date: "2023-12-05",
-      end_date: "2023-12-10",
-      guests: 2,
-      total_price: 4899,
+      user_name: "João Silva",
+      user_email: "joao@example.com",
+      item_type: "tour",
+      item_name: "Mergulho na Baía dos Porcos",
+      start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
+      end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      guests: 1,
+      total_price: 480,
       status: "pending",
       payment_status: "pending",
-      created_at: "2023-09-20T16:45:00Z"
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
     },
     {
       id: "booking-004",
-      user_name: "Ana Souza",
-      user_email: "ana@example.com",
-      item_type: "tour",
-      item_name: "Mergulho na Baía dos Porcos",
-      start_date: "2023-10-20",
-      end_date: "2023-10-20",
-      guests: 1,
-      total_price: 480,
-      status: "confirmed",
-      payment_status: "paid",
-      created_at: "2023-09-15T11:30:00Z"
-    },
-    {
-      id: "booking-005",
       user_name: "João Silva",
       user_email: "joao@example.com",
-      item_type: "accommodation",
-      item_name: "Villa Paradiso",
-      start_date: "2023-11-20",
-      end_date: "2023-11-25",
-      guests: 4,
-      total_price: 11000,
+      item_type: "package",
+      item_name: "Escapada Romântica",
+      start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+      end_date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      guests: 2,
+      total_price: 4899,
       status: "confirmed",
       payment_status: "paid",
-      created_at: "2023-09-10T09:20:00Z"
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString() // 60 days ago
     }
   ];
   

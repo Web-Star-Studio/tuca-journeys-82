@@ -21,6 +21,7 @@ import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
 import TourBooking from '@/pages/TourBooking';
 import BookingConfirmation from '@/pages/BookingConfirmation';
+import Reservar from '@/pages/Reservar';
 
 export const publicRoutes = (
   <>
@@ -29,6 +30,7 @@ export const publicRoutes = (
     <Route path="/cadastro" element={<Register />} />
     <Route path="/esqueci-senha" element={<ResetPassword />} />
     <Route path="/redefinir-senha" element={<ResetPassword />} />
+    <Route path="/reservar" element={<Reservar />} />
     
     {/* Portuguese Routes */}
     <Route path="/passeios" element={<Tours />} />

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -76,8 +75,8 @@ const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
       <div className="mt-auto border-t pt-6 px-4 mb-4">
         <Link
           to="/reservar"
-          className="w-full flex items-center justify-center px-4 py-3 bg-tuca-ocean-blue text-white rounded-lg hover:bg-tuca-deep-blue transition-colors"
           onClick={onClose}
+          className="w-full flex items-center justify-center px-4 py-3 bg-tuca-ocean-blue text-white rounded-lg hover:bg-tuca-deep-blue transition-colors"
         >
           Reservar
         </Link>

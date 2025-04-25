@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +14,15 @@ import { useNavigate } from "react-router-dom";
  */
 export const hasRole = async (userId: string, role: string): Promise<boolean> => {
   if (!userId) return false;
+  
+  // Handle demo users - they won't be in the database
+  if (userId.startsWith('demo-')) {
+    // For demo purpose, we'll consider specific demo emails as admin
+    // This value should match what's in the mock session
+    const demoAdminEmails = ['admin@tucanoronha.com', 'felipe@webstar.studio'];
+    const demoUserEmail = localStorage.getItem(`demo-email-${userId}`);
+    return demoUserEmail ? demoAdminEmails.includes(demoUserEmail) : false;
+  }
   
   try {
     const { data, error } = await supabase

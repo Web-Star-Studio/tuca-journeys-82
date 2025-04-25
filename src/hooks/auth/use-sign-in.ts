@@ -24,9 +24,10 @@ export const useSignIn = () => {
         
         // Create a mock user and session for demo purposes
         const isAdmin = email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
+        const userId = `demo-${Date.now()}`;
         
         const mockUser: User = {
-          id: `demo-${Date.now()}`,
+          id: userId,
           app_metadata: { 
             provider: "demo",
             ...(isAdmin ? { role: "admin" } : {})
@@ -41,6 +42,10 @@ export const useSignIn = () => {
           role: "",
           updated_at: new Date().toISOString(),
         };
+        
+        // Store the email for this demo user ID in localStorage
+        // This will be used for checking admin status without DB queries
+        localStorage.setItem(`demo-email-${userId}`, email);
         
         // Create a mock session that lasts for 24 hours
         const expiresAt = Math.floor(Date.now() / 1000) + 86400;

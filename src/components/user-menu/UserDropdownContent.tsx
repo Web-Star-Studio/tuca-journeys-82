@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -24,7 +25,6 @@ import {
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSignOut } from "@/hooks/auth/use-sign-out";
 
 interface UserDropdownItem {
   label: string;
@@ -41,45 +41,32 @@ interface UserDropdownContentProps {
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { signOut } = useSignOut();
-
-  // Define menu items based on user role
-  const menuItems = isAdmin ? [
-    { label: "Admin Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { label: "Minhas Reservas", href: "/bookings", icon: CalendarDays },
-    { label: "Minhas Compras", href: "/orders", icon: ShoppingBag },
-    { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
-    { label: "Documentos de Viagem", href: "/documents", icon: FileText },
-    { label: "Cupons e Descontos", href: "/cupons", icon: Ticket },
-    { label: "Programa de Pontos", href: "/pontos", icon: BadgePercent },
-    { label: "Notificações", href: "/notificacoes", icon: Bell },
-    { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
-    { label: "Configurações", href: "/configuracoes", icon: Settings },
-  ] : [
+  
+  const menuItems: UserDropdownItem[] = [
     { label: "Meu Painel", href: "/dashboard", icon: LayoutDashboard },
     { label: "Meu Perfil", href: "/profile", icon: UserIcon },
     { label: "Minhas Reservas", href: "/bookings", icon: CalendarDays },
     { label: "Minhas Compras", href: "/orders", icon: ShoppingBag },
     { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
-    { label: "Documentos de Viagem", href: "/documents", icon: FileText },
+    { label: "Documentos de Viagem", href: "/profile?tab=documents", icon: FileText },
     { label: "Cupons e Descontos", href: "/cupons", icon: Ticket },
     { label: "Programa de Pontos", href: "/pontos", icon: BadgePercent },
     { label: "Notificações", href: "/notificacoes", icon: Bell },
     { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
     { label: "Configurações", href: "/configuracoes", icon: Settings },
   ];
+  
+  // Add admin dashboard link for admin users
+  if (isAdmin) {
+    menuItems.unshift({ label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard });
+  }
 
   const handleNavigation = (href: string) => {
     navigate(href);
   };
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Erro durante o logout:', error);
-    }
+    await onSignOut();
   };
 
   const truncateEmail = (email: string) => {
@@ -104,7 +91,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
           <DropdownMenuItem
             key={index}
             className="cursor-pointer"
-            onClick={() => handleNavigation(item.href)}
+            onClick={() => item.onClick ? item.onClick() : handleNavigation(item.href)}
           >
             <item.icon className="mr-2 h-4 w-4" />
             <span>{item.label}</span>
@@ -112,10 +99,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
         ))}
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem 
-        className="cursor-pointer" 
-        onClick={handleSignOut}
-      >
+      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
         <LogOut className="mr-2 h-4 w-4" />
         <span>Sair</span>
       </DropdownMenuItem>

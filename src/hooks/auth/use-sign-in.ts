@@ -11,23 +11,21 @@ export const useSignIn = () => {
     try {
       console.log("Attempting to sign in with:", email);
       
-      // Check if this is a demo account and if the password matches
+      // Check if this is a demo account
       const isDemoAccount = [
         "user@example.com",
         "admin@tucanoronha.com",
         "felipe@webstar.studio"
       ].includes(email);
       
-      // Demo account logic - requires explicit password match
-      if (isDemoAccount && password === "demo123") {
+      if (isDemoAccount) {
         console.log("Demo account detected, creating mock session");
         
         // Create a mock user and session for demo purposes
         const isAdmin = email === "admin@tucanoronha.com" || email === "felipe@webstar.studio";
-        const userId = `demo-${Date.now()}`;
         
         const mockUser: User = {
-          id: userId,
+          id: `demo-${Date.now()}`,
           app_metadata: { 
             provider: "demo",
             ...(isAdmin ? { role: "admin" } : {})
@@ -43,10 +41,6 @@ export const useSignIn = () => {
           updated_at: new Date().toISOString(),
         };
         
-        // Store the email for this demo user ID in localStorage
-        // This will be used for checking admin status without DB queries
-        localStorage.setItem(`demo-email-${userId}`, email);
-        
         // Create a mock session that lasts for 24 hours
         const expiresAt = Math.floor(Date.now() / 1000) + 86400;
         const mockSession = {
@@ -57,6 +51,9 @@ export const useSignIn = () => {
           user: mockUser,
           token_type: "bearer"
         };
+        
+        // Store the mock session in localStorage to persist across page reloads
+        localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
         
         toast({
           title: "Login de demonstração",

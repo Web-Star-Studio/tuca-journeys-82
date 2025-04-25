@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -67,16 +68,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        setIsLoading(true);
+        // Check for mock session
+        const mockSessionStr = localStorage.getItem("supabase-mock-session");
+        if (mockSessionStr) {
+          try {
+            const mockSessionData = JSON.parse(mockSessionStr);
+            // Check if mock session is expired
+            if (mockSessionData.expires_at > Math.floor(Date.now() / 1000)) {
+              console.log("Found valid mock session, setting user state");
+              // Create a proper Session object with all required fields
+              const mockSession: Session = {
+                access_token: mockSessionData.access_token,
+                refresh_token: mockSessionData.refresh_token,
+                user: mockSessionData.user,
+                expires_at: mockSessionData.expires_at,
+                expires_in: mockSessionData.expires_at - Math.floor(Date.now() / 1000),
+                token_type: "bearer"
+              };
+              
+              setSession(mockSession);
+              setUser(mockSession.user);
+              await checkAdminStatus(mockSession.user);
+              setIsLoading(false);
+              return;
+            } else {
+              // Clear expired mock session
+              localStorage.removeItem("supabase-mock-session");
+            }
+          } catch (error) {
+            console.error("Error parsing mock session:", error);
+            localStorage.removeItem("supabase-mock-session");
+          }
+        }
         
-        // Clear any mock sessions and sign out on mount to prevent auto-login
-        localStorage.removeItem("supabase-mock-session");
-        await supabase.auth.signOut();
+        // Check for real Supabase session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          throw sessionError;
+        }
         
-        // Reset all auth state
-        setUser(null);
-        setSession(null);
-        setIsAdmin(false);
+        if (sessionData?.session) {
+          setSession(sessionData.session);
+          setUser(sessionData.session.user);
+          await checkAdminStatus(sessionData.session.user);
+        } else {
+          // No valid session
+          setSession(null);
+          setUser(null);
+        }
       } catch (error) {
         console.error("Error initializing auth:", error);
       } finally {
@@ -84,38 +123,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Initialize auth first
     initAuth();
-
-    // Set up auth state listener after initialization
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    
+    // Set up auth state listener
+    const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (event === "SIGNED_OUT") {
         localStorage.removeItem("supabase-mock-session");
-        setUser(null);
         setSession(null);
+        setUser(null);
         setIsAdmin(false);
-      } else if (event === "SIGNED_IN" && currentSession) {
-        setUser(currentSession.user);
+      } else if (currentSession) {
         setSession(currentSession);
+        setUser(currentSession.user);
         await checkAdminStatus(currentSession.user);
       }
     });
-
+    
+    // Properly handle unsubscribing
     return () => {
-      authListener?.subscription.unsubscribe();
+      data?.subscription.unsubscribe();
     };
   }, []);
 
-  // Auth operation wrappers
+  // Wrap the auth operations
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Clear any existing sessions before attempting new login
-      localStorage.removeItem("supabase-mock-session");
-      await supabase.auth.signOut();
-      
       const result = await authSignIn(email, password);
       if (result.data?.user) {
         setUser(result.data.user);
@@ -142,8 +177,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authSignOut();
-      // Ensure we clear any potential mock sessions on sign out
-      localStorage.removeItem("supabase-mock-session");
       setUser(null);
       setSession(null);
       setIsAdmin(false);

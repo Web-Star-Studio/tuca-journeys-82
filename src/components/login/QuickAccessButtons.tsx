@@ -6,35 +6,24 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const DEMO_ACCOUNTS = [
-  { email: "user@example.com", password: "demo123", label: "Entrar como Usuário Demo" },
-  { email: "admin@tucanoronha.com", password: "demo123", label: "Entrar como Admin Demo" },
-  { email: "felipe@webstar.studio", password: "demo123", label: "Entrar como Admin Felipe" }
+  { email: "user@example.com", password: "password", label: "Entrar como Usuário Demo" },
+  { email: "admin@tucanoronha.com", password: "admin123456", label: "Entrar como Admin Demo" },
+  { email: "felipe@webstar.studio", password: "Client@123", label: "Entrar como Admin Felipe" }
 ];
 
 const QuickAccessButtons = () => {
-  const { signIn } = useAuth();
+  const { signIn, isLoading } = useAuth();
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleDemoLogin = async (email: string, password: string) => {
     setLoggingIn(email);
     try {
-      // Clear any existing sessions before attempting login
-      localStorage.removeItem("supabase-mock-session");
-      
-      const result = await signIn(email, password);
-      
+      await signIn(email, password);
       toast({
         title: "Login de demonstração",
         description: `Você está acessando como ${email.includes("admin") || email === "felipe@webstar.studio" ? "administrador" : "usuário"} demo.`,
       });
-      
-      // After successful login, redirect based on user type
-      if (email.includes("admin") || email === "felipe@webstar.studio") {
-        window.location.href = "/admin/dashboard";
-      } else {
-        window.location.href = "/dashboard";
-      }
     } catch (error: any) {
       console.error("Demo login error:", error);
       toast({
@@ -64,7 +53,7 @@ const QuickAccessButtons = () => {
             key={account.email}
             variant="outline"
             className="w-full"
-            disabled={!!loggingIn}
+            disabled={isLoading || !!loggingIn}
             onClick={() => handleDemoLogin(account.email, account.password)}
           >
             {loggingIn === account.email ? (

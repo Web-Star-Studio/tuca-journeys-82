@@ -11,14 +11,6 @@ import ConversationalForm from "@/components/registration/ConversationalForm";
 import { TravelPreference } from "@/types/user-preferences";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 
 interface RegisterFormValues {
   name: string;
@@ -45,7 +37,12 @@ const Register = () => {
     }
   }, [user, navigate, registrationComplete]);
   
-  const form = useForm<RegisterFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<RegisterFormValues>({
     defaultValues: {
       name: "",
       email: "",
@@ -55,7 +52,6 @@ const Register = () => {
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, watch } = form;
   const password = watch("password");
   
   const onSubmit = async (data: RegisterFormValues) => {
@@ -108,169 +104,146 @@ const Register = () => {
                 </p>
               </div>
               
-              <Form {...form}>
-                <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                      {error}
-                    </div>
-                  )}
-                  
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    rules={{
+              <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                    {error}
+                  </div>
+                )}
+                
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Nome completo
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    {...register("name", {
                       required: "Nome é obrigatório",
                       minLength: {
                         value: 3,
                         message: "Nome deve ter pelo menos 3 caracteres",
                       },
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome completo</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="text"
-                            autoComplete="name"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    })}
+                    className="mt-1"
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    rules={{
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errors.name.message}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    {...register("email", {
                       required: "Email é obrigatório",
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                         message: "Endereço de email inválido",
                       },
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="email"
-                            autoComplete="email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    })}
+                    className="mt-1"
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    rules={{
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errors.email.message}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Senha
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="new-password"
+                    {...register("password", {
                       required: "Senha é obrigatória",
                       minLength: {
                         value: 6,
                         message: "A senha deve ter pelo menos 6 caracteres",
                       },
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Senha</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="password"
-                            autoComplete="new-password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    })}
+                    className="mt-1"
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="passwordConfirm"
-                    rules={{
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errors.password.message}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Confirmar senha
+                  </label>
+                  <Input
+                    id="passwordConfirm"
+                    type="password"
+                    autoComplete="new-password"
+                    {...register("passwordConfirm", {
                       required: "Confirme sua senha",
                       validate: (value) =>
                         value === password || "As senhas não conferem",
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirmar senha</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="password"
-                            autoComplete="new-password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    })}
+                    className="mt-1"
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="terms"
-                    rules={{
+                  {errors.passwordConfirm && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errors.passwordConfirm.message}</p>
+                  )}
+                </div>
+                
+                <div className="flex items-center">
+                  <Checkbox
+                    id="terms"
+                    {...register("terms", {
                       required: "Você deve aceitar os termos",
-                    }}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-1">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-sm">
-                            Eu concordo com os{" "}
-                            <Link to="/termos" className="text-tuca-ocean-blue hover:underline">
-                              Termos de Serviço
-                            </Link>{" "}
-                            e{" "}
-                            <Link to="/privacidade" className="text-tuca-ocean-blue hover:underline">
-                              Política de Privacidade
-                            </Link>
-                          </FormLabel>
-                          <FormMessage />
-                        </div>
-                      </FormItem>
-                    )}
+                    })}
                   />
+                  <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                    Eu concordo com os{" "}
+                    <Link to="/termos" className="text-tuca-ocean-blue hover:underline">
+                      Termos de Serviço
+                    </Link>{" "}
+                    e{" "}
+                    <Link to="/privacidade" className="text-tuca-ocean-blue hover:underline">
+                      Política de Privacidade
+                    </Link>
+                  </label>
+                </div>
+                {errors.terms && (
+                  <p className="text-sm text-red-600 dark:text-red-500">{errors.terms.message}</p>
+                )}
 
-                  <div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Criando conta...
-                        </>
-                      ) : (
-                        "Criar conta"
-                      )}
-                    </Button>
-                  </div>
+                <div>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Criando conta...
+                      </>
+                    ) : (
+                      "Criar conta"
+                    )}
+                  </Button>
+                </div>
 
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Já tem uma conta?{" "}
-                      <Link
-                        to="/login"
-                        className="font-medium text-tuca-ocean-blue hover:text-tuca-ocean-blue/80"
-                      >
-                        Entrar
-                      </Link>
-                    </p>
-                  </div>
-                </form>
-              </Form>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Já tem uma conta?{" "}
+                    <Link
+                      to="/login"
+                      className="font-medium text-tuca-ocean-blue hover:text-tuca-ocean-blue/80"
+                    >
+                      Entrar
+                    </Link>
+                  </p>
+                </div>
+              </form>
             </motion.div>
           ) : (
             // Preferences Step

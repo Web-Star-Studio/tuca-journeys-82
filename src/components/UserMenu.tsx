@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,20 +13,14 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Settings, Heart, ShoppingBag } from 'lucide-react';
-import { useSignOut } from '@/hooks/auth/use-sign-out';
 
 const UserMenu = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { signOut } = useSignOut();
   
   const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Erro durante o logout:', error);
-    }
+    await signOut();
+    navigate('/login');
   };
 
   const getInitials = (name: string) => {
@@ -93,12 +88,9 @@ const UserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={handleLogout} 
-          className="cursor-pointer"
-        >
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
+          Sair
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

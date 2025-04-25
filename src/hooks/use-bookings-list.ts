@@ -24,7 +24,7 @@ export const useBookingsList = () => {
       if (!user?.id) return [];
       
       try {
-        // Instead of calling the actual API which is failing, directly return our demo data
+        // Using demo data instead of API call
         console.log("Using demo bookings data instead of API");
         return demoData.bookings;
       } catch (err) {

@@ -1,12 +1,13 @@
+
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { usePackages } from "@/hooks/use-packages";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import PackageForm from "@/components/admin/packages/PackageForm";
-import PackageTable from "@/components/admin/packages/PackageTable";
 import PackageSearch from "@/components/admin/packages/PackageSearch";
 import PackageDeleteDialog from "@/components/admin/packages/PackageDeleteDialog";
+import PackageGrid from "@/components/admin/packages/PackageGrid";
 
 const AdminPackages = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,14 +34,14 @@ const AdminPackages = () => {
   ) || [];
 
   // Handle package edit
-  const handleEditClick = (packageId: number) => {
-    setPackageToEdit(packageId);
+  const handleEditClick = (pkg: any) => {
+    setPackageToEdit(pkg.id);
     setShowPackageForm(true);
   };
 
   // Handle package delete
-  const handleDeleteClick = (packageId: number) => {
-    setPackageToDelete(packageId);
+  const handleDeleteClick = (pkg: any) => {
+    setPackageToDelete(pkg.id);
     setDeleteDialogOpen(true);
   };
 
@@ -67,49 +68,42 @@ const AdminPackages = () => {
     }
   };
 
-  const handleFormClose = () => {
-    setShowPackageForm(false);
-    setPackageToEdit(null);
-  };
-
   return (
     <AdminLayout pageTitle="Gerenciar Pacotes">
-      <div className="w-full overflow-hidden">
+      <div className="space-y-6">
         <PackageSearch
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
-          onAddNewClick={() => setShowPackageForm(true)}
+          onAddNewClick={() => {
+            setPackageToEdit(null);
+            setShowPackageForm(true);
+          }}
         />
 
-        <PackageTable
+        <PackageGrid
           packages={filteredPackages}
           isLoading={isLoading}
-          error={error}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
         />
 
         {/* Package Form Dialog */}
         <Dialog open={showPackageForm} onOpenChange={setShowPackageForm}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {packageToEdit ? "Editar Pacote" : "Novo Pacote"}
-              </DialogTitle>
-              <DialogDescription>
-                {packageToEdit
-                  ? "Edite os detalhes do pacote abaixo."
-                  : "Preencha os detalhes do novo pacote abaixo."}
-              </DialogDescription>
-            </DialogHeader>
-            <PackageForm
-              packageId={packageToEdit}
-              onCancel={handleFormClose}
-              onSuccess={handleFormClose}
-            />
-          </DialogContent>
+          <PackageForm
+            packageId={packageToEdit}
+            onCancel={() => setShowPackageForm(false)}
+            onSuccess={() => {
+              setShowPackageForm(false);
+              toast({
+                title: packageToEdit ? "Pacote atualizado" : "Pacote criado",
+                description: packageToEdit 
+                  ? "O pacote foi atualizado com sucesso." 
+                  : "O pacote foi criado com sucesso."
+              });
+            }}
+          />
         </Dialog>
 
         {/* Delete Confirmation Dialog */}

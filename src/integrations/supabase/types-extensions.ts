@@ -34,28 +34,26 @@ export interface Database extends OriginalDatabase {
           user_id: string;
           role: string;
           created_at: string;
+          updated_at: string;
+          partner_type: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
           role: string;
           created_at?: string;
+          updated_at?: string;
+          partner_type?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
           role?: string;
           created_at?: string;
+          updated_at?: string;
+          partner_type?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          }
-        ];
+        Relationships: [];
       };
       
       tour_bookings: {

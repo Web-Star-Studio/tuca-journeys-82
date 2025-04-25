@@ -61,34 +61,36 @@ const Tours = () => {
 
   return (
     <AdminLayout pageTitle="Gerenciar Passeios">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <TourSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <TourActionButton onClick={handleAddNewTour} />
+      <div className="w-full overflow-x-hidden">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <TourSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <TourActionButton onClick={handleAddNewTour} />
+        </div>
+
+        <TourList
+          tours={filteredTours}
+          isLoading={isLoading}
+          error={error}
+          onEditTour={handleEditClick}
+          onDeleteTour={handleDeleteClick}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteTourDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          tourToDelete={tourToDelete}
+          onConfirmDelete={confirmDelete}
+        />
+
+        {/* Tour Form Dialog */}
+        <TourFormDialog
+          open={formDialogOpen}
+          onOpenChange={setFormDialogOpen}
+          tourId={tourToEdit}
+          onSuccess={handleFormSuccess}
+        />
       </div>
-
-      <TourList
-        tours={filteredTours}
-        isLoading={isLoading}
-        error={error}
-        onEditTour={handleEditClick}
-        onDeleteTour={handleDeleteClick}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <DeleteTourDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        tourToDelete={tourToDelete}
-        onConfirmDelete={confirmDelete}
-      />
-
-      {/* Tour Form Dialog */}
-      <TourFormDialog
-        open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
-        tourId={tourToEdit}
-        onSuccess={handleFormSuccess}
-      />
     </AdminLayout>
   );
 };

@@ -23,7 +23,7 @@ const HeroIndicators = ({
     }} transition={{
       delay: 1,
       duration: 0.6
-    }} className="absolute bottom-8 md:bottom-12 left-[31rem] transform -translate-x-1/2 flex space-x-3 z-20">
+    }} className="absolute bottom-8 md:bottom-12 left-[30rem] transform -translate-x-1/2 flex space-x-3 z-20">
         {heroImages.map((_, index) => <button key={index} onClick={() => setCurrentImageIndex(index)} className={`h-2.5 rounded-full transition-all duration-500 ${index === currentImageIndex ? "bg-white w-12" : "bg-white/40 w-2.5 hover:bg-white/70"}`} aria-label={`Go to slide ${index + 1}`} />)}
       </motion.div>
     </>;

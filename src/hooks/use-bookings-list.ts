@@ -23,9 +23,15 @@ export const useBookingsList = () => {
     queryFn: async () => {
       if (!user?.id) return [];
       
-      // Instead of calling the API, which is failing, use our demo data directly
-      console.log("Using demo bookings data instead of API");
-      return demoData.bookings;
+      try {
+        // Instead of calling the actual API which is failing, directly return our demo data
+        console.log("Using demo bookings data instead of API");
+        return demoData.bookings;
+      } catch (err) {
+        console.error("Error fetching bookings demo data:", err);
+        toast.error("Erro ao carregar suas reservas");
+        throw err;
+      }
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes

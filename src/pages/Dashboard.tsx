@@ -30,9 +30,18 @@ const Dashboard = () => {
   // Show error toast if bookings fetch fails
   useEffect(() => {
     if (bookingsError) {
-      console.error("Error fetching bookings:", bookingsError);
+      console.error("Error fetching bookings in Dashboard:", bookingsError);
+      toast.error("Erro ao carregar suas reservas. Usando dados de demonstração.");
     }
   }, [bookingsError]);
+  
+  // Log what's happening
+  useEffect(() => {
+    console.log("Dashboard - Current bookings:", bookings);
+    console.log("Dashboard - Bookings loading:", bookingsLoading);
+    console.log("Dashboard - Auth loading:", authLoading);
+    console.log("Dashboard - Profile loading:", profileLoading);
+  }, [bookings, bookingsLoading, authLoading, profileLoading]);
   
   // Calculate user metrics from demo data
   const userMetrics = getDashboardMetrics(bookings);

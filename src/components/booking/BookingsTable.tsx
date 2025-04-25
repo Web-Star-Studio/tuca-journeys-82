@@ -15,14 +15,17 @@ import { UIBooking } from "@/types";
  */
 const BookingsTable: React.FC = () => {
   const { bookings, isLoading, error } = useBookingsList();
+  
+  console.log("BookingsTable - Current bookings:", bookings);
 
   // Loading state
   if (isLoading) {
     return <BookingLoadingState />;
   }
 
-  // Error state
+  // Error state - This should now be bypassed since we're using mock data
   if (error) {
+    console.error("Error in BookingsTable:", error);
     return (
       <Card>
         <CardContent className="p-6 text-center">
@@ -40,6 +43,7 @@ const BookingsTable: React.FC = () => {
 
   // Empty state
   if (!bookings || bookings.length === 0) {
+    console.log("BookingsTable - No bookings found");
     return <BookingEmptyState />;
   }
 
@@ -50,7 +54,7 @@ const BookingsTable: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200 bg-white">
           <BookingsTableHeader />
           <tbody className="divide-y divide-gray-200">
-            {bookings.map((booking: UIBooking) => (
+            {bookings.map((booking) => (
               <BookingRow 
                 key={booking.id} 
                 booking={booking}

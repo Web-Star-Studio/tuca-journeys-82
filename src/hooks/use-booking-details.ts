@@ -1,9 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService } from '@/services';
-import { UIBooking } from '@/types';
 import { toast } from 'sonner';
+import { demoData } from '@/utils/demoDataGenerator';
 
 /**
  * Hook to fetch details for a specific booking
@@ -24,8 +23,16 @@ export const useBookingDetails = (id: string | undefined) => {
       if (!user?.id || !id) return null;
       
       try {
-        const bookings = await bookingService.getUserBookings(user.id);
-        return bookings.find(booking => booking.id === id) || null;
+        console.log("Using demo booking data for ID:", id);
+        // Find the specific booking from our demo data
+        const booking = demoData.bookings.find(b => b.id === id);
+        
+        if (!booking) {
+          console.log("Booking not found in demo data");
+          return null;
+        }
+        
+        return booking;
       } catch (err) {
         console.error(`Error fetching booking ${id}:`, err);
         toast.error("Erro ao carregar detalhes da reserva");

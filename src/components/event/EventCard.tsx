@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock, MapPin, Users, Heart } from "lucide-react";
 import { Event } from "@/types/event";
 import { useWishlist } from "@/contexts/WishlistContext";
+import SafeImage from "@/components/ui/safe-image";
 
 interface EventCardProps {
   event: Event;
@@ -37,10 +38,11 @@ const EventCard = ({ event }: EventCardProps) => {
       onClick={() => navigate(`/eventos/${event.id}`)}
     >
       <div className="relative h-56">
-        <img
+        <SafeImage
           src={event.image_url}
           alt={event.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          fallbackSrc="/placeholder.svg"
         />
         {event.featured && (
           <div className="absolute top-3 right-3 bg-tuca-ocean-blue/90 text-white text-xs font-medium px-2 py-1 rounded">

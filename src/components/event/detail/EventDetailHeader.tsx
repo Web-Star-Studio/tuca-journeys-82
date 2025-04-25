@@ -2,6 +2,7 @@
 import React from "react";
 import { Event } from "@/types/event";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
 
 interface EventDetailHeaderProps {
   event: Event;
@@ -18,10 +19,11 @@ const EventDetailHeader = ({ event }: EventDetailHeaderProps) => {
 
   return (
     <div className="relative h-[40vh] md:h-[50vh] rounded-xl overflow-hidden mb-8">
-      <img 
+      <SafeImage 
         src={event.image_url} 
         alt={event.name} 
         className="w-full h-full object-cover"
+        fallbackSrc="/placeholder.svg"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
         <div className="p-6 md:p-10 text-white">

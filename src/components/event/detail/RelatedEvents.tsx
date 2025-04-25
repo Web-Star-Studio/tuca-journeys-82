@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Event } from "@/types/event";
 import { CalendarDays } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
 
 interface RelatedEventsProps {
   events: Event[];
@@ -26,10 +27,11 @@ const RelatedEvents = ({ events }: RelatedEventsProps) => {
             onClick={() => navigate(`/eventos/${event.id}`)}
           >
             <div className="relative h-48">
-              <img
+              <SafeImage
                 src={event.image_url}
                 alt={event.name}
                 className="w-full h-full object-cover"
+                fallbackSrc="/placeholder.svg"
               />
               <div className="absolute top-3 left-3 bg-tuca-green/80 text-white text-xs px-2 py-1 rounded">
                 {event.category}

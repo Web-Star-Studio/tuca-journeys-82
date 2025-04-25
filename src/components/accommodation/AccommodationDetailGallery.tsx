@@ -1,27 +1,34 @@
 
 import React, { useState } from "react";
-import { Accommodation } from "@/data/accommodations";
 import { 
   Dialog, 
   DialogContent, 
+  DialogTitle,
+  DialogDescription,
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X, Maximize } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
 
 interface AccommodationDetailGalleryProps {
-  accommodation: Accommodation;
+  accommodation: any;
 }
 
 const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGalleryProps) => {
-  // Use all 5 images for demonstration purposes
-  const images = [
-    accommodation.image,
-    "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
-    "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
-    "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png",
-    "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png",
-  ];
+  // Use gallery images from accommodation or fallback images
+  const images = accommodation.gallery_images?.length > 0 
+    ? accommodation.gallery_images 
+    : accommodation.gallery?.length > 0
+      ? accommodation.gallery
+      : [
+          accommodation.image_url || accommodation.image,
+          "/lovable-uploads/e336048f-0022-4f5b-a53a-de1f09cde38a.png",
+          "/lovable-uploads/1ee83aef-4d58-4201-9998-59a29833ea4e.png",
+          "/lovable-uploads/949f8aa0-19c8-4df4-b751-b730f41db238.png",
+          "/lovable-uploads/29f781ec-249e-490d-b220-30ce02793db1.png",
+        ];
+  
+  const mainImage = accommodation.image_url || accommodation.image || images[0];
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
@@ -44,10 +51,10 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-lg overflow-hidden">
         <div className="md:col-span-2 h-80 md:h-[500px] relative group">
           <SafeImage
-            src={images[0]}
+            src={mainImage}
             alt={accommodation.title}
             className="w-full h-full object-cover"
-            onLoadSuccess={() => handleImageLoaded(images[0])}
+            onLoadSuccess={() => handleImageLoaded(mainImage)}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
             <Dialog open={showFullscreen} onOpenChange={setShowFullscreen}>
@@ -57,6 +64,10 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-6xl h-[80vh] p-0 bg-black">
+                <DialogTitle className="sr-only">Galeria de imagens</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Visualize todas as imagens da acomodação
+                </DialogDescription>
                 <div className="relative h-full flex items-center justify-center">
                   <SafeImage
                     src={images[currentImageIndex]}
@@ -114,10 +125,10 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
             setShowFullscreen(true);
           }}>
             <SafeImage
-              src={images[1]}
+              src={images[1] || images[0]}
               alt={accommodation.title}
               className="w-full h-full object-cover brightness-95"
-              onLoadSuccess={() => handleImageLoaded(images[1])}
+              onLoadSuccess={() => handleImageLoaded(images[1] || images[0])}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
           </div>
@@ -126,10 +137,10 @@ const AccommodationDetailGallery = ({ accommodation }: AccommodationDetailGaller
             setShowFullscreen(true);
           }}>
             <SafeImage
-              src={images[2]}
+              src={images[2] || images[0]}
               alt={accommodation.title}
               className="w-full h-full object-cover brightness-90"
-              onLoadSuccess={() => handleImageLoaded(images[2])}
+              onLoadSuccess={() => handleImageLoaded(images[2] || images[0])}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
           </div>

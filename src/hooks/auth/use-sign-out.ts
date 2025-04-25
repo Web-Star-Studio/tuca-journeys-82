@@ -15,9 +15,6 @@ export const useSignOut = () => {
       
       if (error) throw error;
       
-      // Make sure session is really cleared
-      await supabase.auth.clearSession();
-      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você saiu da sua conta.",

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { User, LogOut, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -22,6 +22,7 @@ interface UserMenuProps {
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const { signOut } = useSignOut();
   const { toast } = useToast();
+  const location = useLocation();
   
   if (!user) return null;
   
@@ -77,9 +78,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/admin/profile" className="flex items-center cursor-pointer">
+          <Link 
+            to={location.pathname.startsWith('/admin') ? "/" : "/admin/profile"} 
+            className="flex items-center cursor-pointer"
+          >
             <UserCircle className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
+            <span>{location.pathname.startsWith('/admin') ? "Home" : "Perfil"}</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,8 @@ import { Clock, Star, MapPin, Heart } from "lucide-react";
 import { Tour } from "@/data/tours";
 import { useWishlist } from "@/contexts/WishlistContext";
 import SafeImage from "@/components/ui/safe-image";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface TourCardProps {
   tour: Tour;
@@ -15,6 +17,9 @@ interface TourCardProps {
 const TourCard = ({ tour }: TourCardProps) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [imageLoaded, setImageLoaded] = React.useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,6 +35,23 @@ const TourCard = ({ tour }: TourCardProps) => {
         image: tour.image
       });
     }
+  };
+
+  const handleBookClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Faça login",
+        description: "Por favor, faça login para reservar este passeio.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    navigate(`/passeios/${tour.id}/reserva`);
   };
 
   const isWishlisted = isInWishlist(tour.id);
@@ -88,11 +110,12 @@ const TourCard = ({ tour }: TourCardProps) => {
           <div className="text-tuca-ocean-blue">
             <p className="text-xl font-medium">R$ {tour.price.toLocaleString('pt-BR')}</p>
           </div>
-          <Link to={`/passeios/${tour.id}`}>
-            <Button className="rounded-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90">
-              Reservar
-            </Button>
-          </Link>
+          <Button 
+            className="rounded-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90"
+            onClick={handleBookClick}
+          >
+            Reservar
+          </Button>
         </div>
       </div>
     </Card>

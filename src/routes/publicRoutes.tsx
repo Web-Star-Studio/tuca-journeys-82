@@ -1,4 +1,3 @@
-
 import { Route } from 'react-router-dom';
 import Home from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
@@ -20,6 +19,7 @@ import Wishlist from '@/pages/Wishlist';
 import Loja from '@/pages/Loja';
 import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
+import TourBooking from '@/pages/TourBooking';
 
 export const publicRoutes = (
   <>
@@ -32,6 +32,7 @@ export const publicRoutes = (
     {/* Portuguese Routes */}
     <Route path="/passeios" element={<Tours />} />
     <Route path="/passeios/:id" element={<TourDetail />} />
+    <Route path="/passeios/:id/reserva" element={<TourBooking />} />
     <Route path="/hospedagens" element={<Hospedagens />} />
     <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
     <Route path="/hospedagem/:id" element={<AccommodationDetail />} />

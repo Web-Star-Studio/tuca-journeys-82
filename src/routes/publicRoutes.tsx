@@ -20,6 +20,7 @@ import Loja from '@/pages/Loja';
 import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
 import TourBooking from '@/pages/TourBooking';
+import BookingConfirmation from '@/pages/BookingConfirmation';
 
 export const publicRoutes = (
   <>
@@ -59,6 +60,7 @@ export const publicRoutes = (
     <Route path="/store" element={<Loja />} />
     <Route path="/store/:id" element={<ProductDetails />} />
     
+    <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

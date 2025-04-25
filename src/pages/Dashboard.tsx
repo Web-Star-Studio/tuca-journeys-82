@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -39,26 +38,6 @@ const Dashboard = () => {
       diasAteProximaViagem: 0,
       statusPerfil: 0
     };
-    
-    // Count active bookings
-    if (bookings?.length) {
-      metrics.reservasAtivas = bookings.filter(b => b.status === 'confirmed').length;
-      
-      // Find next upcoming trip
-      const upcomingBookings = bookings
-        .filter(b => b.status === 'confirmed')
-        .filter(b => new Date(b.start_date) > new Date())
-        .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-        
-      if (upcomingBookings.length) {
-        const nextTrip = new Date(upcomingBookings[0].start_date);
-        const daysUntil = Math.ceil((nextTrip.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        metrics.diasAteProximaViagem = daysUntil > 0 ? daysUntil : 0;
-      }
-      
-      // Calculate points (simplified example: 10 points per booking)
-      metrics.pontosAcumulados = bookings.length * 10;
-    }
     
     // Calculate profile completeness
     if (profile) {

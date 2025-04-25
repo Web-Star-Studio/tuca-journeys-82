@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -95,7 +94,22 @@ const TourBooking = () => {
         description: "Sua reserva foi realizada com sucesso.",
       });
 
-      navigate("/dashboard");
+      navigate("/reserva-confirmada", {
+        state: { 
+          booking: {
+            id: crypto.randomUUID(),
+            checkIn: date,
+            checkOut: date,
+            guests: guests,
+            accommodationType: tour.title,
+            name: user.user_metadata?.name || user.email,
+            email: user.email,
+            phone: user.user_metadata?.phone || "",
+            bookingId: `RES${Math.floor(Math.random() * 10000)}`,
+            notes: ""
+          }
+        }
+      });
     } catch (error) {
       console.error('Error creating booking:', error);
       toast({

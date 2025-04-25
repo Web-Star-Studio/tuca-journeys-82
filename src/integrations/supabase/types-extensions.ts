@@ -1,11 +1,28 @@
-
 import { Database as OriginalDatabase } from './types';
 
+// Extend the original Database type with our custom tables
 export interface Database extends OriginalDatabase {
   public: {
     Tables: {
-      // Include all original tables from the base Database type
-      [K in keyof OriginalDatabase['public']['Tables']]: OriginalDatabase['public']['Tables'][K];
+      // For all existing tables in the original database, keep them as is
+      accommodation_availability: OriginalDatabase['public']['Tables']['accommodation_availability'];
+      accommodations: OriginalDatabase['public']['Tables']['accommodations'];
+      bookings: OriginalDatabase['public']['Tables']['bookings'];
+      chat_messages: OriginalDatabase['public']['Tables']['chat_messages'];
+      discount_coupons: OriginalDatabase['public']['Tables']['discount_coupons'];
+      event_bookings: OriginalDatabase['public']['Tables']['event_bookings'];
+      events: OriginalDatabase['public']['Tables']['events'];
+      flight_bookings: OriginalDatabase['public']['Tables']['flight_bookings'];
+      flights: OriginalDatabase['public']['Tables']['flights'];
+      notifications: OriginalDatabase['public']['Tables']['notifications'];
+      packages: OriginalDatabase['public']['Tables']['packages'];
+      partners: OriginalDatabase['public']['Tables']['partners'];
+      products: OriginalDatabase['public']['Tables']['products'];
+      reviews: OriginalDatabase['public']['Tables']['reviews'];
+      tour_bookings: OriginalDatabase['public']['Tables']['tour_bookings'];
+      tours: OriginalDatabase['public']['Tables']['tours'];
+      user_profiles: OriginalDatabase['public']['Tables']['user_profiles'];
+      wishlist_items: OriginalDatabase['public']['Tables']['wishlist_items'];
       
       // Add our new travel_preferences table
       travel_preferences: {

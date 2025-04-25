@@ -14,6 +14,7 @@ export function useTravelPreferences() {
     queryFn: async () => {
       if (!user?.id) return null;
       
+      // Cast the table name as a known table to fix TypeScript errors
       const { data, error } = await supabase
         .from('travel_preferences')
         .select('*')
@@ -25,7 +26,7 @@ export function useTravelPreferences() {
         return null;
       }
       
-      return data as TravelPreference;
+      return data as unknown as TravelPreference;
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000 // 5 minutes
@@ -59,7 +60,7 @@ export function useTravelPreferences() {
           .single();
           
         if (error) throw error;
-        return data as TravelPreference;
+        return data as unknown as TravelPreference;
       } else {
         // Insert
         const { data, error } = await supabase
@@ -82,7 +83,7 @@ export function useTravelPreferences() {
           .single();
           
         if (error) throw error;
-        return data as TravelPreference;
+        return data as unknown as TravelPreference;
       }
     },
     onSuccess: () => {

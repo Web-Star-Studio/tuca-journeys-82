@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -29,12 +30,11 @@ const Dashboard = () => {
   // Show error toast if bookings fetch fails
   useEffect(() => {
     if (bookingsError) {
-      toast.error("Erro ao carregar suas reservas");
       console.error("Error fetching bookings:", bookingsError);
     }
   }, [bookingsError]);
   
-  // Calculate user metrics from real data
+  // Calculate user metrics from demo data
   const userMetrics = getDashboardMetrics(bookings);
 
   // Generate personalized recommendations based on user behavior and preferences
@@ -60,6 +60,9 @@ const Dashboard = () => {
   if (!user) {
     return null; // Will be redirected by useAuthRedirect
   }
+
+  console.log("Dashboard rendering with bookings:", bookings);
+  console.log("User metrics:", userMetrics);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

@@ -1,13 +1,10 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import LoginForm from "@/components/login/LoginForm";
 import { Loader2 } from "lucide-react";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const Login = () => {
-  const { isLoading: authRedirectLoading, isAuthenticated, isAdmin } = useAuthRedirect();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,18 +12,6 @@ const Login = () => {
   // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo');
-  
-  // Redirect authenticated users away from login page
-  useEffect(() => {
-    if (!authRedirectLoading && isAuthenticated) {
-      if (isAdmin) {
-        navigate('/admin/dashboard');
-      } else {
-        // Use the returnTo query param or default to dashboard
-        navigate(returnTo || '/dashboard');
-      }
-    }
-  }, [authRedirectLoading, isAuthenticated, isAdmin, navigate, returnTo]);
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
@@ -39,7 +24,7 @@ const Login = () => {
     }
   };
   
-  if (authRedirectLoading || isRedirecting) {
+  if (isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />

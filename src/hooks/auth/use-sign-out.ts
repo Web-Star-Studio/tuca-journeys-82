@@ -7,19 +7,8 @@ export const useSignOut = () => {
 
   const signOut = async () => {
     try {
-      // Check if we have a mock session
-      const mockSessionStr = localStorage.getItem("supabase-mock-session");
-      if (mockSessionStr) {
-        // Remove mock session
-        localStorage.removeItem("supabase-mock-session");
-        
-        toast({
-          title: "Logout realizado com sucesso",
-          description: "Você saiu da sessão de demonstração.",
-        });
-        
-        return;
-      }
+      // Make sure to clear any mock sessions
+      localStorage.removeItem("supabase-mock-session");
       
       // Real Supabase signout
       const { error } = await supabase.auth.signOut();

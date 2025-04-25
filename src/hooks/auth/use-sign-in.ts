@@ -18,6 +18,7 @@ export const useSignIn = () => {
         "felipe@webstar.studio"
       ].includes(email);
       
+      // Demo account logic - requires explicit password match
       if (isDemoAccount && password === "demo123") {
         console.log("Demo account detected, creating mock session");
         
@@ -51,9 +52,6 @@ export const useSignIn = () => {
           user: mockUser,
           token_type: "bearer"
         };
-        
-        // Store the mock session in localStorage to persist across page reloads
-        localStorage.setItem("supabase-mock-session", JSON.stringify(mockSession));
         
         toast({
           title: "Login de demonstração",

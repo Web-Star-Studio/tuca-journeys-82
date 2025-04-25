@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const DEMO_ACCOUNTS = [
-  { email: "user@example.com", password: "password", label: "Entrar como Usuário Demo" },
-  { email: "admin@tucanoronha.com", password: "admin123456", label: "Entrar como Admin Demo" },
-  { email: "felipe@webstar.studio", password: "Client@123", label: "Entrar como Admin Felipe" }
+  { email: "user@example.com", password: "demo123", label: "Entrar como Usuário Demo" },
+  { email: "admin@tucanoronha.com", password: "demo123", label: "Entrar como Admin Demo" },
+  { email: "felipe@webstar.studio", password: "demo123", label: "Entrar como Admin Felipe" }
 ];
 
 const QuickAccessButtons = () => {

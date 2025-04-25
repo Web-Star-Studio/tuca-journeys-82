@@ -26,6 +26,9 @@ export const useAuthState = () => {
       setLoading(true);
       
       try {
+        // Clean up any old mock sessions first
+        localStorage.removeItem("supabase-mock-session");
+        
         // Get the current session from Supabase
         const { data, error } = await supabase.auth.getSession();
         if (error) {
@@ -33,7 +36,7 @@ export const useAuthState = () => {
         }
         
         if (data?.session) {
-          console.log("Found Supabase session, setting user state");
+          console.log("Found valid session, setting user state");
           setSession(data.session);
           setUser(data.session.user);
         } else {

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -67,36 +68,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Remove auto-login from mock session - only check for real Supabase session
+        // Only check for real Supabase session - no mock session checking
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          throw sessionError;
-        }
+        if (sessionError) throw sessionError;
         
         if (sessionData?.session) {
+          console.log("Found valid Supabase session");
           setSession(sessionData.session);
           setUser(sessionData.session.user);
           await checkAdminStatus(sessionData.session.user);
         } else {
-          // No valid session
+          console.log("No valid session found");
           setSession(null);
           setUser(null);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+        setSession(null);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initAuth();
-    
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (event === "SIGNED_OUT") {
-        // Clear any mock sessions on sign out
+        // Clear everything on sign out
         localStorage.removeItem("supabase-mock-session");
         setSession(null);
         setUser(null);
@@ -107,6 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await checkAdminStatus(currentSession.user);
       }
     });
+    
+    // Initialize auth
+    initAuth();
     
     // Properly handle unsubscribing
     return () => {

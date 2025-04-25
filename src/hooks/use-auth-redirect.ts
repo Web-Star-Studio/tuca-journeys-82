@@ -27,8 +27,10 @@ export const useAuthRedirect = (options: AuthRedirectOptions = {}) => {
   const [hasRedirected, setHasRedirected] = useState(false);
   
   useEffect(() => {
+    // Don't redirect while auth is still loading
     if (isLoading) return;
     
+    // Only redirect if auth is required and user isn't logged in
     if (requiredAuth && !user) {
       const currentPath = window.location.pathname;
       navigate(`${redirectTo}${currentPath !== '/' ? `?returnTo=${currentPath}` : ''}`);
@@ -36,6 +38,7 @@ export const useAuthRedirect = (options: AuthRedirectOptions = {}) => {
       return;
     }
     
+    // Only redirect if admin is required and user isn't admin
     if (requiredAdmin && !isAdmin) {
       navigate('/dashboard');
       setHasRedirected(true);

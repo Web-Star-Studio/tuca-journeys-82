@@ -18,7 +18,7 @@ export const useSignIn = () => {
         "felipe@webstar.studio"
       ].includes(email);
       
-      if (isDemoAccount) {
+      if (isDemoAccount && password === "demo123") {
         console.log("Demo account detected, creating mock session");
         
         // Create a mock user and session for demo purposes

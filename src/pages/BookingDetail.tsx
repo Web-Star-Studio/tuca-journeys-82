@@ -20,10 +20,10 @@ const BookingDetail = () => {
   const { cancelBooking, isCancelling } = useCancelBooking();
   
   // Handle cancellation request
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = () => {
     if (booking && window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
       cancelBooking(booking.id);
-      // Navigate back after success
+      // Navigate back after success (the toast will show automatically)
       setTimeout(() => navigate('/dashboard'), 1500);
     }
   };
@@ -165,7 +165,7 @@ const BookingDetail = () => {
             </CardContent>
             <CardFooter className="border-t pt-4 flex justify-end space-x-2">
               <Button variant="outline">Entrar em contato</Button>
-              {booking.status === 'confirmed' && (
+              {booking?.status === 'confirmed' && (
                 <Button 
                   variant="destructive"
                   onClick={handleCancelBooking}

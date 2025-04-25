@@ -1,13 +1,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService } from '@/services';
 import { toast } from 'sonner';
 
 /**
- * Hook for cancelling a booking
- * 
- * @returns Mutation for cancelling a booking
+ * Hook for cancelling a booking - using demo data
  */
 export const useCancelBooking = () => {
   const { user } = useAuth();
@@ -16,11 +13,19 @@ export const useCancelBooking = () => {
   const mutation = useMutation({
     mutationFn: async (bookingId: string) => {
       if (!user) throw new Error('User not authenticated');
-      return await bookingService.cancelBooking(bookingId, user.id);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Cancelling booking:', bookingId);
+      
+      // In a real app, this would make an API call to cancel the booking
+      // For demo purposes, we'll just return success
+      return { success: true };
     },
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['bookings', user?.id] });
+    onSuccess: (_, bookingId) => {
+      // Invalidate and refetch to update the UI with mock data
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
       toast.success('Reserva cancelada com sucesso');
     },
     onError: (error) => {
@@ -29,12 +34,9 @@ export const useCancelBooking = () => {
     }
   });
 
-  const cancelBooking = (id: string) => {
-    mutation.mutate(id);
-  };
-
   return {
-    cancelBooking,
+    cancelBooking: (id: string) => mutation.mutate(id),
     isCancelling: mutation.isPending
   };
 };
+

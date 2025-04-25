@@ -1,6 +1,5 @@
-
 import React from "react";
-import { ExternalLink, Ban, ChevronRight } from "lucide-react";
+import { ExternalLink, Ban, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +31,7 @@ const BookingRow: React.FC<BookingRowProps> = ({
   compact = false 
 }) => {
   const navigate = useNavigate();
-  const { cancelBooking: hookCancelBooking } = useCancelBooking();
+  const { cancelBooking: hookCancelBooking, isCancelling } = useCancelBooking();
   
   // Use the cancelBooking function from props if provided, otherwise use the one from the hook
   const cancelBooking = propsCancelBooking || hookCancelBooking;
@@ -55,9 +54,8 @@ const BookingRow: React.FC<BookingRowProps> = ({
   };
 
   const handleCancel = () => {
-    if (cancelBooking) {
+    if (cancelBooking && window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
       cancelBooking(booking.id);
-      toast.success('Reserva cancelada com sucesso');
     }
   };
 
@@ -80,7 +78,7 @@ const BookingRow: React.FC<BookingRowProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={handleViewBooking}
+            onClick={() => navigate(`/bookings/${booking.id}`)}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -89,7 +87,7 @@ const BookingRow: React.FC<BookingRowProps> = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={handleViewBooking}
+              onClick={() => navigate(`/bookings/${booking.id}`)}
               className="text-tuca-ocean-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/20"
             >
               <ExternalLink className="h-4 w-4 mr-1" /> Ver
@@ -102,8 +100,14 @@ const BookingRow: React.FC<BookingRowProps> = ({
                     variant="ghost" 
                     size="sm"
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    disabled={isCancelling}
                   >
-                    <Ban className="h-4 w-4 mr-1" /> Cancelar
+                    {isCancelling ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                      <Ban className="h-4 w-4 mr-1" />
+                    )}
+                    {isCancelling ? 'Cancelando...' : 'Cancelar'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

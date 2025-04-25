@@ -34,6 +34,7 @@ export const publicRoutes = (
     <Route path="/passeios/:id" element={<TourDetail />} />
     <Route path="/hospedagens" element={<Hospedagens />} />
     <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
+    <Route path="/hospedagem/:id" element={<AccommodationDetail />} />
     <Route path="/pacotes" element={<Packages />} />
     <Route path="/pacotes/:id" element={<PackageDetail />} />
     <Route path="/sobre" element={<About />} />

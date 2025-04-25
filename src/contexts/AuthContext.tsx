@@ -34,7 +34,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut, resetPassword: authResetPassword } = useAuthOperations();
+  
+  // Don't use the auth operations with navigation hooks during initial render
+  const { signIn: authSignIn, signUp: authSignUp, resetPassword: authResetPassword } = useAuthOperations();
+  const { signOut: authSignOut } = useAuthOperations();
 
   // Check if user has admin role
   const checkAdminStatus = async (currentUser: User | null) => {
@@ -158,11 +161,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     setIsLoading(true);
     try {
-      await authSignOut();
+      const result = await authSignOut();
       // Immediately clear auth state
       setUser(null);
       setSession(null);
       setIsAdmin(false);
+      return result;
     } finally {
       setIsLoading(false);
     }

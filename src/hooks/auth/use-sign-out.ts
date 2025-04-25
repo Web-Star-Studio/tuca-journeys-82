@@ -1,11 +1,9 @@
 
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export const useSignOut = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const signOut = async () => {
     try {
@@ -25,8 +23,8 @@ export const useSignOut = () => {
         description: "Você saiu da sua conta.",
       });
       
-      // Force redirect to login page after logout
-      navigate("/login", { replace: true });
+      // Return success without navigating (navigation will be handled by the component)
+      return { success: true };
       
     } catch (error: any) {
       console.error("Error during logout:", error);
@@ -35,6 +33,7 @@ export const useSignOut = () => {
         description: error.message || "Ocorreu um erro ao fazer logout. Tente novamente.",
         variant: "destructive",
       });
+      return { success: false, error };
     }
   };
 

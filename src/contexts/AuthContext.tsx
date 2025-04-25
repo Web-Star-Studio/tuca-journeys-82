@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
 import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
+import { SignOutResult } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -12,7 +12,7 @@ interface AuthContextType {
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, name: string) => Promise<any>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<SignOutResult>;
   resetPassword: (email: string) => Promise<any>;
 }
 
@@ -23,7 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   signIn: async () => ({}),
   signUp: async () => ({}),
-  signOut: async () => {},
+  signOut: async () => ({ success: false }),
   resetPassword: async () => ({})
 });
 
@@ -158,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<SignOutResult> => {
     setIsLoading(true);
     try {
       const result = await authSignOut();

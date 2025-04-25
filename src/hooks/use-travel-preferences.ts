@@ -42,23 +42,47 @@ export function useTravelPreferences() {
         // Update
         const { data, error } = await supabase
           .from('travel_preferences')
-          .update(preferences)
+          .update({
+            travel_style: preferences.travel_style,
+            group_size: preferences.group_size,
+            trip_duration: preferences.trip_duration,
+            activities: preferences.activities,
+            accommodation_types: preferences.accommodation_types,
+            budget_range: preferences.budget_range,
+            dietary_restrictions: preferences.dietary_restrictions,
+            special_requests: preferences.special_requests,
+            travel_dates: preferences.travel_dates,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', preferences.id)
           .select()
           .single();
           
         if (error) throw error;
-        return data;
+        return data as TravelPreference;
       } else {
         // Insert
         const { data, error } = await supabase
           .from('travel_preferences')
-          .insert(preferences)
+          .insert({
+            user_id: preferences.user_id,
+            travel_style: preferences.travel_style,
+            group_size: preferences.group_size,
+            trip_duration: preferences.trip_duration,
+            activities: preferences.activities,
+            accommodation_types: preferences.accommodation_types,
+            budget_range: preferences.budget_range,
+            dietary_restrictions: preferences.dietary_restrictions,
+            special_requests: preferences.special_requests,
+            travel_dates: preferences.travel_dates,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
           .select()
           .single();
           
         if (error) throw error;
-        return data;
+        return data as TravelPreference;
       }
     },
     onSuccess: () => {

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -67,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // REMOVED: All mock session handling from localStorage 
+        setIsLoading(true);
         
         // Check for real Supabase session
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -76,16 +77,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         if (sessionData?.session) {
+          console.log("Found existing session, setting user state");
           setSession(sessionData.session);
           setUser(sessionData.session.user);
           await checkAdminStatus(sessionData.session.user);
         } else {
           // No valid session
+          console.log("No valid session found");
           setSession(null);
           setUser(null);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
       } finally {
         setIsLoading(false);
       }
@@ -98,12 +105,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Auth state changed:", event);
       
       if (event === "SIGNED_OUT") {
-        // Remove any mock session that might exist
-        localStorage.removeItem("supabase-mock-session");
+        console.log("User signed out, clearing auth state");
+        // Clear all auth data
         setSession(null);
         setUser(null);
         setIsAdmin(false);
-      } else if (currentSession) {
+      } else if (event === "SIGNED_IN" && currentSession) {
+        console.log("User signed in, setting auth state");
+        setSession(currentSession);
+        setUser(currentSession.user);
+        await checkAdminStatus(currentSession.user);
+      } else if (event === "TOKEN_REFRESHED" && currentSession) {
+        console.log("Token refreshed");
         setSession(currentSession);
         setUser(currentSession.user);
         await checkAdminStatus(currentSession.user);
@@ -146,6 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authSignOut();
+      // Immediately clear auth state
       setUser(null);
       setSession(null);
       setIsAdmin(false);

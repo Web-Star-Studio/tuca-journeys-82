@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -17,9 +18,22 @@ const UserMenu = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Clear any potential localStorage items first
+      localStorage.removeItem("supabase-mock-session");
+      localStorage.removeItem("supabase.auth.token");
+      
+      // Use the context's signOut function
+      await signOut();
+      
+      // Force navigate to login page and replace history to prevent back navigation
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   const getInitials = (name: string) => {

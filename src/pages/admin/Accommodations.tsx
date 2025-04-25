@@ -39,7 +39,8 @@ const AdminAccommodations = () => {
     };
     
     fetchData();
-  }, [typeFilter, fetchAccommodations]);
+    // Removemos fetchAccommodations das dependências para evitar o loop infinito
+  }, [typeFilter]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(

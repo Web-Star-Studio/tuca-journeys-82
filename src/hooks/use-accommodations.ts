@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Accommodation } from '@/types/database';
 import { getAccommodationsFromDB, getAccommodationByIdFromDB } from '@/lib/api';
 
@@ -28,7 +28,7 @@ export const useAccommodations = (typeFilter: string = '') => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchAccommodations = async () => {
+  const fetchAccommodations = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await getAccommodationsFromDB();
@@ -47,7 +47,7 @@ export const useAccommodations = (typeFilter: string = '') => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [typeFilter]);
 
   const getAccommodationById = async (id: number): Promise<Accommodation> => {
     try {
@@ -99,7 +99,7 @@ export const useAccommodations = (typeFilter: string = '') => {
     return updatedAccommodation;
   };
 
-  const deleteAccommodation = async (id: number) => {
+  const deleteAccommodationMutation = async (id: number) => {
     // In a real application, this would make an API call
     console.log('Deleting accommodation with ID:', id);
     
@@ -123,7 +123,7 @@ export const useAccommodations = (typeFilter: string = '') => {
     createAccommodation,
     updateAccommodation,
     deleteAccommodation: {
-      mutate: deleteAccommodation,
+      mutate: deleteAccommodationMutation,
       isPending: false, // Simplified - in a real app this would be stateful
     }
   };

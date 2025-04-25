@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -24,7 +25,6 @@ import {
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { SignOutResult } from "@/types/auth";
 
 interface UserDropdownItem {
   label: string;
@@ -35,7 +35,7 @@ interface UserDropdownItem {
 
 interface UserDropdownContentProps {
   user: User;
-  onSignOut: () => Promise<SignOutResult>;
+  onSignOut: () => Promise<void>;
 }
 
 const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
@@ -65,7 +65,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
     navigate(href);
   };
 
-  const handleSignOutClick = async () => {
+  const handleSignOut = async () => {
     await onSignOut();
   };
 
@@ -99,7 +99,7 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
         ))}
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOutClick}>
+      <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
         <LogOut className="mr-2 h-4 w-4" />
         <span>Sair</span>
       </DropdownMenuItem>

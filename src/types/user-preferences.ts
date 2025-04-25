@@ -8,7 +8,6 @@ export interface TravelPreference {
   activities: string[];         // Hiking, Diving, Beach, etc.
   accommodation_types: string[]; // Hotel, Pousada, Resort
   budget_range: string;         // Economy, Medium, Premium, Luxury
-  travel_frequency: string;     // Monthly, Quarterly, Biannual, Annual
   travel_dates?: {
     start_date?: string;
     end_date?: string;

@@ -7,11 +7,19 @@ export const useSignOut = () => {
 
   const signOut = async () => {
     try {
-      // Remove any mock session that might exist
-      localStorage.removeItem("supabase-mock-session");
-      
-      // Clear any other auth-related items in localStorage
-      localStorage.removeItem("supabase.auth.token");
+      // Check if we have a mock session
+      const mockSessionStr = localStorage.getItem("supabase-mock-session");
+      if (mockSessionStr) {
+        // Remove mock session
+        localStorage.removeItem("supabase-mock-session");
+        
+        toast({
+          title: "Logout realizado com sucesso",
+          description: "Você saiu da sessão de demonstração.",
+        });
+        
+        return;
+      }
       
       // Real Supabase signout
       const { error } = await supabase.auth.signOut();
@@ -23,9 +31,6 @@ export const useSignOut = () => {
         description: "Você saiu da sua conta.",
       });
       
-      // Return success without navigating (navigation will be handled by the component)
-      return { success: true };
-      
     } catch (error: any) {
       console.error("Error during logout:", error);
       toast({
@@ -33,7 +38,6 @@ export const useSignOut = () => {
         description: error.message || "Ocorreu um erro ao fazer logout. Tente novamente.",
         variant: "destructive",
       });
-      return { success: false, error };
     }
   };
 

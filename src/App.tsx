@@ -29,11 +29,11 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Router>
-          <AuthProvider>
-            <UIProvider>
-              <CartProvider>
-                <WishlistProvider>
+        <AuthProvider>
+          <UIProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Router>
                   <ScrollToTop />
                   <Suspense fallback={<GlobalLoading />}>
                     <Routes>
@@ -42,12 +42,12 @@ const App: React.FC = () => {
                       {adminRoutes}
                     </Routes>
                   </Suspense>
-                  <Toaster position="top-center" richColors closeButton />
-                </WishlistProvider>
-              </CartProvider>
-            </UIProvider>
-          </AuthProvider>
-        </Router>
+                </Router>
+                <Toaster position="top-center" richColors closeButton />
+              </WishlistProvider>
+            </CartProvider>
+          </UIProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

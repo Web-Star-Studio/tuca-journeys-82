@@ -28,6 +28,7 @@ export const useSignUp = () => {
       
       return { data, error: null };
     } catch (error: any) {
+      console.error("Error in signup:", error);
       toast({
         title: "Erro ao criar conta",
         description: error.message,

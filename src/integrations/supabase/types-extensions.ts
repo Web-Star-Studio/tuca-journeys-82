@@ -1,4 +1,3 @@
-
 import { Database as OriginalDatabase } from './types';
 
 // Extend the original Database type with our custom tables
@@ -20,8 +19,13 @@ export interface Database extends OriginalDatabase {
       products: OriginalDatabase['public']['Tables']['products'];
       reviews: OriginalDatabase['public']['Tables']['reviews'];
       tours: OriginalDatabase['public']['Tables']['tours'];
+      tour_schedules: OriginalDatabase['public']['Tables']['tour_schedules'];
       user_profiles: OriginalDatabase['public']['Tables']['user_profiles'];
       wishlist_items: OriginalDatabase['public']['Tables']['wishlist_items'];
+      user_coupons: OriginalDatabase['public']['Tables']['user_coupons'];
+      vehicle_bookings: OriginalDatabase['public']['Tables']['vehicle_bookings'];
+      vehicle_units: OriginalDatabase['public']['Tables']['vehicle_units'];
+      vehicles: OriginalDatabase['public']['Tables']['vehicles'];
       
       // Add missing tables that are referenced in the codebase
       user_roles: {
@@ -54,45 +58,6 @@ export interface Database extends OriginalDatabase {
         ];
       };
       
-      tour_schedules: {
-        Row: {
-          id: number;
-          tour_id: number;
-          date: string;
-          available_spots: number;
-          price: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          tour_id: number;
-          date: string;
-          available_spots: number;
-          price: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          tour_id?: number;
-          date?: string;
-          available_spots?: number;
-          price?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "tour_schedules_tour_id_fkey";
-            columns: ["tour_id"];
-            isOneToOne: false;
-            referencedRelation: "tours";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
       tour_bookings: {
         Row: {
           id: number;
@@ -131,91 +96,6 @@ export interface Database extends OriginalDatabase {
             columns: ["tour_schedule_id"];
             isOneToOne: false;
             referencedRelation: "tour_schedules";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      user_coupons: {
-        Row: {
-          id: string;
-          user_id: string;
-          coupon_id: string;
-          is_used: boolean;
-          used_at: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          coupon_id: string;
-          is_used?: boolean;
-          used_at?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          coupon_id?: string;
-          is_used?: boolean;
-          used_at?: string | null;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "user_coupons_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "user_coupons_coupon_id_fkey";
-            columns: ["coupon_id"];
-            isOneToOne: false;
-            referencedRelation: "discount_coupons";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      vehicle_bookings: {
-        Row: {
-          id: number;
-          booking_id: number;
-          vehicle_id: number;
-          start_date: string;
-          end_date: string;
-          price: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          booking_id: number;
-          vehicle_id: number;
-          start_date: string;
-          end_date: string;
-          price: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          booking_id?: number;
-          vehicle_id?: number;
-          start_date?: string;
-          end_date?: string;
-          price?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "vehicle_bookings_booking_id_fkey";
-            columns: ["booking_id"];
-            isOneToOne: false;
-            referencedRelation: "bookings";
             referencedColumns: ["id"];
           }
         ];

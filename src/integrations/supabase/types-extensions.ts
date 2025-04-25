@@ -1,12 +1,12 @@
 
 import { Database as OriginalDatabase } from './types';
 
-// Extend the original Database type with our new travel_preferences table
 export interface Database extends OriginalDatabase {
   public: {
     Tables: {
       // Include all original tables
       ...OriginalDatabase['public']['Tables'],
+      
       // Add our new travel_preferences table
       travel_preferences: {
         Row: {
@@ -72,7 +72,7 @@ export interface Database extends OriginalDatabase {
             referencedColumns: ["id"];
           }
         ];
-      };
+      }
     };
     Views: OriginalDatabase['public']['Views'];
     Functions: OriginalDatabase['public']['Functions'];

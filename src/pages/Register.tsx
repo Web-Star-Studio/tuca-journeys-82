@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -90,7 +89,6 @@ const Register = () => {
           className="bg-white dark:bg-gray-900 bg-opacity-95 dark:bg-opacity-95 backdrop-blur-sm py-8 px-6 shadow-xl rounded-xl border border-gray-200 dark:border-gray-700"
         >
           {registrationStep === 'account' ? (
-            // Account Creation Step
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -198,12 +196,7 @@ const Register = () => {
                 </div>
                 
                 <div className="flex items-center">
-                  <Checkbox
-                    id="terms"
-                    {...register("terms", {
-                      required: "Você deve aceitar os termos",
-                    })}
-                  />
+                  <Checkbox id="terms" {...register("terms")} />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                     Eu concordo com os{" "}
                     <Link to="/termos" className="text-tuca-ocean-blue hover:underline">
@@ -215,9 +208,6 @@ const Register = () => {
                     </Link>
                   </label>
                 </div>
-                {errors.terms && (
-                  <p className="text-sm text-red-600 dark:text-red-500">{errors.terms.message}</p>
-                )}
 
                 <div>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -246,7 +236,6 @@ const Register = () => {
               </form>
             </motion.div>
           ) : (
-            // Preferences Step
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

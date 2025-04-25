@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -66,26 +65,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state when component mounts
   useEffect(() => {
+    // Clear any mock sessions on mount
+    localStorage.removeItem("supabase-mock-session");
+    
     const initAuth = async () => {
       try {
         // Remove any mock sessions - important to prevent auto login
         localStorage.removeItem("supabase-mock-session");
         
-        // Check for real Supabase session
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
+        // Sign out any existing session to force re-login
+        await supabase.auth.signOut();
         
-        if (sessionData?.session) {
-          console.log("Found valid Supabase session");
-          setSession(sessionData.session);
-          setUser(sessionData.session.user);
-          await checkAdminStatus(sessionData.session.user);
-        } else {
-          console.log("No valid session found");
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-        }
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
       } catch (error) {
         console.error("Error initializing auth:", error);
         setSession(null);

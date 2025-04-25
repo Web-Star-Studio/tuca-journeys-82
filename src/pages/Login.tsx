@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginForm from "@/components/login/LoginForm";
 import { Loader2 } from "lucide-react";
@@ -14,14 +14,6 @@ const Login = () => {
   // Get redirect URL from query params if available
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo');
-  
-  // Only redirect if user is already logged in
-  useEffect(() => {
-    if (!isLoading && user) {
-      setIsRedirecting(true);
-      navigate(returnTo || '/dashboard');
-    }
-  }, [user, isLoading, navigate, returnTo]);
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {

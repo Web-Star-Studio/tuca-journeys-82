@@ -4,8 +4,8 @@ import { Database as OriginalDatabase } from './types';
 export interface Database extends OriginalDatabase {
   public: {
     Tables: {
-      // Include all original tables
-      ...OriginalDatabase['public']['Tables'],
+      // Include all original tables from the base Database type
+      [K in keyof OriginalDatabase['public']['Tables']]: OriginalDatabase['public']['Tables'][K];
       
       // Add our new travel_preferences table
       travel_preferences: {
@@ -72,7 +72,7 @@ export interface Database extends OriginalDatabase {
             referencedColumns: ["id"];
           }
         ];
-      }
+      };
     };
     Views: OriginalDatabase['public']['Views'];
     Functions: OriginalDatabase['public']['Functions'];

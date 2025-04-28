@@ -89,7 +89,7 @@ const AdminSidebar = ({
       <div className="flex h-16 items-center justify-between px-4 border-b">
         <Link to="/admin" className="flex items-center">
           {!collapsed && <span className="text-xl font-bold text-black">Administrativo</span>}
-          {collapsed && <ArrowRight size={24} className="text-tuca-deep-blue" />}
+          {collapsed}
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} className="text-gray-500 hover:text-tuca-ocean-blue">
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}

@@ -93,8 +93,8 @@ export const TourForm: React.FC<TourFormProps> = ({
         setIsLoading(true);
         try {
           // Use our timeout wrapper for the getTourById call
-          const tour = await withTimeout(
-            () => getTourById(tourId),
+          const tour = await withTimeout<Tour | null>(
+            () => Promise.resolve(getTourById(tourId)),
             8000, // 8 second timeout
             null  // Return null if timeout
           );
@@ -200,7 +200,7 @@ export const TourForm: React.FC<TourFormProps> = ({
       if (tourId) {
         // Update existing tour with timeout
         await withTimeout(
-          () => saveTour({ ...formattedData, id: tourId }),
+          () => Promise.resolve(saveTour({ ...formattedData, id: tourId })),
           10000
         );
         toast({
@@ -210,7 +210,7 @@ export const TourForm: React.FC<TourFormProps> = ({
       } else {
         // Create new tour with timeout
         await withTimeout(
-          () => saveTour(formattedData),
+          () => Promise.resolve(saveTour(formattedData)),
           10000
         );
         toast({

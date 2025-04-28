@@ -43,15 +43,19 @@ const Tours = () => {
       setTourToEdit(tour.id);
       
       // Use a small delay to ensure UI updates before heavy operations
-      setTimeout(() => {
-        setFormDialogOpen(true);
-        setIsProcessing(false);
-      }, 100);
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setFormDialogOpen(true);
+          setIsProcessing(false);
+          resolve();
+        }, 100);
+      });
       
     } catch (error) {
       console.error("Error while trying to edit tour:", error);
       toast.error("Erro ao tentar editar o passeio. Tente novamente.");
       setIsProcessing(false);
+      return Promise.reject(error);
     }
   };
 
@@ -73,21 +77,23 @@ const Tours = () => {
   };
 
   const confirmDelete = async () => {
-    if (!tourToDelete) return;
+    if (!tourToDelete) return Promise.resolve();
     
     setIsProcessing(true);
     
     try {
       await withTimeout(
-        () => deleteTour(tourToDelete.id), 
+        () => Promise.resolve(deleteTour(tourToDelete.id)), 
         5000
       );
       setDeleteDialogOpen(false);
       setTourToDelete(null);
       toast.success("Passeio excluído com sucesso");
+      return Promise.resolve();
     } catch (error) {
       console.error("Error deleting tour:", error);
       toast.error("Erro ao excluir o passeio. Tente novamente.");
+      return Promise.reject(error);
     } finally {
       setIsProcessing(false);
     }

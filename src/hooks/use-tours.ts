@@ -51,15 +51,15 @@ export const useTours = () => {
     }
   });
 
-  const deleteTour = (tourId: number) => {
-    deleteTourMutation.mutate(tourId);
+  const deleteTour = (tourId: number): Promise<void> => {
+    return deleteTourMutation.mutateAsync(tourId).then(() => {});
   };
 
-  const saveTour = (tour: Partial<Tour>) => {
-    saveTourMutation.mutate(tour);
+  const saveTour = (tour: Partial<Tour>): Promise<void> => {
+    return saveTourMutation.mutateAsync(tour).then(() => {});
   };
 
-  const getTourById = (id?: number) => {
+  const getTourById = (id?: number): Tour | null => {
     if (!id || !tours) return null;
     return tours.find(tour => tour.id === id) || null;
   };

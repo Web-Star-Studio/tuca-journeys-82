@@ -10,12 +10,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface DeleteTourDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tourToDelete: Tour | null;
   onConfirmDelete: () => void;
+  isDeleting?: boolean;
 }
 
 const DeleteTourDialog: React.FC<DeleteTourDialogProps> = ({
@@ -23,6 +25,7 @@ const DeleteTourDialog: React.FC<DeleteTourDialogProps> = ({
   onOpenChange,
   tourToDelete,
   onConfirmDelete,
+  isDeleting = false,
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,11 +38,26 @@ const DeleteTourDialog: React.FC<DeleteTourDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={isDeleting}
+          >
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={onConfirmDelete}>
-            Excluir
+          <Button 
+            variant="destructive" 
+            onClick={onConfirmDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Excluindo...
+              </>
+            ) : (
+              "Excluir"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

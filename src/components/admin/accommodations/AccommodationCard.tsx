@@ -11,12 +11,14 @@ interface AccommodationCardProps {
   accommodation: Accommodation;
   onEditAccommodation: (accommodation: Accommodation) => void;
   onDeleteAccommodation: (accommodation: Accommodation) => void;
+  disabled?: boolean;
 }
 
 const AccommodationCard: React.FC<AccommodationCardProps> = ({
   accommodation,
   onEditAccommodation,
   onDeleteAccommodation,
+  disabled = false,
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all">
@@ -55,6 +57,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               size="sm"
               asChild
               className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
+              disabled={disabled}
             >
               <Link to={`/admin/accommodations/${accommodation.id}/availability`}>
                 <Calendar className="h-4 w-4" />
@@ -65,6 +68,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               size="sm"
               asChild
               className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
+              disabled={disabled}
             >
               <Link to={`/hospedagens/${accommodation.id}`} target="_blank">
                 <ExternalLink className="h-4 w-4" />
@@ -75,6 +79,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               size="sm"
               className="text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
               onClick={() => onEditAccommodation(accommodation)}
+              disabled={disabled}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -83,6 +88,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               size="sm"
               className="text-red-600 hover:text-red-700 hover:bg-red-50"
               onClick={() => onDeleteAccommodation(accommodation)}
+              disabled={disabled}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

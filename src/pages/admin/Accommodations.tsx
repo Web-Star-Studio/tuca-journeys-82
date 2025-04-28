@@ -9,6 +9,8 @@ import AccommodationList from "@/components/admin/accommodations/AccommodationLi
 import AccommodationSearch from "@/components/admin/accommodations/AccommodationSearch";
 import AccommodationDeleteDialog from "@/components/admin/accommodations/AccommodationDeleteDialog";
 import { Accommodation } from "@/types/database";
+import { withTimeout } from "@/utils/asyncUtils";
+import { useUI } from "@/contexts/UIContext";
 
 const AdminAccommodations = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,8 +19,10 @@ const AdminAccommodations = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accommodationToDelete, setAccommodationToDelete] = useState<Accommodation | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { toast } = useToast();
+  const { showGlobalSpinner } = useUI();
   const { 
     accommodations,
     isLoading, 
@@ -31,14 +35,22 @@ const AdminAccommodations = () => {
     // Fetch accommodations when component mounts or type filter changes
     const fetchData = async () => {
       try {
-        await refetch();
+        showGlobalSpinner(true);
+        await withTimeout(() => refetch(), 8000);
       } catch (error) {
         console.error("Error fetching accommodations:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar as hospedagens. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        showGlobalSpinner(false);
       }
     };
     
     fetchData();
-  }, [typeFilter, refetch]);
+  }, [typeFilter, refetch, showGlobalSpinner, toast]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -59,15 +71,27 @@ const AdminAccommodations = () => {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (accommodationToDelete) {
-      deleteAccommodation(accommodationToDelete.id);
-      setDeleteDialogOpen(false);
-      setAccommodationToDelete(null);
-      toast({
-        title: "Hospedagem excluída",
-        description: "A hospedagem foi excluída com sucesso."
-      });
+      try {
+        setIsDeleting(true);
+        await deleteAccommodation(accommodationToDelete.id);
+        setDeleteDialogOpen(false);
+        setAccommodationToDelete(null);
+        toast({
+          title: "Hospedagem excluída",
+          description: "A hospedagem foi excluída com sucesso."
+        });
+      } catch (error) {
+        console.error("Error deleting accommodation:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a hospedagem. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -121,7 +145,7 @@ const AdminAccommodations = () => {
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onConfirmDelete={confirmDelete}
-          isDeleting={false}
+          isDeleting={isDeleting}
         />
       </div>
     </AdminLayout>

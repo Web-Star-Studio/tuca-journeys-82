@@ -26,7 +26,15 @@ const AccommodationDeleteDialog: React.FC<AccommodationDeleteDialogProps> = ({
   isDeleting,
 }) => {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog 
+      open={open} 
+      onOpenChange={(newValue) => {
+        // Prevent closing while deletion is in progress
+        if (!isDeleting) {
+          onOpenChange(newValue);
+        }
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir hospedagem</AlertDialogTitle>

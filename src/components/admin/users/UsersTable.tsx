@@ -14,18 +14,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Pencil, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UsersTableProps {
   users: User[];
   isLoading?: boolean;
+  permissions?: Record<string, string[]>;
+  isMasterUser?: boolean;
   actions: {
     onEmailClick: (user: User) => void;
     onEditClick: (user: User) => void;
     onDeleteClick: (user: User) => void;
+    onRoleChange?: (userId: string, newRole: string) => void;
+    onPermissionToggle?: (userId: string, permission: string, hasPermission: boolean) => void;
+    onPromoteMaster?: (userId: string) => void;
   };
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, actions }) => {
+const UsersTable: React.FC<UsersTableProps> = ({ 
+  users, 
+  isLoading, 
+  permissions = {}, 
+  isMasterUser = false, 
+  actions 
+}) => {
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'dd/MM/yyyy');
@@ -48,6 +60,10 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, actions }) =>
     switch (role) {
       case "admin":
         return "bg-blue-100 text-blue-800";
+      case "master":
+        return "bg-purple-100 text-purple-800";
+      case "partner":
+        return "bg-amber-100 text-amber-800";
       case "customer":
         return "bg-green-100 text-green-800";
       default:
@@ -63,6 +79,16 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, actions }) =>
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case "admin": return "Administrador";
+      case "master": return "Master";
+      case "partner": return "Parceiro";
+      case "customer": return "Cliente";
+      default: return role;
     }
   };
 
@@ -122,11 +148,28 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, actions }) =>
                 </div>
               </TableCell>
               <TableCell>
-                <span 
-                  className={`px-2 py-1 rounded-full text-xs ${getRoleBadgeClass(user.role)}`}
-                >
-                  {user.role === 'admin' ? 'Administrador' : 'Cliente'}
-                </span>
+                {actions.onRoleChange ? (
+                  <Select 
+                    value={user.role} 
+                    onValueChange={(value) => actions.onRoleChange?.(user.id, value)}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Selecionar papel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="customer">Cliente</SelectItem>
+                      <SelectItem value="partner">Parceiro</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      {isMasterUser && <SelectItem value="master">Master</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span 
+                    className={`px-2 py-1 rounded-full text-xs ${getRoleBadgeClass(user.role)}`}
+                  >
+                    {getRoleDisplayName(user.role)}
+                  </span>
+                )}
               </TableCell>
               <TableCell>
                 <span 

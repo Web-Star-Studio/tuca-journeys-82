@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useRoutes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
@@ -24,6 +24,13 @@ const queryClient = new QueryClient({
   },
 });
 
+// Component to render all routes
+const AppRoutes = () => {
+  // Combine all routes
+  const allRoutes = [...publicRoutes, ...protectedRoutes, ...adminRoutes];
+  return useRoutes(allRoutes);
+};
+
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,11 +42,7 @@ const App: React.FC = () => {
                 <Router>
                   <ScrollToTop />
                   <Suspense fallback={<GlobalLoading />}>
-                    <Routes>
-                      {publicRoutes}
-                      {protectedRoutes}
-                      {adminRoutes}
-                    </Routes>
+                    <AppRoutes />
                   </Suspense>
                 </Router>
                 <Toaster position="top-center" richColors closeButton />

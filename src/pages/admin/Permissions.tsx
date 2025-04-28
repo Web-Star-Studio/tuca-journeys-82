@@ -69,15 +69,20 @@ const Permissions = () => {
         
         const role = roles && roles.length > 0 ? roles[0].role : 'customer';
         
-        // Get permissions
-        const { data: permissions } = await supabase
-          .from('user_permissions')
-          .select('permission')
-          .eq('user_id', profile.id);
+        // Get permissions using RPC function for each permission type
+        const permissionsList = await Promise.all(
+          standardPermissions.map(async (perm) => {
+            const { data } = await supabase.rpc('user_has_permission', {
+              user_id: profile.id, 
+              required_permission: perm
+            });
+            return data ? perm : null;
+          })
+        );
         
-        const userPerms = permissions ? permissions.map(p => p.permission) : [];
+        // Filter out null values and update permissions state
+        const userPerms = permissionsList.filter(Boolean) as string[];
         
-        // Update permissions state
         setUserPermissions(prev => ({
           ...prev,
           [profile.id]: userPerms

@@ -1,3 +1,4 @@
+
 import { Database as OriginalDatabase } from './types';
 
 // Extend the original Database type with our custom tables
@@ -27,7 +28,7 @@ export interface Database extends OriginalDatabase {
       vehicle_units: OriginalDatabase['public']['Tables']['vehicle_units'];
       vehicles: OriginalDatabase['public']['Tables']['vehicles'];
       
-      // Add missing tables that are referenced in the codebase
+      // Add our new tables
       user_roles: {
         Row: {
           id: string;
@@ -53,7 +54,116 @@ export interface Database extends OriginalDatabase {
           updated_at?: string;
           partner_type?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      
+      user_permissions: {
+        Row: {
+          id: string;
+          user_id: string;
+          permission: string;
+          granted_by: string | null;
+          granted_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          permission: string;
+          granted_by?: string | null;
+          granted_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          permission?: string;
+          granted_by?: string | null;
+          granted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_permissions_granted_by_fkey";
+            columns: ["granted_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      
+      audit_logs: {
+        Row: {
+          id: number;
+          user_id: string | null;
+          action: string;
+          table_name: string | null;
+          record_id: string | null;
+          old_data: any | null;
+          new_data: any | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          created_at: string | null;
+          target_user_id: string | null;
+          change_details: any | null;
+        };
+        Insert: {
+          id?: number;
+          user_id?: string | null;
+          action: string;
+          table_name?: string | null;
+          record_id?: string | null;
+          old_data?: any | null;
+          new_data?: any | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string | null;
+          target_user_id?: string | null;
+          change_details?: any | null;
+        };
+        Update: {
+          id?: number;
+          user_id?: string | null;
+          action?: string;
+          table_name?: string | null;
+          record_id?: string | null;
+          old_data?: any | null;
+          new_data?: any | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string | null;
+          target_user_id?: string | null;
+          change_details?: any | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_logs_target_user_id_fkey";
+            columns: ["target_user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       
       tour_bookings: {
@@ -98,7 +208,7 @@ export interface Database extends OriginalDatabase {
           }
         ];
       };
-
+      
       packages: {
         Row: {
           id: number;
@@ -151,7 +261,6 @@ export interface Database extends OriginalDatabase {
         Relationships: [];
       };
       
-      // Add our travel_preferences table
       travel_preferences: {
         Row: {
           id: string;

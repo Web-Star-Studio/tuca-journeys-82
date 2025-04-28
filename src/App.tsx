@@ -8,9 +8,9 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { UIProvider } from './contexts/UIContext';
-import { publicRoutes } from './routes/publicRoutes';
-import { protectedRoutes } from './routes/protectedRoutes';
-import { adminRoutes } from './routes/adminRoutes';
+import publicRoutes from './routes/publicRoutes';
+import protectedRoutes from './routes/protectedRoutes';
+import adminRoutes from './routes/adminRoutes';
 import ScrollToTop from './components/utils/ScrollToTop';
 import GlobalLoading from './components/utils/GlobalLoading';
 

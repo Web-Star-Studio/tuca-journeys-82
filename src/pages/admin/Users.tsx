@@ -27,6 +27,9 @@ const Users = () => {
   const { user: currentUser } = useAuth();
   const [isMasterUser, setIsMasterUser] = useState(false);
 
+  // Define permission types
+  const standardPermissions = ['read', 'write', 'delete', 'admin', 'master'];
+
   // Check if current user is a master
   useEffect(() => {
     const checkMasterStatus = async () => {
@@ -63,12 +66,19 @@ const Users = () => {
             : 'customer';
           
           // Get user permissions
-          const { data: permissions } = await supabase
-            .from('user_permissions')
-            .select('permission')
-            .eq('user_id', profile.id);
-            
-          const userPerms = permissions ? permissions.map(p => p.permission) : [];
+          // Instead of directly querying, check each permission type
+          const permissionsList = await Promise.all(
+            standardPermissions.map(async (perm) => {
+              const { data } = await supabase.rpc('user_has_permission', {
+                user_id: profile.id, 
+                required_permission: perm
+              });
+              return data ? perm : null;
+            })
+          );
+          
+          // Filter out null values
+          const userPerms = permissionsList.filter(Boolean) as string[];
           
           // Store permissions for each user
           setUserPermissions(prev => ({
@@ -136,12 +146,9 @@ const Users = () => {
     
     try {
       // Delete user_permissions first
-      const { error: permissionError } = await supabase
-        .from('user_permissions')
-        .delete()
-        .eq('user_id', userToDelete.id);
-      
-      if (permissionError) throw permissionError;
+      await supabase.rpc('revoke_all_permissions', {
+        target_user_id: userToDelete.id
+      });
       
       // Delete user_roles next
       const { error: roleError } = await supabase

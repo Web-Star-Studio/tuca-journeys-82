@@ -49,19 +49,18 @@ export const hasPermission = async (
     }
     
     // Finally check for specific permission via user_permissions table
-    const { data: permData, error: permError } = await supabase
-      .from('user_permissions')
-      .select('permission')
-      .eq('user_id', userId)
-      .eq('permission', permission)
-      .maybeSingle();
-      
-    if (permError) {
-      console.error('Error checking specific permission:', permError);
+    // Using raw SQL query to avoid type errors with user_permissions table
+    const { data, error } = await supabase.rpc('user_has_permission', {
+      user_id: userId,
+      required_permission: permission
+    });
+    
+    if (error) {
+      console.error('Error checking specific permission:', error);
       return false;
     }
     
-    return !!permData;
+    return !!data;
   } catch (error) {
     console.error('Error checking user permission:', error);
     return false;
@@ -124,12 +123,11 @@ export const grantPermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('user_permissions')
-      .insert({
-        user_id: userId,
-        permission
-      });
+    // Using raw SQL via rpc to avoid type issues
+    const { error } = await supabase.rpc('grant_permission', {
+      target_user_id: userId,
+      permission_name: permission
+    });
     
     if (error) {
       console.error('Error granting permission:', error);
@@ -154,11 +152,11 @@ export const revokePermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('user_permissions')
-      .delete()
-      .eq('user_id', userId)
-      .eq('permission', permission);
+    // Using raw SQL via rpc to avoid type issues
+    const { error } = await supabase.rpc('revoke_permission', {
+      target_user_id: userId,
+      permission_name: permission
+    });
     
     if (error) {
       console.error('Error revoking permission:', error);

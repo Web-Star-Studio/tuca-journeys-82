@@ -29,7 +29,7 @@ import { User, UserRole, UserStatus } from "@/components/admin/users/types";
 const userFormSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "Email inválido" }),
-  role: z.enum(["admin", "customer"]),
+  role: z.enum(["admin", "customer", "partner", "master"]),
   status: z.enum(["active", "inactive"]),
   password: z
     .string()
@@ -342,6 +342,8 @@ export const UserForm: React.FC<UserFormProps> = ({
                     <SelectContent>
                       <SelectItem value="admin">Administrador</SelectItem>
                       <SelectItem value="customer">Cliente</SelectItem>
+                      <SelectItem value="partner">Parceiro</SelectItem>
+                      <SelectItem value="master">Master</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -18,8 +19,10 @@ const UserMenu = () => {
   const navigate = useNavigate();
   
   const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
+    const result = await signOut();
+    if (result.success) {
+      navigate('/login');
+    }
   };
 
   const getInitials = (name: string) => {

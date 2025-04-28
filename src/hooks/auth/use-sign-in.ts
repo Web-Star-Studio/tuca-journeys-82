@@ -5,12 +5,10 @@ import { supabase } from "@/lib/supabase";
 export const useSignIn = () => {
   const { toast } = useToast();
 
-  // Sign in function
   const signIn = async (email: string, password: string) => {
     try {
       console.log("Attempting to sign in with:", email);
       
-      // Real Supabase authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

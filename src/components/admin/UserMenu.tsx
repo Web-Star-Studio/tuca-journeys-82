@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, LogOut, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,6 +23,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const { signOut } = useSignOut();
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   
   if (!user) return null;
   
@@ -39,11 +40,16 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   
   const handleSignOut = async () => {
     try {
-      await signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso."
-      });
+      const result = await signOut();
+      if (result.success) {
+        toast({
+          title: "Logout realizado",
+          description: "Você foi desconectado com sucesso."
+        });
+        navigate('/login');
+      } else {
+        throw new Error("Failed to sign out");
+      }
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

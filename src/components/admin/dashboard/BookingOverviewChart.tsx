@@ -1,8 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { XAxis, YAxis } from "@/components/ui/chart/RechartsWrappers";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 interface DateRange {
   from: Date;
@@ -58,8 +57,8 @@ const BookingOverviewChart = ({ dateRange }: BookingOverviewChartProps) => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <XAxis dataKey="name" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
             <Tooltip 
               contentStyle={{ 
                 backgroundColor: "white", 

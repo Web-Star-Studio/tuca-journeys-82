@@ -1,8 +1,7 @@
 
 import React from "react";
 import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, CartesianGrid, Tooltip, TooltipProps } from "recharts";
-import { XAxis, YAxis } from "@/components/ui/chart/RechartsWrappers";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RegionData {
@@ -69,11 +68,19 @@ const UserRegionChart = ({ regionData, chartConfig }: UserRegionChartProps) => {
             horizontal={true}
             stroke="#f0f0f0"
           />
-          <XAxis type="number" />
+          <XAxis 
+            type="number"
+            tickLine={false}
+            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fontSize: 10 }}
+          />
           <YAxis 
             type="category" 
             dataKey="regiao"
             width={isMobile ? 60 : 80}
+            tickLine={false}
+            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fontSize: 10 }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar 

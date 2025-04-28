@@ -1,9 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, CartesianGrid, Legend, Tooltip } from "recharts";
-import { XAxis, YAxis } from "@/components/ui/chart/RechartsWrappers";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
 import { BookingData, BookingChartConfig } from "./BookingsDataTypes";
 
 interface BookingsDistributionChartProps {

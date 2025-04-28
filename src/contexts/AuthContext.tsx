@@ -3,6 +3,7 @@ import React, { createContext, useContext } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
 import { useAuthState } from "@/hooks/auth/use-auth-state";
+import { useResetPassword } from "@/hooks/auth/use-reset-password";
 import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
 import { SignOutResult } from "@/types/auth";
 
@@ -14,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, name: string) => Promise<any>;
   signOut: () => Promise<SignOutResult>;
+  resetPassword: (email: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,13 +26,15 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => ({}),
   signUp: async () => ({}),
   signOut: async () => ({ success: false }),
+  resetPassword: async () => ({}),
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, session, isLoading, setLoading } = useAuthState();
+  const { user, session, loading: isLoading, setLoading } = useAuthState();
   const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut } = useAuthOperations();
+  const { resetPassword: authResetPassword } = useResetPassword();
   
   // Check admin status on login/signup
   const signIn = async (email: string, password: string) => {
@@ -65,6 +69,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
+  
+  const resetPassword = async (email: string) => {
+    return await authResetPassword(email);
+  };
 
   const value = {
     user,
@@ -74,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

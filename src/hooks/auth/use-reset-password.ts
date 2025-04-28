@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase";
 export const useResetPassword = () => {
   const { toast } = useToast();
 
-  // Reset password function with real Supabase authentication
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {

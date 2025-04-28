@@ -1,6 +1,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
+import { BaseApiService } from "./base-api";
 
 export enum AuditAction {
   CREATE = 'create',

@@ -1,3 +1,4 @@
+
 import { supabase } from "./supabase";
 
 /**
@@ -46,7 +47,7 @@ export const hasPermission = async (
       return false;
     }
     
-    return data || false;
+    return data === true;
   } catch (error) {
     console.error('Error checking user permission:', error);
     return false;

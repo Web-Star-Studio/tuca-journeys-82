@@ -34,17 +34,46 @@ export const withTimeout = async <T>(
 
 /**
  * Debounce function to prevent multiple rapid calls to the same function
+ * Returns a debounced function that returns a Promise
  */
 export function debounce<F extends (...args: any[]) => any>(
   func: F,
   waitFor: number
-): (...args: Parameters<F>) => void {
+): (...args: Parameters<F>) => Promise<ReturnType<F>> {
   let timeout: ReturnType<typeof setTimeout> | null = null;
+  let resolveList: Array<(value: ReturnType<F> | PromiseLike<ReturnType<F>>) => void> = [];
+  let rejectList: Array<(reason?: any) => void> = [];
 
-  return (...args: Parameters<F>): void => {
-    if (timeout !== null) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => func(...args), waitFor);
+  return (...args: Parameters<F>): Promise<ReturnType<F>> => {
+    return new Promise<ReturnType<F>>((resolve, reject) => {
+      if (timeout !== null) {
+        clearTimeout(timeout);
+        resolveList.push(resolve);
+        rejectList.push(reject);
+      } else {
+        resolveList = [resolve];
+        rejectList = [reject];
+      }
+
+      timeout = setTimeout(async () => {
+        const currentResolveList = [...resolveList];
+        const currentRejectList = [...rejectList];
+        
+        // Clear lists first to avoid issues if there are errors
+        resolveList = [];
+        rejectList = [];
+        timeout = null;
+        
+        try {
+          const result = await func(...args);
+          // Resolve all promises with the result
+          currentResolveList.forEach(resolveFunc => resolveFunc(result));
+        } catch (error) {
+          console.error("Debounced function error:", error);
+          // Reject all promises with the error
+          currentRejectList.forEach(rejectFunc => rejectFunc(error));
+        }
+      }, waitFor);
+    });
   };
 }

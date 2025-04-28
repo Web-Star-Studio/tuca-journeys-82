@@ -14,7 +14,7 @@ export const hasPermission = async (
 ): Promise<boolean> => {
   if (!userId) return false;
   
-  // Check cache first
+  // Check cache first for improved performance
   const cachedResult = permissionCache.getPermission(userId, permission);
   if (cachedResult !== null) {
     return cachedResult;
@@ -35,7 +35,12 @@ export const hasPermission = async (
       }
       
       if (masterData) {
-        permissionCache.setPermission(userId, permission, true);
+        // Cache all common permissions when we detect a master user
+        permissionCache.setPermission(userId, 'read', true);
+        permissionCache.setPermission(userId, 'write', true);
+        permissionCache.setPermission(userId, 'delete', true);
+        permissionCache.setPermission(userId, 'admin', true);
+        permissionCache.setPermission(userId, 'master', true);
         return true; // Master has all permissions
       }
       
@@ -53,7 +58,11 @@ export const hasPermission = async (
         }
         
         if (adminData) {
-          permissionCache.setPermission(userId, permission, true);
+          // Cache all common permissions for admin
+          permissionCache.setPermission(userId, 'read', true);
+          permissionCache.setPermission(userId, 'write', true);
+          permissionCache.setPermission(userId, 'delete', true);
+          permissionCache.setPermission(userId, 'admin', true);
           return true; // Admin has all standard permissions except master
         }
       }
@@ -75,11 +84,21 @@ export const hasPermission = async (
     };
 
     // Use timeout wrapper to prevent UI freezing
-    return await withTimeout(checkPermission, 3000, false);
+    return await withTimeout(checkPermission, 5000, false);
   } catch (error) {
     console.error('Error checking user permission:', error);
     return false;
   }
+};
+
+/**
+ * Preload common permissions for a user to avoid multiple database calls
+ */
+export const preloadUserPermissions = async (userId: string): Promise<void> => {
+  if (!userId) return;
+  
+  const commonPermissions = ['read', 'write', 'delete', 'admin'];
+  await permissionCache.preloadPermissions(userId, commonPermissions);
 };
 
 /**

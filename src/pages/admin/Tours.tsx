@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useTours } from "@/hooks/use-tours";
 import { Tour } from "@/types/database";
@@ -12,9 +12,12 @@ import DeleteTourDialog from "@/components/admin/tours/DeleteTourDialog";
 import TourFormDialog from "@/components/admin/tours/TourFormDialog";
 import { withTimeout } from "@/utils/asyncUtils";
 import { usePermission } from "@/hooks/use-permission";
+import { preloadUserPermissions } from "@/lib/role-helpers";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUI } from "@/contexts/UIContext";
 
 const Tours = () => {
-  const { tours, isLoading, error, deleteTour } = useTours();
+  const { tours, isLoading, error, deleteTour, isDeleting, isSaving } = useTours();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
@@ -22,10 +25,21 @@ const Tours = () => {
   const [tourToEdit, setTourToEdit] = useState<number | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState(false);
   
+  const { user } = useAuth();
+  const { showGlobalSpinner } = useUI();
+  
   // Pre-check write permission
   const { hasPermission: canEdit, isLoading: permissionLoading } = usePermission('write');
+  
+  // Preload permissions for better performance
+  useEffect(() => {
+    if (user?.id) {
+      // Preload permissions in background
+      preloadUserPermissions(user.id).catch(console.error);
+    }
+  }, [user]);
 
-  // Handle tour edit with error handling and timeout
+  // Handle tour edit with improved performance and error handling
   const handleEditClick = async (tour: Tour) => {
     if (isProcessing) return; // Prevent multiple rapid clicks
     
@@ -39,18 +53,16 @@ const Tours = () => {
         return;
       }
       
-      // Set the tour ID to be edited
+      // Set the tour ID to be edited (asynchronously load the tour data)
       setTourToEdit(tour.id);
       
-      // Use a small delay to ensure UI updates before heavy operations
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setFormDialogOpen(true);
-          setIsProcessing(false);
-          resolve();
-        }, 100);
-      });
+      // Use a small delay to ensure UI updates before opening modal
+      setTimeout(() => {
+        setFormDialogOpen(true);
+        setIsProcessing(false);
+      }, 100);
       
+      return Promise.resolve();
     } catch (error) {
       console.error("Error while trying to edit tour:", error);
       toast.error("Erro ao tentar editar o passeio. Tente novamente.");
@@ -59,7 +71,7 @@ const Tours = () => {
     }
   };
 
-  // Handle tour delete with improved error handling
+  // Handle tour delete with improved error handling and loading state
   const handleDeleteClick = (tour: Tour) => {
     if (isProcessing) return;
     
@@ -76,19 +88,21 @@ const Tours = () => {
     }
   };
 
+  // Confirmation with proper Promise handling and timeout
   const confirmDelete = async () => {
     if (!tourToDelete) return Promise.resolve();
     
     setIsProcessing(true);
+    showGlobalSpinner(true);
     
     try {
       await withTimeout(
-        () => Promise.resolve(deleteTour(tourToDelete.id)), 
-        5000
+        () => deleteTour(tourToDelete.id), 
+        10000
       );
+      
       setDeleteDialogOpen(false);
       setTourToDelete(null);
-      toast.success("Passeio excluído com sucesso");
       return Promise.resolve();
     } catch (error) {
       console.error("Error deleting tour:", error);
@@ -96,10 +110,11 @@ const Tours = () => {
       return Promise.reject(error);
     } finally {
       setIsProcessing(false);
+      showGlobalSpinner(false);
     }
   };
 
-  // Handle adding new tour
+  // Handle adding new tour with optimizations
   const handleAddNewTour = () => {
     if (isProcessing) return;
     
@@ -114,11 +129,15 @@ const Tours = () => {
       }
       
       setTourToEdit(undefined);
-      setFormDialogOpen(true);
+      
+      // Use setTimeout to prevent UI blocking
+      setTimeout(() => {
+        setFormDialogOpen(true);
+        setIsProcessing(false);
+      }, 100);
     } catch (error) {
       console.error("Error while trying to add new tour:", error);
       toast.error("Erro ao tentar adicionar novo passeio. Tente novamente.");
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -134,15 +153,18 @@ const Tours = () => {
     (tour) =>
       tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.short_description.toLowerCase().includes(searchQuery.toLowerCase())
+      (tour.short_description || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Combined processing state
+  const isAnyProcessing = isProcessing || isDeleting || isSaving;
 
   return (
     <AdminLayout pageTitle="Gerenciar Passeios">
       <div className="w-full overflow-x-hidden">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TourSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          <TourActionButton onClick={handleAddNewTour} disabled={isProcessing} />
+          <TourActionButton onClick={handleAddNewTour} disabled={isAnyProcessing} />
         </div>
 
         <TourList
@@ -151,7 +173,7 @@ const Tours = () => {
           error={error}
           onEditTour={handleEditClick}
           onDeleteTour={handleDeleteClick}
-          isProcessing={isProcessing}
+          isProcessing={isAnyProcessing}
         />
 
         {/* Delete Confirmation Dialog */}
@@ -160,14 +182,14 @@ const Tours = () => {
           onOpenChange={setDeleteDialogOpen}
           tourToDelete={tourToDelete}
           onConfirmDelete={confirmDelete}
-          isDeleting={isProcessing}
+          isDeleting={isProcessing || isDeleting}
         />
 
         {/* Tour Form Dialog */}
         <TourFormDialog
           open={formDialogOpen}
           onOpenChange={(open) => {
-            if (!isProcessing) {
+            if (!isAnyProcessing) {
               setFormDialogOpen(open);
             }
           }}

@@ -3,19 +3,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Tour } from '@/types/database';
 import { tourService } from '@/services/tour-service';
+import { debounce } from '@/utils/asyncUtils';
+
+// Standard debounce duration
+const DEBOUNCE_MS = 300;
 
 export const useTours = () => {
   const queryClient = useQueryClient();
 
-  // Query para buscar passeios
-  const { data: tours, isLoading, error, refetch } = useQuery({
+  // Query para buscar passeios com caching otimizado
+  const { 
+    data: tours, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
     queryKey: ['tours'],
     queryFn: async () => {
       return await tourService.getTours();
     },
+    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+    refetchOnWindowFocus: false, // Evitar refetch excessivo
   });
 
-  // Mutation para excluir um passeio
+  // Mutation para excluir um passeio com debounce
   const deleteTourMutation = useMutation({
     mutationFn: async (tourId: number) => {
       await tourService.deleteTour(tourId);
@@ -31,15 +42,14 @@ export const useTours = () => {
     }
   });
 
-  // Mutation para criar ou atualizar um passeio
+  // Mutation para criar ou atualizar um passeio com otimizações
   const saveTourMutation = useMutation({
     mutationFn: async (tour: Partial<Tour>) => {
       if (tour.id) {
-        await tourService.updateTour(tour.id, tour);
+        return await tourService.updateTour(tour.id, tour);
       } else {
-        await tourService.createTour(tour);
+        return await tourService.createTour(tour);
       }
-      return { success: true };
     },
     onSuccess: () => {
       toast.success('Passeio salvo com sucesso');
@@ -51,17 +61,44 @@ export const useTours = () => {
     }
   });
 
-  const deleteTour = (tourId: number): Promise<void> => {
-    return deleteTourMutation.mutateAsync(tourId).then(() => {});
+  // Versão com debounce e Promise para deleteTour
+  const debouncedDeleteTour = debounce((tourId: number) => {
+    return deleteTourMutation.mutateAsync(tourId);
+  }, DEBOUNCE_MS);
+
+  const deleteTour = (tourId: number): Promise<any> => {
+    return debouncedDeleteTour(tourId);
   };
 
-  const saveTour = (tour: Partial<Tour>): Promise<void> => {
-    return saveTourMutation.mutateAsync(tour).then(() => {});
+  // Versão com debounce e Promise para saveTour
+  const debouncedSaveTour = debounce((tour: Partial<Tour>) => {
+    return saveTourMutation.mutateAsync(tour);
+  }, DEBOUNCE_MS);
+
+  const saveTour = (tour: Partial<Tour>): Promise<any> => {
+    return debouncedSaveTour(tour);
   };
 
+  // Otimização do getTourById para evitar buscar toda a lista de passeios
   const getTourById = (id?: number): Tour | null => {
-    if (!id || !tours) return null;
-    return tours.find(tour => tour.id === id) || null;
+    if (!id) return null;
+    
+    // Primeiro verifica se o tour já está no cache
+    if (tours) {
+      const cachedTour = tours.find(tour => tour.id === id);
+      if (cachedTour) return cachedTour;
+    }
+    
+    // Se não estiver no cache, inicia uma busca individual
+    // mas retorna null imediatamente para não travar a interface
+    if (id) {
+      queryClient.prefetchQuery({
+        queryKey: ['tour', id],
+        queryFn: () => tourService.getTourById(id),
+      });
+    }
+    
+    return null;
   };
 
   return {
@@ -71,11 +108,13 @@ export const useTours = () => {
     deleteTour,
     saveTour,
     getTourById,
-    refetch
+    refetch,
+    isDeleting: deleteTourMutation.isPending,
+    isSaving: saveTourMutation.isPending,
   };
 };
 
-// Hook para detalhes de um único passeio
+// Hook para detalhes de um único passeio com otimizações
 export const useTour = (tourId?: number) => {
   return useQuery({
     queryKey: ['tour', tourId],
@@ -84,10 +123,12 @@ export const useTour = (tourId?: number) => {
       return await tourService.getTourById(tourId);
     },
     enabled: !!tourId,
+    staleTime: 1000 * 60 * 2, // Cache por 2 minutos
+    refetchOnWindowFocus: false,
   });
 };
 
-// Hook para gerenciar disponibilidade de passeios
+// Hook para gerenciar disponibilidade de passeios com debounce
 export const useTourAvailability = (tourId?: number) => {
   const queryClient = useQueryClient();
 
@@ -99,9 +140,11 @@ export const useTourAvailability = (tourId?: number) => {
       return tourService.getTourAvailability(tourId);
     },
     enabled: !!tourId,
+    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+    refetchOnWindowFocus: false,
   });
 
-  // Mutation para atualizar a disponibilidade de um passeio
+  // Mutation para atualizar a disponibilidade com debounce
   const updateAvailabilityMutation = useMutation({
     mutationFn: async ({
       date,
@@ -132,7 +175,17 @@ export const useTourAvailability = (tourId?: number) => {
     }
   });
 
-  // Mutation para atualizar a disponibilidade de um passeio em lote
+  // Versão com debounce para updateAvailability
+  const debouncedUpdateAvailability = debounce((params: {
+    date: Date;
+    availableSpots: number;
+    customPrice?: number;
+    status?: 'available' | 'unavailable';
+  }) => {
+    return updateAvailabilityMutation.mutateAsync(params);
+  }, DEBOUNCE_MS);
+
+  // Mutation para atualizar a disponibilidade em lote
   const updateBulkAvailabilityMutation = useMutation({
     mutationFn: async ({
       dates,
@@ -164,12 +217,22 @@ export const useTourAvailability = (tourId?: number) => {
     }
   });
 
+  // Versão com debounce para updateBulkAvailability
+  const debouncedUpdateBulkAvailability = debounce((params: {
+    dates: Date[];
+    availableSpots: number;
+    customPrice?: number;
+    status?: 'available' | 'unavailable';
+  }) => {
+    return updateBulkAvailabilityMutation.mutateAsync(params);
+  }, DEBOUNCE_MS);
+
   return {
     availability: availabilityQuery.data,
     isLoading: availabilityQuery.isLoading,
     error: availabilityQuery.error,
-    updateAvailability: updateAvailabilityMutation.mutate,
-    updateBulkAvailability: updateBulkAvailabilityMutation.mutate,
+    updateAvailability: (params: any) => debouncedUpdateAvailability(params),
+    updateBulkAvailability: (params: any) => debouncedUpdateBulkAvailability(params),
     isUpdating: updateAvailabilityMutation.isPending || updateBulkAvailabilityMutation.isPending
   };
 };

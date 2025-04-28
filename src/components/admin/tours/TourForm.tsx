@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useTours } from "@/hooks/use-tours";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { TourFormValues, tourFormSchema, tourCategories, difficultyLevels } from "./TourFormTypes";
 import TourBasicInfoForm from "./form/TourBasicInfoForm";
 import TourMediaForm from "./form/TourMediaForm";
@@ -14,6 +14,7 @@ import { Form } from "@/components/ui/form";
 import { Tour } from "@/types/database";
 import { stringToArray } from "@/utils/formUtils";
 import { withTimeout } from "@/utils/asyncUtils";
+import { useTour } from "@/hooks/use-tours";
 
 interface TourFormProps {
   tourId?: number;
@@ -31,9 +32,11 @@ export const TourForm: React.FC<TourFormProps> = ({
   setError
 }) => {
   const [previewUrl, setPreviewUrl] = useState("");
-  const { toast } = useToast();
-  const { saveTour, getTourById } = useTours();
-  const [isLoading, setIsLoading] = useState(tourId ? true : false);
+  
+  // Use optimized tourData fetching from the useTour hook instead of getTourById
+  const { data: tourData, isLoading: isTourLoading, error: tourError } = useTour(tourId);
+  const { saveTour, isSaving } = useTours();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Initialize form
@@ -60,6 +63,9 @@ export const TourForm: React.FC<TourFormProps> = ({
     },
   });
 
+  // Combined loading state
+  const isLoading = isTourLoading || isSubmitting;
+
   // Update external loading state
   useEffect(() => {
     if (setLoading) {
@@ -67,12 +73,11 @@ export const TourForm: React.FC<TourFormProps> = ({
     }
     
     // Set a timeout to prevent UI from being stuck indefinitely
-    if (isLoading && tourId) {
+    if (isTourLoading && tourId) {
       const timeoutId = setTimeout(() => {
         if (setError) {
           setError("O carregamento demorou muito tempo. Por favor, tente novamente mais tarde.");
         }
-        setIsLoading(false);
         if (setLoading) {
           setLoading(false);
         }
@@ -84,81 +89,47 @@ export const TourForm: React.FC<TourFormProps> = ({
         if (timeoutId) clearTimeout(timeoutId);
       };
     }
-  }, [isLoading, setLoading, tourId, setError]);
+  }, [isLoading, setLoading, tourId, setError, isTourLoading]);
 
-  // Fetch tour data when editing
+  // Set up form with tour data when available
   useEffect(() => {
-    const loadTourData = async () => {
-      if (tourId) {
-        setIsLoading(true);
-        try {
-          // Use our timeout wrapper for the getTourById call
-          const tour = await withTimeout<Tour | null>(
-            () => Promise.resolve(getTourById(tourId)),
-            8000, // 8 second timeout
-            null  // Return null if timeout
-          );
-          
-          if (tour) {
-            form.reset({
-              title: tour.title,
-              description: tour.description,
-              short_description: tour.short_description,
-              image_url: tour.image_url,
-              price: tour.price,
-              duration: tour.duration,
-              category: tour.category,
-              max_participants: tour.max_participants,
-              min_participants: tour.min_participants,
-              difficulty: tour.difficulty || "fácil",
-              rating: tour.rating,
-              meeting_point: tour.meeting_point || "",
-              schedule: tour.schedule?.join("\n") || "",
-              includes: tour.includes?.join("\n") || "",
-              excludes: tour.excludes?.join("\n") || "",
-              notes: tour.notes?.join("\n") || "",
-              gallery_images: tour.gallery_images?.join(",") || "",
-            });
-            setPreviewUrl(tour.image_url);
-          } else {
-            // Handle case where tour is not found
-            if (setError) {
-              setError("Não foi possível carregar os dados do passeio.");
-            }
-            toast({
-              title: "Erro",
-              description: "Passeio não encontrado ou erro ao carregar.",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error("Error loading tour:", error);
-          if (setError) {
-            setError("Erro ao carregar o passeio. Por favor, tente novamente.");
-          }
-          toast({
-            title: "Erro",
-            description: "Não foi possível carregar os dados do passeio.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-          if (loadingTimeout) {
-            clearTimeout(loadingTimeout);
-            setLoadingTimeout(null);
-          }
-        }
-      }
-    };
-
-    loadTourData();
-    
-    return () => {
+    if (tourData && !isSubmitting) {
+      form.reset({
+        title: tourData.title,
+        description: tourData.description,
+        short_description: tourData.short_description,
+        image_url: tourData.image_url,
+        price: tourData.price,
+        duration: tourData.duration,
+        category: tourData.category,
+        max_participants: tourData.max_participants,
+        min_participants: tourData.min_participants,
+        difficulty: tourData.difficulty || "fácil",
+        rating: tourData.rating,
+        meeting_point: tourData.meeting_point || "",
+        schedule: tourData.schedule?.join("\n") || "",
+        includes: tourData.includes?.join("\n") || "",
+        excludes: tourData.excludes?.join("\n") || "",
+        notes: tourData.notes?.join("\n") || "",
+        gallery_images: tourData.gallery_images?.join(",") || "",
+      });
+      setPreviewUrl(tourData.image_url);
+      
       if (loadingTimeout) {
         clearTimeout(loadingTimeout);
+        setLoadingTimeout(null);
       }
-    };
-  }, [tourId, form, getTourById, toast, setError, loadingTimeout]);
+    }
+  }, [tourData, form, loadingTimeout, isSubmitting]);
+
+  // Handle tour error
+  useEffect(() => {
+    if (tourError && setError) {
+      setError("Não foi possível carregar os dados do passeio.");
+      toast.error("Erro ao carregar passeio");
+      console.error("Error loading tour:", tourError);
+    }
+  }, [tourError, setError]);
 
   // Update image preview
   useEffect(() => {
@@ -170,7 +141,7 @@ export const TourForm: React.FC<TourFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // Form submission
+  // Form submission with improved error handling
   const onSubmit = async (data: TourFormValues) => {
     // Convert string lists to arrays
     const formattedData = {
@@ -192,42 +163,36 @@ export const TourForm: React.FC<TourFormProps> = ({
       duration: data.duration || "1 hora",
       category: data.category || "aventura",
       image_url: data.image_url || "/placeholder.jpg"
-    } as Omit<Tour, "id" | "created_at" | "updated_at">;
+    } as Partial<Tour>;
 
-    setIsLoading(true);
+    setIsSubmitting(true);
+    if (setLoading) setLoading(true);
     
     try {
       if (tourId) {
         // Update existing tour with timeout
         await withTimeout(
-          () => Promise.resolve(saveTour({ ...formattedData, id: tourId })),
-          10000
+          () => saveTour({ ...formattedData, id: tourId }), 
+          15000
         );
-        toast({
-          title: "Sucesso",
-          description: "Passeio atualizado com sucesso.",
-        });
+        toast.success("Passeio atualizado com sucesso.");
       } else {
         // Create new tour with timeout
         await withTimeout(
-          () => Promise.resolve(saveTour(formattedData)),
-          10000
+          () => saveTour(formattedData), 
+          15000
         );
-        toast({
-          title: "Sucesso",
-          description: "Novo passeio criado com sucesso.",
-        });
+        toast.success("Novo passeio criado com sucesso.");
       }
       onSuccess();
+      return Promise.resolve();
     } catch (error) {
       console.error("Error saving tour:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar o passeio. Tente novamente.",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível salvar o passeio. Tente novamente.");
+      return Promise.reject(error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
+      if (setLoading) setLoading(false);
     }
   };
 
@@ -266,7 +231,7 @@ export const TourForm: React.FC<TourFormProps> = ({
         <TourFormActions 
           onCancel={onCancel} 
           isEditing={!!tourId} 
-          isSubmitting={isLoading}
+          isSubmitting={isSubmitting || isSaving}
         />
       </form>
     </Form>

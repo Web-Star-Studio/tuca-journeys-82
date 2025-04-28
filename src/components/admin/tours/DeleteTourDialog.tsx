@@ -16,7 +16,7 @@ interface DeleteTourDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tourToDelete: Tour | null;
-  onConfirmDelete: () => void;
+  onConfirmDelete: () => Promise<void>;
   isDeleting?: boolean;
 }
 
@@ -28,7 +28,15 @@ const DeleteTourDialog: React.FC<DeleteTourDialogProps> = ({
   isDeleting = false,
 }) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog 
+      open={open} 
+      onOpenChange={(newValue) => {
+        // Prevent closing while deletion is in progress
+        if (!isDeleting) {
+          onOpenChange(newValue);
+        }
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirmar exclusão</DialogTitle>
@@ -47,7 +55,7 @@ const DeleteTourDialog: React.FC<DeleteTourDialogProps> = ({
           </Button>
           <Button 
             variant="destructive" 
-            onClick={onConfirmDelete}
+            onClick={() => onConfirmDelete()}
             disabled={isDeleting}
           >
             {isDeleting ? (

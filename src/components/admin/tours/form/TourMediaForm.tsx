@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { TourFormValues } from "../TourFormTypes";
+import ImageUpload from "@/components/ui/image-upload";
+import GalleryUpload from "@/components/ui/gallery-upload";
 
 interface TourMediaFormProps {
   form: UseFormReturn<TourFormValues>;
@@ -23,6 +25,18 @@ const TourMediaForm: React.FC<TourMediaFormProps> = ({
   previewUrl,
   setPreviewUrl,
 }) => {
+  const handleMainImageUploaded = (url: string) => {
+    form.setValue("image_url", url);
+    setPreviewUrl(url);
+  };
+
+  const handleGalleryImagesChange = (urls: string[]) => {
+    form.setValue("gallery_images", urls.join(","));
+  };
+
+  const galleryImages = form.watch("gallery_images") || "";
+  const galleryImagesArray = galleryImages.split(",").filter(Boolean);
+
   return (
     <div className="space-y-6">
       <FormField
@@ -30,22 +44,17 @@ const TourMediaForm: React.FC<TourMediaFormProps> = ({
         name="image_url"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>URL da Imagem Principal</FormLabel>
+            <FormLabel>Imagem Principal</FormLabel>
             <FormControl>
-              <Input placeholder="URL da imagem principal" {...field} />
+              <ImageUpload 
+                currentImageUrl={field.value}
+                onImageUploaded={handleMainImageUploaded}
+                height="200px"
+                bucketName="tour-images"
+                folderPath="main"
+              />
             </FormControl>
             <FormMessage />
-            {previewUrl && (
-              <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="rounded-md h-40 object-cover"
-                  onError={() => setPreviewUrl("")}
-                />
-              </div>
-            )}
           </FormItem>
         )}
       />
@@ -55,15 +64,18 @@ const TourMediaForm: React.FC<TourMediaFormProps> = ({
         name="gallery_images"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Galeria de Imagens (URLs separadas por vírgula)</FormLabel>
+            <FormLabel>Galeria de Imagens</FormLabel>
             <FormControl>
-              <Input
-                placeholder="/imagem1.jpg, /imagem2.jpg, /imagem3.jpg"
-                {...field}
+              <GalleryUpload 
+                initialImages={galleryImagesArray}
+                onImagesChange={handleGalleryImagesChange}
+                maxImages={5}
+                bucketName="tour-images"
+                folderPath="gallery"
               />
             </FormControl>
             <FormDescription>
-              Lista de imagens adicionais para a galeria do passeio
+              Adicione até 5 imagens para a galeria do passeio
             </FormDescription>
             <FormMessage />
           </FormItem>

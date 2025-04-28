@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Edit, Trash2 } from "lucide-react";
+import { ExternalLink, Edit, Trash2, Calendar } from "lucide-react";
 import { Tour } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,9 @@ const TourCard: React.FC<TourCardProps> = ({
           src={tour.image_url}
           alt={tour.title}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder.svg"; // Fallback para imagem padrão
+          }}
         />
         <Badge
           variant="secondary"
@@ -48,6 +51,16 @@ const TourCard: React.FC<TourCardProps> = ({
           </div>
           
           <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
+            >
+              <Link to={`/admin/tours/${tour.id}/availability`}>
+                <Calendar className="h-4 w-4" />
+              </Link>
+            </Button>
             <Button
               variant="ghost"
               size="sm"

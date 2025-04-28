@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,8 @@ interface ImageUploadProps {
   width?: string;
   height?: string;
   className?: string;
+  bucketName?: string;
+  folderPath?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -20,6 +21,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   width = "100%",
   height = "240px",
   className = "",
+  bucketName = "product-images",
+  folderPath = ""
 }) => {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -93,11 +96,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       // Create a unique file path
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      const filePath = folderPath ? `${folderPath}/${fileName}` : fileName;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('product-images')
+        .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -109,7 +112,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       // Get the public URL
       const { data: urlData } = supabase.storage
-        .from('product-images')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       // Update preview and notify parent

@@ -1,130 +1,175 @@
 
-import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
-import { getAccommodationsFromDB, getAccommodationByIdFromDB } from '@/lib/api';
+import { accommodationService } from '@/services/accommodation-service';
 
-interface AccommodationCreate {
-  title: string;
-  description: string;
-  short_description: string;
-  price_per_night: number;
-  image_url: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  max_guests: number;
-  address: string;
-  amenities: string[];
-  gallery_images: string[];
-  rating: number;
-}
+export const useAccommodations = () => {
+  const queryClient = useQueryClient();
 
-interface AccommodationUpdate extends Partial<AccommodationCreate> {
-  id: number;
-}
+  // Query para buscar hospedagens
+  const { data: accommodations, isLoading, error, refetch } = useQuery({
+    queryKey: ['accommodations'],
+    queryFn: async () => {
+      return await accommodationService.getAccommodations();
+    },
+  });
 
-export const useAccommodations = (typeFilter: string = '') => {
-  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchAccommodations = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAccommodationsFromDB();
-      
-      // Apply type filter if provided
-      const filteredData = typeFilter 
-        ? data.filter(acc => acc.type === typeFilter)
-        : data;
-        
-      setAccommodations(filteredData);
-      return filteredData;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch accommodations');
-      setError(error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+  // Mutation para excluir uma hospedagem
+  const deleteAccommodationMutation = useMutation({
+    mutationFn: async (accommodationId: number) => {
+      await accommodationService.deleteAccommodation(accommodationId);
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Hospedagem excluída com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['accommodations'] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao excluir a hospedagem');
+      console.error('Error deleting accommodation:', error);
     }
-  }, [typeFilter]);
+  });
 
-  const getAccommodationById = async (id: number): Promise<Accommodation> => {
-    try {
-      return await getAccommodationByIdFromDB(id);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(`Failed to fetch accommodation with ID ${id}`);
-      throw error;
+  // Mutation para criar ou atualizar uma hospedagem
+  const saveAccommodationMutation = useMutation({
+    mutationFn: async (accommodation: Partial<Accommodation>) => {
+      if (accommodation.id) {
+        await accommodationService.updateAccommodation(accommodation.id, accommodation);
+      } else {
+        await accommodationService.createAccommodation(accommodation);
+      }
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast.success('Hospedagem salva com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['accommodations'] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao salvar a hospedagem');
+      console.error('Error saving accommodation:', error);
     }
+  });
+
+  const deleteAccommodation = (accommodationId: number) => {
+    deleteAccommodationMutation.mutate(accommodationId);
   };
 
-  const createAccommodation = async (accommodation: AccommodationCreate) => {
-    // In a real application, this would make an API call
-    console.log('Creating accommodation:', accommodation);
-    // Convert the accommodation object to match the database structure
-    const newAccommodation = {
-      ...accommodation,
-      id: Math.floor(Math.random() * 1000),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    } as Accommodation;
-    
-    setAccommodations([...accommodations, newAccommodation]);
-    return newAccommodation;
+  const createAccommodation = (accommodation: Partial<Accommodation>) => {
+    saveAccommodationMutation.mutate(accommodation);
   };
 
-  const updateAccommodation = async (accommodation: AccommodationUpdate) => {
-    // In a real application, this would make an API call
-    console.log('Updating accommodation:', accommodation);
-    
-    // Find the existing accommodation
-    const existingAccommodation = accommodations.find(acc => acc.id === accommodation.id);
-    
-    if (!existingAccommodation) {
-      throw new Error(`Accommodation with ID ${accommodation.id} not found`);
-    }
-    
-    // Merge the updated fields with the existing accommodation
-    const updatedAccommodation = {
-      ...existingAccommodation,
-      ...accommodation,
-      updated_at: new Date().toISOString()
-    } as Accommodation;
-    
-    // Update the local state
-    setAccommodations(accommodations.map(acc => 
-      acc.id === accommodation.id ? updatedAccommodation : acc
-    ));
-    
-    return updatedAccommodation;
+  const updateAccommodation = (accommodation: Partial<Accommodation>) => {
+    if (!accommodation.id) throw new Error('Accommodation ID is required for update');
+    saveAccommodationMutation.mutate(accommodation);
   };
 
-  const deleteAccommodationMutation = async (id: number) => {
-    // In a real application, this would make an API call
-    console.log('Deleting accommodation with ID:', id);
-    
-    // Update the local state by filtering out the deleted accommodation
-    setAccommodations(accommodations.filter(acc => acc.id !== id));
-    
-    return { success: true };
+  const getAccommodationById = (id?: number) => {
+    if (!id || !accommodations) return null;
+    return accommodations.find(accommodation => accommodation.id === id) || null;
   };
-
-  // Add the isError property for consistency with React Query pattern
-  const isError = error !== null;
 
   return {
-    data: accommodations,
     accommodations,
     isLoading,
     error,
-    isError,
-    fetchAccommodations,
-    getAccommodationById,
+    deleteAccommodation,
     createAccommodation,
     updateAccommodation,
-    deleteAccommodation: {
-      mutate: deleteAccommodationMutation,
-      isPending: false, // Simplified - in a real app this would be stateful
+    getAccommodationById,
+    refetch
+  };
+};
+
+// Hook para detalhes de uma única hospedagem
+export const useAccommodation = (accommodationId?: number) => {
+  return useQuery({
+    queryKey: ['accommodation', accommodationId],
+    queryFn: async () => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      return await accommodationService.getAccommodationById(accommodationId);
+    },
+    enabled: !!accommodationId,
+  });
+};
+
+// Hook para gerenciar disponibilidade de hospedagens
+export const useAccommodationAvailability = (accommodationId?: number) => {
+  const queryClient = useQueryClient();
+
+  // Consulta para obter a disponibilidade de uma hospedagem
+  const availabilityQuery = useQuery({
+    queryKey: ['accommodation-availability', accommodationId],
+    queryFn: () => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      return accommodationService.getAccommodationAvailability(accommodationId);
+    },
+    enabled: !!accommodationId,
+  });
+
+  // Mutation para atualizar a disponibilidade de uma hospedagem
+  const updateAvailabilityMutation = useMutation({
+    mutationFn: async ({
+      date,
+      customPrice,
+      status
+    }: {
+      date: Date;
+      customPrice?: number;
+      status?: 'available' | 'unavailable';
+    }) => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      return accommodationService.updateAccommodationAvailability(
+        accommodationId,
+        date,
+        customPrice,
+        status
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accommodation-availability', accommodationId] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar disponibilidade');
+      console.error('Error updating availability:', error);
     }
+  });
+
+  // Mutation para atualizar a disponibilidade de uma hospedagem em lote
+  const updateBulkAvailabilityMutation = useMutation({
+    mutationFn: async ({
+      dates,
+      customPrice,
+      status
+    }: {
+      dates: Date[];
+      customPrice?: number;
+      status?: 'available' | 'unavailable';
+    }) => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      return accommodationService.setBulkAccommodationAvailability(
+        accommodationId,
+        dates,
+        customPrice,
+        status
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accommodation-availability', accommodationId] });
+      toast.success('Disponibilidade atualizada com sucesso');
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar disponibilidade em lote');
+      console.error('Error updating bulk availability:', error);
+    }
+  });
+
+  return {
+    availability: availabilityQuery.data,
+    isLoading: availabilityQuery.isLoading,
+    error: availabilityQuery.error,
+    updateAvailability: updateAvailabilityMutation.mutate,
+    updateBulkAvailability: updateBulkAvailabilityMutation.mutate,
+    isUpdating: updateAvailabilityMutation.isPending || updateBulkAvailabilityMutation.isPending
   };
 };

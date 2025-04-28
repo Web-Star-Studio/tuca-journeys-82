@@ -1,120 +1,82 @@
 
 import React from "react";
-import { RouteObject, Navigate } from "react-router-dom";
-import Dashboard from "@/pages/admin/Dashboard";
+import { RouteObject } from "react-router-dom";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import Tours from "@/pages/admin/Tours";
+import TourAvailability from "@/pages/admin/TourAvailability";
 import Accommodations from "@/pages/admin/Accommodations";
-import Packages from "@/pages/admin/Packages";
+import AccommodationAvailability from "@/pages/admin/AccommodationAvailability";
 import Products from "@/pages/admin/Products";
+import Users from "@/pages/admin/Users";
 import Media from "@/pages/admin/Media";
 import Reports from "@/pages/admin/Reports";
 import Settings from "@/pages/admin/Settings";
-import Users from "@/pages/admin/Users";
 import Bookings from "@/pages/admin/Bookings";
+import Packages from "@/pages/admin/Packages";
 import Permissions from "@/pages/admin/Permissions";
 import AuditLogs from "@/pages/admin/AuditLogs";
-import ProtectedRoute from "@/components/ProtectedRoute";
 
 const adminRoutes: RouteObject[] = [
   {
-    path: "/admin",
-    element: <Navigate to="/admin/dashboard" replace />,
+    path: "/admin/login",
+    element: <AdminLogin />,
   },
   {
-    path: "/admin/dashboard",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    path: "/admin",
+    element: <AdminDashboard />,
   },
   {
     path: "/admin/tours",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Tours />
-      </ProtectedRoute>
-    ),
+    element: <Tours />,
+  },
+  {
+    path: "/admin/tours/:id/availability",
+    element: <TourAvailability />,
   },
   {
     path: "/admin/accommodations",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Accommodations />
-      </ProtectedRoute>
-    ),
+    element: <Accommodations />,
+  },
+  {
+    path: "/admin/accommodations/:id/availability",
+    element: <AccommodationAvailability />,
   },
   {
     path: "/admin/packages",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Packages />
-      </ProtectedRoute>
-    ),
+    element: <Packages />,
   },
   {
     path: "/admin/products",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Products />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/media",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Media />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/reports",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Reports />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/settings",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Settings />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/users",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Users />
-      </ProtectedRoute>
-    ),
+    element: <Products />,
   },
   {
     path: "/admin/bookings",
-    element: (
-      <ProtectedRoute requiredPermission="admin">
-        <Bookings />
-      </ProtectedRoute>
-    ),
+    element: <Bookings />,
+  },
+  {
+    path: "/admin/users",
+    element: <Users />,
   },
   {
     path: "/admin/permissions",
-    element: (
-      <ProtectedRoute requiredPermission="master">
-        <Permissions />
-      </ProtectedRoute>
-    ),
+    element: <Permissions />,
   },
   {
     path: "/admin/audit-logs",
-    element: (
-      <ProtectedRoute requiredPermission="master">
-        <AuditLogs />
-      </ProtectedRoute>
-    ),
+    element: <AuditLogs />,
+  },
+  {
+    path: "/admin/media",
+    element: <Media />,
+  },
+  {
+    path: "/admin/reports",
+    element: <Reports />,
+  },
+  {
+    path: "/admin/settings",
+    element: <Settings />,
   },
 ];
 

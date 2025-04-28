@@ -1,32 +1,29 @@
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Tour } from '@/types/database';
-import { demoData } from '@/utils/demoDataGenerator';
+import { tourService } from '@/services/tour-service';
 
 export const useTours = () => {
-  // Query to fetch tours
+  const queryClient = useQueryClient();
+
+  // Query para buscar passeios
   const { data: tours, isLoading, error, refetch } = useQuery({
     queryKey: ['tours'],
     queryFn: async () => {
-      // In a real app, we'd fetch from an API
-      // For demo purposes, return our generated tours
-      return demoData.tours;
+      return await tourService.getTours();
     },
   });
 
-  // Mutation to delete a tour
+  // Mutation para excluir um passeio
   const deleteTourMutation = useMutation({
     mutationFn: async (tourId: number) => {
-      // In a real app, we'd call an API
-      console.log(`Deleting tour: ${tourId}`);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await tourService.deleteTour(tourId);
       return { success: true };
     },
     onSuccess: () => {
       toast.success('Passeio excluído com sucesso');
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['tours'] });
     },
     onError: (error) => {
       toast.error('Erro ao excluir o passeio');
@@ -34,18 +31,19 @@ export const useTours = () => {
     }
   });
 
-  // Mutation to create or update a tour
+  // Mutation para criar ou atualizar um passeio
   const saveTourMutation = useMutation({
     mutationFn: async (tour: Partial<Tour>) => {
-      // In a real app, we'd call an API
-      console.log('Saving tour:', tour);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      if (tour.id) {
+        await tourService.updateTour(tour.id, tour);
+      } else {
+        await tourService.createTour(tour);
+      }
       return { success: true };
     },
     onSuccess: () => {
       toast.success('Passeio salvo com sucesso');
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['tours'] });
     },
     onError: (error) => {
       toast.error('Erro ao salvar o passeio');
@@ -77,20 +75,101 @@ export const useTours = () => {
   };
 };
 
-// Add the missing useTour hook for single tour details
+// Hook para detalhes de um único passeio
 export const useTour = (tourId?: number) => {
   return useQuery({
     queryKey: ['tour', tourId],
     queryFn: async () => {
       if (!tourId) throw new Error('Tour ID is required');
-      
-      // In a real app, we'd fetch from an API endpoint for a single tour
-      // For demo, find the tour in our demo data
-      const tour = demoData.tours.find(t => t.id === tourId);
-      if (!tour) throw new Error('Tour not found');
-      
-      return tour;
+      return await tourService.getTourById(tourId);
     },
     enabled: !!tourId,
   });
+};
+
+// Hook para gerenciar disponibilidade de passeios
+export const useTourAvailability = (tourId?: number) => {
+  const queryClient = useQueryClient();
+
+  // Consulta para obter a disponibilidade de um passeio
+  const availabilityQuery = useQuery({
+    queryKey: ['tour-availability', tourId],
+    queryFn: () => {
+      if (!tourId) throw new Error('Tour ID is required');
+      return tourService.getTourAvailability(tourId);
+    },
+    enabled: !!tourId,
+  });
+
+  // Mutation para atualizar a disponibilidade de um passeio
+  const updateAvailabilityMutation = useMutation({
+    mutationFn: async ({
+      date,
+      availableSpots,
+      customPrice,
+      status
+    }: {
+      date: Date;
+      availableSpots: number;
+      customPrice?: number;
+      status?: 'available' | 'unavailable';
+    }) => {
+      if (!tourId) throw new Error('Tour ID is required');
+      return tourService.updateTourAvailability(
+        tourId,
+        date,
+        availableSpots,
+        customPrice,
+        status
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tour-availability', tourId] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar disponibilidade');
+      console.error('Error updating availability:', error);
+    }
+  });
+
+  // Mutation para atualizar a disponibilidade de um passeio em lote
+  const updateBulkAvailabilityMutation = useMutation({
+    mutationFn: async ({
+      dates,
+      availableSpots,
+      customPrice,
+      status
+    }: {
+      dates: Date[];
+      availableSpots: number;
+      customPrice?: number;
+      status?: 'available' | 'unavailable';
+    }) => {
+      if (!tourId) throw new Error('Tour ID is required');
+      return tourService.setBulkTourAvailability(
+        tourId,
+        dates,
+        availableSpots,
+        customPrice,
+        status
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tour-availability', tourId] });
+      toast.success('Disponibilidade atualizada com sucesso');
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar disponibilidade em lote');
+      console.error('Error updating bulk availability:', error);
+    }
+  });
+
+  return {
+    availability: availabilityQuery.data,
+    isLoading: availabilityQuery.isLoading,
+    error: availabilityQuery.error,
+    updateAvailability: updateAvailabilityMutation.mutate,
+    updateBulkAvailability: updateBulkAvailabilityMutation.mutate,
+    isUpdating: updateAvailabilityMutation.isPending || updateBulkAvailabilityMutation.isPending
+  };
 };

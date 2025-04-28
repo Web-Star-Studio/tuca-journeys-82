@@ -721,6 +721,47 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_availability: {
+        Row: {
+          available_spots: number
+          created_at: string
+          custom_price: number | null
+          date: string
+          id: number
+          status: string
+          tour_id: number
+          updated_at: string
+        }
+        Insert: {
+          available_spots?: number
+          created_at?: string
+          custom_price?: number | null
+          date: string
+          id?: number
+          status?: string
+          tour_id: number
+          updated_at?: string
+        }
+        Update: {
+          available_spots?: number
+          created_at?: string
+          custom_price?: number | null
+          date?: string
+          id?: number
+          status?: string
+          tour_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_availability_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tour_schedules: {
         Row: {
           available_spots: number

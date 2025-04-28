@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Edit, Trash2 } from "lucide-react";
+import { ExternalLink, Edit, Trash2, Calendar } from "lucide-react";
 import { Accommodation } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,9 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
           src={accommodation.image_url}
           alt={accommodation.title}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder.svg"; // Fallback para imagem padrão
+          }}
         />
         <Badge
           variant="secondary"
@@ -38,8 +41,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
           <div>
             <h3 className="text-lg font-medium text-tuca-deep-blue">{accommodation.title}</h3>
             <div className="flex items-center mt-2 text-sm text-muted-foreground">
-              <span className="mr-3">R$ {accommodation.price_per_night.toFixed(2)}</span>
-              <span className="mr-3">{accommodation.address}</span>
+              <span className="mr-3">R$ {accommodation.price_per_night.toFixed(2)}/noite</span>
               <div className="flex items-center">
                 <span className="mr-1 text-yellow-500">★</span>
                 {accommodation.rating}
@@ -54,7 +56,17 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               asChild
               className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
             >
-              <Link to={`/hospedagem/${accommodation.id}`} target="_blank">
+              <Link to={`/admin/accommodations/${accommodation.id}/availability`}>
+                <Calendar className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
+            >
+              <Link to={`/hospedagens/${accommodation.id}`} target="_blank">
                 <ExternalLink className="h-4 w-4" />
               </Link>
             </Button>

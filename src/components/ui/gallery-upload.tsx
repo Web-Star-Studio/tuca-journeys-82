@@ -2,21 +2,23 @@
 import React, { useState } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { v4 as uuidv4 } from 'uuid';
 import ImageUpload from "./image-upload";
 
 interface GalleryUploadProps {
   onImagesChange: (urls: string[]) => void;
   initialImages?: string[];
   maxImages?: number;
+  bucketName?: string;
+  folderPath?: string;
 }
 
 const GalleryUpload: React.FC<GalleryUploadProps> = ({
   onImagesChange,
   initialImages = [],
   maxImages = 5,
+  bucketName = "product-images",
+  folderPath = "",
 }) => {
   const [images, setImages] = useState<string[]>(initialImages);
   const [uploading, setUploading] = useState(false);
@@ -62,6 +64,8 @@ const GalleryUpload: React.FC<GalleryUploadProps> = ({
               onImageUploaded={(url) => handleImageUploaded(url, index)}
               width="100%"
               height="160px"
+              bucketName={bucketName}
+              folderPath={folderPath}
             />
             <Button
               type="button"

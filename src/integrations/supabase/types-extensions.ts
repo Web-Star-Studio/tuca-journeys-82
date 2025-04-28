@@ -327,8 +327,7 @@ export interface Database extends OriginalDatabase {
       };
     };
     Views: OriginalDatabase['public']['Views'];
-    Functions: {
-      ...OriginalDatabase['public']['Functions'],
+    Functions: OriginalDatabase['public']['Functions'] & {
       // Add our new RPC functions
       grant_permission: {
         Args: {

@@ -1,34 +1,24 @@
+
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { User } from "@/components/admin/users/types";
 import { userService } from "@/services/user-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { auditService, AuditAction } from "@/services/audit-service";
 
-interface UserFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface UserFormProps {
   userId?: string;
-  onSuccess?: () => void;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
-const UserFormDialog: React.FC<UserFormDialogProps> = ({ 
-  open, 
-  onOpenChange, 
+const UserForm: React.FC<UserFormProps> = ({ 
   userId, 
+  onCancel, 
   onSuccess 
 }) => {
   const [name, setName] = useState("");
@@ -160,8 +150,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         title: "Sucesso",
         description: `Usuário ${userId ? "atualizado" : "criado"} com sucesso!`,
       });
-      onSuccess?.();
-      onOpenChange(false);
+      onSuccess();
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -175,86 +164,77 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{userId ? "Editar Usuário" : "Adicionar Usuário"}</DialogTitle>
-          <DialogDescription>
-            {userId
-              ? "Edite os detalhes do usuário."
-              : "Crie um novo usuário inserindo as informações abaixo."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Nome
-              </Label>
-              <Input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
-                disabled={isLoading}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
-              <Input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="col-span-3"
-                disabled={isLoading}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right">
-                Papel
-              </Label>
-              <Select 
-                value={role} 
-                onValueChange={(value) => setRole(value)}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Selecione um papel" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="customer">Cliente</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="partner">Parceiro</SelectItem>
-                  {showMaster && <SelectItem value="master">Master</SelectItem>}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="avatar" className="text-right">
-                Avatar URL
-              </Label>
-              <Input
-                type="text"
-                id="avatar"
-                value={avatarUrl || ""}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                className="col-span-3"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <form onSubmit={handleSubmit}>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">
+            Nome
+          </Label>
+          <Input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="col-span-3"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="email" className="text-right">
+            Email
+          </Label>
+          <Input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="col-span-3"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="role" className="text-right">
+            Papel
+          </Label>
+          <Select 
+            value={role} 
+            onValueChange={(value) => setRole(value)}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Selecione um papel" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="customer">Cliente</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="partner">Parceiro</SelectItem>
+              {showMaster && <SelectItem value="master">Master</SelectItem>}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="avatar" className="text-right">
+            Avatar URL
+          </Label>
+          <Input
+            type="text"
+            id="avatar"
+            value={avatarUrl || ""}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            className="col-span-3"
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Salvando..." : "Salvar"}
+        </Button>
+      </div>
+    </form>
   );
 };
 
-export default UserFormDialog;
+export default UserForm; // Changed to default export

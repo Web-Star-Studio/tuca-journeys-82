@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { UserForm } from "./UserForm";
+import UserForm from "./UserForm"; // Changed from named import to default import
 
 interface UserFormDialogProps {
   open: boolean;

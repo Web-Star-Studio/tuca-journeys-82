@@ -68,38 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Check for mock session
-        const mockSessionStr = localStorage.getItem("supabase-mock-session");
-        if (mockSessionStr) {
-          try {
-            const mockSessionData = JSON.parse(mockSessionStr);
-            // Check if mock session is expired
-            if (mockSessionData.expires_at > Math.floor(Date.now() / 1000)) {
-              console.log("Found valid mock session, setting user state");
-              // Create a proper Session object with all required fields
-              const mockSession: Session = {
-                access_token: mockSessionData.access_token,
-                refresh_token: mockSessionData.refresh_token,
-                user: mockSessionData.user,
-                expires_at: mockSessionData.expires_at,
-                expires_in: mockSessionData.expires_at - Math.floor(Date.now() / 1000),
-                token_type: "bearer"
-              };
-              
-              setSession(mockSession);
-              setUser(mockSession.user);
-              await checkAdminStatus(mockSession.user);
-              setIsLoading(false);
-              return;
-            } else {
-              // Clear expired mock session
-              localStorage.removeItem("supabase-mock-session");
-            }
-          } catch (error) {
-            console.error("Error parsing mock session:", error);
-            localStorage.removeItem("supabase-mock-session");
-          }
-        }
+        // Clear any existing mock sessions (to prevent auto-login)
+        localStorage.removeItem("supabase-mock-session");
         
         // Check for real Supabase session
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();

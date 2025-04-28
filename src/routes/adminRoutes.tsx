@@ -2,7 +2,6 @@
 import React from "react";
 import { RouteObject } from "react-router-dom";
 import AdminDashboard from "@/pages/admin/Dashboard";
-import AdminLogin from "@/pages/admin/AdminLogin";
 import Tours from "@/pages/admin/Tours";
 import TourAvailability from "@/pages/admin/TourAvailability";
 import Accommodations from "@/pages/admin/Accommodations";
@@ -18,10 +17,6 @@ import Permissions from "@/pages/admin/Permissions";
 import AuditLogs from "@/pages/admin/AuditLogs";
 
 const adminRoutes: RouteObject[] = [
-  {
-    path: "/admin/login",
-    element: <AdminLogin />,
-  },
   {
     path: "/admin",
     element: <AdminDashboard />,

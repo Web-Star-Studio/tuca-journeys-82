@@ -23,24 +23,22 @@ const AdminAccommodations = () => {
     accommodations,
     isLoading, 
     error,
-    isError,
-    fetchAccommodations,
+    refetch,
     deleteAccommodation
-  } = useAccommodations(typeFilter === "all" ? "" : typeFilter);
+  } = useAccommodations();
 
   useEffect(() => {
     // Fetch accommodations when component mounts or type filter changes
     const fetchData = async () => {
       try {
-        await fetchAccommodations();
+        await refetch();
       } catch (error) {
         console.error("Error fetching accommodations:", error);
       }
     };
     
     fetchData();
-    // Removemos fetchAccommodations das dependências para evitar o loop infinito
-  }, [typeFilter]);
+  }, [typeFilter, refetch]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -63,7 +61,7 @@ const AdminAccommodations = () => {
 
   const confirmDelete = () => {
     if (accommodationToDelete) {
-      deleteAccommodation.mutate(accommodationToDelete.id);
+      deleteAccommodation(accommodationToDelete.id);
       setDeleteDialogOpen(false);
       setAccommodationToDelete(null);
       toast({
@@ -123,7 +121,7 @@ const AdminAccommodations = () => {
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onConfirmDelete={confirmDelete}
-          isDeleting={deleteAccommodation.isPending}
+          isDeleting={false}
         />
       </div>
     </AdminLayout>

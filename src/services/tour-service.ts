@@ -48,7 +48,7 @@ export class TourService extends BaseApiService {
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
     const { data, error } = await this.supabase
       .from('tours')
-      .insert([tourData])
+      .insert(tourData)
       .select()
       .single();
     
@@ -169,13 +169,13 @@ export class TourService extends BaseApiService {
       // Criar novo registro
       const { data, error } = await this.supabase
         .from('tour_availability')
-        .insert([{
+        .insert({
           tour_id: tourId,
           date: formattedDate,
           available_spots: availableSpots,
           custom_price: customPrice,
           status
-        }])
+        })
         .select()
         .single();
       

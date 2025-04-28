@@ -1,50 +1,37 @@
 
 /**
- * Format a price to a localized currency string
- * 
- * @param price The price to format
- * @param locale The locale to use for formatting (default: 'pt-BR')
- * @param currency The currency code (default: 'BRL')
+ * Format a number as currency in BRL format
+ * @param value Number to format
  * @returns Formatted currency string
  */
-export const formatCurrency = (
-  price: number | undefined, 
-  locale: string = 'pt-BR', 
-  currency: string = 'BRL'
-): string => {
-  if (price === undefined || price === null) {
-    return 'Valor não disponível';
-  }
-  
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-    }).format(price);
-  } catch (error) {
-    console.error('Error formatting currency:', error);
-    return `R$ ${price.toFixed(2)}`;
-  }
+export const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
 };
 
 /**
- * Format a date to a localized string
- * 
- * @param date The date to format
- * @param locale The locale to use for formatting (default: 'pt-BR')
+ * Format a date in Brazilian format (DD/MM/YYYY)
+ * @param date Date to format
  * @returns Formatted date string
  */
-export const formatDate = (
-  date: Date | string | undefined,
-  locale: string = 'pt-BR'
-): string => {
-  if (!date) return 'Data não disponível';
+export const formatDate = (date: Date | string): string => {
+  if (!date) return '';
   
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString(locale);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return String(date);
-  }
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('pt-BR');
+};
+
+/**
+ * Format a date and time in Brazilian format (DD/MM/YYYY HH:MM)
+ * @param date Date to format
+ * @returns Formatted date and time string
+ */
+export const formatDateTime = (date: Date | string): string => {
+  if (!date) return '';
+  
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('pt-BR') + ' ' + 
+    d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 };

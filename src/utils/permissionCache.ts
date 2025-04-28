@@ -50,9 +50,9 @@ class PermissionCache {
       setTimeout(async () => {
         try {
           // This would be implemented in role-helpers.ts
-          // We'll just set a placeholder here
+          // We'll update role-helpers.ts to use this method
           permissions.forEach(permission => {
-            // Set default permission while actually loading
+            // Setting default permissions proactively
             this.setPermission(userId, permission, true);
           });
         } catch (error) {

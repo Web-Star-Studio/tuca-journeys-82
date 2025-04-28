@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
@@ -14,35 +13,37 @@ export const useAccommodations = () => {
   const { data: accommodations, isLoading, error, refetch } = useQuery({
     queryKey: ['accommodations'],
     queryFn: async () => {
-      return await withTimeout(
-        () => accommodationService.getAccommodations(),
-        10000, // 10 seconds timeout
-        []
-      );
+      try {
+        return await withTimeout(
+          () => accommodationService.getAccommodations(),
+          15000, // 15 seconds timeout - increased from 10
+          []
+        );
+      } catch (error) {
+        console.error('Error in useAccommodations queryFn:', error);
+        throw error;
+      }
     },
   });
 
   // Mutation para excluir uma hospedagem com debounce e timeout
   const deleteAccommodationMutation = useMutation({
     mutationFn: async (accommodationId: number) => {
-      showGlobalSpinner(true);
       try {
-        // Modified return type to match what accommodationService.deleteAccommodation returns (void)
         await withTimeout(
           () => accommodationService.deleteAccommodation(accommodationId),
-          8000 // 8 seconds timeout
+          15000 // 15 seconds timeout - increased from 8
         );
-        return { success: true }; // Return value now handled properly
-      } finally {
-        showGlobalSpinner(false);
+        return { success: true };
+      } catch (error) {
+        console.error('Error in deleteAccommodation mutationFn:', error);
+        throw error;
       }
     },
     onSuccess: () => {
-      toast.success('Hospedagem excluída com sucesso');
       queryClient.invalidateQueries({ queryKey: ['accommodations'] });
     },
     onError: (error) => {
-      toast.error('Erro ao excluir a hospedagem');
       console.error('Error deleting accommodation:', error);
     }
   });
@@ -50,25 +51,23 @@ export const useAccommodations = () => {
   // Mutation para criar ou atualizar uma hospedagem com timeout
   const saveAccommodationMutation = useMutation({
     mutationFn: async (accommodation: Partial<Accommodation>) => {
-      showGlobalSpinner(true);
       try {
         if (accommodation.id) {
-          // Modified to properly handle types
           const result = await withTimeout(
             () => accommodationService.updateAccommodation(accommodation.id!, accommodation),
-            12000 // 12 seconds timeout
+            15000 // 15 seconds timeout - increased from 12
           );
           return result;
         } else {
-          // Modified to properly handle types
           const result = await withTimeout(
             () => accommodationService.createAccommodation(accommodation),
-            12000 // 12 seconds timeout
+            15000 // 15 seconds timeout - increased from 12
           );
           return result;
         }
-      } finally {
-        showGlobalSpinner(false);
+      } catch (error) {
+        console.error('Error in saveAccommodation mutationFn:', error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -98,15 +97,16 @@ export const useAccommodations = () => {
 
   // Public interface with debounced operations
   const deleteAccommodation = (accommodationId: number) => {
-    debouncedDeleteAccommodation(accommodationId);
+    return deleteAccommodationMutation.mutateAsync(accommodationId);
   };
 
   const createAccommodation = (accommodation: Partial<Accommodation>) => {
-    debouncedCreateAccommodation(accommodation);
+    return saveAccommodationMutation.mutateAsync(accommodation);
   };
 
   const updateAccommodation = (accommodation: Partial<Accommodation>) => {
-    debouncedUpdateAccommodation(accommodation);
+    if (!accommodation.id) throw new Error('Accommodation ID is required for update');
+    return saveAccommodationMutation.mutateAsync(accommodation);
   };
 
   const getAccommodationById = (id?: number) => {
@@ -134,7 +134,7 @@ export const useAccommodation = (accommodationId?: number) => {
       if (!accommodationId) throw new Error('Accommodation ID is required');
       return await withTimeout(
         () => accommodationService.getAccommodationById(accommodationId),
-        8000, // 8 seconds timeout
+        15000, // 15 seconds timeout - increased from 8
         null
       );
     },

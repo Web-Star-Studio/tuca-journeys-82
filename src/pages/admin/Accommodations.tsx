@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,10 @@ const AdminAccommodations = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Use a ref to track component mount state
+  const isMounted = useRef(true);
   
   const { showGlobalSpinner } = useUI();
   const { 
@@ -32,27 +36,67 @@ const AdminAccommodations = () => {
     deleteAccommodation
   } = useAccommodations();
 
+  // Effect for initial data loading - only runs once
   useEffect(() => {
-    // Fetch accommodations when component mounts or type filter changes
     const fetchData = async () => {
-      if (isProcessing) return;
-      
-      setIsProcessing(true);
-      showGlobalSpinner(true);
+      if (initialLoadComplete) return;
       
       try {
-        await withTimeout(() => refetch(), 8000);
+        setIsProcessing(true);
+        showGlobalSpinner(true);
+        
+        await withTimeout(() => refetch(), 12000);
+        
+        if (isMounted.current) {
+          setInitialLoadComplete(true);
+        }
       } catch (error) {
         console.error("Error fetching accommodations:", error);
         toast.error("Não foi possível carregar as hospedagens. Tente novamente.");
       } finally {
-        showGlobalSpinner(false);
-        setIsProcessing(false);
+        // Only update states if component is still mounted
+        if (isMounted.current) {
+          showGlobalSpinner(false);
+          setIsProcessing(false);
+        }
       }
     };
     
     fetchData();
-  }, [typeFilter, refetch, showGlobalSpinner]);
+    
+    // Cleanup function to prevent state updates if unmounted
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  // Effect that handles type filter changes (separate from initial load)
+  useEffect(() => {
+    // Skip on first render - only run when typeFilter changes
+    if (!initialLoadComplete) return;
+    
+    const applyFilter = async () => {
+      if (isProcessing) return;
+      
+      try {
+        setIsProcessing(true);
+        // Short loading spinner for filter changes
+        showGlobalSpinner(true);
+        
+        await refetch();
+      } catch (error) {
+        console.error("Error applying filter:", error);
+        toast.error("Não foi possível filtrar as hospedagens. Tente novamente.");
+      } finally {
+        if (isMounted.current) {
+          showGlobalSpinner(false);
+          setIsProcessing(false);
+        }
+      }
+    };
+    
+    applyFilter();
+  }, [typeFilter]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -61,11 +105,9 @@ const AdminAccommodations = () => {
       acc.description.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  // Handle accommodation edit with improved performance and error handling
-  const handleEditClick = async (accommodation: Accommodation) => {
-    if (isProcessing) return; // Prevent multiple rapid clicks
-    
-    setIsProcessing(true);
+  // Handle accommodation edit with improved error handling
+  const handleEditClick = (accommodation: Accommodation) => {
+    if (isProcessing || isDeleting) return;
     
     try {
       // Set the accommodation ID to be edited
@@ -74,20 +116,16 @@ const AdminAccommodations = () => {
       // Use a small delay to ensure UI updates before opening modal
       setTimeout(() => {
         setShowAccommodationForm(true);
-        setIsProcessing(false);
       }, 100);
     } catch (error) {
       console.error("Error while trying to edit accommodation:", error);
       toast.error("Erro ao tentar editar a hospedagem. Tente novamente.");
-      setIsProcessing(false);
     }
   };
 
-  // Handle accommodation delete with improved error handling and loading state
+  // Handle accommodation delete with improved error handling
   const handleDeleteClick = (accommodation: Accommodation) => {
-    if (isProcessing) return;
-    
-    setIsProcessing(true);
+    if (isProcessing || isDeleting) return;
     
     try {
       setAccommodationToDelete(accommodation);
@@ -95,40 +133,42 @@ const AdminAccommodations = () => {
     } catch (error) {
       console.error("Error while preparing to delete accommodation:", error);
       toast.error("Erro ao preparar exclusão. Tente novamente.");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   const confirmDelete = async () => {
-    if (accommodationToDelete) {
-      try {
-        setIsDeleting(true);
-        setIsProcessing(true);
-        
-        await deleteAccommodation(accommodationToDelete.id);
-        
+    if (!accommodationToDelete || isDeleting) return;
+    
+    try {
+      setIsDeleting(true);
+      showGlobalSpinner(true);
+      
+      await deleteAccommodation(accommodationToDelete.id);
+      
+      if (isMounted.current) {
         setDeleteDialogOpen(false);
         setAccommodationToDelete(null);
         toast.success("Hospedagem excluída com sucesso");
-      } catch (error) {
-        console.error("Error deleting accommodation:", error);
-        toast.error("Não foi possível excluir a hospedagem. Tente novamente.");
-      } finally {
+      }
+    } catch (error) {
+      console.error("Error deleting accommodation:", error);
+      toast.error("Não foi possível excluir a hospedagem. Tente novamente.");
+    } finally {
+      if (isMounted.current) {
         setIsDeleting(false);
-        setIsProcessing(false);
+        showGlobalSpinner(false);
       }
     }
   };
 
   const handleFormClose = () => {
-    if (isProcessing) return;
+    if (isProcessing || isDeleting) return;
     setShowAccommodationForm(false);
     setAccommodationToEdit(null);
   };
 
   // Combined processing state
-  const isAnyProcessing = isProcessing || isDeleting;
+  const isAnyProcessing = isProcessing || isDeleting || isLoading;
 
   return (
     <AdminLayout pageTitle="Gerenciar Hospedagens">
@@ -139,7 +179,7 @@ const AdminAccommodations = () => {
           typeFilter={typeFilter}
           setTypeFilter={setTypeFilter}
           onAddNewClick={() => {
-            if (!isProcessing) {
+            if (!isAnyProcessing) {
               setShowAccommodationForm(true);
             }
           }}
@@ -147,7 +187,7 @@ const AdminAccommodations = () => {
 
         <AccommodationList
           accommodations={filteredAccommodations}
-          isLoading={isLoading}
+          isLoading={isLoading && !isAnyProcessing}
           error={error}
           onEditAccommodation={handleEditClick}
           onDeleteAccommodation={handleDeleteClick}
@@ -158,7 +198,7 @@ const AdminAccommodations = () => {
         <Dialog 
           open={showAccommodationForm} 
           onOpenChange={(open) => {
-            if (!isProcessing) {
+            if (!isAnyProcessing) {
               setShowAccommodationForm(open);
               if (!open) {
                 setAccommodationToEdit(null);

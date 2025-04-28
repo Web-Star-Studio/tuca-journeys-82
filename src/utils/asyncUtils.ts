@@ -7,24 +7,36 @@
  */
 export const withTimeout = async <T>(
   asyncOperation: () => Promise<T>,
-  timeoutMs: number = 5000,
+  timeoutMs: number = 15000, // Increased default timeout
   fallback?: T
 ): Promise<T> => {
   let timeoutId: NodeJS.Timeout;
+  let operationComplete = false;
   
   const timeoutPromise = new Promise<T>((_, reject) => {
     timeoutId = setTimeout(() => {
-      reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+      if (!operationComplete) {
+        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+      }
     }, timeoutMs);
   });
 
   try {
     // Race between the actual operation and the timeout
-    const result = await Promise.race([asyncOperation(), timeoutPromise]);
+    const result = await Promise.race([
+      asyncOperation().then(result => {
+        operationComplete = true;
+        return result;
+      }),
+      timeoutPromise
+    ]);
+    
     clearTimeout(timeoutId!);
     return result;
   } catch (error) {
     console.error("Operation failed or timed out:", error);
+    clearTimeout(timeoutId!);
+    
     if (fallback !== undefined) {
       return fallback;
     }

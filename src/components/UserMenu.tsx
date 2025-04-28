@@ -44,6 +44,28 @@ const UserMenu = () => {
     }
   };
 
+  // Define the dashboard link and text based on user role
+  const getDashboardInfo = () => {
+    if (isMaster) {
+      return {
+        path: "/admin/permissions",
+        text: "Painel Admin Master"
+      };
+    } else if (isAdmin) {
+      return {
+        path: "/admin/dashboard",
+        text: "Painel Admin"
+      };
+    } else {
+      return {
+        path: "/dashboard",
+        text: "Painel do Usuário"
+      };
+    }
+  };
+
+  const dashboardInfo = getDashboardInfo();
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -101,9 +123,9 @@ const UserMenu = () => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to={(isMaster || isAdmin) ? "/admin/dashboard" : "/dashboard"} className="cursor-pointer flex w-full items-center">
+          <Link to={dashboardInfo.path} className="cursor-pointer flex w-full items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            {(isMaster || isAdmin) ? "Painel Admin" : "Painel do Usuário"}
+            {dashboardInfo.text}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

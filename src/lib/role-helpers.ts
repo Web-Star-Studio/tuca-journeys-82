@@ -1,5 +1,6 @@
-
 import { supabase } from "./supabase";
+import { permissionCache } from "@/utils/permissionCache";
+import { withTimeout } from "@/utils/asyncUtils";
 
 /**
  * Check if a user has a specific permission
@@ -13,53 +14,68 @@ export const hasPermission = async (
 ): Promise<boolean> => {
   if (!userId) return false;
   
+  // Check cache first
+  const cachedResult = permissionCache.getPermission(userId, permission);
+  if (cachedResult !== null) {
+    return cachedResult;
+  }
+  
   try {
-    // First check if user has master role (masters have all permissions)
-    const { data: masterData, error: masterError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'master')
-      .maybeSingle();
-    
-    if (masterError) {
-      console.error('Error checking master role:', masterError);
-    }
-    
-    if (masterData) {
-      return true; // Master has all permissions
-    }
-    
-    // Then check for admin role (admins have all standard permissions)
-    if (permission !== 'master') {
-      const { data: adminData, error: adminError } = await supabase
+    const checkPermission = async (): Promise<boolean> => {
+      // First check if user has master role (masters have all permissions)
+      const { data: masterData, error: masterError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .eq('role', 'admin')
+        .eq('role', 'master')
         .maybeSingle();
       
-      if (adminError) {
-        console.error('Error checking admin role:', adminError);
+      if (masterError) {
+        console.error('Error checking master role:', masterError);
       }
       
-      if (adminData) {
-        return true; // Admin has all standard permissions except master
+      if (masterData) {
+        permissionCache.setPermission(userId, permission, true);
+        return true; // Master has all permissions
       }
-    }
-    
-    // Finally check for specific permission via user_has_permission RPC function
-    const { data, error } = await supabase.rpc('user_has_permission', {
-      user_id: userId,
-      required_permission: permission
-    });
-    
-    if (error) {
-      console.error('Error checking specific permission:', error);
-      return false;
-    }
-    
-    return !!data;
+      
+      // Then check for admin role (admins have all standard permissions)
+      if (permission !== 'master') {
+        const { data: adminData, error: adminError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        if (adminError) {
+          console.error('Error checking admin role:', adminError);
+        }
+        
+        if (adminData) {
+          permissionCache.setPermission(userId, permission, true);
+          return true; // Admin has all standard permissions except master
+        }
+      }
+      
+      // Finally check for specific permission via user_has_permission RPC function
+      const { data, error } = await supabase.rpc('user_has_permission', {
+        user_id: userId,
+        required_permission: permission
+      });
+      
+      if (error) {
+        console.error('Error checking specific permission:', error);
+        return false;
+      }
+      
+      const result = !!data;
+      permissionCache.setPermission(userId, permission, result);
+      return result;
+    };
+
+    // Use timeout wrapper to prevent UI freezing
+    return await withTimeout(checkPermission, 3000, false);
   } catch (error) {
     console.error('Error checking user permission:', error);
     return false;
@@ -74,10 +90,14 @@ export const hasPermission = async (
 export const currentUserHasPermission = async (
   permission: 'read' | 'write' | 'delete' | 'admin' | 'master'
 ): Promise<boolean> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-  
-  return hasPermission(user.id, permission);
+  const getUserPermission = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    return hasPermission(user.id, permission);
+  };
+
+  return await withTimeout(getUserPermission, 3000, false);
 };
 
 /**
@@ -96,15 +116,19 @@ export const isUserMaster = async (userId: string): Promise<boolean> => {
  */
 export const promoteToMaster = async (userId: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
-      .rpc('promote_to_master', { target_user_id: userId });
+    const promoteUser = async () => {
+      const { data, error } = await supabase
+        .rpc('promote_to_master', { target_user_id: userId });
+      
+      if (error) {
+        console.error('Error promoting user to master:', error);
+        return false;
+      }
+      
+      return data === true;
+    };
     
-    if (error) {
-      console.error('Error promoting user to master:', error);
-      return false;
-    }
-    
-    return data === true;
+    return await withTimeout(promoteUser, 3000, false);
   } catch (error) {
     console.error('Error promoting user to master:', error);
     return false;
@@ -122,18 +146,22 @@ export const grantPermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    // Using the grant_permission RPC function
-    const { data, error } = await supabase.rpc('grant_permission', {
-      target_user_id: userId,
-      permission_name: permission
-    });
+    const grantUserPermission = async () => {
+      // Using the grant_permission RPC function
+      const { data, error } = await supabase.rpc('grant_permission', {
+        target_user_id: userId,
+        permission_name: permission
+      });
+      
+      if (error) {
+        console.error('Error granting permission:', error);
+        return false;
+      }
+      
+      return data === true;
+    };
     
-    if (error) {
-      console.error('Error granting permission:', error);
-      return false;
-    }
-    
-    return data === true;
+    return await withTimeout(grantUserPermission, 3000, false);
   } catch (error) {
     console.error('Error granting permission:', error);
     return false;
@@ -151,18 +179,22 @@ export const revokePermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    // Using the revoke_permission RPC function
-    const { data, error } = await supabase.rpc('revoke_permission', {
-      target_user_id: userId,
-      permission_name: permission
-    });
+    const revokeUserPermission = async () => {
+      // Using the revoke_permission RPC function
+      const { data, error } = await supabase.rpc('revoke_permission', {
+        target_user_id: userId,
+        permission_name: permission
+      });
+      
+      if (error) {
+        console.error('Error revoking permission:', error);
+        return false;
+      }
+      
+      return data === true;
+    };
     
-    if (error) {
-      console.error('Error revoking permission:', error);
-      return false;
-    }
-    
-    return data === true;
+    return await withTimeout(revokeUserPermission, 3000, false);
   } catch (error) {
     console.error('Error revoking permission:', error);
     return false;
@@ -178,17 +210,21 @@ export const revokeAllPermissions = async (
   userId: string
 ): Promise<boolean> => {
   try {
-    // Using a dedicated RPC function to revoke all permissions
-    const { data, error } = await supabase.rpc('revoke_all_permissions', {
-      target_user_id: userId
-    });
+    const revokeAll = async () => {
+      // Using a dedicated RPC function to revoke all permissions
+      const { data, error } = await supabase.rpc('revoke_all_permissions', {
+        target_user_id: userId
+      });
+      
+      if (error) {
+        console.error('Error revoking all permissions:', error);
+        return false;
+      }
+      
+      return data === true;
+    };
     
-    if (error) {
-      console.error('Error revoking all permissions:', error);
-      return false;
-    }
-    
-    return data === true;
+    return await withTimeout(revokeAll, 3000, false);
   } catch (error) {
     console.error('Error revoking all permissions:', error);
     return false;

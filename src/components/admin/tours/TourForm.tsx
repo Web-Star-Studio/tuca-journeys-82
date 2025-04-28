@@ -13,18 +13,28 @@ import TourFormActions from "./form/TourFormActions";
 import { Form } from "@/components/ui/form";
 import { Tour } from "@/types/database";
 import { stringToArray } from "@/utils/formUtils";
+import { withTimeout } from "@/utils/asyncUtils";
 
 interface TourFormProps {
   tourId?: number;
   onSuccess: () => void;
   onCancel: () => void;
+  setLoading?: (loading: boolean) => void;
+  setError?: (error: string | null) => void;
 }
 
-export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel }) => {
+export const TourForm: React.FC<TourFormProps> = ({ 
+  tourId, 
+  onSuccess, 
+  onCancel,
+  setLoading,
+  setError
+}) => {
   const [previewUrl, setPreviewUrl] = useState("");
   const { toast } = useToast();
   const { saveTour, getTourById } = useTours();
   const [isLoading, setIsLoading] = useState(tourId ? true : false);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Initialize form
   const form = useForm<TourFormValues>({
@@ -50,12 +60,45 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
     },
   });
 
+  // Update external loading state
+  useEffect(() => {
+    if (setLoading) {
+      setLoading(isLoading);
+    }
+    
+    // Set a timeout to prevent UI from being stuck indefinitely
+    if (isLoading && tourId) {
+      const timeoutId = setTimeout(() => {
+        if (setError) {
+          setError("O carregamento demorou muito tempo. Por favor, tente novamente mais tarde.");
+        }
+        setIsLoading(false);
+        if (setLoading) {
+          setLoading(false);
+        }
+      }, 10000); // 10 second timeout
+      
+      setLoadingTimeout(timeoutId);
+      
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }
+  }, [isLoading, setLoading, tourId, setError]);
+
   // Fetch tour data when editing
   useEffect(() => {
     const loadTourData = async () => {
       if (tourId) {
+        setIsLoading(true);
         try {
-          const tour = await getTourById(tourId);
+          // Use our timeout wrapper for the getTourById call
+          const tour = await withTimeout(
+            () => getTourById(tourId),
+            8000, // 8 second timeout
+            null  // Return null if timeout
+          );
+          
           if (tour) {
             form.reset({
               title: tour.title,
@@ -77,9 +120,22 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
               gallery_images: tour.gallery_images?.join(",") || "",
             });
             setPreviewUrl(tour.image_url);
+          } else {
+            // Handle case where tour is not found
+            if (setError) {
+              setError("Não foi possível carregar os dados do passeio.");
+            }
+            toast({
+              title: "Erro",
+              description: "Passeio não encontrado ou erro ao carregar.",
+              variant: "destructive",
+            });
           }
         } catch (error) {
           console.error("Error loading tour:", error);
+          if (setError) {
+            setError("Erro ao carregar o passeio. Por favor, tente novamente.");
+          }
           toast({
             title: "Erro",
             description: "Não foi possível carregar os dados do passeio.",
@@ -87,12 +143,22 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
           });
         } finally {
           setIsLoading(false);
+          if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+            setLoadingTimeout(null);
+          }
         }
       }
     };
 
     loadTourData();
-  }, [tourId, form, getTourById, toast]);
+    
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+    };
+  }, [tourId, form, getTourById, toast, setError, loadingTimeout]);
 
   // Update image preview
   useEffect(() => {
@@ -128,17 +194,25 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
       image_url: data.image_url || "/placeholder.jpg"
     } as Omit<Tour, "id" | "created_at" | "updated_at">;
 
+    setIsLoading(true);
+    
     try {
       if (tourId) {
-        // Update existing tour
-        await saveTour({ ...formattedData, id: tourId });
+        // Update existing tour with timeout
+        await withTimeout(
+          () => saveTour({ ...formattedData, id: tourId }),
+          10000
+        );
         toast({
           title: "Sucesso",
           description: "Passeio atualizado com sucesso.",
         });
       } else {
-        // Create new tour
-        await saveTour(formattedData);
+        // Create new tour with timeout
+        await withTimeout(
+          () => saveTour(formattedData),
+          10000
+        );
         toast({
           title: "Sucesso",
           description: "Novo passeio criado com sucesso.",
@@ -152,6 +226,8 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
         description: "Não foi possível salvar o passeio. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -187,7 +263,11 @@ export const TourForm: React.FC<TourFormProps> = ({ tourId, onSuccess, onCancel 
           </div>
         </div>
 
-        <TourFormActions onCancel={onCancel} isEditing={!!tourId} />
+        <TourFormActions 
+          onCancel={onCancel} 
+          isEditing={!!tourId} 
+          isSubmitting={isLoading}
+        />
       </form>
     </Form>
   );

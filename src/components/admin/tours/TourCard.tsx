@@ -1,95 +1,91 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { ExternalLink, Edit, Trash2, Calendar } from "lucide-react";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Tour } from "@/types/database";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Pencil, Trash } from "lucide-react";
+import { formatCurrency } from "@/utils/formatters";
 
 interface TourCardProps {
   tour: Tour;
   onEditTour: (tour: Tour) => void;
   onDeleteTour: (tour: Tour) => void;
+  disabled?: boolean;
 }
 
-const TourCard: React.FC<TourCardProps> = ({
-  tour,
-  onEditTour,
-  onDeleteTour,
-}) => {
+const TourCard = ({ 
+  tour, 
+  onEditTour, 
+  onDeleteTour, 
+  disabled = false 
+}: TourCardProps) => {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-all">
-      <div className="relative h-48">
+    <Card className="overflow-hidden transition-all hover:shadow-md">
+      <div className="relative h-48 overflow-hidden">
         <img
-          src={tour.image_url}
+          src={tour.image_url || "/placeholder.jpg"}
           alt={tour.title}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.src = "/placeholder.svg"; // Fallback para imagem padrão
-          }}
         />
-        <Badge
-          variant="secondary"
-          className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm"
-        >
-          {tour.category}
-        </Badge>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-2 right-2 flex space-x-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="bg-white/90 hover:bg-white text-gray-800 h-8 w-8"
+            onClick={() => !disabled && onEditTour(tour)}
+            disabled={disabled}
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Editar</span>
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="bg-white/90 hover:bg-white text-red-800 h-8 w-8"
+            onClick={() => !disabled && onDeleteTour(tour)}
+            disabled={disabled}
+          >
+            <Trash className="h-4 w-4" />
+            <span className="sr-only">Excluir</span>
+          </Button>
+        </div>
       </div>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-medium text-tuca-deep-blue">{tour.title}</h3>
-            <div className="flex items-center mt-2 text-sm text-muted-foreground">
-              <span className="mr-3">R$ {tour.price.toFixed(2)}</span>
-              <span className="mr-3">{tour.duration}</span>
-              <div className="flex items-center">
-                <span className="mr-1 text-yellow-500">★</span>
-                {tour.rating}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
-            >
-              <Link to={`/admin/tours/${tour.id}/availability`}>
-                <Calendar className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
-            >
-              <Link to={`/passeios/${tour.id}`} target="_blank">
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
-              onClick={() => onEditTour(tour)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => onDeleteTour(tour)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+      <CardHeader className="p-4">
+        <CardTitle className="line-clamp-1 text-lg">{tour.title}</CardTitle>
+        <CardDescription className="line-clamp-2 text-sm">
+          {tour.short_description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 text-sm space-y-2">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Categoria</span>
+          <span className="font-medium">{tour.category}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Duração</span>
+          <span className="font-medium">{tour.duration}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Participantes</span>
+          <span className="font-medium">
+            {tour.min_participants} - {tour.max_participants}
+          </span>
         </div>
       </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <div className="w-full flex justify-between items-center">
+          <div className="text-muted-foreground text-sm">Valor por pessoa</div>
+          <div className="text-lg font-semibold">{formatCurrency(tour.price)}</div>
+        </div>
+      </CardFooter>
     </Card>
   );
 };

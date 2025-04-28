@@ -12,6 +12,7 @@ interface TourListProps {
   error: Error | null;
   onEditTour: (tour: Tour) => void;
   onDeleteTour: (tour: Tour) => void;
+  isProcessing?: boolean;
 }
 
 const TourList: React.FC<TourListProps> = ({
@@ -20,6 +21,7 @@ const TourList: React.FC<TourListProps> = ({
   error,
   onEditTour,
   onDeleteTour,
+  isProcessing = false,
 }) => {
   if (isLoading) {
     return <TourLoadingState />;
@@ -45,6 +47,7 @@ const TourList: React.FC<TourListProps> = ({
           tour={tour}
           onEditTour={onEditTour}
           onDeleteTour={onDeleteTour}
+          disabled={isProcessing}
         />
       ))}
     </div>

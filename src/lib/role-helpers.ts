@@ -35,9 +35,9 @@ export const hasPermission = async (
     }
     
     // Otherwise check for the specific permission via role
-    // Fix: Changed rpc 'user_has_permission' to correct function call with proper params
+    // Using a type assertion to handle the RPC function that might not be in TypeScript types
     const { data, error } = await supabase
-      .rpc('user_has_permission', { 
+      .rpc('user_has_permission' as any, { 
         user_id: userId, 
         required_permission: permission 
       });
@@ -47,7 +47,7 @@ export const hasPermission = async (
       return false;
     }
     
-    // Fix: Compare with boolean value from the function result
+    // The RPC function returns a boolean, ensure proper comparison
     return data === true;
   } catch (error) {
     console.error('Error checking user permission:', error);

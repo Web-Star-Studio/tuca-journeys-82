@@ -13,6 +13,7 @@ export const XAxis = ({
   stroke = "#888888", 
   fontSize = 12,
   tickLine = false,
+  xAxisId = "default",  // Add default xAxisId
   ...props 
 }: XAxisProps) => {
   return (
@@ -20,6 +21,7 @@ export const XAxis = ({
       stroke={stroke}
       fontSize={fontSize}
       tickLine={tickLine}
+      xAxisId={xAxisId}
       {...props}
     />
   );
@@ -29,6 +31,7 @@ export const YAxis = ({
   stroke = "#888888", 
   fontSize = 12,
   tickLine = false,
+  yAxisId = "left",  // Add default yAxisId
   ...props 
 }: YAxisProps) => {
   return (
@@ -36,6 +39,7 @@ export const YAxis = ({
       stroke={stroke}
       fontSize={fontSize}
       tickLine={tickLine}
+      yAxisId={yAxisId}
       {...props}
     />
   );

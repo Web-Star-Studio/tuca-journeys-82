@@ -1,15 +1,22 @@
 
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { logAuthEvent, AuditAction } from "@/services/audit-service";
 
 export const useSignOut = () => {
   const { toast } = useToast();
 
   const signOut = async () => {
     try {
+      // Get current user before signing out
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
+      
+      // Log successful logout
+      await logAuthEvent(user, AuditAction.LOGOUT);
       
       toast({
         title: "Logout realizado com sucesso",

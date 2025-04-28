@@ -1,53 +1,71 @@
 
-import { Route, Navigate } from 'react-router-dom';
-import AdminDashboard from '@/pages/admin/Dashboard';
-import AdminTours from '@/pages/admin/Tours';
-import { TourForm } from '@/components/admin/tours/TourForm';
-import AdminAccommodations from '@/pages/admin/Accommodations';
-import { AccommodationForm } from '@/components/admin/accommodations/AccommodationForm';
-import AdminPackages from '@/pages/admin/Packages';
-import PackageForm from '@/components/admin/packages/PackageForm';
-import AdminBookings from '@/pages/admin/Bookings';
-import AdminUsers from '@/pages/admin/Users';
-import AdminProducts from '@/pages/admin/Products';
-import { ProductForm } from '@/components/admin/products/ProductForm';
-import AdminSettings from '@/pages/admin/Settings';
-import { InitialSetup } from '@/components/setup/InitialSetup';
+import React from 'react';
+import { Route } from 'react-router-dom';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-// Import reports from the correct locations
-import RevenueReport from '@/components/admin/reports/RevenueReport';
-import BookingsReport from '@/components/admin/reports/BookingsReport';
-import PackagesReport from '@/components/admin/reports/PackagesReport';
-import AccommodationsReport from '@/components/admin/reports/AccommodationsReport';
-import UsersReport from '@/components/admin/reports/UsersReport';
-import BookingsReportContainer from '@/components/admin/reports/bookings/BookingsReportContainer';
+// Admin pages
+import Dashboard from '@/pages/admin/Dashboard';
+import Tours from '@/pages/admin/Tours';
+import Accommodations from '@/pages/admin/Accommodations';
+import Bookings from '@/pages/admin/Bookings';
+import Packages from '@/pages/admin/Packages';
+import Products from '@/pages/admin/Products';
+import Users from '@/pages/admin/Users';
+import Media from '@/pages/admin/Media';
+import Reports from '@/pages/admin/Reports';
+import Settings from '@/pages/admin/Settings';
 
 export const adminRoutes = (
   <>
-    <Route path="/setup" element={<InitialSetup />} />
-    <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-    <Route path="/admin/tours" element={<AdminTours />} />
-    <Route path="/admin/tours/new" element={<TourForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/tours/:id" element={<TourForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/accommodations" element={<AdminAccommodations />} />
-    <Route path="/admin/accommodations/new" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/accommodations/:id" element={<AccommodationForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/packages" element={<AdminPackages />} />
-    <Route path="/admin/packages/new" element={<PackageForm packageId={null} onCancel={() => {}} onSuccess={() => {}} />} />
-    <Route path="/admin/packages/:id" element={<PackageForm packageId={0} onCancel={() => {}} onSuccess={() => {}} />} />
-    <Route path="/admin/bookings" element={<AdminBookings />} />
-    <Route path="/admin/users" element={<AdminUsers />} />
-    <Route path="/admin/products" element={<AdminProducts />} />
-    <Route path="/admin/products/new" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/products/:id" element={<ProductForm onSuccess={() => {}} onCancel={() => {}} />} />
-    <Route path="/admin/settings" element={<AdminSettings />} />
-    
-    {/* Reports */}
-    <Route path="/admin/reports/revenue" element={<RevenueReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/bookings" element={<BookingsReportContainer dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/packages" element={<PackagesReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/accommodations" element={<AccommodationsReport dateRange={{from: undefined, to: undefined}} />} />
-    <Route path="/admin/reports/users" element={<UsersReport dateRange={{from: undefined, to: undefined}} />} />
+    <Route path="/admin" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Dashboard />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/tours" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Tours />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/accommodations" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Accommodations />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/bookings" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Bookings />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/packages" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Packages />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/products" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Products />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/users" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Users />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/media" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Media />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/reports" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Reports />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/settings" element={
+      <ProtectedRoute requiredPermission="admin">
+        <Settings />
+      </ProtectedRoute>
+    } />
   </>
 );

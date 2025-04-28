@@ -3,12 +3,14 @@ export * from './tour-service';
 export * from './accommodation-service';
 export * from './booking-service';
 export * from './user-service';
+export * from './audit-service';
 
 // For backward compatibility, re-export individual services as a unified API
 import { tourService } from './tour-service';
 import { accommodationService } from './accommodation-service';
 import { bookingService } from './booking-service';
 import { userService } from './user-service';
+import { auditService } from './audit-service';
 
 /**
  * @deprecated Use individual service modules instead
@@ -34,4 +36,8 @@ export const apiService = {
   // User roles
   getUserRoles: userService.getUserRoles.bind(userService),
   hasRole: userService.hasRole.bind(userService),
+  
+  // Audit logs
+  getAuditLogs: auditService.getAuditLogs.bind(auditService),
+  addAuditLog: auditService.addAuditLog.bind(auditService),
 };

@@ -1,68 +1,54 @@
+
+import React from 'react';
 import { Route } from 'react-router-dom';
-import Home from '@/pages/Index';
-import NotFound from '@/pages/NotFound';
+import Index from '@/pages/Index';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Tours from '@/pages/Tours';
+import TourDetail from '@/pages/TourDetail';
+import TourBooking from '@/pages/TourBooking';
+import Events from '@/pages/Events';
+import EventDetail from '@/pages/EventDetail';
+import Packages from '@/pages/Packages';
+import PackageDetail from '@/pages/PackageDetail';
+import Hospedagens from '@/pages/Hospedagens';
+import AccommodationDetail from '@/pages/AccommodationDetail';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ResetPassword from '@/pages/ResetPassword';
-import Tours from '@/pages/Tours';
-import TourDetail from '@/pages/TourDetail';
-import Packages from '@/pages/Packages';
-import PackageDetail from '@/pages/PackageDetail';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
-import Events from '@/pages/Events';
-import EventDetail from '@/pages/EventDetail';
+import NotFound from '@/pages/NotFound';
+import Unauthorized from '@/pages/Unauthorized';
 import Mapa from '@/pages/Mapa';
-import Hospedagens from '@/pages/Hospedagens';
-import AccommodationDetail from '@/pages/AccommodationDetail';
-import Wishlist from '@/pages/Wishlist';
-import Loja from '@/pages/Loja';
-import ProductDetails from '@/pages/ProductDetails';
 import Partners from '@/pages/Partners';
-import TourBooking from '@/pages/TourBooking';
-import BookingConfirmation from '@/pages/BookingConfirmation';
-import Reservar from '@/pages/Reservar';
+import PartnerDetail from '@/pages/PartnerDetail';
+import Store from '@/pages/Store';
+import ProductDetails from '@/pages/ProductDetails';
+import Cart from '@/pages/Cart';
 
 export const publicRoutes = (
   <>
-    <Route path="/" element={<Home />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/cadastro" element={<Register />} />
-    <Route path="/esqueci-senha" element={<ResetPassword />} />
-    <Route path="/redefinir-senha" element={<ResetPassword />} />
-    <Route path="/reservar" element={<Reservar />} />
-    
-    {/* Portuguese Routes */}
-    <Route path="/passeios" element={<Tours />} />
-    <Route path="/passeios/:id" element={<TourDetail />} />
-    <Route path="/passeios/:id/reserva" element={<TourBooking />} />
-    <Route path="/hospedagens" element={<Hospedagens />} />
-    <Route path="/hospedagens/:id" element={<AccommodationDetail />} />
-    <Route path="/hospedagem/:id" element={<AccommodationDetail />} />
-    <Route path="/pacotes" element={<Packages />} />
-    <Route path="/pacotes/:id" element={<PackageDetail />} />
-    <Route path="/sobre" element={<About />} />
-    <Route path="/contato" element={<Contact />} />
-    <Route path="/eventos" element={<Events />} />
-    <Route path="/eventos/:id" element={<EventDetail />} />
-    <Route path="/mapa" element={<Mapa />} />
-    <Route path="/parceiros" element={<Partners />} />
-    <Route path="/loja" element={<Loja />} />
-    <Route path="/loja/:id" element={<ProductDetails />} />
-    <Route path="/produto/:id" element={<ProductDetails />} />
-    <Route path="/lista-de-desejos" element={<Wishlist />} />
-    
-    {/* English Routes (for backward compatibility) */}
-    <Route path="/tours" element={<Tours />} />
-    <Route path="/tours/:id" element={<TourDetail />} />
-    <Route path="/packages" element={<Packages />} />
-    <Route path="/packages/:id" element={<PackageDetail />} />
+    <Route path="/" element={<Index />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
-    <Route path="/store" element={<Loja />} />
-    <Route path="/store/:id" element={<ProductDetails />} />
-    
-    <Route path="/reserva-confirmada" element={<BookingConfirmation />} />
+    <Route path="/map" element={<Mapa />} />
+    <Route path="/tours" element={<Tours />} />
+    <Route path="/tours/:id" element={<TourDetail />} />
+    <Route path="/tours/:id/booking" element={<TourBooking />} />
+    <Route path="/events" element={<Events />} />
+    <Route path="/events/:id" element={<EventDetail />} />
+    <Route path="/packages" element={<Packages />} />
+    <Route path="/packages/:id" element={<PackageDetail />} />
+    <Route path="/accommodations" element={<Hospedagens />} />
+    <Route path="/accommodations/:id" element={<AccommodationDetail />} />
+    <Route path="/partners" element={<Partners />} />
+    <Route path="/partners/:id" element={<PartnerDetail />} />
+    <Route path="/store" element={<Store />} />
+    <Route path="/products/:id" element={<ProductDetails />} />
+    <Route path="/cart" element={<Cart />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/registro" element={<Register />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/unauthorized" element={<Unauthorized />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

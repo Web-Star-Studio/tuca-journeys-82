@@ -5,14 +5,16 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  adminOnly?: boolean;
+  requiredPermission?: 'read' | 'write' | 'delete' | 'admin';
+  redirectTo?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  adminOnly = false 
+  requiredPermission = 'read',
+  redirectTo
 }) => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, permissions } = useAuth();
 
   if (isLoading) {
     return (
@@ -22,12 +24,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // If not authenticated, redirect to login
   if (!user) {
     return <Navigate to={`/login?returnTo=${window.location.pathname}`} replace />;
   }
 
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+  // Check permissions
+  const hasRequiredPermission = 
+    permissions.isAdmin || // Admins have all permissions
+    (requiredPermission === 'read' && permissions.canRead) ||
+    (requiredPermission === 'write' && permissions.canWrite) ||
+    (requiredPermission === 'delete' && permissions.canDelete) ||
+    (requiredPermission === 'admin' && permissions.isAdmin);
+  
+  // If doesn't have required permission, redirect to appropriate page
+  if (!hasRequiredPermission) {
+    const defaultRedirect = requiredPermission === 'admin' ? '/dashboard' : '/unauthorized';
+    return <Navigate to={redirectTo || defaultRedirect} replace />;
   }
 
   return <>{children}</>;

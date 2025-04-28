@@ -1,6 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { logAuthEvent, AuditAction } from "@/services/audit-service";
 
 export const useSignIn = () => {
   const { toast } = useToast();
@@ -15,6 +16,9 @@ export const useSignIn = () => {
       });
       
       if (error) throw error;
+      
+      // Log successful login
+      await logAuthEvent(data.user, AuditAction.LOGIN);
       
       toast({
         title: "Login realizado com sucesso",

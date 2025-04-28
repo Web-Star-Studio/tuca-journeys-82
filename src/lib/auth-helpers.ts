@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,12 +6,6 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-/**
- * Check if the current user has a specific role
- * @param userId User ID to check
- * @param role Role to check for
- * @returns Boolean indicating if the user has the role
- */
 export const hasRole = async (userId: string, role: string): Promise<boolean> => {
   if (!userId) return false;
   
@@ -34,17 +29,10 @@ export const hasRole = async (userId: string, role: string): Promise<boolean> =>
   }
 };
 
-/**
- * Check if a user is an admin by checking the user_roles table
- */
 export const isUserAdmin = async (userId: string): Promise<boolean> => {
   return await hasRole(userId, 'admin');
 };
 
-/**
- * Check if the given email matches the admin email
- * This is a fallback for demo purposes
- */
 export const isAdminEmail = (email: string | undefined): boolean => {
   if (!email) return false;
   
@@ -56,43 +44,6 @@ export const isAdminEmail = (email: string | undefined): boolean => {
   return adminEmails.includes(email);
 };
 
-/**
- * Set admin role for a user in the user_roles table
- * This function should be used for newly registered admin users
- */
-export const setAdminRole = async (userId: string): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('user_roles')
-      .insert([
-        { 
-          user_id: userId, 
-          role: 'admin'
-        }
-      ]);
-    
-    if (error) {
-      console.error('Error setting admin role:', error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error setting admin role:', error);
-    return false;
-  }
-};
-
-/**
- * Check if the current user has admin access, checking both session data and custom claims
- */
-export const checkAdminAccess = async (userId: string): Promise<boolean> => {
-  return await isUserAdmin(userId);
-};
-
-/**
- * Add protection to admin routes by redirecting non-admin users
- */
 export const withAdminProtection = (Component: React.ComponentType) => {
   const ProtectedComponent: React.FC<any> = (props) => {
     const { user, isAdmin, isLoading } = useAuth();
@@ -117,7 +68,7 @@ export const withAdminProtection = (Component: React.ComponentType) => {
     }
     
     if (!user || !isAdmin) {
-      return null; // Will redirect due to the useEffect
+      return null;
     }
     
     return React.createElement(Component, props);

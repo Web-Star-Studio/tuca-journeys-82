@@ -9,12 +9,6 @@ interface AuthRedirectOptions {
   redirectTo?: string;
 }
 
-/**
- * Hook for redirecting users based on authentication state
- * 
- * @param options Configuration options
- * @returns Authentication state
- */
 export const useAuthRedirect = (options: AuthRedirectOptions = {}) => {
   const { 
     requiredAuth = false, 

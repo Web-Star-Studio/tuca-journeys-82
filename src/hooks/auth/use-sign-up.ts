@@ -5,10 +5,8 @@ import { supabase } from "@/lib/supabase";
 export const useSignUp = () => {
   const { toast } = useToast();
 
-  // Sign up function with real Supabase authentication
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      // Use supabase auth signUp
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

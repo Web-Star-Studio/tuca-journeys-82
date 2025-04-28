@@ -14,13 +14,12 @@ import { adminRoutes } from './routes/adminRoutes';
 import ScrollToTop from './components/utils/ScrollToTop';
 import GlobalLoading from './components/utils/GlobalLoading';
 
-// Create a client with default options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });

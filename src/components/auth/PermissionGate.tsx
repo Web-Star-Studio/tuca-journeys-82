@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { hasPermission } from '@/lib/role-helpers';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PermissionGateProps {
   children: React.ReactNode;
-  permission: 'read' | 'write' | 'delete' | 'admin';
+  permission: 'read' | 'write' | 'delete' | 'admin' | 'master';
   fallback?: React.ReactNode;
 }
 
@@ -16,26 +17,52 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
   permission,
   fallback = null
 }) => {
-  const { permissions } = useAuth();
-  
-  // Early return for admin users who have all permissions
-  if (permissions.isAdmin) {
-    return <>{children}</>;
+  const { user } = useAuth();
+  const [hasAccessPermission, setHasAccessPermission] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkPermission = async () => {
+      if (!user) {
+        if (isMounted) {
+          setHasAccessPermission(false);
+          setIsChecking(false);
+        }
+        return;
+      }
+      
+      try {
+        const result = await hasPermission(user.id, permission);
+        if (isMounted) {
+          setHasAccessPermission(result);
+        }
+      } catch (error) {
+        console.error('Error checking permission:', error);
+        if (isMounted) {
+          setHasAccessPermission(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsChecking(false);
+        }
+      }
+    };
+    
+    checkPermission();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, permission]);
+
+  if (isChecking) {
+    // Could return a loading state here if desired
+    return null;
   }
-  
-  // Check specific permissions
-  switch (permission) {
-    case 'read':
-      return permissions.canRead ? <>{children}</> : <>{fallback}</>;
-    case 'write':
-      return permissions.canWrite ? <>{children}</> : <>{fallback}</>;
-    case 'delete':
-      return permissions.canDelete ? <>{children}</> : <>{fallback}</>;
-    case 'admin':
-      return permissions.isAdmin ? <>{children}</> : <>{fallback}</>;
-    default:
-      return <>{fallback}</>;
-  }
+
+  return hasAccessPermission ? <>{children}</> : <>{fallback}</>;
 };
 
 export default PermissionGate;

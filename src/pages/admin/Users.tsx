@@ -8,6 +8,9 @@ import UserFormDialog from "@/components/admin/users/UserFormDialog";
 import { User } from "@/components/admin/users/types";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { hasPermission, grantPermission, revokePermission } from "@/lib/role-helpers";
+import { auditService, AuditAction } from "@/services/audit-service";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,12 +22,28 @@ const Users = () => {
   const [userToEdit, setUserToEdit] = useState<string | undefined>(undefined);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [userPermissions, setUserPermissions] = useState<Record<string, string[]>>({});
+  
+  const { user: currentUser } = useAuth();
+  const [isMasterUser, setIsMasterUser] = useState(false);
+
+  // Check if current user is a master
+  useEffect(() => {
+    const checkMasterStatus = async () => {
+      if (currentUser) {
+        const isMaster = await hasPermission(currentUser.id, 'master');
+        setIsMasterUser(isMaster);
+      }
+    };
+    
+    checkMasterStatus();
+  }, [currentUser]);
 
   // Fetch users from Supabase
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      // First get users from auth.users using admin functions
+      // First get users from user_profiles
       const { data: profiles, error } = await supabase
         .from('user_profiles')
         .select('*');
@@ -43,17 +62,29 @@ const Users = () => {
             ? roles[0].role 
             : 'customer';
           
-          // Add a status field explicitly since it doesn't exist in the database schema
-          // Since is_active doesn't exist, we'll determine status based on is_admin property
-          // or simply default to 'active' for this demo
-          const status = 'active'; // Default all users to active since is_active isn't available
+          // Get user permissions
+          const { data: permissions } = await supabase
+            .from('user_permissions')
+            .select('permission')
+            .eq('user_id', profile.id);
+            
+          const userPerms = permissions ? permissions.map(p => p.permission) : [];
+          
+          // Store permissions for each user
+          setUserPermissions(prev => ({
+            ...prev,
+            [profile.id]: userPerms
+          }));
+          
+          // Add a status field (active/inactive)
+          const status = 'active'; // Default all users to active
             
           return {
             id: profile.id,
             name: profile.name || 'User',
             email: profile.email || '',
             role: role,
-            status: status, // Add computed status field
+            status: status,
             created_at: profile.created_at,
             avatar: profile.avatar_url || null
           };
@@ -64,7 +95,7 @@ const Users = () => {
             name: profile.name || 'User',
             email: profile.email || '',
             role: 'customer',
-            status: 'active', // Default status
+            status: 'active',
             created_at: profile.created_at,
             avatar: profile.avatar_url || null
           };
@@ -104,7 +135,15 @@ const Users = () => {
     if (!userToDelete) return;
     
     try {
-      // Delete user_roles first
+      // Delete user_permissions first
+      const { error: permissionError } = await supabase
+        .from('user_permissions')
+        .delete()
+        .eq('user_id', userToDelete.id);
+      
+      if (permissionError) throw permissionError;
+      
+      // Delete user_roles next
       const { error: roleError } = await supabase
         .from('user_roles')
         .delete()
@@ -119,6 +158,18 @@ const Users = () => {
         .eq('id', userToDelete.id);
       
       if (profileError) throw profileError;
+      
+      // Log the deletion
+      if (currentUser) {
+        await auditService.addAuditLog(
+          currentUser,
+          AuditAction.DELETE,
+          'user_profiles',
+          userToDelete.id,
+          { id: userToDelete.id, name: userToDelete.name, email: userToDelete.email },
+          null
+        );
+      }
       
       // Finally, remove from our local state
       setUsers(users.filter(user => user.id !== userToDelete.id));
@@ -143,6 +194,129 @@ const Users = () => {
     fetchUsers();
   };
 
+  // Handle role change
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      // Get current role
+      const { data: currentRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      
+      const currentRole = currentRoles && currentRoles.length > 0 ? currentRoles[0].role : null;
+      
+      // If the role is the same, do nothing
+      if (currentRole === newRole) return;
+      
+      // Delete current role
+      if (currentRole) {
+        const { error: deleteError } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId);
+        
+        if (deleteError) throw deleteError;
+      }
+      
+      // Insert new role
+      const { error: insertError } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role: newRole }]);
+      
+      if (insertError) throw insertError;
+      
+      // Log role change
+      if (currentUser) {
+        await auditService.logRoleChange(currentUser, userId, currentRole, newRole);
+      }
+      
+      // Update local state
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, role: newRole } : user
+      ));
+      
+      toast.success(`Papel do usuário alterado para ${newRole}`);
+    } catch (error) {
+      console.error("Error changing user role:", error);
+      toast.error("Erro ao alterar papel do usuário");
+    }
+  };
+
+  // Handle permission grant/revoke
+  const handlePermissionToggle = async (userId: string, permission: string, hasPermission: boolean) => {
+    try {
+      if (hasPermission) {
+        // Revoke permission
+        const success = await revokePermission(userId, permission);
+        if (!success) throw new Error("Failed to revoke permission");
+        
+        // Log permission revoke
+        if (currentUser) {
+          await auditService.logPermissionChange(currentUser, 'revoke', userId, permission);
+        }
+        
+        // Update local state
+        setUserPermissions(prev => ({
+          ...prev,
+          [userId]: prev[userId].filter(p => p !== permission)
+        }));
+        
+        toast.success(`Permissão '${permission}' revogada`);
+      } else {
+        // Grant permission
+        const success = await grantPermission(userId, permission);
+        if (!success) throw new Error("Failed to grant permission");
+        
+        // Log permission grant
+        if (currentUser) {
+          await auditService.logPermissionChange(currentUser, 'grant', userId, permission);
+        }
+        
+        // Update local state
+        setUserPermissions(prev => ({
+          ...prev,
+          [userId]: [...(prev[userId] || []), permission]
+        }));
+        
+        toast.success(`Permissão '${permission}' concedida`);
+      }
+    } catch (error) {
+      console.error("Error toggling permission:", error);
+      toast.error("Erro ao modificar permissão");
+    }
+  };
+
+  // Promote user to master (only if no master exists yet)
+  const handlePromoteMaster = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('promote_to_master', { target_user_id: userId });
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Success - master user was created
+        toast.success("Usuário promovido a Master");
+        
+        // Log the promotion
+        if (currentUser) {
+          await auditService.logRoleChange(currentUser, userId, 'admin', 'master');
+        }
+        
+        // Update local state
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, role: 'master' } : user
+        ));
+      } else {
+        // Failed - a master user already exists
+        toast.error("Já existe um usuário Master no sistema");
+      }
+    } catch (error) {
+      console.error("Error promoting to master:", error);
+      toast.error("Erro ao promover usuário para Master");
+    }
+  };
+
   // Filter users based on search query, role and status
   const filteredUsers = users.filter(
     (user) => {
@@ -158,7 +332,7 @@ const Users = () => {
   );
 
   return (
-    <AdminLayout pageTitle="Gerenciar Usuários">
+    <AdminLayout pageTitle="Gerenciar Usuários" requiresMaster={false}>
       <UserFilters 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery}
@@ -171,10 +345,15 @@ const Users = () => {
       
       <UsersTable 
         users={filteredUsers}
+        permissions={userPermissions}
+        isMasterUser={isMasterUser}
         actions={{
           onEmailClick: handleEmailClick,
           onEditClick: handleEditClick,
           onDeleteClick: handleDeleteClick,
+          onRoleChange: handleRoleChange,
+          onPermissionToggle: handlePermissionToggle,
+          onPromoteMaster: handlePromoteMaster
         }}
         isLoading={isLoading}
       />

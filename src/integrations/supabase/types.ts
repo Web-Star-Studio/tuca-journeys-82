@@ -115,6 +115,51 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          change_details: Json | null
+          created_at: string | null
+          id: number
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string | null
+          target_user_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          change_details?: Json | null
+          created_at?: string | null
+          id?: number
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          change_details?: Json | null
+          created_at?: string | null
+          id?: number
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           accommodation_id: number | null
@@ -835,6 +880,30 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          permission: string
+          user_id: string | null
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission: string
+          user_id?: string | null
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           address: string | null
@@ -1111,6 +1180,18 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      is_user_master: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      promote_to_master: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
+      user_has_permission: {
+        Args: { user_id: string; required_permission: string }
+        Returns: boolean
+      }
     }
     Enums: {
       accommodation_type:
@@ -1121,6 +1202,7 @@ export type Database = {
         | "apartment"
         | "camping"
       activity_level: "low" | "moderate" | "high" | "extreme"
+      app_role: "admin" | "customer" | "partner" | "master"
       budget_range: "economy" | "moderate" | "premium" | "luxury"
       travel_style:
         | "leisure"
@@ -1254,6 +1336,7 @@ export const Constants = {
         "camping",
       ],
       activity_level: ["low", "moderate", "high", "extreme"],
+      app_role: ["admin", "customer", "partner", "master"],
       budget_range: ["economy", "moderate", "premium", "luxury"],
       travel_style: [
         "leisure",

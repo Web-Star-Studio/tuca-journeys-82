@@ -1,74 +1,103 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Calendar, ShoppingCart, Image, Package, Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, ShoppingCart, Image, Package, Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight, Shield, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSignOut } from "@/hooks/auth/use-sign-out";
 import { useToast } from "@/hooks/use-toast";
+import { usePermission } from '@/hooks/use-permission';
+
 interface AdminSidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
 }
+
 interface SidebarItem {
   title: string;
   icon: React.ElementType;
   path: string;
   dividerAfter?: boolean;
+  requiredPermission?: 'read' | 'write' | 'delete' | 'admin' | 'master';
 }
+
 const AdminSidebar = ({
   collapsed,
   setCollapsed
 }: AdminSidebarProps) => {
   const location = useLocation();
-  const {
-    signOut
-  } = useSignOut();
-  const {
-    toast
-  } = useToast();
-  const sidebarItems: SidebarItem[] = [{
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/admin"
-  }, {
-    title: "Passeios",
-    icon: Calendar,
-    path: "/admin/tours"
-  }, {
-    title: "Hospedagens",
-    icon: Home,
-    path: "/admin/accommodations"
-  }, {
-    title: "Pacotes",
-    icon: Package,
-    path: "/admin/packages"
-  }, {
-    title: "Produtos",
-    icon: Store,
-    path: "/admin/products",
-    dividerAfter: true
-  }, {
-    title: "Reservas",
-    icon: ShoppingCart,
-    path: "/admin/bookings"
-  }, {
-    title: "Usuários",
-    icon: Users,
-    path: "/admin/users",
-    dividerAfter: true
-  }, {
-    title: "Mídia",
-    icon: Image,
-    path: "/admin/media"
-  }, {
-    title: "Relatórios",
-    icon: BarChart2,
-    path: "/admin/reports"
-  }, {
-    title: "Configurações",
-    icon: Settings,
-    path: "/admin/settings"
-  }];
+  const { signOut } = useSignOut();
+  const { toast } = useToast();
+  const { hasPermission: isMaster } = usePermission('master');
+  
+  const sidebarItems: SidebarItem[] = [
+    {
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/admin"
+    },
+    {
+      title: "Passeios",
+      icon: Calendar,
+      path: "/admin/tours"
+    },
+    {
+      title: "Hospedagens",
+      icon: Home,
+      path: "/admin/accommodations"
+    },
+    {
+      title: "Pacotes",
+      icon: Package,
+      path: "/admin/packages"
+    },
+    {
+      title: "Produtos",
+      icon: Store,
+      path: "/admin/products",
+      dividerAfter: true
+    },
+    {
+      title: "Reservas",
+      icon: ShoppingCart,
+      path: "/admin/bookings"
+    },
+    {
+      title: "Usuários",
+      icon: Users,
+      path: "/admin/users",
+      dividerAfter: true
+    },
+    {
+      title: "Logs de Auditoria",
+      icon: ClipboardList,
+      path: "/admin/audit-logs",
+      requiredPermission: 'master'
+    },
+    {
+      title: "Permissões",
+      icon: Shield,
+      path: "/admin/permissions",
+      requiredPermission: 'master',
+      dividerAfter: true
+    },
+    {
+      title: "Mídia",
+      icon: Image,
+      path: "/admin/media"
+    },
+    {
+      title: "Relatórios",
+      icon: BarChart2,
+      path: "/admin/reports"
+    },
+    {
+      title: "Configurações",
+      icon: Settings,
+      path: "/admin/settings"
+    }
+  ];
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -85,6 +114,14 @@ const AdminSidebar = ({
       });
     }
   };
+
+  // Filter items based on permissions
+  const filteredItems = sidebarItems.filter(item => {
+    if (!item.requiredPermission) return true;
+    if (item.requiredPermission === 'master') return isMaster;
+    return true;
+  });
+
   return <div className={`fixed h-screen bg-white shadow-md transition-all duration-300 z-40 ${collapsed ? "w-20" : "w-64"}`}>
       <div className="flex h-16 items-center justify-between px-4 border-b">
         <Link to="/admin" className="flex items-center">
@@ -98,7 +135,7 @@ const AdminSidebar = ({
 
       <div className="py-4">
         <ul className="space-y-1">
-          {sidebarItems.map(item => <React.Fragment key={item.path}>
+          {filteredItems.map(item => <React.Fragment key={item.path}>
               <li>
                 <Link to={item.path} className={cn("flex items-center py-3 text-gray-700 hover:bg-tuca-light-blue/40 hover:text-tuca-ocean-blue", collapsed ? "justify-center px-2" : "px-4", location.pathname === item.path && "bg-tuca-light-blue/60 text-tuca-ocean-blue font-medium")}>
                   <item.icon size={20} className="shrink-0" />
@@ -118,4 +155,5 @@ const AdminSidebar = ({
       </div>
     </div>;
 };
+
 export default AdminSidebar;

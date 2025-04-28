@@ -2,10 +2,11 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermission } from '@/hooks/use-permission';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredPermission?: 'read' | 'write' | 'delete' | 'admin';
+  requiredPermission?: 'read' | 'write' | 'delete' | 'admin' | 'master';
   redirectTo?: string;
 }
 
@@ -14,9 +15,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredPermission = 'read',
   redirectTo
 }) => {
-  const { user, isLoading, permissions } = useAuth();
+  const { user, isLoading } = useAuth();
+  const { hasPermission, isLoading: permissionLoading } = usePermission(requiredPermission);
 
-  if (isLoading) {
+  if (isLoading || permissionLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -29,17 +31,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={`/login?returnTo=${window.location.pathname}`} replace />;
   }
 
-  // Check permissions
-  const hasRequiredPermission = 
-    permissions.isAdmin || // Admins have all permissions
-    (requiredPermission === 'read' && permissions.canRead) ||
-    (requiredPermission === 'write' && permissions.canWrite) ||
-    (requiredPermission === 'delete' && permissions.canDelete) ||
-    (requiredPermission === 'admin' && permissions.isAdmin);
-  
   // If doesn't have required permission, redirect to appropriate page
-  if (!hasRequiredPermission) {
-    const defaultRedirect = requiredPermission === 'admin' ? '/dashboard' : '/unauthorized';
+  if (!hasPermission) {
+    const defaultRedirect = requiredPermission === 'admin' || requiredPermission === 'master' 
+      ? '/dashboard' 
+      : '/unauthorized';
     return <Navigate to={redirectTo || defaultRedirect} replace />;
   }
 

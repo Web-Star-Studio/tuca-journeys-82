@@ -4,24 +4,33 @@ import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Loader2 } from "lucide-react";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from '@/contexts/AuthContext';
+import { usePermission } from '@/hooks/use-permission';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   pageTitle: string;
+  requiresMaster?: boolean;
 }
 
-const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
+const AdminLayout = ({ 
+  children, 
+  pageTitle, 
+  requiresMaster = false 
+}: AdminLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+  const { hasPermission: isAdmin, isLoading: adminCheckLoading } = usePermission('admin');
+  const { hasPermission: isMaster, isLoading: masterCheckLoading } = usePermission('master');
   
-  // Protect admin routes
-  const { isLoading, isAuthenticated, isAdmin } = useAuthRedirect({
-    requiredAuth: true,
-    requiredAdmin: true,
-    redirectTo: '/login?redirectTo=/admin/dashboard'
-  });
+  const permissionLoading = isLoading || adminCheckLoading || (requiresMaster && masterCheckLoading);
   
-  if (isLoading) {
+  // Check permissions
+  const hasRequiredAccess = requiresMaster ? isMaster : isAdmin;
+  
+  if (permissionLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
@@ -30,9 +39,12 @@ const AdminLayout = ({ children, pageTitle }: AdminLayoutProps) => {
     );
   }
 
-  // If not authenticated or not admin, don't render the admin layout
-  // The useAuthRedirect hook will handle the redirect
-  if (!isAuthenticated || !isAdmin) {
+  // If not authenticated or doesn't have required permissions, redirect
+  if (!user || !hasRequiredAccess) {
+    setTimeout(() => {
+      navigate('/unauthorized');
+    }, 100);
+    
     return (
       <div className="flex h-screen w-full items-center justify-center flex-col">
         <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue mb-4" />

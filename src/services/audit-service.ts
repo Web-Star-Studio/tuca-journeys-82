@@ -9,14 +9,15 @@ export enum AuditAction {
   DELETE = 'delete',
   LOGIN = 'login',
   LOGOUT = 'logout',
-  PERMISSION_CHANGE = 'permission_change',
+  PERMISSION_GRANT = 'permission_grant',
+  PERMISSION_REVOKE = 'permission_revoke',
   ROLE_CHANGE = 'role_change',
 }
 
 export interface AuditLog {
   id: number;
   user_id: string;
-  action: AuditAction;
+  action: AuditAction | string;
   table_name: string | null;
   record_id: string | null;
   old_data: any | null;
@@ -24,6 +25,8 @@ export interface AuditLog {
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
+  target_user_id: string | null;
+  change_details: any | null;
 }
 
 /**
@@ -35,16 +38,17 @@ export class AuditService extends BaseApiService {
    */
   async addAuditLog(
     user: User | null,
-    action: AuditAction,
+    action: AuditAction | string,
     tableName?: string,
     recordId?: string | number,
     oldData?: any,
     newData?: any,
+    targetUserId?: string,
+    changeDetails?: any
   ): Promise<void> {
     try {
-      // Use type assertion to handle the audit_logs table that's not in TypeScript types yet
       const { error } = await this.supabase
-        .from('audit_logs' as any)
+        .from('audit_logs')
         .insert([{
           user_id: user?.id || null,
           action,
@@ -52,6 +56,8 @@ export class AuditService extends BaseApiService {
           record_id: recordId?.toString() || null,
           old_data: oldData || null,
           new_data: newData || null,
+          target_user_id: targetUserId || null,
+          change_details: changeDetails || null,
           ip_address: null, // This would require server-side code
           user_agent: navigator.userAgent || null,
         }]);
@@ -70,9 +76,10 @@ export class AuditService extends BaseApiService {
   async getAuditLogs(
     filters: {
       userId?: string;
-      action?: AuditAction;
+      action?: AuditAction | string;
       tableName?: string;
       recordId?: string | number;
+      targetUserId?: string;
       fromDate?: string;
       toDate?: string;
     } = {},
@@ -80,9 +87,8 @@ export class AuditService extends BaseApiService {
     pageSize = 20
   ): Promise<{ data: AuditLog[] | null; count: number | null }> {
     try {
-      // Use type assertion to handle the audit_logs table that's not in TypeScript types yet
       let query = this.supabase
-        .from('audit_logs' as any)
+        .from('audit_logs')
         .select('*', { count: 'exact' });
       
       // Apply filters
@@ -100,6 +106,10 @@ export class AuditService extends BaseApiService {
       
       if (filters.recordId) {
         query = query.eq('record_id', filters.recordId.toString());
+      }
+      
+      if (filters.targetUserId) {
+        query = query.eq('target_user_id', filters.targetUserId);
       }
       
       if (filters.fromDate) {
@@ -125,7 +135,6 @@ export class AuditService extends BaseApiService {
         return { data: null, count: null };
       }
       
-      // Type assertion to ensure the data matches the AuditLog interface
       return { 
         data: data as unknown as AuditLog[], 
         count 
@@ -134,6 +143,48 @@ export class AuditService extends BaseApiService {
       console.error('Error fetching audit logs:', error);
       return { data: null, count: null };
     }
+  }
+
+  /**
+   * Log permission change events
+   */
+  async logPermissionChange(
+    user: User | null,
+    action: 'grant' | 'revoke',
+    userId: string,
+    permission: string
+  ): Promise<void> {
+    await this.addAuditLog(
+      user,
+      action === 'grant' ? AuditAction.PERMISSION_GRANT : AuditAction.PERMISSION_REVOKE,
+      'user_permissions',
+      null,
+      null,
+      null,
+      userId,
+      { permission }
+    );
+  }
+
+  /**
+   * Log role change events
+   */
+  async logRoleChange(
+    user: User | null,
+    userId: string,
+    oldRole: string | null,
+    newRole: string
+  ): Promise<void> {
+    await this.addAuditLog(
+      user,
+      AuditAction.ROLE_CHANGE,
+      'user_roles',
+      null,
+      { role: oldRole },
+      { role: newRole },
+      userId,
+      { old_role: oldRole, new_role: newRole }
+    );
   }
 }
 

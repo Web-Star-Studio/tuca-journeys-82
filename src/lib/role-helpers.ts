@@ -1,3 +1,4 @@
+
 import { supabase } from "./supabase";
 
 /**
@@ -8,47 +9,59 @@ import { supabase } from "./supabase";
  */
 export const hasPermission = async (
   userId: string, 
-  permission: 'read' | 'write' | 'delete' | 'admin'
+  permission: 'read' | 'write' | 'delete' | 'admin' | 'master'
 ): Promise<boolean> => {
   if (!userId) return false;
   
   try {
-    // First check if user has admin role (admins have all permissions)
-    const { data: adminData, error: adminError } = await supabase
+    // First check if user has master role (masters have all permissions)
+    const { data: masterData, error: masterError } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .eq('role', 'admin')
+      .eq('role', 'master')
       .maybeSingle();
     
-    if (adminError) {
-      console.error('Error checking admin role:', adminError);
+    if (masterError) {
+      console.error('Error checking master role:', masterError);
     }
     
-    if (adminData) {
-      return true; // Admin has all permissions
+    if (masterData) {
+      return true; // Master has all permissions
     }
     
-    // If checking for admin permission specifically, the user doesn't have it
-    if (permission === 'admin') {
+    // Then check for admin role (admins have all standard permissions)
+    if (permission !== 'master') {
+      const { data: adminData, error: adminError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      if (adminError) {
+        console.error('Error checking admin role:', adminError);
+      }
+      
+      if (adminData) {
+        return true; // Admin has all standard permissions except master
+      }
+    }
+    
+    // Finally check for specific permission via user_permissions table
+    const { data: permData, error: permError } = await supabase
+      .from('user_permissions')
+      .select('permission')
+      .eq('user_id', userId)
+      .eq('permission', permission)
+      .maybeSingle();
+      
+    if (permError) {
+      console.error('Error checking specific permission:', permError);
       return false;
     }
     
-    // Otherwise check for the specific permission via role
-    // Using a type assertion to handle the RPC function that might not be in TypeScript types
-    const { data, error } = await supabase
-      .rpc('user_has_permission' as any, { 
-        user_id: userId, 
-        required_permission: permission 
-      });
-    
-    if (error) {
-      console.error('Error checking user permission:', error);
-      return false;
-    }
-    
-    // The RPC function returns a boolean, ensure proper comparison
-    return data === true;
+    return !!permData;
   } catch (error) {
     console.error('Error checking user permission:', error);
     return false;
@@ -61,12 +74,102 @@ export const hasPermission = async (
  * @returns True if the current user has the permission, false otherwise
  */
 export const currentUserHasPermission = async (
-  permission: 'read' | 'write' | 'delete' | 'admin'
+  permission: 'read' | 'write' | 'delete' | 'admin' | 'master'
 ): Promise<boolean> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
   
   return hasPermission(user.id, permission);
+};
+
+/**
+ * Checks if a user is a master admin (highest level of access)
+ * @param userId The user ID to check
+ * @returns True if the user is a master admin, false otherwise
+ */
+export const isUserMaster = async (userId: string): Promise<boolean> => {
+  return await hasPermission(userId, 'master');
+};
+
+/**
+ * Promotes a user to master admin (can only be done once in the system)
+ * @param userId The user ID to promote
+ * @returns True if promotion was successful, false if there's already a master admin
+ */
+export const promoteToMaster = async (userId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('promote_to_master', { target_user_id: userId });
+    
+    if (error) {
+      console.error('Error promoting user to master:', error);
+      return false;
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Error promoting user to master:', error);
+    return false;
+  }
+};
+
+/**
+ * Grants a specific permission to a user
+ * @param userId The user ID to grant the permission to
+ * @param permission The permission to grant
+ * @returns True if permission was granted successfully, false otherwise
+ */
+export const grantPermission = async (
+  userId: string,
+  permission: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('user_permissions')
+      .insert({
+        user_id: userId,
+        permission
+      });
+    
+    if (error) {
+      console.error('Error granting permission:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error granting permission:', error);
+    return false;
+  }
+};
+
+/**
+ * Revokes a specific permission from a user
+ * @param userId The user ID to revoke the permission from
+ * @param permission The permission to revoke
+ * @returns True if permission was revoked successfully, false otherwise
+ */
+export const revokePermission = async (
+  userId: string,
+  permission: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('user_permissions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('permission', permission);
+    
+    if (error) {
+      console.error('Error revoking permission:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error revoking permission:', error);
+    return false;
+  }
 };
 
 /**

@@ -27,11 +27,12 @@ export const useAccommodations = () => {
     mutationFn: async (accommodationId: number) => {
       showGlobalSpinner(true);
       try {
-        return await withTimeout(
+        // Modified return type to match what accommodationService.deleteAccommodation returns (void)
+        await withTimeout(
           () => accommodationService.deleteAccommodation(accommodationId),
-          8000, // 8 seconds timeout
-          { success: true }
+          8000 // 8 seconds timeout
         );
+        return { success: true }; // Return value now handled properly
       } finally {
         showGlobalSpinner(false);
       }
@@ -52,17 +53,19 @@ export const useAccommodations = () => {
       showGlobalSpinner(true);
       try {
         if (accommodation.id) {
-          return await withTimeout(
-            () => accommodationService.updateAccommodation(accommodation.id, accommodation),
-            12000, // 12 seconds timeout
-            { success: true }
+          // Modified to properly handle types
+          const result = await withTimeout(
+            () => accommodationService.updateAccommodation(accommodation.id!, accommodation),
+            12000 // 12 seconds timeout
           );
+          return result;
         } else {
-          return await withTimeout(
+          // Modified to properly handle types
+          const result = await withTimeout(
             () => accommodationService.createAccommodation(accommodation),
-            12000, // 12 seconds timeout
-            { success: true }
+            12000 // 12 seconds timeout
           );
+          return result;
         }
       } finally {
         showGlobalSpinner(false);

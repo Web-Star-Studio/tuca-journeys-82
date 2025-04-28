@@ -1180,12 +1180,20 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      grant_permission: {
+        Args: { target_user_id: string; permission_name: string }
+        Returns: boolean
+      }
       is_user_master: {
         Args: { user_id: string }
         Returns: boolean
       }
       promote_to_master: {
         Args: { target_user_id: string }
+        Returns: boolean
+      }
+      revoke_permission: {
+        Args: { target_user_id: string; permission_name: string }
         Returns: boolean
       }
       user_has_permission: {

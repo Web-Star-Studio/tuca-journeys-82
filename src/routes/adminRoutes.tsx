@@ -13,7 +13,7 @@ import Users from "@/pages/admin/Users";
 import Bookings from "@/pages/admin/Bookings";
 import Permissions from "@/pages/admin/Permissions";
 import AuditLogs from "@/pages/admin/AuditLogs";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const adminRoutes: RouteObject[] = [
   {

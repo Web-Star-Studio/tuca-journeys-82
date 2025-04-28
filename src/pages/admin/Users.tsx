@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import UserFilters from "@/components/admin/users/UserFilters";
@@ -8,7 +7,7 @@ import UserFormDialog from "@/components/admin/users/UserFormDialog";
 import { User } from "@/components/admin/users/types";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { hasPermission, grantPermission, revokePermission } from "@/lib/role-helpers";
+import { hasPermission, grantPermission, revokePermission, revokeAllPermissions } from "@/lib/role-helpers";
 import { auditService, AuditAction } from "@/services/audit-service";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -145,10 +144,8 @@ const Users = () => {
     if (!userToDelete) return;
     
     try {
-      // Delete user_permissions first
-      await supabase.rpc('revoke_all_permissions', {
-        target_user_id: userToDelete.id
-      });
+      // Delete user_permissions first using the RPC function
+      await revokeAllPermissions(userToDelete.id);
       
       // Delete user_roles next
       const { error: roleError } = await supabase

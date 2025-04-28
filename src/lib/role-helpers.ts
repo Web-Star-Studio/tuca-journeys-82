@@ -48,8 +48,7 @@ export const hasPermission = async (
       }
     }
     
-    // Finally check for specific permission via user_permissions table
-    // Using raw SQL query to avoid type errors with user_permissions table
+    // Finally check for specific permission via user_has_permission RPC function
     const { data, error } = await supabase.rpc('user_has_permission', {
       user_id: userId,
       required_permission: permission
@@ -123,8 +122,8 @@ export const grantPermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    // Using raw SQL via rpc to avoid type issues
-    const { error } = await supabase.rpc('grant_permission', {
+    // Using the grant_permission RPC function
+    const { data, error } = await supabase.rpc('grant_permission', {
       target_user_id: userId,
       permission_name: permission
     });
@@ -134,7 +133,7 @@ export const grantPermission = async (
       return false;
     }
     
-    return true;
+    return data === true;
   } catch (error) {
     console.error('Error granting permission:', error);
     return false;
@@ -152,8 +151,8 @@ export const revokePermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    // Using raw SQL via rpc to avoid type issues
-    const { error } = await supabase.rpc('revoke_permission', {
+    // Using the revoke_permission RPC function
+    const { data, error } = await supabase.rpc('revoke_permission', {
       target_user_id: userId,
       permission_name: permission
     });
@@ -163,9 +162,35 @@ export const revokePermission = async (
       return false;
     }
     
-    return true;
+    return data === true;
   } catch (error) {
     console.error('Error revoking permission:', error);
+    return false;
+  }
+};
+
+/**
+ * Revokes all permissions from a user
+ * @param userId The user ID to revoke all permissions from
+ * @returns True if permissions were revoked successfully, false otherwise
+ */
+export const revokeAllPermissions = async (
+  userId: string
+): Promise<boolean> => {
+  try {
+    // Using a dedicated RPC function to revoke all permissions
+    const { data, error } = await supabase.rpc('revoke_all_permissions', {
+      target_user_id: userId
+    });
+    
+    if (error) {
+      console.error('Error revoking all permissions:', error);
+      return false;
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Error revoking all permissions:', error);
     return false;
   }
 };

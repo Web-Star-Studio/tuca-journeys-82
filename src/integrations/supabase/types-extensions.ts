@@ -1,4 +1,3 @@
-
 import { Database as OriginalDatabase } from './types';
 
 // Extend the original Database type with our custom tables
@@ -328,7 +327,37 @@ export interface Database extends OriginalDatabase {
       };
     };
     Views: OriginalDatabase['public']['Views'];
-    Functions: OriginalDatabase['public']['Functions'];
+    Functions: {
+      ...OriginalDatabase['public']['Functions'],
+      // Add our new RPC functions
+      grant_permission: {
+        Args: {
+          target_user_id: string;
+          permission_name: string;
+        };
+        Returns: boolean;
+      };
+      revoke_permission: {
+        Args: {
+          target_user_id: string;
+          permission_name: string;
+        };
+        Returns: boolean;
+      };
+      revoke_all_permissions: {
+        Args: {
+          target_user_id: string;
+        };
+        Returns: boolean;
+      };
+      user_has_permission: {
+        Args: {
+          user_id: string;
+          required_permission: string;
+        };
+        Returns: boolean;
+      };
+    };
     Enums: OriginalDatabase['public']['Enums'];
     CompositeTypes: OriginalDatabase['public']['CompositeTypes'];
   };

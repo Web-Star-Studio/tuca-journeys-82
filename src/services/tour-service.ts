@@ -48,7 +48,7 @@ export class TourService extends BaseApiService {
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
     const { data, error } = await this.supabase
       .from('tours')
-      .insert(tourData)
+      .insert([tourData]) // Insere como um elemento de array
       .select()
       .single();
     
@@ -98,7 +98,7 @@ export class TourService extends BaseApiService {
    * Busca a disponibilidade de um passeio
    */
   async getTourAvailability(tourId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
-    let query = this.supabase
+    let query = supabase
       .from('tour_availability')
       .select('*')
       .eq('tour_id', tourId);
@@ -133,7 +133,7 @@ export class TourService extends BaseApiService {
   ): Promise<any> {
     const formattedDate = date.toISOString().split('T')[0];
     
-    const { data: existingData, error: checkError } = await this.supabase
+    const { data: existingData, error: checkError } = await supabase
       .from('tour_availability')
       .select('id')
       .eq('tour_id', tourId)
@@ -147,7 +147,7 @@ export class TourService extends BaseApiService {
     
     if (existingData) {
       // Atualizar registro existente
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('tour_availability')
         .update({
           available_spots: availableSpots,
@@ -167,15 +167,15 @@ export class TourService extends BaseApiService {
       return data;
     } else {
       // Criar novo registro
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('tour_availability')
-        .insert({
+        .insert([{
           tour_id: tourId,
           date: formattedDate,
           available_spots: availableSpots,
           custom_price: customPrice,
           status
-        })
+        }])
         .select()
         .single();
       
@@ -206,7 +206,7 @@ export class TourService extends BaseApiService {
       status,
     }));
 
-    const { error } = await this.supabase
+    const { error } = await supabase
       .from('tour_availability')
       .upsert(updates, { 
         onConflict: 'tour_id,date',

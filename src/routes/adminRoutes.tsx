@@ -15,8 +15,13 @@ import Bookings from "@/pages/admin/Bookings";
 import Packages from "@/pages/admin/Packages";
 import Permissions from "@/pages/admin/Permissions";
 import AuditLogs from "@/pages/admin/AuditLogs";
+import AdminLogin from "@/pages/admin/AdminLogin";
 
 const adminRoutes: RouteObject[] = [
+  {
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
   {
     path: "/admin",
     element: <AdminDashboard />,

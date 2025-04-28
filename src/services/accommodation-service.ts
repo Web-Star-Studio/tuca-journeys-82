@@ -46,9 +46,10 @@ export class AccommodationService extends BaseApiService {
    * Cria uma nova hospedagem
    */
   async createAccommodation(accommodationData: Partial<Accommodation>): Promise<Accommodation> {
+    // Convertendo Partial<Accommodation> para um objeto que não é um array
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert(accommodationData)
+      .insert([accommodationData]) // Insere como um elemento de array
       .select()
       .single();
     
@@ -167,12 +168,12 @@ export class AccommodationService extends BaseApiService {
       // Criar novo registro
       const { data, error } = await this.supabase
         .from('accommodation_availability')
-        .insert({
+        .insert([{
           accommodation_id: accommodationId,
           date: formattedDate,
           custom_price: customPrice,
           status
-        })
+        }])
         .select()
         .single();
       

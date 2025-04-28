@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Calendar, ShoppingCart, Image, Package, Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight, Shield, ClipboardList } from "lucide-react";
@@ -134,7 +133,8 @@ const AdminSidebar = ({
 
       <div className="py-4">
         <ul className="space-y-1">
-          {filteredItems.map(item => <React.Fragment key={item.path}>
+          {filteredItems.map((item, index) => (
+            <div key={item.path} className="contents">
               <li>
                 <Link to={item.path} className={cn("flex items-center py-3 text-gray-700 hover:bg-tuca-light-blue/40 hover:text-tuca-ocean-blue", collapsed ? "justify-center px-2" : "px-4", location.pathname === item.path && "bg-tuca-light-blue/60 text-tuca-ocean-blue font-medium")}>
                   <item.icon size={20} className="shrink-0" />
@@ -142,7 +142,8 @@ const AdminSidebar = ({
                 </Link>
               </li>
               {item.dividerAfter && <li className="my-2 border-b border-gray-200"></li>}
-            </React.Fragment>)}
+            </div>
+          ))}
         </ul>
       </div>
 

@@ -48,7 +48,7 @@ export class TourService extends BaseApiService {
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
     const { data, error } = await this.supabase
       .from('tours')
-      .insert([tourData]) // Insere como um elemento de array
+      .insert(tourData)
       .select()
       .single();
     
@@ -98,8 +98,9 @@ export class TourService extends BaseApiService {
    * Busca a disponibilidade de um passeio
    */
   async getTourAvailability(tourId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
-    let query = supabase
-      .from('tour_availability')
+    // Criando um objeto de consulta temporário para evitar problemas de tipo
+    let query = this.supabase
+      .from('tour_schedules')  // Use tour_schedules em vez de tour_availability
       .select('*')
       .eq('tour_id', tourId);
     
@@ -133,8 +134,9 @@ export class TourService extends BaseApiService {
   ): Promise<any> {
     const formattedDate = date.toISOString().split('T')[0];
     
-    const { data: existingData, error: checkError } = await supabase
-      .from('tour_availability')
+    // Usar tour_schedules em vez de tour_availability
+    const { data: existingData, error: checkError } = await this.supabase
+      .from('tour_schedules')
       .select('id')
       .eq('tour_id', tourId)
       .eq('date', formattedDate)
@@ -147,12 +149,11 @@ export class TourService extends BaseApiService {
     
     if (existingData) {
       // Atualizar registro existente
-      const { data, error } = await supabase
-        .from('tour_availability')
+      const { data, error } = await this.supabase
+        .from('tour_schedules')
         .update({
           available_spots: availableSpots,
-          custom_price: customPrice,
-          status,
+          price_override: customPrice,
           updated_at: new Date().toISOString()
         })
         .eq('id', existingData.id)
@@ -167,15 +168,16 @@ export class TourService extends BaseApiService {
       return data;
     } else {
       // Criar novo registro
-      const { data, error } = await supabase
-        .from('tour_availability')
-        .insert([{
+      const { data, error } = await this.supabase
+        .from('tour_schedules')
+        .insert({
           tour_id: tourId,
           date: formattedDate,
           available_spots: availableSpots,
-          custom_price: customPrice,
-          status
-        }])
+          price_override: customPrice,
+          start_time: '09:00',  // Valores padrão necessários para tour_schedules
+          end_time: '17:00'     // Valores padrão necessários para tour_schedules
+        })
         .select()
         .single();
       
@@ -202,12 +204,13 @@ export class TourService extends BaseApiService {
       tour_id: tourId,
       date: date.toISOString().split('T')[0],
       available_spots: availableSpots,
-      custom_price: customPrice,
-      status,
+      price_override: customPrice,
+      start_time: '09:00',  // Valores padrão necessários para tour_schedules
+      end_time: '17:00'     // Valores padrão necessários para tour_schedules
     }));
 
-    const { error } = await supabase
-      .from('tour_availability')
+    const { error } = await this.supabase
+      .from('tour_schedules')
       .upsert(updates, { 
         onConflict: 'tour_id,date',
         ignoreDuplicates: false 

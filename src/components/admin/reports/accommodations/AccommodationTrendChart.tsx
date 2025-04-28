@@ -3,13 +3,12 @@ import React from "react";
 import {
   LineChart,
   Line,
-  XAxis,
-  YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer
 } from "recharts";
+import { XAxis, YAxis } from "@/components/ui/chart/RechartsWrappers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AccommodationTrendData, AccommodationChartConfig } from "./AccommodationsDataGenerator";
 

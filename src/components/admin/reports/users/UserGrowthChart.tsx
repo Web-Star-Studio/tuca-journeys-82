@@ -2,7 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
+import { AreaChart, Area, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
+import { XAxis, YAxis } from "@/components/ui/chart/RechartsWrappers";
 
 interface GrowthData {
   month: string;
@@ -46,17 +47,8 @@ const UserGrowthChart = ({ growthData, chartConfig }: UserGrowthChartProps) => {
                 vertical={false}
                 stroke="#f0f0f0" 
               />
-              <XAxis 
-                dataKey="month" 
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={{ stroke: '#e0e0e0' }}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={{ stroke: '#e0e0e0' }}
-              />
+              <XAxis dataKey="month" />
+              <YAxis />
               <Tooltip 
                 content={
                   <ChartTooltipContent 

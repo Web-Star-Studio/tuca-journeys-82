@@ -11,6 +11,7 @@ import AccommodationDeleteDialog from "@/components/admin/accommodations/Accommo
 import { Accommodation } from "@/types/database";
 import { withTimeout } from "@/utils/asyncUtils";
 import { useUI } from "@/contexts/UIContext";
+import { toast } from "sonner";
 
 const AdminAccommodations = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,9 +20,9 @@ const AdminAccommodations = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accommodationToDelete, setAccommodationToDelete] = useState<Accommodation | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  const { toast } = useToast();
   const { showGlobalSpinner } = useUI();
   const { 
     accommodations,
@@ -34,23 +35,24 @@ const AdminAccommodations = () => {
   useEffect(() => {
     // Fetch accommodations when component mounts or type filter changes
     const fetchData = async () => {
+      if (isProcessing) return;
+      
+      setIsProcessing(true);
+      showGlobalSpinner(true);
+      
       try {
-        showGlobalSpinner(true);
         await withTimeout(() => refetch(), 8000);
       } catch (error) {
         console.error("Error fetching accommodations:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar as hospedagens. Tente novamente.",
-          variant: "destructive",
-        });
+        toast.error("Não foi possível carregar as hospedagens. Tente novamente.");
       } finally {
         showGlobalSpinner(false);
+        setIsProcessing(false);
       }
     };
     
     fetchData();
-  }, [typeFilter, refetch, showGlobalSpinner, toast]);
+  }, [typeFilter, refetch, showGlobalSpinner]);
 
   // Filter accommodations based on search query
   const filteredAccommodations = accommodations?.filter(
@@ -59,46 +61,74 @@ const AdminAccommodations = () => {
       acc.description.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  // Handle accommodation edit
-  const handleEditClick = (accommodation: Accommodation) => {
-    setAccommodationToEdit(accommodation.id);
-    setShowAccommodationForm(true);
+  // Handle accommodation edit with improved performance and error handling
+  const handleEditClick = async (accommodation: Accommodation) => {
+    if (isProcessing) return; // Prevent multiple rapid clicks
+    
+    setIsProcessing(true);
+    
+    try {
+      // Set the accommodation ID to be edited
+      setAccommodationToEdit(accommodation.id);
+      
+      // Use a small delay to ensure UI updates before opening modal
+      setTimeout(() => {
+        setShowAccommodationForm(true);
+        setIsProcessing(false);
+      }, 100);
+    } catch (error) {
+      console.error("Error while trying to edit accommodation:", error);
+      toast.error("Erro ao tentar editar a hospedagem. Tente novamente.");
+      setIsProcessing(false);
+    }
   };
 
-  // Handle accommodation delete
+  // Handle accommodation delete with improved error handling and loading state
   const handleDeleteClick = (accommodation: Accommodation) => {
-    setAccommodationToDelete(accommodation);
-    setDeleteDialogOpen(true);
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    
+    try {
+      setAccommodationToDelete(accommodation);
+      setDeleteDialogOpen(true);
+    } catch (error) {
+      console.error("Error while preparing to delete accommodation:", error);
+      toast.error("Erro ao preparar exclusão. Tente novamente.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const confirmDelete = async () => {
     if (accommodationToDelete) {
       try {
         setIsDeleting(true);
+        setIsProcessing(true);
+        
         await deleteAccommodation(accommodationToDelete.id);
+        
         setDeleteDialogOpen(false);
         setAccommodationToDelete(null);
-        toast({
-          title: "Hospedagem excluída",
-          description: "A hospedagem foi excluída com sucesso."
-        });
+        toast.success("Hospedagem excluída com sucesso");
       } catch (error) {
         console.error("Error deleting accommodation:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível excluir a hospedagem. Tente novamente.",
-          variant: "destructive",
-        });
+        toast.error("Não foi possível excluir a hospedagem. Tente novamente.");
       } finally {
         setIsDeleting(false);
+        setIsProcessing(false);
       }
     }
   };
 
   const handleFormClose = () => {
+    if (isProcessing) return;
     setShowAccommodationForm(false);
     setAccommodationToEdit(null);
   };
+
+  // Combined processing state
+  const isAnyProcessing = isProcessing || isDeleting;
 
   return (
     <AdminLayout pageTitle="Gerenciar Hospedagens">
@@ -108,7 +138,11 @@ const AdminAccommodations = () => {
           setSearchQuery={setSearchQuery}
           typeFilter={typeFilter}
           setTypeFilter={setTypeFilter}
-          onAddNewClick={() => setShowAccommodationForm(true)}
+          onAddNewClick={() => {
+            if (!isProcessing) {
+              setShowAccommodationForm(true);
+            }
+          }}
         />
 
         <AccommodationList
@@ -117,10 +151,21 @@ const AdminAccommodations = () => {
           error={error}
           onEditAccommodation={handleEditClick}
           onDeleteAccommodation={handleDeleteClick}
+          isProcessing={isAnyProcessing}
         />
 
         {/* Accommodation Form Dialog */}
-        <Dialog open={showAccommodationForm} onOpenChange={setShowAccommodationForm}>
+        <Dialog 
+          open={showAccommodationForm} 
+          onOpenChange={(open) => {
+            if (!isProcessing) {
+              setShowAccommodationForm(open);
+              if (!open) {
+                setAccommodationToEdit(null);
+              }
+            }
+          }}
+        >
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>

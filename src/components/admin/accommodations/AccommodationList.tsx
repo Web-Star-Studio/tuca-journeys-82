@@ -12,6 +12,7 @@ interface AccommodationListProps {
   error: Error | null;
   onEditAccommodation: (accommodation: Accommodation) => void;
   onDeleteAccommodation: (accommodation: Accommodation) => void;
+  isProcessing?: boolean;
 }
 
 const AccommodationList: React.FC<AccommodationListProps> = ({
@@ -20,6 +21,7 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
   error,
   onEditAccommodation,
   onDeleteAccommodation,
+  isProcessing = false,
 }) => {
   if (isLoading) {
     return <AccommodationLoadingState />;
@@ -45,6 +47,7 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
           accommodation={accommodation}
           onEditAccommodation={onEditAccommodation}
           onDeleteAccommodation={onDeleteAccommodation}
+          disabled={isProcessing}
         />
       ))}
     </div>

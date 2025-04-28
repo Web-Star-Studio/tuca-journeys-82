@@ -23,6 +23,23 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   
+  // Handlers with proper event stopping to prevent bubbling
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!disabled) {
+      onEditAccommodation(accommodation);
+    }
+  };
+  
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!disabled) {
+      onDeleteAccommodation(accommodation);
+    }
+  };
+  
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -102,7 +119,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               variant="ghost"
               size="sm"
               className="text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
-              onClick={() => onEditAccommodation(accommodation)}
+              onClick={handleEdit}
               disabled={disabled}
             >
               <Edit className="h-4 w-4" />
@@ -111,7 +128,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               variant="ghost"
               size="sm"
               className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => onDeleteAccommodation(accommodation)}
+              onClick={handleDelete}
               disabled={disabled}
             >
               <Trash2 className="h-4 w-4" />

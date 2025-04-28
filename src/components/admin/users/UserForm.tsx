@@ -219,9 +219,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               </Label>
               <Select 
                 value={role} 
-                onValueChange={(value) => {
-                  setRole(value as any);
-                }}
+                onValueChange={(value) => setRole(value)}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Selecione um papel" />

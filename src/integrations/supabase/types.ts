@@ -1192,6 +1192,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      revoke_all_permissions: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       revoke_permission: {
         Args: { target_user_id: string; permission_name: string }
         Returns: boolean

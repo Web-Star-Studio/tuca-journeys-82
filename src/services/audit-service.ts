@@ -42,8 +42,9 @@ export class AuditService extends BaseApiService {
     newData?: any,
   ): Promise<void> {
     try {
+      // Use type assertion to handle the audit_logs table that's not in TypeScript types yet
       const { error } = await this.supabase
-        .from('audit_logs')
+        .from('audit_logs' as any)
         .insert([{
           user_id: user?.id || null,
           action,
@@ -79,8 +80,9 @@ export class AuditService extends BaseApiService {
     pageSize = 20
   ): Promise<{ data: AuditLog[] | null; count: number | null }> {
     try {
+      // Use type assertion to handle the audit_logs table that's not in TypeScript types yet
       let query = this.supabase
-        .from('audit_logs')
+        .from('audit_logs' as any)
         .select('*', { count: 'exact' });
       
       // Apply filters
@@ -123,7 +125,11 @@ export class AuditService extends BaseApiService {
         return { data: null, count: null };
       }
       
-      return { data, count };
+      // Type assertion to ensure the data matches the AuditLog interface
+      return { 
+        data: data as unknown as AuditLog[], 
+        count 
+      };
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       return { data: null, count: null };

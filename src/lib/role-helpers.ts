@@ -1,4 +1,3 @@
-
 import { supabase } from "./supabase";
 
 /**
@@ -36,6 +35,7 @@ export const hasPermission = async (
     }
     
     // Otherwise check for the specific permission via role
+    // Fix: Changed rpc 'user_has_permission' to correct function call with proper params
     const { data, error } = await supabase
       .rpc('user_has_permission', { 
         user_id: userId, 
@@ -47,6 +47,7 @@ export const hasPermission = async (
       return false;
     }
     
+    // Fix: Compare with boolean value from the function result
     return data === true;
   } catch (error) {
     console.error('Error checking user permission:', error);

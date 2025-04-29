@@ -91,9 +91,10 @@ export class TourService extends BaseApiService {
       updated_at: new Date().toISOString()
     };
 
+    // Fixing the issue with the insert method by specifying the data as a single object
     const { data, error } = await this.supabase
       .from('tours')
-      .insert([dataWithTimestamps])
+      .insert(dataWithTimestamps)
       .select()
       .single();
     

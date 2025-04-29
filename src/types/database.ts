@@ -1,4 +1,3 @@
-
 // Supabase types
 export interface Tour {
   id: number;
@@ -24,6 +23,8 @@ export interface Tour {
   excludes: string[];
   notes: string[];
   gallery_images: string[];
+  is_featured?: boolean;
+  is_active?: boolean;
 }
 
 export interface Accommodation {

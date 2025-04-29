@@ -12,6 +12,7 @@ export interface Tour {
   minParticipants: number;
   category: string;
   featured: boolean;
+  active?: boolean;
   inclusions?: string[];
   exclusions?: string[];
   schedule?: string[];

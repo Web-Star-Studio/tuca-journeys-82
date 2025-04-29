@@ -31,7 +31,7 @@ const TourCard: React.FC<TourCardProps> = ({
     
     toggleTourFeatured({ 
       tourId: tour.id, 
-      isFeatured: !tour.is_featured 
+      isFeatured: !(tour.is_featured ?? false) 
     });
   };
   
@@ -41,24 +41,24 @@ const TourCard: React.FC<TourCardProps> = ({
     
     toggleTourActive({ 
       tourId: tour.id, 
-      isActive: !tour.is_active 
+      isActive: !(tour.is_active ?? true)  // Default to true if undefined
     });
   };
   
   return (
-    <Card className={`overflow-hidden ${!tour.is_active ? 'opacity-70' : ''}`}>
+    <Card className={`overflow-hidden ${!(tour.is_active ?? true) ? 'opacity-70' : ''}`}>
       <div
         className="h-40 bg-cover bg-center relative"
         style={{
           backgroundImage: `url(${tour.image_url || "/placeholder.jpg"})`,
         }}
       >
-        {tour.is_featured && (
+        {(tour.is_featured ?? false) && (
           <Badge className="absolute top-2 right-2 bg-yellow-500">
             Destaque
           </Badge>
         )}
-        {!tour.is_active && (
+        {!(tour.is_active ?? true) && (
           <Badge className="absolute top-2 left-2 bg-red-500">
             Desativado
           </Badge>
@@ -94,7 +94,7 @@ const TourCard: React.FC<TourCardProps> = ({
           <div className="flex items-center">
             <span className="text-sm text-gray-500 mr-2">Destaque:</span>
             <Switch 
-              checked={tour.is_featured || false} 
+              checked={tour.is_featured ?? false} 
               onCheckedChange={() => {}} 
               onClick={handleFeaturedToggle}
               disabled={disabled}
@@ -103,7 +103,7 @@ const TourCard: React.FC<TourCardProps> = ({
           <div className="flex items-center">
             <span className="text-sm text-gray-500 mr-2">Ativo:</span>
             <Switch 
-              checked={tour.is_active !== false} 
+              checked={tour.is_active ?? true} 
               onCheckedChange={() => {}} 
               onClick={handleActiveToggle}
               disabled={disabled}

@@ -20,7 +20,8 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
     schedule: dbTour.schedule,
     requirements: dbTour.notes,
     location: dbTour.meeting_point || '',
-    featured: dbTour.is_featured || false
+    featured: dbTour.is_featured || false,
+    active: dbTour.is_active !== false
   };
 };
 
@@ -41,6 +42,7 @@ export const adaptComponentTourToDBTour = (tour: Partial<ComponentTour>): Partia
     notes: tour.requirements,
     meeting_point: tour.location,
     is_featured: tour.featured,
+    is_active: tour.active !== false,
     short_description: tour.description ? tour.description.substring(0, 150) + '...' : '',
     // Ensure these have default values to avoid null errors
     rating: tour.rating || 0,

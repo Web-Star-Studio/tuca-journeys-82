@@ -27,19 +27,26 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
 
 // Convert component tour model to database format
 export const adaptComponentTourToDBTour = (tour: Partial<ComponentTour>): Partial<DBTour> => {
+  // Make sure we're handling all required fields
+  if (tour.title === undefined || tour.description === undefined || 
+      tour.image === undefined || tour.duration === undefined || 
+      tour.category === undefined || tour.price === undefined) {
+    console.warn('Missing required fields in tour adapter');
+  }
+  
   return {
     title: tour.title,
     description: tour.description,
     image_url: tour.image,
     price: tour.price,
     duration: tour.duration,
-    category: tour.category,
+    category: tour.category || '', // Ensure category is never undefined
     max_participants: tour.maxParticipants,
     min_participants: tour.minParticipants,
-    includes: tour.inclusions,
-    excludes: tour.exclusions,
-    schedule: tour.schedule,
-    notes: tour.requirements,
+    includes: tour.inclusions || [],
+    excludes: tour.exclusions || [],
+    schedule: tour.schedule || [],
+    notes: tour.requirements || [],
     meeting_point: tour.location,
     is_featured: tour.featured,
     is_active: tour.active !== false,

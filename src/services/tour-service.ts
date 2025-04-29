@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Tour } from '@/types/database';
 import { supabase } from '@/lib/supabase';
@@ -84,14 +85,28 @@ export class TourService extends BaseApiService {
    * Cria um novo passeio
    */
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
+    // Ensure required fields are present
+    if (!tourData.title || !tourData.description || !tourData.image_url || 
+        !tourData.duration || !tourData.category || tourData.price === undefined) {
+      throw new Error('Missing required fields for tour creation');
+    }
+
     // Ensure created_at and updated_at are set
     const dataWithTimestamps = {
       ...tourData,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      // Ensure required fields have default values if not provided
+      difficulty: tourData.difficulty || 'normal',
+      includes: tourData.includes || [],
+      excludes: tourData.excludes || [],
+      notes: tourData.notes || [],
+      gallery_images: tourData.gallery_images || [],
+      min_participants: tourData.min_participants || 1,
+      max_participants: tourData.max_participants || 10,
+      rating: tourData.rating || 0
     };
 
-    // Fixing the issue with the insert method by specifying the data as a single object
     const { data, error } = await this.supabase
       .from('tours')
       .insert(dataWithTimestamps)

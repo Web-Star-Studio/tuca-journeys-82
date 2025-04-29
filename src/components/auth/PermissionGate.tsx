@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { hasPermission } from '@/lib/role-helpers';
+import { currentUserHasPermission } from '@/lib/role-helpers';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PermissionGateProps {
@@ -17,14 +17,14 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
   permission,
   fallback = null
 }) => {
-  const { user } = useAuth();
+  const { user, checkPermission } = useAuth();
   const [hasAccessPermission, setHasAccessPermission] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     
-    const checkPermission = async () => {
+    const checkAccess = async () => {
       if (!user) {
         if (isMounted) {
           setHasAccessPermission(false);
@@ -34,7 +34,9 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
       }
       
       try {
-        const result = await hasPermission(user.id, permission);
+        // Use the checkPermission function from AuthContext
+        const result = await checkPermission(permission);
+        
         if (isMounted) {
           setHasAccessPermission(result);
         }
@@ -50,12 +52,12 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
       }
     };
     
-    checkPermission();
+    checkAccess();
     
     return () => {
       isMounted = false;
     };
-  }, [user, permission]);
+  }, [user, permission, checkPermission]);
 
   if (isChecking) {
     // Could return a loading state here if desired

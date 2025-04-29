@@ -5,7 +5,7 @@ import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
 import { useAuthState } from "@/hooks/auth/use-auth-state";
 import { useResetPassword } from "@/hooks/auth/use-reset-password";
 import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
-import { currentUserHasPermission } from "@/lib/role-helpers";
+import { currentUserHasPermission, preloadUserPermissions } from "@/lib/role-helpers";
 import { SignOutResult } from "@/types/auth";
 
 interface AuthContextType {
@@ -23,7 +23,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<any>;
   signOut: () => Promise<SignOutResult>;
   resetPassword: (email: string) => Promise<any>;
-  checkPermission: (permission: 'read' | 'write' | 'delete' | 'admin') => Promise<boolean>;
+  checkPermission: (permission: 'read' | 'write' | 'delete' | 'admin' | 'master') => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -59,23 +59,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin: false,
   });
   
+  // Save current user email in localStorage for legacy support during transition
+  useEffect(() => {
+    if (user?.email) {
+      window.localStorage.setItem('current_user_email', user.email);
+    } else {
+      window.localStorage.removeItem('current_user_email');
+    }
+  }, [user]);
+  
   // Update permissions when user changes
   useEffect(() => {
     const updatePermissions = async () => {
       if (user) {
-        const [canRead, canWrite, canDelete, isAdmin] = await Promise.all([
-          currentUserHasPermission('read'),
-          currentUserHasPermission('write'),
-          currentUserHasPermission('delete'),
-          currentUserHasPermission('admin'),
-        ]);
-        
-        setPermissions({
-          canRead,
-          canWrite,
-          canDelete,
-          isAdmin,
-        });
+        try {
+          // Preload permissions for better performance
+          await preloadUserPermissions(user.id);
+          
+          const [canRead, canWrite, canDelete, isAdmin] = await Promise.all([
+            currentUserHasPermission('read'),
+            currentUserHasPermission('write'),
+            currentUserHasPermission('delete'),
+            currentUserHasPermission('admin'),
+          ]);
+          
+          setPermissions({
+            canRead,
+            canWrite,
+            canDelete,
+            isAdmin,
+          });
+        } catch (error) {
+          console.error('Error updating permissions:', error);
+          setPermissions({
+            canRead: false,
+            canWrite: false,
+            canDelete: false,
+            isAdmin: false,
+          });
+        }
       } else {
         setPermissions({
           canRead: false,
@@ -96,7 +118,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await authSignIn(email, password);
       if (result.data?.user) {
         const isAdmin = await isUserAdmin(result.data.user.id);
+        result.data.user.app_metadata = result.data.user.app_metadata || {};
         result.data.user.app_metadata.isAdmin = isAdmin;
+        
+        // Store email in localStorage for legacy support
+        if (result.data.user.email) {
+          window.localStorage.setItem('current_user_email', result.data.user.email);
+        }
       }
       return result;
     } finally {
@@ -117,6 +145,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async (): Promise<SignOutResult> => {
     setLoading(true);
     try {
+      // Clean up localStorage
+      window.localStorage.removeItem('current_user_email');
       return await authSignOut();
     } finally {
       setLoading(false);
@@ -128,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   // Function to check if user has a specific permission
-  const checkPermission = async (permission: 'read' | 'write' | 'delete' | 'admin') => {
+  const checkPermission = async (permission: 'read' | 'write' | 'delete' | 'admin' | 'master') => {
     if (!user) return false;
     return await currentUserHasPermission(permission);
   };
@@ -137,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     isLoading,
-    isAdmin: !!user && (isAdminEmail(user.email) || user.app_metadata?.isAdmin || permissions.isAdmin),
+    isAdmin: !!user && (permissions.isAdmin || user.app_metadata?.isAdmin),
     permissions,
     signIn,
     signUp,

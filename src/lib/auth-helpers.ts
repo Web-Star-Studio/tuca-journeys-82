@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { supabase } from "./supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,20 +29,56 @@ export const hasRole = async (userId: string, role: string): Promise<boolean> =>
 };
 
 export const isUserAdmin = async (userId: string): Promise<boolean> => {
-  return await hasRole(userId, 'admin');
+  // First check if user has admin permission directly
+  try {
+    const { data: permData, error: permError } = await supabase.rpc('user_has_permission', {
+      user_id: userId,
+      required_permission: 'admin'
+    });
+    
+    if (permError) {
+      console.error('Error checking admin permission:', permError);
+      // Fall back to checking role
+      return await hasRole(userId, 'admin');
+    }
+    
+    if (permData) return true;
+    
+    // If no admin permission found, check for master permission
+    const { data: masterData, error: masterError } = await supabase.rpc('user_has_permission', {
+      user_id: userId,
+      required_permission: 'master'
+    });
+    
+    if (masterError) {
+      console.error('Error checking master permission:', masterError);
+      // Fall back to checking role
+      return await hasRole(userId, 'master');
+    }
+    
+    return !!masterData;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    // Fall back to checking roles
+    return await hasRole(userId, 'admin') || await hasRole(userId, 'master');
+  }
 };
 
+// We'll keep this function for backward compatibility, but it will now check the database
 export const isAdminEmail = (email: string | undefined): boolean => {
   if (!email) return false;
   
-  const adminEmails = [
+  // Legacy admin emails - keeping for backward compatibility during transition
+  const legacyAdminEmails = [
     'admin@tucanoronha.com',
-    'felipe@webstar.studio',
-    // Add your email below - replace this comment with your actual email
-    window.localStorage.getItem('current_user_email') || '' // This will use the current user's email from localStorage
+    'felipe@webstar.studio'
   ];
   
-  return adminEmails.includes(email);
+  if (legacyAdminEmails.includes(email)) return true;
+  
+  // For other emails, we'll need to check the DB asynchronously
+  // Since this is a sync function, we'll update the auth context to handle this properly
+  return false;
 };
 
 export const withAdminProtection = (Component: React.ComponentType) => {

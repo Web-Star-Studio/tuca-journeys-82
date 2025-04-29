@@ -46,7 +46,7 @@ const PackageDetailSidebar = ({
       </div>
       
       <div className="space-y-3">
-        <Link to="/reservar">
+        <Link to={`/reservar/pacote/${packageData.id}`}>
           <Button className="w-full bg-tuca-coral hover:bg-tuca-coral/90 text-white">
             Reservar Agora
           </Button>

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -47,11 +48,11 @@ const TourCard = ({ tour }: TourCardProps) => {
         description: "Por favor, faça login para reservar este passeio.",
         variant: "destructive",
       });
-      navigate("/login");
+      navigate("/login", { state: { from: `/passeios/${tour.id}` } });
       return;
     }
 
-    navigate(`/passeios/${tour.id}/reserva`);
+    navigate(`/passeios/${tour.id}`);
   };
 
   const isWishlisted = isInWishlist(tour.id);

@@ -75,10 +75,15 @@ const BookingConfirmation = () => {
                       <Home className="w-5 h-5 text-tuca-ocean-blue" />
                     </div>
                     <div>
-                      <p className="font-medium">Tipo de Hospedagem</p>
+                      <p className="font-medium">Tipo de Reserva</p>
                       <p className="text-muted-foreground capitalize">
                         {booking.accommodationType}
                       </p>
+                      {booking.packageDetails && (
+                        <p className="text-tuca-ocean-blue font-medium mt-1">
+                          {booking.packageDetails.title}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -128,9 +133,15 @@ const BookingConfirmation = () => {
               <Link to="/">
                 <Button variant="outline">Voltar para Home</Button>
               </Link>
-              <Link to="/hospedagens">
-                <Button>Ver Hospedagens</Button>
-              </Link>
+              {booking.packageDetails ? (
+                <Link to="/pacotes">
+                  <Button>Ver Mais Pacotes</Button>
+                </Link>
+              ) : (
+                <Link to="/hospedagens">
+                  <Button>Ver Hospedagens</Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

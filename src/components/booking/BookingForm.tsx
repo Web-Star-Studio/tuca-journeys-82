@@ -19,6 +19,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
 import { tours } from "@/data/tours";
 import { accommodations } from "@/data/accommodations";
+import { getPackageById } from "@/data/packages";
+import { v4 as uuidv4 } from "uuid";
 
 // Define the form schema
 const bookingFormSchema = z.object({
@@ -27,6 +29,7 @@ const bookingFormSchema = z.object({
   phone: z.string().min(10, { message: "Telefone deve ter pelo menos 10 dígitos" }),
   tourId: z.string().optional(),
   accommodationId: z.string().optional(),
+  packageId: z.string().optional(),
   checkInDate: z.date({ required_error: "Data de check-in é obrigatória" }),
   checkOutDate: z.date({ required_error: "Data de check-out é obrigatória" }),
   guests: z.string().min(1, { message: "Número de hóspedes é obrigatório" }),
@@ -38,12 +41,17 @@ const bookingFormSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
-const BookingForm = () => {
+interface BookingFormProps {
+  selectedPackageId?: number | null;
+}
+
+const BookingForm = ({ selectedPackageId }: BookingFormProps) => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   // Initialize form with default values
   const form = useForm<BookingFormValues>({
@@ -54,6 +62,7 @@ const BookingForm = () => {
       phone: "",
       tourId: undefined,
       accommodationId: undefined,
+      packageId: selectedPackageId ? selectedPackageId.toString() : undefined,
       checkInDate: new Date(),
       checkOutDate: new Date(new Date().setDate(new Date().getDate() + 5)),
       guests: "2",
@@ -71,6 +80,22 @@ const BookingForm = () => {
     }
   }, [profile, form]);
 
+  // Load package data when selectedPackageId changes
+  useEffect(() => {
+    if (selectedPackageId) {
+      const packageData = getPackageById(selectedPackageId);
+      setSelectedPackage(packageData);
+      
+      if (packageData) {
+        // Update form with package details
+        form.setValue("packageId", selectedPackageId.toString());
+        if (packageData.persons) {
+          form.setValue("guests", packageData.persons.toString());
+        }
+      }
+    }
+  }, [selectedPackageId, form]);
+
   // Function to handle form submission
   const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
@@ -78,6 +103,23 @@ const BookingForm = () => {
     try {
       // Here we would typically send the data to a backend API
       console.log("Booking form data:", data);
+      
+      // Create mock booking for demonstration
+      const bookingId = uuidv4().substring(0, 8).toUpperCase();
+      const bookingData = {
+        bookingId,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        accommodationType: selectedPackage ? "Pacote" : 
+                          data.accommodationId && data.accommodationId !== "none" ? "Hospedagem" : 
+                          data.tourId && data.tourId !== "none" ? "Passeio" : "Não especificado",
+        checkIn: data.checkInDate,
+        checkOut: data.checkOutDate,
+        guests: data.guests,
+        notes: data.specialRequests,
+        packageDetails: selectedPackage,
+      };
       
       // Show success toast
       toast({
@@ -87,8 +129,8 @@ const BookingForm = () => {
       
       // Simulate API call delay
       setTimeout(() => {
-        // Redirect to booking confirmation page
-        navigate("/reserva-confirmada");
+        // Redirect to booking confirmation page with booking data
+        navigate("/reserva-confirmada", { state: { booking: bookingData } });
       }, 1500);
     } catch (error) {
       console.error("Error submitting booking form:", error);
@@ -105,7 +147,7 @@ const BookingForm = () => {
   return (
     <div className="w-full max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-sm">
       <h2 className="text-2xl md:text-3xl font-serif font-bold mb-6 text-tuca-deep-blue">
-        Solicitar Reserva
+        {selectedPackage ? `Reservar ${selectedPackage.title}` : "Solicitar Reserva"}
       </h2>
       
       <Form {...form}>
@@ -162,63 +204,76 @@ const BookingForm = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Detalhes da Reserva</h3>
               
-              <FormField
-                control={form.control}
-                name="tourId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Passeio (opcional)</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um passeio" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Nenhum passeio</SelectItem>
-                        {tours.map((tour) => (
-                          <SelectItem key={tour.id} value={tour.id.toString()}>
-                            {tour.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!selectedPackageId && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="tourId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Passeio (opcional)</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um passeio" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhum passeio</SelectItem>
+                            {tours.map((tour) => (
+                              <SelectItem key={tour.id} value={tour.id.toString()}>
+                                {tour.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="accommodationId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hospedagem (opcional)</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione uma hospedagem" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhuma hospedagem</SelectItem>
+                            {accommodations.map((accommodation) => (
+                              <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
+                                {accommodation.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
               
-              <FormField
-                control={form.control}
-                name="accommodationId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hospedagem (opcional)</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma hospedagem" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Nenhuma hospedagem</SelectItem>
-                        {accommodations.map((accommodation) => (
-                          <SelectItem key={accommodation.id} value={accommodation.id.toString()}>
-                            {accommodation.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {selectedPackage && (
+                <div className="bg-blue-50 p-4 rounded-md mb-4">
+                  <p className="font-medium">Pacote selecionado: {selectedPackage.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {selectedPackage.short_description}
+                  </p>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -314,6 +369,7 @@ const BookingForm = () => {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -387,7 +443,7 @@ const BookingForm = () => {
             className="w-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90 py-6 text-lg"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Enviando..." : "Enviar Solicitação de Reserva"}
+            {isSubmitting ? "Enviando..." : `Enviar Solicitação de Reserva${selectedPackage ? ' do Pacote' : ''}`}
           </Button>
         </form>
       </Form>

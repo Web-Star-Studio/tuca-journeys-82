@@ -15,6 +15,9 @@ import Register from "@/pages/Register";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
+import Booking from "@/pages/Booking";
+import BookingConfirmation from "@/pages/BookingConfirmation";
+import Reservar from "@/pages/Reservar";
 
 // Public routes accessible to all users
 const publicRoutes: RouteObject[] = [
@@ -27,11 +30,11 @@ const publicRoutes: RouteObject[] = [
     element: <About />,
   },
   {
-    path: "/packages",
+    path: "/pacotes",
     element: <Packages />,
   },
   {
-    path: "/packages/:id",
+    path: "/pacotes/:id",
     element: <PackageDetail />,
   },
   {
@@ -65,6 +68,18 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/reset-password",
     element: <ResetPassword />,
+  },
+  {
+    path: "/reservar",
+    element: <Reservar />,
+  },
+  {
+    path: "/reservar/pacote/:id",
+    element: <Booking />,
+  },
+  {
+    path: "/reserva-confirmada",
+    element: <BookingConfirmation />,
   },
   {
     path: "/unauthorized",

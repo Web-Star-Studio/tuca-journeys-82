@@ -27,8 +27,8 @@ const AdminLayout = ({
   
   const permissionLoading = isLoading || adminCheckLoading || (requiresMaster && masterCheckLoading);
   
-  // Check permissions
-  const hasRequiredAccess = requiresMaster ? isMaster : isAdmin;
+  // Updated access logic: master users can access everything, admin users can access non-master pages
+  const hasRequiredAccess = isMaster || (!requiresMaster && isAdmin);
   
   if (permissionLoading) {
     return (

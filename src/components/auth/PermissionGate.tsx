@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { currentUserHasPermission } from '@/lib/role-helpers';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PermissionGateProps {
@@ -11,6 +10,7 @@ interface PermissionGateProps {
 
 /**
  * A component that only renders its children if the user has the specified permission
+ * Master users automatically have access to all permissions
  */
 const PermissionGate: React.FC<PermissionGateProps> = ({ 
   children, 
@@ -34,8 +34,11 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
       }
       
       try {
-        // Use the checkPermission function from AuthContext
-        const result = await checkPermission(permission);
+        // Check for master permission first (masters have access to everything)
+        const isMaster = await checkPermission('master');
+        
+        // If user is master or has the specific permission, grant access
+        const result = isMaster || await checkPermission(permission);
         
         if (isMounted) {
           setHasAccessPermission(result);

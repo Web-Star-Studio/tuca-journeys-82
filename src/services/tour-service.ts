@@ -13,7 +13,7 @@ export class TourService extends BaseApiService {
     const { data, error } = await this.supabase
       .from('tours')
       .select('*')
-      .eq('is_active', true)
+      // Removed the filter for is_active to include all tours
       .order('created_at', { ascending: false });
     
     if (error) {

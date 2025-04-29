@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tour } from "@/types/database";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +44,7 @@ const TourCard: React.FC<TourCardProps> = ({
     });
   };
   
+  // We're keeping this card but adding a visual indicator for inactive tours
   return (
     <Card className={`overflow-hidden ${!(tour.is_active ?? true) ? 'opacity-70' : ''}`}>
       <div

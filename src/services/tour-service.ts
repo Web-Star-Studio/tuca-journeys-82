@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Tour } from '@/types/database';
 import { supabase } from '@/lib/supabase';
@@ -14,6 +13,7 @@ export class TourService extends BaseApiService {
     const { data, error } = await this.supabase
       .from('tours')
       .select('*')
+      .eq('is_active', true)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -21,7 +21,45 @@ export class TourService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data || [];
+  }
+
+  /**
+   * Busca passeios em destaque
+   */
+  async getFeaturedTours(): Promise<Tour[]> {
+    const { data, error } = await this.supabase
+      .from('tours')
+      .select('*')
+      .eq('is_featured', true)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching featured tours:', error);
+      throw error;
+    }
+    
+    return data || [];
+  }
+
+  /**
+   * Busca passeios por categoria
+   */
+  async getToursByCategory(category: string): Promise<Tour[]> {
+    const { data, error } = await this.supabase
+      .from('tours')
+      .select('*')
+      .eq('category', category)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error(`Error fetching tours by category ${category}:`, error);
+      throw error;
+    }
+    
+    return data || [];
   }
 
   /**
@@ -46,9 +84,16 @@ export class TourService extends BaseApiService {
    * Cria um novo passeio
    */
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
+    // Ensure created_at and updated_at are set
+    const dataWithTimestamps = {
+      ...tourData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
     const { data, error } = await this.supabase
       .from('tours')
-      .insert([tourData as any]) // Usamos 'as any' para contornar a verificação de tipo
+      .insert([dataWithTimestamps])
       .select()
       .single();
     
@@ -64,9 +109,15 @@ export class TourService extends BaseApiService {
    * Atualiza um passeio existente
    */
   async updateTour(id: number, tourData: Partial<Tour>): Promise<Tour> {
+    // Always update the timestamp
+    const dataWithTimestamp = {
+      ...tourData,
+      updated_at: new Date().toISOString()
+    };
+
     const { data, error } = await this.supabase
       .from('tours')
-      .update(tourData)
+      .update(dataWithTimestamp)
       .eq('id', id)
       .select()
       .single();
@@ -92,6 +143,44 @@ export class TourService extends BaseApiService {
       console.error(`Error deleting tour ${id}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Atualiza o status de destaque de um passeio
+   */
+  async toggleTourFeatured(id: number, isFeatured: boolean): Promise<Tour> {
+    const { data, error } = await this.supabase
+      .from('tours')
+      .update({ is_featured: isFeatured, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error(`Error updating tour featured status ${id}:`, error);
+      throw error;
+    }
+    
+    return data;
+  }
+
+  /**
+   * Atualiza o status de ativação de um passeio
+   */
+  async toggleTourActive(id: number, isActive: boolean): Promise<Tour> {
+    const { data, error } = await this.supabase
+      .from('tours')
+      .update({ is_active: isActive, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error(`Error updating tour active status ${id}:`, error);
+      throw error;
+    }
+    
+    return data;
   }
 
   /**
@@ -220,6 +309,28 @@ export class TourService extends BaseApiService {
       console.error('Error setting bulk tour availability:', error);
       throw error;
     }
+  }
+
+  /**
+   * Pesquisa por passeios
+   */
+  async searchTours(query: string): Promise<Tour[]> {
+    if (!query.trim()) {
+      return this.getTours();
+    }
+    
+    const { data, error } = await this.supabase
+      .from('tours')
+      .select('*')
+      .textSearch('search_vector', query)
+      .eq('is_active', true);
+    
+    if (error) {
+      console.error('Error searching tours:', error);
+      throw error;
+    }
+    
+    return data || [];
   }
 }
 

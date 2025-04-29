@@ -28,12 +28,20 @@ const TourCard = ({ tour }: TourCardProps) => {
     
     if (isInWishlist(tour.id)) {
       removeFromWishlist(tour.id);
+      toast({
+        title: "Removido dos favoritos",
+        description: "O passeio foi removido da sua lista de favoritos.",
+      });
     } else {
       addToWishlist({
         id: tour.id,
         type: 'tour',
         name: tour.title,
         image: tour.image
+      });
+      toast({
+        title: "Adicionado aos favoritos",
+        description: "O passeio foi adicionado à sua lista de favoritos.",
       });
     }
   };
@@ -52,36 +60,42 @@ const TourCard = ({ tour }: TourCardProps) => {
       return;
     }
 
-    navigate(`/passeios/${tour.id}`);
+    navigate(`/reservar/passeio/${tour.id}`);
   };
 
   const isWishlisted = isInWishlist(tour.id);
 
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <SafeImage
-          src={tour.image}
-          alt={tour.title}
-          className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
-          onLoadSuccess={() => setImageLoaded(true)}
-        />
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full font-medium">
-          {tour.category}
-        </div>
-        <button 
-          onClick={handleWishlistToggle}
-          className="absolute top-4 left-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
-          aria-label={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        >
-          <Heart 
-            className={`h-5 w-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} 
+      <Link to={`/passeios/${tour.id}`} className="block">
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <SafeImage
+            src={tour.image}
+            alt={tour.title}
+            className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
+            onLoadSuccess={() => setImageLoaded(true)}
           />
-        </button>
-      </div>
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full font-medium">
+            {tour.category}
+          </div>
+          <button 
+            onClick={handleWishlistToggle}
+            className="absolute top-4 left-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
+            aria-label={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
+            <Heart 
+              className={`h-5 w-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`} 
+            />
+          </button>
+        </div>
+      </Link>
       <div className="p-6 md:p-8">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-medium">{tour.title}</h3>
+          <h3 className="text-xl font-medium">
+            <Link to={`/passeios/${tour.id}`} className="hover:text-tuca-ocean-blue transition-colors">
+              {tour.title}
+            </Link>
+          </h3>
           <div className="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
             <Star className="h-4 w-4 text-yellow-500 mr-1" />
             <span className="text-sm font-medium">{tour.rating}</span>

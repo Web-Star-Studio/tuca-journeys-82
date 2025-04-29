@@ -821,6 +821,8 @@ export type Database = {
           id: number
           image_url: string
           includes: string[]
+          is_active: boolean | null
+          is_featured: boolean | null
           max_participants: number
           meeting_point: string | null
           min_participants: number
@@ -845,6 +847,8 @@ export type Database = {
           id?: number
           image_url: string
           includes?: string[]
+          is_active?: boolean | null
+          is_featured?: boolean | null
           max_participants: number
           meeting_point?: string | null
           min_participants?: number
@@ -869,6 +873,8 @@ export type Database = {
           id?: number
           image_url?: string
           includes?: string[]
+          is_active?: boolean | null
+          is_featured?: boolean | null
           max_participants?: number
           meeting_point?: string | null
           min_participants?: number

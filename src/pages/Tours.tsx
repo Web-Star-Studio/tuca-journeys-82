@@ -5,11 +5,15 @@ import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
 import TourFilters from "@/components/tour/TourFilters";
 import TourGrid from "@/components/tour/TourGrid";
-import { Tour, tours } from "@/data/tours";
+import { useTours } from "@/hooks/use-tours";
+import { adaptDBTourToComponentTour } from "@/utils/tourAdapter";
+import { Tour } from "@/data/tours";
+import { Loader2 } from "lucide-react";
 
 const Tours = () => {
-  const [filteredTours, setFilteredTours] = useState(tours);
-  const [sortedTours, setSortedTours] = useState(tours);
+  const { tours, isLoading, error } = useTours();
+  const [filteredTours, setFilteredTours] = useState<Tour[]>([]);
+  const [sortedTours, setSortedTours] = useState<Tour[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(700);
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
@@ -17,10 +21,24 @@ const Tours = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState("priceAsc");
 
-  // Get unique categories from all tours
-  const allCategories = Array.from(
-    new Set(tours.map((tour) => tour.category))
-  ).sort();
+  // Map database tours to component format when data loads
+  useEffect(() => {
+    if (tours) {
+      const componentTours = tours.map(adaptDBTourToComponentTour);
+      setFilteredTours(componentTours);
+      
+      // Also update max price based on actual data
+      if (componentTours.length > 0) {
+        const highestPrice = Math.max(...componentTours.map(tour => tour.price));
+        setMaxPrice(Math.ceil(highestPrice / 100) * 100); // Round up to next hundred
+      }
+    }
+  }, [tours]);
+
+  // Get unique categories from actual tours
+  const allCategories = tours 
+    ? Array.from(new Set(tours.map(tour => tour.category))).sort()
+    : [];
 
   // Helper function to map duration string to hour range
   const getDurationRange = (duration: string): string => {
@@ -61,7 +79,10 @@ const Tours = () => {
 
   // Filter tours based on criteria
   const applyFilters = () => {
-    const filtered = tours.filter((tour) => {
+    if (!tours) return;
+    
+    const componentTours = tours.map(adaptDBTourToComponentTour);
+    const filtered = componentTours.filter((tour) => {
       // Price filter
       if (tour.price < minPrice || tour.price > maxPrice) return false;
 
@@ -89,11 +110,21 @@ const Tours = () => {
 
   // Reset filters
   const resetFilters = () => {
+    if (!tours) return;
+    
+    const componentTours = tours.map(adaptDBTourToComponentTour);
     setMinPrice(0);
-    setMaxPrice(700);
+    
+    if (componentTours.length > 0) {
+      const highestPrice = Math.max(...componentTours.map(tour => tour.price));
+      setMaxPrice(Math.ceil(highestPrice / 100) * 100);
+    } else {
+      setMaxPrice(700);
+    }
+    
     setCategoryFilter([]);
     setDurationFilter([]);
-    setFilteredTours(tours);
+    setFilteredTours(componentTours);
   };
 
   // Toggle category filter
@@ -113,6 +144,77 @@ const Tours = () => {
       setDurationFilter([...durationFilter, duration]);
     }
   };
+
+  // Handle loading and error states
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main>
+          <section className="relative">
+            <div
+              className="h-[40vh] bg-cover bg-center"
+              style={{ backgroundImage: "url('/hero-noronha-3.jpg')" }}
+            >
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="text-center text-white px-4">
+                  <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Passeios em Fernando de Noronha</h1>
+                  <p className="text-xl max-w-2xl mx-auto">
+                    Descubra experiências incríveis na ilha com nossos passeios guiados por especialistas locais.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-10 w-10 animate-spin text-tuca-ocean-blue mb-4" />
+            <p className="text-xl text-gray-600">Carregando passeios...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main>
+          <section className="relative">
+            <div
+              className="h-[40vh] bg-cover bg-center"
+              style={{ backgroundImage: "url('/hero-noronha-3.jpg')" }}
+            >
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="text-center text-white px-4">
+                  <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Passeios em Fernando de Noronha</h1>
+                  <p className="text-xl max-w-2xl mx-auto">
+                    Descubra experiências incríveis na ilha com nossos passeios guiados por especialistas locais.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-lg text-center">
+              <h2 className="text-xl text-red-600 font-medium mb-2">Erro ao carregar passeios</h2>
+              <p className="text-gray-700 mb-4">Não foi possível carregar os passeios no momento. Por favor, tente novamente mais tarde.</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-6 py-2 bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white rounded-full"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

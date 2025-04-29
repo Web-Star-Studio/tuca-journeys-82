@@ -11,7 +11,7 @@ const DEBOUNCE_MS = 300;
 export const useTours = () => {
   const queryClient = useQueryClient();
 
-  // Query para buscar passeios com caching otimizado
+  // Query para buscar todos os passeios
   const { 
     data: tours, 
     isLoading, 
@@ -23,7 +23,20 @@ export const useTours = () => {
       return await tourService.getTours();
     },
     staleTime: 1000 * 60 * 5, // Cache por 5 minutos
-    refetchOnWindowFocus: false, // Evitar refetch excessivo
+    refetchOnWindowFocus: false,
+  });
+
+  // Query para buscar passeios em destaque
+  const { 
+    data: featuredTours, 
+    isLoading: isFeaturedLoading 
+  } = useQuery({
+    queryKey: ['tours', 'featured'],
+    queryFn: async () => {
+      return await tourService.getFeaturedTours();
+    },
+    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+    refetchOnWindowFocus: false,
   });
 
   // Mutation para excluir um passeio com debounce
@@ -61,26 +74,56 @@ export const useTours = () => {
     }
   });
 
-  // Versão com debounce e Promise para deleteTour
+  // Mutation para alternar o status de destaque
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: async ({ tourId, isFeatured }: { tourId: number, isFeatured: boolean }) => {
+      return await tourService.toggleTourFeatured(tourId, isFeatured);
+    },
+    onSuccess: () => {
+      toast.success('Status de destaque alterado com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['tours'] });
+      queryClient.invalidateQueries({ queryKey: ['tours', 'featured'] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao alterar status de destaque');
+      console.error('Error toggling featured status:', error);
+    }
+  });
+
+  // Mutation para alternar o status de ativação
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ tourId, isActive }: { tourId: number, isActive: boolean }) => {
+      return await tourService.toggleTourActive(tourId, isActive);
+    },
+    onSuccess: () => {
+      toast.success('Status de ativação alterado com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['tours'] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao alterar status de ativação');
+      console.error('Error toggling active status:', error);
+    }
+  });
+
+  // Versão com debounce para cada operação
   const debouncedDeleteTour = debounce((tourId: number) => {
     return deleteTourMutation.mutateAsync(tourId);
   }, DEBOUNCE_MS);
 
-  const deleteTour = (tourId: number): Promise<any> => {
-    return debouncedDeleteTour(tourId);
-  };
-
-  // Versão com debounce e Promise para saveTour
   const debouncedSaveTour = debounce((tour: Partial<Tour>) => {
     return saveTourMutation.mutateAsync(tour);
   }, DEBOUNCE_MS);
 
-  const saveTour = (tour: Partial<Tour>): Promise<any> => {
-    return debouncedSaveTour(tour);
-  };
+  const debouncedToggleFeatured = debounce(({ tourId, isFeatured }: { tourId: number, isFeatured: boolean }) => {
+    return toggleFeaturedMutation.mutateAsync({ tourId, isFeatured });
+  }, DEBOUNCE_MS);
+
+  const debouncedToggleActive = debounce(({ tourId, isActive }: { tourId: number, isActive: boolean }) => {
+    return toggleActiveMutation.mutateAsync({ tourId, isActive });
+  }, DEBOUNCE_MS);
 
   // Otimização do getTourById para evitar buscar toda a lista de passeios
-  const getTourById = (id?: number): Tour | null => {
+  const getTourById = async (id?: number): Promise<Tour | null> => {
     if (!id) return null;
     
     // Primeiro verifica se o tour já está no cache
@@ -89,24 +132,24 @@ export const useTours = () => {
       if (cachedTour) return cachedTour;
     }
     
-    // Se não estiver no cache, inicia uma busca individual
-    // mas retorna null imediatamente para não travar a interface
-    if (id) {
-      queryClient.prefetchQuery({
-        queryKey: ['tour', id],
-        queryFn: () => tourService.getTourById(id),
-      });
+    try {
+      return await tourService.getTourById(id);
+    } catch (error) {
+      console.error(`Failed to get tour by ID: ${id}`, error);
+      return null;
     }
-    
-    return null;
   };
 
   return {
     tours,
+    featuredTours,
     isLoading,
+    isFeaturedLoading,
     error,
-    deleteTour,
-    saveTour,
+    deleteTour: debouncedDeleteTour,
+    saveTour: debouncedSaveTour,
+    toggleTourFeatured: debouncedToggleFeatured,
+    toggleTourActive: debouncedToggleActive,
     getTourById,
     refetch,
     isDeleting: deleteTourMutation.isPending,
@@ -124,6 +167,19 @@ export const useTour = (tourId?: number) => {
     },
     enabled: !!tourId,
     staleTime: 1000 * 60 * 2, // Cache por 2 minutos
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Search hook for tours
+export const useSearchTours = (query: string) => {
+  return useQuery({
+    queryKey: ['tours', 'search', query],
+    queryFn: async () => {
+      return await tourService.searchTours(query);
+    },
+    enabled: !!query,
+    staleTime: 1000 * 60, // Cache for 1 minute
     refetchOnWindowFocus: false,
   });
 };

@@ -19,8 +19,32 @@ export const adaptDBTourToComponentTour = (dbTour: DBTour): ComponentTour => {
     exclusions: dbTour.excludes,
     schedule: dbTour.schedule,
     requirements: dbTour.notes,
-    location: dbTour.meeting_point,
-    // Use a proper fallback if featured is missing in DBTour type
-    featured: dbTour.is_available !== undefined ? dbTour.is_available : false
+    location: dbTour.meeting_point || '',
+    featured: dbTour.is_featured || false
+  };
+};
+
+// Convert component tour model to database format
+export const adaptComponentTourToDBTour = (tour: Partial<ComponentTour>): Partial<DBTour> => {
+  return {
+    title: tour.title,
+    description: tour.description,
+    image_url: tour.image,
+    price: tour.price,
+    duration: tour.duration,
+    category: tour.category,
+    max_participants: tour.maxParticipants,
+    min_participants: tour.minParticipants,
+    includes: tour.inclusions,
+    excludes: tour.exclusions,
+    schedule: tour.schedule,
+    notes: tour.requirements,
+    meeting_point: tour.location,
+    is_featured: tour.featured,
+    short_description: tour.description ? tour.description.substring(0, 150) + '...' : '',
+    // Ensure these have default values to avoid null errors
+    rating: tour.rating || 0,
+    difficulty: 'normal',
+    gallery_images: []
   };
 };

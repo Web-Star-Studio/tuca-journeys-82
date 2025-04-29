@@ -51,19 +51,36 @@ class AccommodationService extends BaseApiService {
   async createAccommodation(accommodation: Partial<Accommodation>): Promise<Accommodation> {
     console.log('Creating new accommodation:', accommodation);
     
+    // Make sure all required fields are present
+    if (!accommodation.title || !accommodation.description || !accommodation.short_description ||
+        !accommodation.address || !accommodation.image_url || !accommodation.type ||
+        accommodation.price_per_night === undefined || accommodation.bathrooms === undefined || 
+        accommodation.bedrooms === undefined || accommodation.max_guests === undefined) {
+      throw new Error('Missing required fields for accommodation');
+    }
+    
     // Set default values for required fields if not provided
     const accommodationToInsert = {
-      ...accommodation,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      title: accommodation.title,
+      description: accommodation.description,
+      short_description: accommodation.short_description,
+      address: accommodation.address,
+      type: accommodation.type,
+      image_url: accommodation.image_url,
+      price_per_night: accommodation.price_per_night,
+      bathrooms: accommodation.bathrooms,
+      bedrooms: accommodation.bedrooms,
+      max_guests: accommodation.max_guests,
       rating: accommodation.rating || 0,
       amenities: accommodation.amenities || [],
-      gallery_images: accommodation.gallery_images || []
+      gallery_images: accommodation.gallery_images || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert([accommodationToInsert]) // Fix: Wrap accommodationToInsert in an array
+      .insert(accommodationToInsert)
       .select()
       .single();
 

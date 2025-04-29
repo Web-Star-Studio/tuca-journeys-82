@@ -38,7 +38,9 @@ export const isAdminEmail = (email: string | undefined): boolean => {
   
   const adminEmails = [
     'admin@tucanoronha.com',
-    'felipe@webstar.studio'
+    'felipe@webstar.studio',
+    // Add your email below - replace this comment with your actual email
+    window.localStorage.getItem('current_user_email') || '' // This will use the current user's email from localStorage
   ];
   
   return adminEmails.includes(email);

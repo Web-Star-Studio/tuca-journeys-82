@@ -85,18 +85,24 @@ export class TourService extends BaseApiService {
    * Cria um novo passeio
    */
   async createTour(tourData: Partial<Tour>): Promise<Tour> {
-    // Ensure required fields are present
+    // Ensure required fields are present - these fields are required by the database schema
     if (!tourData.title || !tourData.description || !tourData.image_url || 
         !tourData.duration || !tourData.category || tourData.price === undefined) {
       throw new Error('Missing required fields for tour creation');
     }
 
-    // Ensure created_at and updated_at are set
-    const dataWithTimestamps = {
-      ...tourData,
+    // Create a properly typed object with all required fields explicitly set
+    const dataWithTimestamps: Tour = {
+      id: tourData.id || 0, // Will be replaced by the database
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      // Ensure required fields have default values if not provided
+      title: tourData.title,
+      description: tourData.description,
+      short_description: tourData.short_description || `${tourData.description.substring(0, 150)}...`,
+      image_url: tourData.image_url,
+      price: tourData.price,
+      duration: tourData.duration,
+      category: tourData.category, // This is now guaranteed to exist from the check above
       difficulty: tourData.difficulty || 'normal',
       includes: tourData.includes || [],
       excludes: tourData.excludes || [],
@@ -104,7 +110,11 @@ export class TourService extends BaseApiService {
       gallery_images: tourData.gallery_images || [],
       min_participants: tourData.min_participants || 1,
       max_participants: tourData.max_participants || 10,
-      rating: tourData.rating || 0
+      rating: tourData.rating || 0,
+      schedule: tourData.schedule || [],
+      meeting_point: tourData.meeting_point || null,
+      is_featured: tourData.is_featured || false,
+      is_active: tourData.is_active !== false
     };
 
     const { data, error } = await this.supabase

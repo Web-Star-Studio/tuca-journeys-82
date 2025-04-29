@@ -63,7 +63,7 @@ class AccommodationService extends BaseApiService {
 
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert([accommodationToInsert])
+      .insert([accommodationToInsert]) // Fix: Wrap accommodationToInsert in an array
       .select()
       .single();
 

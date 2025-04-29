@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -445,6 +444,7 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
           onImagesUploaded={handleGalleryImagesUpdated} 
           folder="accommodations/gallery"
           maxImages={5}
+          onImageUploaded={() => {}} // Add this empty function to satisfy the required prop
         />
       </div>
       

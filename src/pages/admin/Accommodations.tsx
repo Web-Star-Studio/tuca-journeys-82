@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
-import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AccommodationForm } from "@/components/admin/accommodations/AccommodationForm";
 import AccommodationList from "@/components/admin/accommodations/AccommodationList";
@@ -14,6 +13,7 @@ import { useUI } from "@/contexts/UIContext";
 import { toast } from "sonner";
 
 const AdminAccommodations = () => {
+  // State management for UI
   const [searchQuery, setSearchQuery] = useState("");
   const [showAccommodationForm, setShowAccommodationForm] = useState(false);
   const [accommodationToEdit, setAccommodationToEdit] = useState<number | null>(null);
@@ -45,6 +45,7 @@ const AdminAccommodations = () => {
         setIsProcessing(true);
         showGlobalSpinner(true);
         
+        // Use withTimeout to ensure we don't block the UI indefinitely
         await withTimeout(() => refetch(), 12000);
         
         if (isMounted.current) {
@@ -98,11 +99,19 @@ const AdminAccommodations = () => {
     applyFilter();
   }, [typeFilter]);
 
-  // Filter accommodations based on search query
+  // Filter accommodations based on search query and type filter
   const filteredAccommodations = accommodations?.filter(
-    (acc) =>
-      acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      acc.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (acc) => {
+      // Filter by search query
+      const matchesSearch = 
+        acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        acc.description.toLowerCase().includes(searchQuery.toLowerCase());
+        
+      // Filter by accommodation type
+      const matchesType = typeFilter === "all" || acc.type.toLowerCase() === typeFilter.toLowerCase();
+      
+      return matchesSearch && matchesType;
+    }
   ) || [];
 
   // Handle accommodation edit with improved error handling

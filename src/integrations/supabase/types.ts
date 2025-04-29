@@ -62,6 +62,7 @@ export type Database = {
           partner_id: string | null
           price_per_night: number
           rating: number
+          search_vector: unknown | null
           short_description: string
           title: string
           type: string
@@ -81,6 +82,7 @@ export type Database = {
           partner_id?: string | null
           price_per_night: number
           rating: number
+          search_vector?: unknown | null
           short_description: string
           title: string
           type: string
@@ -100,6 +102,7 @@ export type Database = {
           partner_id?: string | null
           price_per_night?: number
           rating?: number
+          search_vector?: unknown | null
           short_description?: string
           title?: string
           type?: string
@@ -826,6 +829,7 @@ export type Database = {
           price: number
           rating: number
           schedule: string[]
+          search_vector: unknown | null
           short_description: string
           title: string
           updated_at: string
@@ -849,6 +853,7 @@ export type Database = {
           price: number
           rating: number
           schedule?: string[]
+          search_vector?: unknown | null
           short_description: string
           title: string
           updated_at?: string
@@ -872,6 +877,7 @@ export type Database = {
           price?: number
           rating?: number
           schedule?: string[]
+          search_vector?: unknown | null
           short_description?: string
           title?: string
           updated_at?: string

@@ -1,460 +1,470 @@
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Loader2 } from "lucide-react";
-import { useAccommodations } from "@/hooks/use-accommodations";
-import { Accommodation } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import { 
+  Select, 
+  SelectContent, 
+  SelectGroup, 
+  SelectItem, 
+  SelectLabel, 
+  SelectTrigger, 
+  SelectValue 
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-
-// Form schema for validation
-const accommodationFormSchema = z.object({
-  title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres" }),
-  description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres" }),
-  image_url: z.string().url({ message: "Forneça uma URL válida para a imagem" }),
-  type: z.string().min(1, { message: "O tipo de hospedagem é obrigatório" }),
-  price_per_night: z.coerce.number().positive({ message: "O preço deve ser um valor positivo" }),
-  bedrooms: z.coerce.number().int().min(1, { message: "Precisa ter pelo menos 1 quarto" }),
-  bathrooms: z.coerce.number().int().min(1, { message: "Precisa ter pelo menos 1 banheiro" }),
-  capacity: z.coerce.number().int().min(1, { message: "Precisa acomodar pelo menos 1 pessoa" }),
-  location: z.string().min(3, { message: "A localização é obrigatória" }),
-  rating: z.coerce.number().min(0).max(5, { message: "A avaliação deve estar entre 0 e 5" }),
-  amenities: z.string().optional(),
-  gallery: z.string().optional(),
-});
-
-type AccommodationFormValues = z.infer<typeof accommodationFormSchema>;
+import { useAccommodations } from "@/hooks/use-accommodations";
+import { Accommodation } from "@/types/database";
+import { toast } from "sonner";
+import { useUI } from "@/contexts/UIContext";
+import ImageUploader from "@/components/admin/shared/ImageUploader";
+import TagInput from "@/components/admin/shared/TagInput";
 
 interface AccommodationFormProps {
-  accommodationId?: number;
-  onSuccess: () => void;
+  accommodationId: number | null;
   onCancel: () => void;
+  onSuccess: () => void;
 }
 
-export const AccommodationForm: React.FC<AccommodationFormProps> = ({ 
-  accommodationId, 
-  onSuccess, 
-  onCancel 
+export const AccommodationForm: React.FC<AccommodationFormProps> = ({
+  accommodationId,
+  onCancel,
+  onSuccess,
 }) => {
-  const [previewUrl, setPreviewUrl] = useState("");
-  const { toast } = useToast();
-  const { createAccommodation, updateAccommodation, getAccommodationById } = useAccommodations();
-  const [isLoading, setIsLoading] = useState(accommodationId ? true : false);
-
-  // Initialize form
-  const form = useForm<AccommodationFormValues>({
-    resolver: zodResolver(accommodationFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      image_url: "",
-      type: "",
-      price_per_night: 0,
-      bedrooms: 1,
-      bathrooms: 1,
-      capacity: 2,
-      location: "",
-      rating: 4.5,
-      amenities: "",
-      gallery: "",
-    },
+  const { showGlobalSpinner } = useUI();
+  const { 
+    getAccommodationById, 
+    createAccommodation, 
+    updateAccommodation 
+  } = useAccommodations();
+  
+  // Initial form state
+  const [formState, setFormState] = useState<Partial<Accommodation>>({
+    title: "",
+    short_description: "",
+    description: "",
+    price_per_night: 0,
+    type: "",
+    max_guests: 1,
+    bedrooms: 1,
+    bathrooms: 1,
+    amenities: [],
+    address: "",
+    image_url: "",
+    gallery_images: []
   });
-
-  // Fetch accommodation data when editing
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  
+  // Load existing accommodation data if in edit mode
   useEffect(() => {
-    const loadAccommodationData = async () => {
+    const loadAccommodation = async () => {
       if (accommodationId) {
+        showGlobalSpinner(true);
         try {
-          const accommodation = await getAccommodationById(accommodationId);
+          const accommodation = getAccommodationById(accommodationId);
+          
           if (accommodation) {
-            form.reset({
-              title: accommodation.title,
-              description: accommodation.description,
-              image_url: accommodation.image_url,
-              type: accommodation.type,
-              price_per_night: accommodation.price_per_night,
-              bedrooms: accommodation.bedrooms,
-              bathrooms: accommodation.bathrooms,
-              capacity: accommodation.max_guests,
-              location: accommodation.address,
-              rating: accommodation.rating,
-              amenities: accommodation.amenities?.join("\n") || "",
-              gallery: accommodation.gallery_images?.join("\n") || "",
-            });
-            setPreviewUrl(accommodation.image_url);
+            setFormState(accommodation);
+          } else {
+            toast.error("Hospedagem não encontrada");
+            onCancel();
           }
         } catch (error) {
           console.error("Error loading accommodation:", error);
-          toast({
-            title: "Erro",
-            description: "Não foi possível carregar os dados da hospedagem.",
-            variant: "destructive",
-          });
+          toast.error("Erro ao carregar dados da hospedagem");
+          onCancel();
         } finally {
-          setIsLoading(false);
+          showGlobalSpinner(false);
         }
       }
     };
-
-    loadAccommodationData();
-  }, [accommodationId, form, getAccommodationById, toast]);
-
-  // Update image preview
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (value.image_url) {
-        setPreviewUrl(value.image_url);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  // Form submission
-  const onSubmit = async (data: AccommodationFormValues) => {
-    // Convert string lists to arrays
-    const amenitiesArray = data.amenities ? data.amenities.split("\n").map(item => item.trim()).filter(Boolean) : [];
-    const galleryArray = data.gallery ? data.gallery.split("\n").map(item => item.trim()).filter(Boolean) : [];
-
-    try {
-      if (accommodationId) {
-        // Update existing accommodation
-        await updateAccommodation({ 
-          id: accommodationId,
-          title: data.title,
-          description: data.description,
-          short_description: data.description.substring(0, 100),
-          price_per_night: data.price_per_night,
-          image_url: data.image_url,
-          type: data.type,
-          bedrooms: data.bedrooms,
-          bathrooms: data.bathrooms,
-          max_guests: data.capacity,
-          address: data.location,
-          amenities: amenitiesArray,
-          gallery_images: galleryArray,
-          rating: data.rating
-        });
-        
-        toast({
-          title: "Sucesso",
-          description: "Hospedagem atualizada com sucesso.",
-        });
-      } else {
-        // Create new accommodation
-        await createAccommodation({ 
-          title: data.title,
-          description: data.description,
-          short_description: data.description.substring(0, 100),
-          price_per_night: data.price_per_night,
-          image_url: data.image_url,
-          type: data.type,
-          bedrooms: data.bedrooms,
-          bathrooms: data.bathrooms,
-          max_guests: data.capacity,
-          address: data.location,
-          amenities: amenitiesArray,
-          gallery_images: galleryArray,
-          rating: data.rating
-        });
-        
-        toast({
-          title: "Sucesso",
-          description: "Nova hospedagem criada com sucesso.",
-        });
-      }
-      onSuccess();
-    } catch (error) {
-      console.error("Error saving accommodation:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar a hospedagem. Tente novamente.",
-        variant: "destructive",
+    
+    loadAccommodation();
+  }, [accommodationId]);
+  
+  // Handle form field changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { name: string; value: any }
+  ) => {
+    const { name, value } = 'target' in e ? e.target : e;
+    
+    setFormState((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear validation error when field is updated
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
       });
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin mr-2" />
-        <span>Carregando dados da hospedagem...</span>
-      </div>
-    );
-  }
-
+  
+  // Handle numeric input fields
+  const handleNumericChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const numericValue = value === "" ? 0 : parseFloat(value);
+    
+    setFormState((prev) => ({
+      ...prev,
+      [name]: numericValue
+    }));
+    
+    // Clear validation error
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+  };
+  
+  // Handle image upload completion
+  const handleImageUploaded = (url: string, fieldName: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      [fieldName]: url
+    }));
+    
+    // Clear validation error
+    if (validationErrors[fieldName]) {
+      setValidationErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[fieldName];
+        return updated;
+      });
+    }
+  };
+  
+  // Handle gallery images upload
+  const handleGalleryImagesUpdated = (urls: string[]) => {
+    setFormState((prev) => ({
+      ...prev,
+      gallery_images: urls
+    }));
+  };
+  
+  // Handle amenities update
+  const handleAmenitiesUpdated = (amenities: string[]) => {
+    setFormState((prev) => ({
+      ...prev,
+      amenities
+    }));
+  };
+  
+  // Form validation
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    if (!formState.title || formState.title.trim() === "") {
+      errors.title = "Título é obrigatório";
+    }
+    
+    if (!formState.short_description || formState.short_description.trim() === "") {
+      errors.short_description = "Descrição curta é obrigatória";
+    }
+    
+    if (!formState.description || formState.description.trim() === "") {
+      errors.description = "Descrição completa é obrigatória";
+    }
+    
+    if (!formState.type || formState.type.trim() === "") {
+      errors.type = "Tipo de hospedagem é obrigatório";
+    }
+    
+    if (!formState.price_per_night || formState.price_per_night <= 0) {
+      errors.price_per_night = "Preço por noite precisa ser maior que zero";
+    }
+    
+    if (!formState.address || formState.address.trim() === "") {
+      errors.address = "Endereço é obrigatório";
+    }
+    
+    if (!formState.image_url || formState.image_url.trim() === "") {
+      errors.image_url = "Imagem principal é obrigatória";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Por favor, corrija os erros no formulário");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    showGlobalSpinner(true);
+    
+    try {
+      if (accommodationId) {
+        // Update existing accommodation
+        await updateAccommodation({
+          ...formState,
+          id: accommodationId
+        });
+        toast.success("Hospedagem atualizada com sucesso");
+      } else {
+        // Create new accommodation
+        await createAccommodation(formState);
+        toast.success("Hospedagem criada com sucesso");
+      }
+      
+      onSuccess();
+    } catch (error) {
+      console.error("Error saving accommodation:", error);
+      toast.error("Ocorreu um erro ao salvar a hospedagem");
+    } finally {
+      setIsSubmitting(false);
+      showGlobalSpinner(false);
+    }
+  };
+  
+  // Accommodation types
   const accommodationTypes = [
-    "hotel",
-    "pousada",
-    "resort",
-    "apartamento",
-    "casa",
-    "chalé",
-    "villa",
-    "hostel",
+    "Pousada",
+    "Hotel",
+    "Casa",
+    "Apartamento",
+    "Villa",
+    "Chalé",
+    "Resort",
+    "Hostel",
+    "Camping"
   ];
-
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome da Hospedagem</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome da hospedagem" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descrição da hospedagem"
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Localização</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Endereço / Localização" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {accommodationTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price_per_night"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço por Noite (R$)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="bedrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quartos</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bathrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Banheiros</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="capacity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capacidade</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="image_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL da Imagem Principal</FormLabel>
-                  <FormControl>
-                    <Input placeholder="URL da imagem principal" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="rounded-md h-40 object-cover"
-                        onError={() => setPreviewUrl("")}
-                      />
-                    </div>
-                  )}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="gallery"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Galeria de Imagens (uma URL por linha)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="https://exemplo.com/imagem1.jpg&#10;https://exemplo.com/imagem2.jpg&#10;..."
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Adicione URLs de imagens adicionais para a galeria, uma por linha
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Avaliação (0-5)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="5"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="amenities"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Comodidades (uma por linha)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Wi-Fi gratuito&#10;Piscina&#10;Café da manhã&#10;Ar-condicionado&#10;..."
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Liste as comodidades disponíveis, uma por linha
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Basic Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="title">Título <span className="text-red-500">*</span></Label>
+          <Input
+            id="title"
+            name="title"
+            value={formState.title}
+            onChange={handleChange}
+            placeholder="Ex: Pousada Vista Mar"
+            className={validationErrors.title ? "border-red-500" : ""}
+          />
+          {validationErrors.title && (
+            <p className="text-red-500 text-sm">{validationErrors.title}</p>
+          )}
         </div>
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit">
-            {accommodationId ? "Atualizar Hospedagem" : "Criar Hospedagem"}
-          </Button>
+        
+        <div className="space-y-2">
+          <Label htmlFor="type">Tipo <span className="text-red-500">*</span></Label>
+          <Select
+            value={formState.type}
+            onValueChange={(value) => handleChange({ name: "type", value })}
+          >
+            <SelectTrigger className={validationErrors.type ? "border-red-500" : ""}>
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Tipos de Hospedagem</SelectLabel>
+                {accommodationTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {validationErrors.type && (
+            <p className="text-red-500 text-sm">{validationErrors.type}</p>
+          )}
         </div>
-      </form>
-    </Form>
+      </div>
+      
+      {/* Description */}
+      <div className="space-y-2">
+        <Label htmlFor="short_description">
+          Descrição Curta <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="short_description"
+          name="short_description"
+          value={formState.short_description}
+          onChange={handleChange}
+          placeholder="Breve descrição (até 100 caracteres)"
+          maxLength={100}
+          className={validationErrors.short_description ? "border-red-500" : ""}
+        />
+        {validationErrors.short_description && (
+          <p className="text-red-500 text-sm">{validationErrors.short_description}</p>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">
+          Descrição Completa <span className="text-red-500">*</span>
+        </Label>
+        <Textarea
+          id="description"
+          name="description"
+          value={formState.description}
+          onChange={handleChange}
+          placeholder="Descrição detalhada da hospedagem"
+          rows={4}
+          className={validationErrors.description ? "border-red-500" : ""}
+        />
+        {validationErrors.description && (
+          <p className="text-red-500 text-sm">{validationErrors.description}</p>
+        )}
+      </div>
+      
+      {/* Details */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="price_per_night">
+            Preço por noite (R$) <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="price_per_night"
+            name="price_per_night"
+            type="number"
+            min="0"
+            step="0.01"
+            value={formState.price_per_night}
+            onChange={handleNumericChange}
+            className={validationErrors.price_per_night ? "border-red-500" : ""}
+          />
+          {validationErrors.price_per_night && (
+            <p className="text-red-500 text-sm">{validationErrors.price_per_night}</p>
+          )}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="max_guests">Máximo de Hóspedes</Label>
+          <Input
+            id="max_guests"
+            name="max_guests"
+            type="number"
+            min="1"
+            max="50"
+            value={formState.max_guests}
+            onChange={handleNumericChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="bedrooms">Quartos</Label>
+          <Input
+            id="bedrooms"
+            name="bedrooms"
+            type="number"
+            min="0"
+            value={formState.bedrooms}
+            onChange={handleNumericChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="bathrooms">Banheiros</Label>
+          <Input
+            id="bathrooms"
+            name="bathrooms"
+            type="number"
+            min="0"
+            value={formState.bathrooms}
+            onChange={handleNumericChange}
+          />
+        </div>
+      </div>
+      
+      {/* Location */}
+      <div className="space-y-2">
+        <Label htmlFor="address">
+          Endereço <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="address"
+          name="address"
+          value={formState.address}
+          onChange={handleChange}
+          placeholder="Ex: Praia do Sueste, s/n"
+          className={validationErrors.address ? "border-red-500" : ""}
+        />
+        {validationErrors.address && (
+          <p className="text-red-500 text-sm">{validationErrors.address}</p>
+        )}
+      </div>
+      
+      {/* Amenities */}
+      <div className="space-y-2">
+        <Label>Comodidades</Label>
+        <TagInput
+          tags={formState.amenities || []}
+          onTagsChange={handleAmenitiesUpdated}
+          placeholder="Digite e pressione Enter para adicionar"
+          suggestions={[
+            "Wi-Fi", 
+            "Ar-condicionado", 
+            "Piscina", 
+            "Café da manhã", 
+            "Estacionamento",
+            "TV", 
+            "Cozinha", 
+            "Churrasqueira"
+          ]}
+        />
+      </div>
+      
+      {/* Images */}
+      <div className="space-y-2">
+        <Label>
+          Imagem Principal <span className="text-red-500">*</span>
+        </Label>
+        <ImageUploader 
+          currentImage={formState.image_url} 
+          onImageUploaded={(url) => handleImageUploaded(url, "image_url")} 
+          folder="accommodations"
+        />
+        {validationErrors.image_url && (
+          <p className="text-red-500 text-sm">{validationErrors.image_url}</p>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Galeria de Imagens</Label>
+        <ImageUploader 
+          multiple={true}
+          currentImages={formState.gallery_images} 
+          onImagesUploaded={handleGalleryImagesUpdated} 
+          folder="accommodations/gallery"
+          maxImages={5}
+        />
+      </div>
+      
+      {/* Form Actions */}
+      <div className="flex justify-end space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {accommodationId ? "Atualizar" : "Criar"} Hospedagem
+        </Button>
+      </div>
+    </form>
   );
 };
-

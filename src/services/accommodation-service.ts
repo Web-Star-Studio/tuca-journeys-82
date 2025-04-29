@@ -1,218 +1,200 @@
 
-import { BaseApiService } from './base-api';
-import { Accommodation } from '@/types/database';
 import { supabase } from '@/lib/supabase';
+import { Accommodation } from '@/types/database';
+import { BaseApiService } from './base-api';
 
-/**
- * Serviço para gerenciar operações relacionadas a hospedagens
- */
-export class AccommodationService extends BaseApiService {
+class AccommodationService extends BaseApiService {
   /**
-   * Busca todas as hospedagens
+   * Retrieves all accommodations from the database
    */
   async getAccommodations(): Promise<Accommodation[]> {
+    console.log('Fetching accommodations from Supabase');
     const { data, error } = await this.supabase
       .from('accommodations')
       .select('*')
-      .order('created_at', { ascending: false });
-    
+      .order('id', { ascending: true });
+
     if (error) {
       console.error('Error fetching accommodations:', error);
       throw error;
     }
-    
-    return data;
+
+    return data as Accommodation[];
   }
 
   /**
-   * Busca uma hospedagem específica por ID
+   * Retrieves a specific accommodation by its ID
    */
-  async getAccommodationById(id: number): Promise<Accommodation> {
+  async getAccommodationById(id: number): Promise<Accommodation | null> {
+    console.log(`Fetching accommodation with ID: ${id}`);
     const { data, error } = await this.supabase
       .from('accommodations')
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) {
-      console.error(`Error fetching accommodation ${id}:`, error);
+      if (error.code === 'PGRST116') {
+        console.warn(`No accommodation found with ID: ${id}`);
+        return null;
+      }
+      console.error(`Error fetching accommodation with ID: ${id}:`, error);
       throw error;
     }
-    
-    return data;
+
+    return data as Accommodation;
   }
 
   /**
-   * Cria uma nova hospedagem
+   * Creates a new accommodation
    */
-  async createAccommodation(accommodationData: Partial<Accommodation>): Promise<Accommodation> {
-    // Para resolver o problema de tipagem, vamos usar o tipo correto para o Supabase
+  async createAccommodation(accommodation: Partial<Accommodation>): Promise<Accommodation> {
+    console.log('Creating new accommodation:', accommodation);
+    
+    // Set default values for required fields if not provided
+    const accommodationToInsert = {
+      ...accommodation,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      rating: accommodation.rating || 0,
+      amenities: accommodation.amenities || [],
+      gallery_images: accommodation.gallery_images || []
+    };
+
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert([accommodationData as any]) // Usamos 'as any' para contornar a verificação de tipo
+      .insert([accommodationToInsert])
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error creating accommodation:', error);
       throw error;
     }
-    
-    return data;
+
+    return data as Accommodation;
   }
 
   /**
-   * Atualiza uma hospedagem existente
+   * Updates an existing accommodation
    */
-  async updateAccommodation(id: number, accommodationData: Partial<Accommodation>): Promise<Accommodation> {
+  async updateAccommodation(id: number, updates: Partial<Accommodation>): Promise<Accommodation> {
+    console.log(`Updating accommodation with ID: ${id}`, updates);
+    
+    // Always update the updated_at timestamp
+    const updatedAccommodation = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
     const { data, error } = await this.supabase
       .from('accommodations')
-      .update(accommodationData)
+      .update(updatedAccommodation)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) {
-      console.error(`Error updating accommodation ${id}:`, error);
+      console.error(`Error updating accommodation with ID: ${id}:`, error);
       throw error;
     }
-    
-    return data;
+
+    return data as Accommodation;
   }
 
   /**
-   * Exclui uma hospedagem
+   * Deletes an accommodation by its ID
    */
   async deleteAccommodation(id: number): Promise<void> {
+    console.log(`Deleting accommodation with ID: ${id}`);
     const { error } = await this.supabase
       .from('accommodations')
       .delete()
       .eq('id', id);
-    
+
     if (error) {
-      console.error(`Error deleting accommodation ${id}:`, error);
+      console.error(`Error deleting accommodation with ID: ${id}:`, error);
       throw error;
     }
   }
 
   /**
-   * Busca a disponibilidade de uma hospedagem
+   * Gets availability for an accommodation
    */
-  async getAccommodationAvailability(accommodationId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
-    let query = this.supabase
+  async getAccommodationAvailability(accommodationId: number) {
+    const { data, error } = await this.supabase
       .from('accommodation_availability')
       .select('*')
-      .eq('accommodation_id', accommodationId);
-    
-    if (startDate) {
-      query = query.gte('date', startDate.toISOString().split('T')[0]);
-    }
-    
-    if (endDate) {
-      query = query.lte('date', endDate.toISOString().split('T')[0]);
-    }
-    
-    const { data, error } = await query.order('date', { ascending: true });
-    
+      .eq('accommodation_id', accommodationId)
+      .order('date', { ascending: true });
+
     if (error) {
-      console.error(`Error fetching availability for accommodation ${accommodationId}:`, error);
+      console.error('Error fetching accommodation availability:', error);
       throw error;
     }
-    
+
     return data;
   }
 
   /**
-   * Atualiza a disponibilidade de uma hospedagem
+   * Updates availability for a specific date
    */
   async updateAccommodationAvailability(
-    accommodationId: number, 
-    date: Date, 
-    customPrice?: number, 
-    status: 'available' | 'unavailable' = 'available'
-  ): Promise<any> {
+    accommodationId: number,
+    date: Date,
+    customPrice?: number,
+    status?: 'available' | 'unavailable'
+  ) {
     const formattedDate = date.toISOString().split('T')[0];
     
-    const { data: existingData, error: checkError } = await this.supabase
+    const { data, error } = await this.supabase
       .from('accommodation_availability')
-      .select('id')
-      .eq('accommodation_id', accommodationId)
-      .eq('date', formattedDate)
-      .maybeSingle();
-    
-    if (checkError) {
-      console.error('Error checking accommodation availability:', checkError);
-      throw checkError;
+      .upsert({
+        accommodation_id: accommodationId,
+        date: formattedDate,
+        ...(customPrice !== undefined && { custom_price: customPrice }),
+        ...(status !== undefined && { status })
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating accommodation availability:', error);
+      throw error;
     }
-    
-    if (existingData) {
-      // Atualizar registro existente
-      const { data, error } = await this.supabase
-        .from('accommodation_availability')
-        .update({
-          custom_price: customPrice,
-          status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingData.id)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error updating accommodation availability:', error);
-        throw error;
-      }
-      
-      return data;
-    } else {
-      // Criar novo registro
-      const { data, error } = await this.supabase
-        .from('accommodation_availability')
-        .insert({
-          accommodation_id: accommodationId,
-          date: formattedDate,
-          custom_price: customPrice,
-          status
-        } as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error creating accommodation availability:', error);
-        throw error;
-      }
-      
-      return data;
-    }
+
+    return data;
   }
 
   /**
-   * Define a disponibilidade de uma hospedagem para várias datas
+   * Sets availability for multiple dates at once
    */
   async setBulkAccommodationAvailability(
-    accommodationId: number, 
-    dates: Date[], 
+    accommodationId: number,
+    dates: Date[],
     customPrice?: number,
-    status: 'available' | 'unavailable' = 'available'
-  ): Promise<void> {
-    const updates = dates.map(date => ({
+    status?: 'available' | 'unavailable'
+  ) {
+    if (!dates.length) return [];
+
+    const records = dates.map(date => ({
       accommodation_id: accommodationId,
       date: date.toISOString().split('T')[0],
-      custom_price: customPrice,
-      status,
+      ...(customPrice !== undefined && { custom_price: customPrice }),
+      ...(status !== undefined && { status })
     }));
 
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('accommodation_availability')
-      .upsert(updates as any[], { 
-        onConflict: 'accommodation_id,date',
-        ignoreDuplicates: false 
-      });
-    
+      .upsert(records)
+      .select();
+
     if (error) {
       console.error('Error setting bulk accommodation availability:', error);
       throw error;
     }
+
+    return data;
   }
 }
 

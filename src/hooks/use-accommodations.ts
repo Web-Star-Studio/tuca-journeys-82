@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
@@ -9,14 +10,14 @@ export const useAccommodations = () => {
   const queryClient = useQueryClient();
   const { showGlobalSpinner } = useUI();
 
-  // Query para buscar hospedagens com timeout para prevenir UI blocking
+  // Query to fetch accommodations with timeout to prevent UI blocking
   const { data: accommodations, isLoading, error, refetch } = useQuery({
     queryKey: ['accommodations'],
     queryFn: async () => {
       try {
         return await withTimeout(
           () => accommodationService.getAccommodations(),
-          15000, // 15 seconds timeout - increased from 10
+          15000, // 15 seconds timeout
           []
         );
       } catch (error) {
@@ -26,13 +27,13 @@ export const useAccommodations = () => {
     },
   });
 
-  // Mutation para excluir uma hospedagem com debounce e timeout
+  // Mutation to delete an accommodation with debounce and timeout
   const deleteAccommodationMutation = useMutation({
     mutationFn: async (accommodationId: number) => {
       try {
         await withTimeout(
           () => accommodationService.deleteAccommodation(accommodationId),
-          15000 // 15 seconds timeout - increased from 8
+          15000 // 15 seconds timeout
         );
         return { success: true };
       } catch (error) {
@@ -48,20 +49,20 @@ export const useAccommodations = () => {
     }
   });
 
-  // Mutation para criar ou atualizar uma hospedagem com timeout
+  // Mutation to create or update an accommodation with timeout
   const saveAccommodationMutation = useMutation({
     mutationFn: async (accommodation: Partial<Accommodation>) => {
       try {
         if (accommodation.id) {
           const result = await withTimeout(
             () => accommodationService.updateAccommodation(accommodation.id!, accommodation),
-            15000 // 15 seconds timeout - increased from 12
+            15000 // 15 seconds timeout
           );
           return result;
         } else {
           const result = await withTimeout(
             () => accommodationService.createAccommodation(accommodation),
-            15000 // 15 seconds timeout - increased from 12
+            15000 // 15 seconds timeout
           );
           return result;
         }
@@ -80,22 +81,7 @@ export const useAccommodations = () => {
     }
   });
 
-  // Debounce the delete operation to prevent multiple rapid calls
-  const debouncedDeleteAccommodation = debounce((accommodationId: number) => {
-    deleteAccommodationMutation.mutate(accommodationId);
-  }, 300);
-
-  // Debounce the save operations to prevent multiple rapid calls
-  const debouncedCreateAccommodation = debounce((accommodation: Partial<Accommodation>) => {
-    saveAccommodationMutation.mutate(accommodation);
-  }, 300);
-
-  const debouncedUpdateAccommodation = debounce((accommodation: Partial<Accommodation>) => {
-    if (!accommodation.id) throw new Error('Accommodation ID is required for update');
-    saveAccommodationMutation.mutate(accommodation);
-  }, 300);
-
-  // Public interface with debounced operations
+  // Public interface
   const deleteAccommodation = (accommodationId: number) => {
     return deleteAccommodationMutation.mutateAsync(accommodationId);
   };
@@ -126,7 +112,7 @@ export const useAccommodations = () => {
   };
 };
 
-// Hook para detalhes de uma única hospedagem com timeout
+// Hook for details of a single accommodation with timeout
 export const useAccommodation = (accommodationId?: number) => {
   return useQuery({
     queryKey: ['accommodation', accommodationId],
@@ -134,7 +120,7 @@ export const useAccommodation = (accommodationId?: number) => {
       if (!accommodationId) throw new Error('Accommodation ID is required');
       return await withTimeout(
         () => accommodationService.getAccommodationById(accommodationId),
-        15000, // 15 seconds timeout - increased from 8
+        15000, // 15 seconds timeout
         null
       );
     },
@@ -142,12 +128,12 @@ export const useAccommodation = (accommodationId?: number) => {
   });
 };
 
-// Hook para gerenciar disponibilidade de hospedagens com timeout
+// Hook to manage availability of accommodations with timeout
 export const useAccommodationAvailability = (accommodationId?: number) => {
   const queryClient = useQueryClient();
   const { showGlobalSpinner } = useUI();
 
-  // Consulta para obter a disponibilidade de uma hospedagem
+  // Query to get the availability of an accommodation
   const availabilityQuery = useQuery({
     queryKey: ['accommodation-availability', accommodationId],
     queryFn: async () => {
@@ -161,7 +147,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
     enabled: !!accommodationId,
   });
 
-  // Mutation para atualizar a disponibilidade de uma hospedagem
+  // Mutation to update the availability of an accommodation
   const updateAvailabilityMutation = useMutation({
     mutationFn: async ({
       date,
@@ -194,7 +180,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
     }
   });
 
-  // Mutation para atualizar a disponibilidade de uma hospedagem em lote com UI feedback
+  // Mutation to update the availability of an accommodation in batch with UI feedback
   const updateBulkAvailabilityMutation = useMutation({
     mutationFn: async ({
       dates,
@@ -215,7 +201,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
             customPrice,
             status
           ),
-          15000, // 15 seconds timeout since this could be a larger operation
+          15000, // 15 seconds timeout
           null
         );
       } finally {
@@ -232,25 +218,12 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
     }
   });
 
-  // Debounce the bulk update operation
-  const debouncedUpdateBulkAvailability = debounce(({
-    dates,
-    customPrice,
-    status
-  }: {
-    dates: Date[];
-    customPrice?: number;
-    status?: 'available' | 'unavailable';
-  }) => {
-    updateBulkAvailabilityMutation.mutate({ dates, customPrice, status });
-  }, 300);
-
   return {
     availability: availabilityQuery.data,
     isLoading: availabilityQuery.isLoading,
     error: availabilityQuery.error,
     updateAvailability: updateAvailabilityMutation.mutate,
-    updateBulkAvailability: debouncedUpdateBulkAvailability,
+    updateBulkAvailability: updateBulkAvailabilityMutation.mutate,
     isUpdating: updateAvailabilityMutation.isPending || updateBulkAvailabilityMutation.isPending
   };
 };

@@ -53,7 +53,7 @@ export const adaptComponentTourToDBTour = (tour: Partial<ComponentTour>): Partia
     short_description: tour.description ? tour.description.substring(0, 150) + '...' : '',
     // Ensure these have default values to avoid null errors
     rating: tour.rating || 0,
-    difficulty: 'normal',
+    difficulty: 'normal', // Always set a default value for difficulty since it's required
     gallery_images: []
   };
 };

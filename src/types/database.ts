@@ -1,3 +1,4 @@
+
 // Supabase types
 export interface Tour {
   id: number;
@@ -16,7 +17,7 @@ export interface Tour {
   category: string;
   max_participants: number;
   min_participants: number;
-  difficulty?: string;
+  difficulty: string; // Changed from optional to required
   rating: number;
   schedule: string[];
   includes: string[];

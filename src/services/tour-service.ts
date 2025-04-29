@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Tour } from '@/types/database';
 import { supabase } from '@/lib/supabase';
@@ -91,19 +90,16 @@ export class TourService extends BaseApiService {
       throw new Error('Missing required fields for tour creation');
     }
 
-    // Create a properly typed object with all required fields explicitly set
-    const dataWithTimestamps: Tour = {
-      id: tourData.id || 0, // Will be replaced by the database
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+    // Create an object with all fields needed by the database schema
+    const dataToInsert = {
       title: tourData.title,
       description: tourData.description,
       short_description: tourData.short_description || `${tourData.description.substring(0, 150)}...`,
       image_url: tourData.image_url,
       price: tourData.price,
       duration: tourData.duration,
-      category: tourData.category, // This is now guaranteed to exist from the check above
-      difficulty: tourData.difficulty || 'normal',
+      category: tourData.category,
+      difficulty: tourData.difficulty || 'normal', // Ensure difficulty is always provided
       includes: tourData.includes || [],
       excludes: tourData.excludes || [],
       notes: tourData.notes || [],
@@ -114,12 +110,14 @@ export class TourService extends BaseApiService {
       schedule: tourData.schedule || [],
       meeting_point: tourData.meeting_point || null,
       is_featured: tourData.is_featured || false,
-      is_active: tourData.is_active !== false
+      is_active: tourData.is_active !== false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await this.supabase
       .from('tours')
-      .insert(dataWithTimestamps)
+      .insert(dataToInsert)
       .select()
       .single();
     

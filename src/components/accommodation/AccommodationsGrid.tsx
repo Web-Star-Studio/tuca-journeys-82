@@ -10,14 +10,17 @@ import { adaptDatabaseToUIAccommodations } from "@/utils/accommodationAdapters";
 
 interface AccommodationsGridProps {
   initialAccommodations?: DatabaseAccommodation[];
+  isLoading?: boolean;
+  accommodations?: DatabaseAccommodation[];
+  error?: Error;
 }
 
-const AccommodationsGrid = ({ initialAccommodations }: AccommodationsGridProps) => {
+const AccommodationsGrid = ({ initialAccommodations, isLoading: propIsLoading, accommodations: propAccommodations, error: propError }: AccommodationsGridProps) => {
   // Use our enhanced hook for accommodations with filters
   const {
-    accommodations,
-    isLoading,
-    error,
+    accommodations: hookAccommodations,
+    isLoading: hookIsLoading,
+    error: hookError,
     filters,
     applyFilters,
     accommodationTypes,
@@ -32,7 +35,9 @@ const AccommodationsGrid = ({ initialAccommodations }: AccommodationsGridProps) 
   });
 
   // Use either provided accommodations or fetched ones
-  const dbAccommodations = initialAccommodations || accommodations || [];
+  const isLoading = propIsLoading !== undefined ? propIsLoading : hookIsLoading;
+  const error = propError || hookError;
+  const dbAccommodations = propAccommodations || initialAccommodations || hookAccommodations || [];
   
   // Convert database accommodations to UI accommodations
   const displayAccommodations = adaptDatabaseToUIAccommodations(dbAccommodations);

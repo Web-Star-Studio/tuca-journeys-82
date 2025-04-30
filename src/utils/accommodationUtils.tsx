@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Wifi, Wind, Coffee, Waves, Bath, Bed, Users, Utensils, Tv, Lock, Car, Fan,
-  Parking, Dog, Sprout, Shield, Coffee as CoffeeIcon } from 'lucide-react';
+  CircleParking, Dog, Sprout, Shield, Coffee as CoffeeIcon } from 'lucide-react';
 
 /**
  * Returns the appropriate icon component for a given amenity
@@ -45,7 +45,7 @@ export const getAmenityIcon = (amenity: string) => {
     case "estacionamento":
     case "garagem":
     case "vaga de garagem":
-      return <Parking {...iconSize} />;
+      return <CircleParking {...iconSize} />;
     case "pet friendly":
     case "aceita pets":
     case "pets":

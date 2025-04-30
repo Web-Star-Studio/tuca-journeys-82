@@ -20,6 +20,7 @@ interface AccommodationFiltersProps {
   applyFilters: () => void;
   resetFilters: () => void;
   getAmenityIcon: (amenity: string) => React.ReactNode;
+  priceRange?: { min: number; max: number };
 }
 
 const AccommodationFilters = ({
@@ -37,6 +38,7 @@ const AccommodationFilters = ({
   applyFilters,
   resetFilters,
   getAmenityIcon,
+  priceRange,
 }: AccommodationFiltersProps) => {
   return (
     <>

@@ -1,145 +1,25 @@
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import TourCard from "@/components/tour/TourCard";
 import { ArrowRight } from "lucide-react";
-import { useTours } from "@/hooks/use-tours";
-import { adaptDBTourToComponentTour } from "@/utils/tourAdapter";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tour } from "@/data/tours";
-
-// Tour categories for filtering
-const categories = ["Todos", "Barco", "Mergulho", "Trilha", "Terrestre", "Ecológico"];
+import { useFeaturedTours } from "@/hooks/use-featured-tours";
+import TourCategorySelector from "@/components/tour/TourCategorySelector";
+import FeaturedToursLoading from "@/components/tour/FeaturedToursLoading";
+import NoToursFound from "@/components/tour/NoToursFound";
+import FeaturedTourGrid from "@/components/tour/FeaturedTourGrid";
 
 const FeaturedTours = () => {
-  const [activeCategory, setActiveCategory] = useState("Todos");
-  const { featuredTours, isFeaturedLoading } = useTours();
-  const [displayTours, setDisplayTours] = useState<Tour[]>([]);
-  const lastActiveCategory = useRef(activeCategory);
-  
-  // Create a memoized filter function to prevent unnecessary recalculations
-  const filterTours = useCallback((tours: Tour[], category: string) => {
-    console.log(`Filtering tours for category: ${category}`);
-    
-    if (!tours) {
-      console.log("No tours available to filter");
-      return [];
-    }
-    
-    if (category === "Todos") {
-      console.log(`Showing all ${tours.length} tours`);
-      return tours;
-    }
-    
-    const normalizedCategory = category.toLowerCase().trim();
-    
-    const filtered = tours.filter(tour => {
-      const normalizedTourCategory = tour.category.toLowerCase().trim();
-      const isMatch = normalizedTourCategory.includes(normalizedCategory) || 
-                      normalizedCategory.includes(normalizedTourCategory);
-      
-      console.log(`Tour ${tour.id} (${tour.title}) - Category: ${tour.category} - Match with ${category}: ${isMatch}`);
-      
-      return isMatch;
-    });
-    
-    console.log(`Found ${filtered.length} tours for category "${category}"`);
-    return filtered;
-  }, []);
-  
-  // Handle category change
-  const handleCategoryChange = useCallback((category: string) => {
-    console.log(`Category changed from ${activeCategory} to ${category}`);
-    setActiveCategory(category);
-    lastActiveCategory.current = category;
-  }, [activeCategory]);
-  
-  // Separate effect to update displayTours when tours or category changes
-  useEffect(() => {
-    if (!featuredTours) {
-      console.log("Featured tours not loaded yet");
-      return;
-    }
-    
-    console.log(`Processing ${featuredTours.length} featured tours for category "${activeCategory}"`);
-    
-    // Convert from DB format to component format
-    const componentTours = featuredTours.map(adaptDBTourToComponentTour);
-    console.log("Converted tours:", componentTours.map(t => ({ id: t.id, title: t.title, category: t.category })));
-    
-    // Apply filtering
-    const filtered = filterTours(componentTours, activeCategory);
-    console.log(`Setting displayTours with ${filtered.length} tours`);
-    
-    // Force a clean state update by creating a new array
-    setDisplayTours([...filtered]);
-    
-  }, [featuredTours, activeCategory, filterTours]);
-  
-  // Debug effect to monitor state changes
-  useEffect(() => {
-    console.log("displayTours updated:", displayTours.map(tour => tour.title));
-  }, [displayTours]);
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6 }
-    }
-  };
+  const {
+    activeCategory,
+    displayTours,
+    isFeaturedLoading,
+    handleCategoryChange
+  } = useFeaturedTours();
 
   // Loading state placeholder
   if (isFeaturedLoading) {
-    return (
-      <section className="py-24 lg:py-32 bg-tuca-sand">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-medium tracking-tight mb-5">Passeios Imperdíveis</h2>
-            <p className="text-lg text-center text-muted-foreground max-w-3xl mx-auto">
-              Carregando passeios em destaque...
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                <Skeleton className="h-64 w-full" />
-                <div className="p-6">
-                  <Skeleton className="h-8 w-3/4 mb-4" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-4/5 mb-6" />
-                  <div className="flex justify-between items-center">
-                    <Skeleton className="h-6 w-24" />
-                    <Skeleton className="h-10 w-32 rounded-full" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <FeaturedToursLoading />;
   }
   
   return (
@@ -163,58 +43,20 @@ const FeaturedTours = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           viewport={{ once: true }}
-          className="flex flex-wrap justify-center gap-3 mb-14"
         >
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={category === activeCategory ? "default" : "outline"}
-              className={
-                category === activeCategory
-                  ? "rounded-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white"
-                  : "rounded-full text-foreground hover:bg-background hover:text-tuca-ocean-blue"
-              }
-              onClick={() => handleCategoryChange(category)}
-            >
-              {category}
-            </Button>
-          ))}
+          <TourCategorySelector 
+            activeCategory={activeCategory}
+            onCategoryChange={handleCategoryChange}
+          />
         </motion.div>
 
         {displayTours.length > 0 ? (
-          <motion.div
-            key={`tour-list-${activeCategory}`}
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6 lg:gap-8"
-          >
-            {displayTours.slice(0, 3).map((tour) => (
-              <motion.div 
-                key={tour.id} 
-                variants={itemVariants}
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
-              >
-                <TourCard tour={tour} />
-              </motion.div>
-            ))}
-          </motion.div>
+          <FeaturedTourGrid tours={displayTours} activeCategory={activeCategory} />
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-            <h3 className="text-xl font-medium mb-3">Nenhum passeio na categoria {activeCategory}</h3>
-            <p className="text-muted-foreground mb-6">
-              No momento não temos passeios em destaque nesta categoria.
-            </p>
-            <Button 
-              variant="outline" 
-              className="rounded-full"
-              onClick={() => handleCategoryChange("Todos")}
-            >
-              Ver todos os passeios
-            </Button>
-          </div>
+          <NoToursFound 
+            category={activeCategory}
+            onReset={() => handleCategoryChange("Todos")}
+          />
         )}
 
         <motion.div 

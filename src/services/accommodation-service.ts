@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Accommodation } from '@/types/database';
 import { BaseApiService } from './base-api';
@@ -149,11 +148,18 @@ class AccommodationService extends BaseApiService {
   async updateAccommodation(id: number, updates: Partial<Accommodation>): Promise<Accommodation> {
     console.log(`Updating accommodation with ID: ${id}`, updates);
     
-    // Always update the updated_at timestamp and remove search_vector if present
-    const { search_vector, ...updatedAccommodation } = {
-      ...updates,
-      updated_at: new Date().toISOString()
-    };
+    // Create a new object without the search_vector property
+    // Note: We're explicitly creating a new object instead of trying to destructure a property
+    // that might not exist in the TypeScript interface
+    const updatedAccommodation = { ...updates };
+    
+    // Always update the updated_at timestamp
+    updatedAccommodation.updated_at = new Date().toISOString();
+    
+    // Remove search_vector if it exists in the object at runtime
+    if ('search_vector' in updatedAccommodation) {
+      delete (updatedAccommodation as any).search_vector;
+    }
 
     const { data, error } = await this.supabase
       .from('accommodations')

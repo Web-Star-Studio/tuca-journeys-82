@@ -1,91 +1,58 @@
 
 /**
- * Utility function to execute an async operation with a timeout to prevent UI blocking
- * @param asyncOperation The async function to execute
+ * Execute an async function with a timeout
+ * @param fn The async function to execute
  * @param timeoutMs Timeout in milliseconds
- * @param fallback Optional fallback value if the operation times out
+ * @param fallbackValue Value to return if the function times out
+ * @returns The function result or fallback value
  */
 export const withTimeout = async <T>(
-  asyncOperation: () => Promise<T>,
-  timeoutMs: number = 15000, // Increased default timeout
-  fallback?: T
+  fn: () => Promise<T>,
+  timeoutMs: number,
+  fallbackValue: T
 ): Promise<T> => {
-  let timeoutId: NodeJS.Timeout;
-  let operationComplete = false;
-  
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      if (!operationComplete) {
-        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
-      }
+  return new Promise<T>((resolve) => {
+    const timeoutId = setTimeout(() => {
+      console.warn(`Function execution timed out after ${timeoutMs}ms`);
+      resolve(fallbackValue);
     }, timeoutMs);
-  });
 
-  try {
-    // Race between the actual operation and the timeout
-    const result = await Promise.race([
-      asyncOperation().then(result => {
-        operationComplete = true;
-        return result;
-      }),
-      timeoutPromise
-    ]);
-    
-    clearTimeout(timeoutId!);
-    return result;
-  } catch (error) {
-    console.error("Operation failed or timed out:", error);
-    clearTimeout(timeoutId!);
-    
-    if (fallback !== undefined) {
-      return fallback;
-    }
-    throw error;
-  }
+    fn()
+      .then((result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      })
+      .catch((error) => {
+        console.error('Function execution failed:', error);
+        clearTimeout(timeoutId);
+        resolve(fallbackValue);
+      });
+  });
 };
 
 /**
- * Debounce function to prevent multiple rapid calls to the same function
- * Returns a debounced function that returns a Promise
+ * Creates a debounced version of a function
+ * @param fn The function to debounce
+ * @param delay Delay in milliseconds
+ * @returns Debounced function
  */
-export function debounce<F extends (...args: any[]) => any>(
-  func: F,
-  waitFor: number
-): (...args: Parameters<F>) => Promise<ReturnType<F>> {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-  let resolveList: Array<(value: ReturnType<F> | PromiseLike<ReturnType<F>>) => void> = [];
-  let rejectList: Array<(reason?: any) => void> = [];
-
-  return (...args: Parameters<F>): Promise<ReturnType<F>> => {
-    return new Promise<ReturnType<F>>((resolve, reject) => {
-      if (timeout !== null) {
-        clearTimeout(timeout);
-        resolveList.push(resolve);
-        rejectList.push(reject);
-      } else {
-        resolveList = [resolve];
-        rejectList = [reject];
+export const debounce = <T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): ((...args: Parameters<T>) => Promise<ReturnType<T>>) => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  
+  return (...args: Parameters<T>): Promise<ReturnType<T>> => {
+    return new Promise((resolve) => {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
       }
-
-      timeout = setTimeout(async () => {
-        const currentResolveList = [...resolveList];
-        const currentRejectList = [...rejectList];
-        
-        // Clear lists first to avoid issues if there are errors
-        resolveList = [];
-        rejectList = [];
-        timeout = null;
-        
-        try {
-          const result = await func(...args);
-          // Resolve all promises with the result
-          currentResolveList.forEach(resolveFunc => resolveFunc(result));
-        } catch (error) {
-          console.error("Debounced function error:", error);
-          // Reject all promises with the error
-          currentRejectList.forEach(rejectFunc => rejectFunc(error));
-        }
-      }, waitFor);
+      
+      timeoutId = setTimeout(() => {
+        const result = fn(...args);
+        resolve(result);
+        timeoutId = null;
+      }, delay);
     });
   };
-}
+};

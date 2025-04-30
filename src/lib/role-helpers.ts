@@ -258,3 +258,4 @@ export const revokeAllPermissions = async (
 export const isUserAdminEnhanced = async (userId: string): Promise<boolean> => {
   return await hasPermission(userId, 'admin');
 };
+

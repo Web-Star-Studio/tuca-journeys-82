@@ -13,7 +13,9 @@ class AccommodationService extends BaseApiService {
     minPrice: null as number | null,
     maxPrice: null as number | null,
     minRating: null as number | null,
-    sortBy: 'newest' as 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical'
+    sortBy: 'newest' as 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical',
+    amenities: [] as string[],
+    maxGuests: null as number | null
   }): Promise<Accommodation[]> {
     console.log('Fetching accommodations from Supabase with options:', options);
     
@@ -44,6 +46,19 @@ class AccommodationService extends BaseApiService {
     // Apply rating filter
     if (options.minRating !== null) {
       query = query.gte('rating', options.minRating);
+    }
+    
+    // Apply max guests filter (new)
+    if (options.maxGuests !== null) {
+      query = query.gte('max_guests', options.maxGuests);
+    }
+    
+    // Apply amenities filter (new)
+    if (options.amenities && options.amenities.length > 0) {
+      // Using Postgres array contains operator
+      options.amenities.forEach(amenity => {
+        query = query.contains('amenities', [amenity]);
+      });
     }
 
     // Apply sorting
@@ -106,7 +121,7 @@ class AccommodationService extends BaseApiService {
     console.log('Creating new accommodation:', accommodationData);
     
     // Create a complete accommodation object with required fields
-    const accommodation: any = {
+    const accommodation: Omit<Accommodation, 'id' | 'search_vector'> = {
       title: accommodationData.title || 'Nova Hospedagem',
       description: accommodationData.description || '',
       short_description: accommodationData.short_description || '',
@@ -127,10 +142,13 @@ class AccommodationService extends BaseApiService {
     
     // Validate required fields
     this.validateAccommodation(accommodation);
+
+    // Ensure search_vector is not included
+    const { search_vector, ...cleanAccommodation } = accommodation as any;
     
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert(accommodation)
+      .insert(cleanAccommodation)
       .select()
       .single();
 
@@ -149,8 +167,6 @@ class AccommodationService extends BaseApiService {
     console.log(`Updating accommodation with ID: ${id}`, updates);
     
     // Create a new object without the search_vector property
-    // Note: We're explicitly creating a new object instead of trying to destructure a property
-    // that might not exist in the TypeScript interface
     const updatedAccommodation = { ...updates };
     
     // Always update the updated_at timestamp
@@ -379,21 +395,6 @@ class AccommodationService extends BaseApiService {
     if (!isValidPrice(accommodation.price_per_night)) {
       throw new Error('Invalid price for accommodation');
     }
-  }
-  
-  /**
-   * Helper method to prepare accommodation data with defaults
-   */
-  private prepareAccommodationData(accommodation: Accommodation): Accommodation {
-    const now = new Date().toISOString();
-    return {
-      ...accommodation,
-      rating: accommodation.rating || 0,
-      amenities: accommodation.amenities || [],
-      gallery_images: accommodation.gallery_images || [],
-      created_at: now,
-      updated_at: now
-    };
   }
 }
 

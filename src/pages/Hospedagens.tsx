@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,15 +10,7 @@ import { getAmenityIcon } from "@/utils/accommodationUtils";
 import { useAccommodations } from "@/hooks/use-accommodations";
 
 const Hospedagens = () => {
-  
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
-  // State for filters
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(3000);
-  const [capacityFilter, setCapacityFilter] = useState<number[]>([]);
-  const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
   
   // Get all available amenities for filtering
   const commonAmenities = [
@@ -36,9 +29,24 @@ const Hospedagens = () => {
     isLoading, 
     error, 
     filters,
-    applyFilters: applyAccommodationFilters,
+    applyFilters,
     priceRange 
   } = useAccommodations();
+  
+  // State for filters that will be applied to the database query
+  const [minPrice, setMinPrice] = useState(priceRange?.min || 0);
+  const [maxPrice, setMaxPrice] = useState(priceRange?.max || 3000);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [capacityFilter, setCapacityFilter] = useState<number[]>([]);
+  const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
+  
+  // Update local state when price range is fetched
+  useEffect(() => {
+    if (priceRange) {
+      setMinPrice(priceRange.min);
+      setMaxPrice(priceRange.max);
+    }
+  }, [priceRange]);
   
   // Handler to toggle capacity filter
   const toggleCapacityFilter = (capacity: number) => {
@@ -58,18 +66,17 @@ const Hospedagens = () => {
     }
   };
   
-  // Apply filters function
-  const applyFilters = () => {
-    applyAccommodationFilters({
+  // Apply filters function - this now applies filters to the database query
+  const applyAllFilters = () => {
+    // Determine max guests based on capacity filter
+    const maxGuests = capacityFilter.length > 0 ? Math.max(...capacityFilter) : null;
+    
+    applyFilters({
       minPrice: minPrice,
       maxPrice: maxPrice,
-      type: typeFilter
-    });
-    console.log("Applying filters:", {
-      minPrice,
-      maxPrice,
-      capacityFilter,
-      amenitiesFilter
+      type: typeFilter,
+      amenities: amenitiesFilter,
+      maxGuests: maxGuests
     });
   };
   
@@ -80,10 +87,13 @@ const Hospedagens = () => {
     setCapacityFilter([]);
     setAmenitiesFilter([]);
     setTypeFilter("all");
-    applyAccommodationFilters({
+    
+    applyFilters({
       minPrice: null,
       maxPrice: null,
-      type: "all"
+      type: "all",
+      amenities: [],
+      maxGuests: null
     });
   };
 
@@ -110,7 +120,7 @@ const Hospedagens = () => {
                 setMaxPrice={setMaxPrice}
                 toggleCapacityFilter={toggleCapacityFilter}
                 toggleAmenityFilter={toggleAmenityFilter}
-                applyFilters={applyFilters}
+                applyFilters={applyAllFilters}
                 resetFilters={resetFilters}
                 priceRange={priceRange}
               />

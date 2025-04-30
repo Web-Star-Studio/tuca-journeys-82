@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient, QueryFunctionContext } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
@@ -5,7 +6,6 @@ import { accommodationService } from '@/services/accommodation-service';
 import { withTimeout } from '@/utils/asyncUtils';
 import { useUI } from '@/contexts/UIContext';
 import { useState } from 'react';
-import { AccommodationFilters as AccommodationFilterOptions, PriceRange } from '@/types/accommodation';
 
 // Define type for filter options
 export interface AccommodationFilters {
@@ -15,6 +15,8 @@ export interface AccommodationFilters {
   maxPrice?: number | null;
   minRating?: number | null;
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
+  amenities?: string[];
+  maxGuests?: number | null;
 }
 
 export const useAccommodations = (initialFilters?: AccommodationFilters) => {
@@ -28,7 +30,9 @@ export const useAccommodations = (initialFilters?: AccommodationFilters) => {
     minPrice: null,
     maxPrice: null,
     minRating: null,
-    sortBy: 'newest'
+    sortBy: 'newest',
+    amenities: [],
+    maxGuests: null
   });
 
   // Query to fetch accommodations with timeout to prevent UI blocking
@@ -52,7 +56,9 @@ export const useAccommodations = (initialFilters?: AccommodationFilters) => {
           minPrice: currentFilters.minPrice,
           maxPrice: currentFilters.maxPrice,
           minRating: currentFilters.minRating,
-          sortBy: currentFilters.sortBy || 'newest'
+          sortBy: currentFilters.sortBy || 'newest',
+          amenities: currentFilters.amenities || [],
+          maxGuests: currentFilters.maxGuests
         };
         
         return await withTimeout(
@@ -109,7 +115,7 @@ export const useAccommodations = (initialFilters?: AccommodationFilters) => {
         } else {
           // For creates, we need to make sure all required fields are present
           const result = await withTimeout(
-            () => accommodationService.createAccommodation(accommodation as any), // Use type assertion as a temporary fix
+            () => accommodationService.createAccommodation(accommodation),
             15000, // 15 seconds timeout
             null as any // Fallback value
           );
@@ -210,6 +216,7 @@ export const useAccommodations = (initialFilters?: AccommodationFilters) => {
 // Hook for details of a single accommodation with timeout
 export const useAccommodation = (accommodationId?: number) => {
   const queryClient = useQueryClient();
+  const { showGlobalSpinner } = useUI();
 
   const {
     data: accommodation,
@@ -220,11 +227,16 @@ export const useAccommodation = (accommodationId?: number) => {
     queryKey: ['accommodation', accommodationId],
     queryFn: async () => {
       if (!accommodationId) throw new Error('Accommodation ID is required');
-      return await withTimeout(
-        () => accommodationService.getAccommodationById(accommodationId),
-        15000, // 15 seconds timeout
-        null // Fallback value
-      );
+      showGlobalSpinner(true);
+      try {
+        return await withTimeout(
+          () => accommodationService.getAccommodationById(accommodationId),
+          15000, // 15 seconds timeout
+          null // Fallback value
+        );
+      } finally {
+        showGlobalSpinner(false);
+      }
     },
     enabled: !!accommodationId,
     staleTime: 5 * 60 * 1000, // 5 minutes

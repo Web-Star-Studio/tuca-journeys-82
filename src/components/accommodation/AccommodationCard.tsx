@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { MapPin, Star, Users, Bed, Bath } from "lucide-react";
 import { UIAccommodation } from "@/types/accommodation";
 import SafeImage from "@/components/ui/safe-image";
-import { getAmenityIcon } from "@/utils/accommodationUtils";
 
 interface AccommodationCardProps {
   accommodation: UIAccommodation;
@@ -14,6 +13,11 @@ interface AccommodationCardProps {
 
 const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
+  
+  // Safety check for missing accommodation data
+  if (!accommodation) {
+    return null;
+  }
   
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
@@ -23,6 +27,7 @@ const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
           alt={accommodation.title}
           className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
           onLoadSuccess={() => setImageLoaded(true)}
+          fallbackSrc="/images/placeholder-accommodation.jpg"
         />
       </div>
       <div className="p-6 md:p-8">
@@ -61,7 +66,11 @@ const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
         <div className="flex items-center justify-between">
           <div className="text-tuca-ocean-blue">
             <span className="text-sm">Por noite</span>
-            <p className="text-xl font-medium">R$ {accommodation.price.toLocaleString('pt-BR')}</p>
+            <p className="text-xl font-medium">
+              {typeof accommodation.price === 'number'
+                ? `R$ ${accommodation.price.toLocaleString('pt-BR')}`
+                : 'Preço sob consulta'}
+            </p>
           </div>
           <Link to={`/hospedagem/${accommodation.id}`}>
             <Button className="rounded-full bg-tuca-ocean-blue hover:bg-tuca-ocean-blue/90">

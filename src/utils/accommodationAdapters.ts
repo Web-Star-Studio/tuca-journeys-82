@@ -6,6 +6,8 @@ import { UIAccommodation } from "@/types/accommodation";
  * Adapts a database accommodation to the UI accommodation format
  */
 export function adaptDatabaseToUIAccommodation(dbAccommodation: DatabaseAccommodation): UIAccommodation {
+  if (!dbAccommodation) return null;
+  
   return {
     id: dbAccommodation.id,
     title: dbAccommodation.title,
@@ -13,9 +15,9 @@ export function adaptDatabaseToUIAccommodation(dbAccommodation: DatabaseAccommod
     price: dbAccommodation.price_per_night,
     perNight: true,
     image: dbAccommodation.image_url,
-    location: dbAccommodation.location || dbAccommodation.address,
-    rating: dbAccommodation.rating,
-    amenities: dbAccommodation.amenities,
+    location: dbAccommodation.address,
+    rating: dbAccommodation.rating || 0,
+    amenities: dbAccommodation.amenities || [],
     capacity: dbAccommodation.max_guests,
     bedrooms: dbAccommodation.bedrooms,
     bathrooms: dbAccommodation.bathrooms,
@@ -27,6 +29,7 @@ export function adaptDatabaseToUIAccommodation(dbAccommodation: DatabaseAccommod
  * Adapts an array of database accommodations to UI accommodations format
  */
 export function adaptDatabaseToUIAccommodations(dbAccommodations: DatabaseAccommodation[]): UIAccommodation[] {
+  if (!dbAccommodations) return [];
   return dbAccommodations.map(adaptDatabaseToUIAccommodation);
 }
 
@@ -34,6 +37,8 @@ export function adaptDatabaseToUIAccommodations(dbAccommodations: DatabaseAccomm
  * Adapts a UI accommodation to the database format
  */
 export function adaptUIToDatabaseAccommodation(uiAccommodation: UIAccommodation): Partial<DatabaseAccommodation> {
+  if (!uiAccommodation) return null;
+  
   return {
     id: uiAccommodation.id,
     title: uiAccommodation.title,
@@ -41,14 +46,13 @@ export function adaptUIToDatabaseAccommodation(uiAccommodation: UIAccommodation)
     short_description: uiAccommodation.description.substring(0, 150) + '...',
     price_per_night: uiAccommodation.price,
     image_url: uiAccommodation.image,
-    location: uiAccommodation.location,
     address: uiAccommodation.location,
-    type: 'hotel', // Default value
+    type: 'hotel', // Default value if not provided
     bedrooms: uiAccommodation.bedrooms,
     bathrooms: uiAccommodation.bathrooms,
     max_guests: uiAccommodation.capacity,
     amenities: uiAccommodation.amenities,
     gallery_images: [uiAccommodation.image],
-    rating: uiAccommodation.rating
+    rating: uiAccommodation.rating || 0
   };
 }

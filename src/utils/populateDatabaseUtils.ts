@@ -9,7 +9,8 @@ import { toast } from 'sonner';
  */
 export async function populateAccommodationsDatabase(): Promise<boolean> {
   try {
-    const sampleAccommodations: Partial<Accommodation>[] = [
+    // Define sample data with all required properties specified by TypeScript
+    const sampleAccommodations = [
       {
         title: 'Pousada Vista Mar',
         description: 'Pousada com vista privilegiada para o mar de Noronha, café da manhã incluso e localização estratégica.',
@@ -146,9 +147,10 @@ export async function populateAccommodationsDatabase(): Promise<boolean> {
     ];
 
     // Insert the sample accommodations into the database
+    // Use the spread operator to ensure each accommodation is treated as a separate record
     const { data, error } = await supabase
       .from('accommodations')
-      .insert(sampleAccommodations)
+      .insert([...sampleAccommodations]) // This ensures we pass an array of records instead of just the array directly
       .select();
 
     if (error) {

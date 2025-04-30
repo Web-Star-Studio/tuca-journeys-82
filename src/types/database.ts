@@ -48,7 +48,7 @@ export interface Accommodation {
   amenities: string[];
   gallery_images: string[];
   rating: number;
-  is_featured?: boolean; 
+  is_featured?: boolean; // Added this property
 }
 
 export interface Booking {

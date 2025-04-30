@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import AccommodationCard from "./accommodation/AccommodationCard";
 import { useQuery } from "@tanstack/react-query";

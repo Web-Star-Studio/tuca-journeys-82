@@ -1,6 +1,6 @@
 
 import { Accommodation as DatabaseAccommodation } from "@/types/database";
-import { Accommodation as UIAccommodation } from "@/data/accommodations";
+import { UIAccommodation } from "@/types/accommodation";
 
 /**
  * Adapts a database accommodation to the UI accommodation format

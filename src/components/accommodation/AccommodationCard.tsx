@@ -3,14 +3,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Users, Bed, Bath } from "lucide-react";
-import { Accommodation } from "@/data/accommodations";
+import { UIAccommodation } from "@/types/accommodation";
 import SafeImage from "@/components/ui/safe-image";
 import { getAmenityIcon } from "@/utils/accommodationUtils";
 
 interface AccommodationCardProps {
-  accommodation: Accommodation;
+  accommodation: UIAccommodation;
 }
 
 const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {

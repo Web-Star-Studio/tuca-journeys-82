@@ -2,7 +2,6 @@
 import React from "react";
 import AccommodationCard from "./AccommodationCard";
 import { Accommodation as DatabaseAccommodation } from "@/types/database";
-import { Accommodation as UIAccommodation } from "@/data/accommodations"; 
 import { useAccommodations } from "@/hooks/use-accommodations";
 import AccommodationFilter from "./AccommodationFilter";
 import { Loader2 } from "lucide-react";
@@ -15,7 +14,12 @@ interface AccommodationsGridProps {
   error?: Error;
 }
 
-const AccommodationsGrid = ({ initialAccommodations, isLoading: propIsLoading, accommodations: propAccommodations, error: propError }: AccommodationsGridProps) => {
+const AccommodationsGrid = ({ 
+  initialAccommodations, 
+  isLoading: propIsLoading, 
+  accommodations: propAccommodations, 
+  error: propError 
+}: AccommodationsGridProps) => {
   // Use our enhanced hook for accommodations with filters
   const {
     accommodations: hookAccommodations,

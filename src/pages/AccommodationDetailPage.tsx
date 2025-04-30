@@ -1,22 +1,31 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactCTA from "@/components/ContactCTA";
-import { accommodations } from "@/data/accommodations";
 import AccommodationDetailHeader from "@/components/accommodation/AccommodationDetailHeader";
 import AccommodationDetailGallery from "@/components/accommodation/AccommodationDetailGallery";
 import AccommodationDetailInfo from "@/components/accommodation/AccommodationDetailInfo";
 import AccommodationDetailSidebar from "@/components/accommodation/AccommodationDetailSidebar";
+import { useAccommodation } from "@/hooks/use-accommodations";
+import { adaptDatabaseToUIAccommodation } from "@/utils/accommodationAdapters";
+import GlobalLoading from "@/components/utils/GlobalLoading";
 
 const AccommodationDetailPage = () => {
   const { id } = useParams();
   
-  // Find the accommodation by ID
-  const accommodation = accommodations.find(acc => acc.id === Number(id));
+  // Use the hook to fetch accommodation details
+  const { accommodation: dbAccommodation, isLoading, error } = useAccommodation(id ? parseInt(id) : undefined);
+  
+  // Convert db accommodation to UI format
+  const accommodation = dbAccommodation ? adaptDatabaseToUIAccommodation(dbAccommodation) : null;
 
-  if (!accommodation) {
+  if (isLoading) {
+    return <GlobalLoading />;
+  }
+
+  if (error || !accommodation) {
     return (
       <div className="min-h-screen">
         <Header />

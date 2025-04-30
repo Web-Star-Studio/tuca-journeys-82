@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
@@ -10,6 +9,7 @@ import AccommodationDeleteDialog from "@/components/admin/accommodations/Accommo
 import { Accommodation } from "@/types/database";
 import { useUI } from "@/contexts/UIContext";
 import { toast } from "sonner";
+import PopulateDbButton from "@/components/admin/accommodations/PopulateDbButton";
 
 const AdminAccommodations = () => {
   // State management for UI
@@ -177,7 +177,11 @@ const AdminAccommodations = () => {
           accommodationTypes={accommodationTypes}
           priceRange={priceRange}
           isProcessing={isAnyProcessing}
-        />
+        >
+          <div className="mt-2 flex justify-end">
+            <PopulateDbButton />
+          </div>
+        </AccommodationSearch>
 
         <AccommodationList
           accommodations={accommodations || []}

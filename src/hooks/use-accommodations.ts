@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient, QueryFunctionContext } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
@@ -6,6 +5,7 @@ import { accommodationService } from '@/services/accommodation-service';
 import { withTimeout } from '@/utils/asyncUtils';
 import { useUI } from '@/contexts/UIContext';
 import { useState } from 'react';
+import { AccommodationFilters, PriceRange } from '@/types/accommodation';
 
 // Define type for filter options
 export interface AccommodationFilters {

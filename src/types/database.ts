@@ -1,4 +1,3 @@
-
 // Supabase types
 export interface Tour {
   id: number;
@@ -49,7 +48,7 @@ export interface Accommodation {
   amenities: string[];
   gallery_images: string[];
   rating: number;
-  is_featured?: boolean;
+  is_featured?: boolean;  // Explicitly declared to match database schema
 }
 
 export interface Booking {

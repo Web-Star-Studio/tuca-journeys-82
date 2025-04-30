@@ -4,11 +4,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { tours } from "@/data/tours";
-import { accommodations } from "@/data/accommodations";
+import EventsGrid from "@/components/event/EventsGrid";
 import { events } from "@/data/events";
 import TourGrid from "@/components/tour/TourGrid";
 import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
-import EventsGrid from "@/components/event/EventsGrid";
 
 const Reservar = () => {
   const [sortBy, setSortBy] = useState("priceAsc");
@@ -48,12 +47,7 @@ const Reservar = () => {
             </TabsContent>
             
             <TabsContent value="accommodations">
-              <AccommodationsGrid 
-                filteredAccommodations={accommodations}
-                resetFilters={resetFilters}
-                onSortChange={handleSortChange}
-                sortBy={sortBy}
-              />
+              <AccommodationsGrid />
             </TabsContent>
             
             <TabsContent value="events">

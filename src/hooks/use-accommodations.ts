@@ -45,8 +45,18 @@ export const useAccommodations = (initialFilters?: AccommodationFilters) => {
         // Extract filters from query key
         const [_, currentFilters] = queryKey as [string, AccommodationFilters];
         
+        // Ensure all required fields are present with defaults
+        const fullFilters = {
+          searchQuery: currentFilters.searchQuery || '',
+          type: currentFilters.type || 'all',
+          minPrice: currentFilters.minPrice,
+          maxPrice: currentFilters.maxPrice,
+          minRating: currentFilters.minRating,
+          sortBy: currentFilters.sortBy || 'newest'
+        };
+        
         return await withTimeout(
-          () => accommodationService.getAccommodations(currentFilters),
+          () => accommodationService.getAccommodations(fullFilters),
           15000, // 15 seconds timeout
           [] as Accommodation[] // Fallback value
         );

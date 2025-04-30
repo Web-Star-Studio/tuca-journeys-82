@@ -1,13 +1,15 @@
 
 import React from "react";
 import AccommodationCard from "./AccommodationCard";
-import { Accommodation } from "@/types/database";
+import { Accommodation as DatabaseAccommodation } from "@/types/database";
+import { Accommodation as UIAccommodation } from "@/data/accommodations"; 
 import { useAccommodations } from "@/hooks/use-accommodations";
 import AccommodationFilter from "./AccommodationFilter";
 import { Loader2 } from "lucide-react";
+import { adaptDatabaseToUIAccommodations } from "@/utils/accommodationAdapters";
 
 interface AccommodationsGridProps {
-  initialAccommodations?: Accommodation[];
+  initialAccommodations?: DatabaseAccommodation[];
 }
 
 const AccommodationsGrid = ({ initialAccommodations }: AccommodationsGridProps) => {
@@ -30,7 +32,10 @@ const AccommodationsGrid = ({ initialAccommodations }: AccommodationsGridProps) 
   });
 
   // Use either provided accommodations or fetched ones
-  const displayAccommodations = initialAccommodations || accommodations || [];
+  const dbAccommodations = initialAccommodations || accommodations || [];
+  
+  // Convert database accommodations to UI accommodations
+  const displayAccommodations = adaptDatabaseToUIAccommodations(dbAccommodations);
 
   // Handle error state
   if (error) {

@@ -6,18 +6,23 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import AccommodationCard from "./accommodation/AccommodationCard";
 import { useQuery } from "@tanstack/react-query";
 import { accommodationService } from "@/services/accommodation-service";
+import { adaptDatabaseToUIAccommodations } from "@/utils/accommodationAdapters";
 
 const FeaturedAccommodations = () => {
   const [hoveredAccommodation, setHoveredAccommodation] = useState<number | null>(null);
   
   // Fetch featured accommodations from the database
-  const { data: accommodations, isLoading, error } = useQuery({
+  const { data: dbAccommodations, isLoading, error } = useQuery({
     queryKey: ['featured-accommodations'],
     queryFn: async () => {
       // Sort by rating descending to get the highest rated accommodations
       const allAccommodations = await accommodationService.getAccommodations({
-        sortBy: 'rating',
-        minRating: 4 // Only show well-rated accommodations
+        searchQuery: '',
+        type: 'all',
+        minPrice: null,
+        maxPrice: null,
+        minRating: 4,
+        sortBy: 'rating'
       });
       
       // Return top 3 accommodations
@@ -25,6 +30,9 @@ const FeaturedAccommodations = () => {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
+  
+  // Convert to UI accommodations
+  const accommodations = dbAccommodations ? adaptDatabaseToUIAccommodations(dbAccommodations) : [];
 
   return (
     <section className="section-padding bg-white">

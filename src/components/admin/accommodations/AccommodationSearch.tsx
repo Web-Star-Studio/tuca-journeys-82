@@ -63,7 +63,7 @@ const AccommodationSearch = ({
   
   // Reset all filters
   const handleResetFilters = () => {
-    const resetFilters = {
+    const resetFilters: AccommodationFilters = {
       searchQuery: '',
       type: 'all',
       minPrice: null,
@@ -97,6 +97,15 @@ const AccommodationSearch = ({
   
   const formatPrice = (price: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+
+  const updateLocalSortBy = (value: string) => {
+    // Type guard to ensure value is a valid sortBy option
+    const sortValue = value as AccommodationFilters['sortBy'];
+    setLocalFilters({
+      ...localFilters,
+      sortBy: sortValue
+    });
+  };
 
   return (
     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-3 lg:space-y-0 mb-6">
@@ -218,10 +227,7 @@ const AccommodationSearch = ({
                 <h3 className="text-sm font-medium">Ordenar Por</h3>
                 <Select 
                   value={localFilters.sortBy ?? 'newest'} 
-                  onValueChange={(value) => setLocalFilters({
-                    ...localFilters,
-                    sortBy: value as AccommodationFilters['sortBy']
-                  })}
+                  onValueChange={updateLocalSortBy}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Ordenar por" />

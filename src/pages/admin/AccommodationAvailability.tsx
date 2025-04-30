@@ -1,27 +1,28 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodation } from "@/hooks/use-accommodations";
-import AccommodationAvailabilityCalendar from "@/components/admin/accommodations/AccommodationAvailabilityCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const AccommodationAvailability = () => {
-  // Pegar o ID da hospedagem da URL
   const { id } = useParams<{ id: string }>();
   const accommodationId = id ? parseInt(id) : undefined;
   
-  // Buscar dados da hospedagem
-  const { data: accommodation, isLoading, error } = useAccommodation(accommodationId);
-
+  // Get accommodation details
+  const { accommodation, isLoading, error } = useAccommodation(accommodationId);
+  
   if (isLoading) {
     return (
-      <AdminLayout pageTitle="Carregando...">
+      <AdminLayout pageTitle="Carregando disponibilidade...">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tuca-ocean-blue"></div>
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </AdminLayout>
     );
@@ -29,63 +30,65 @@ const AccommodationAvailability = () => {
 
   if (error || !accommodation) {
     return (
-      <AdminLayout pageTitle="Erro">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-          <h2 className="font-bold mb-2">Erro ao carregar hospedagem</h2>
-          <p>{error?.message || "Hospedagem não encontrada"}</p>
-          <div className="mt-4">
+      <AdminLayout pageTitle="Erro ao carregar hospedagem">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-md">
+          <h3 className="text-red-800 font-medium">Hospedagem não encontrada</h3>
+          <p className="text-red-600 mt-2">Não foi possível carregar os detalhes da hospedagem.</p>
+          <Button asChild className="mt-4">
             <Link to="/admin/accommodations">
-              <Button variant="outline">Voltar para Hospedagens</Button>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para listagem
             </Link>
-          </div>
+          </Button>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout pageTitle={`Disponibilidade: ${accommodation.title}`}>
-      <div className="mb-6 flex items-center">
-        <Link to="/admin/accommodations" className="mr-4">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">{accommodation.title}</h1>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2">
-          <AccommodationAvailabilityCalendar accommodationId={accommodationId} />
-        </div>
-
-        <div className="xl:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações da Hospedagem</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Capacidade</h3>
-                  <p>{accommodation.max_guests} hóspedes</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Preço Padrão</h3>
-                  <p>R$ {accommodation.price_per_night.toFixed(2)} por noite</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Tipo</h3>
-                  <p>{accommodation.type}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Quartos</h3>
-                  <p>{accommodation.bedrooms} quartos, {accommodation.bathrooms} banheiros</p>
+    <AdminLayout pageTitle={`Disponibilidade - ${accommodation.title}`}>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Disponibilidade</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="w-full lg:w-1/2">
+                <h3 className="font-medium mb-3">Detalhes da Hospedagem</h3>
+                <div className="space-y-2">
+                  <p><strong>ID:</strong> {accommodation.id}</p>
+                  <p><strong>Nome:</strong> {accommodation.title}</p>
+                  <p><strong>Tipo:</strong> {accommodation.type}</p>
+                  <p><strong>Preço por noite:</strong> R$ {accommodation.price_per_night.toFixed(2)}</p>
+                  <p><strong>Avaliação:</strong> {accommodation.rating || "Sem avaliações"}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              
+              <div className="w-full lg:w-1/2">
+                <h3 className="font-medium mb-3">Calendário de Disponibilidade</h3>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    A implementação do calendário será feita no próximo sprint. Por enquanto, 
+                    este é um placeholder para visualizar a disponibilidade para reservas.
+                  </p>
+                  <Calendar
+                    mode="single"
+                    selected={new Date()}
+                    onSelect={() => {}}
+                    className="border rounded-md"
+                    locale={ptBR}
+                    footer={
+                      <div className="text-center text-sm text-muted-foreground">
+                        {format(new Date(), "MMMM yyyy", { locale: ptBR })}
+                      </div>
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );

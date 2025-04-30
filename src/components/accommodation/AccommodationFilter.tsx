@@ -60,7 +60,7 @@ export default function AccommodationFilter({
 
   // Reset all filters
   const handleResetFilters = () => {
-    const resetFilters = {
+    const resetFilters: AccommodationFilters = {
       searchQuery: '',
       type: 'all',
       minPrice: null,
@@ -75,6 +75,15 @@ export default function AccommodationFilter({
   // Format price for display
   const formatPrice = (price: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+
+  const updateLocalSortBy = (value: string) => {
+    // Type guard to ensure value is a valid sortBy option
+    const sortValue = value as AccommodationFilters['sortBy'];
+    setLocalFilters({
+      ...localFilters,
+      sortBy: sortValue
+    });
+  };
 
   return (
     <div className="bg-white shadow-sm rounded-lg p-4 mb-6">
@@ -194,11 +203,8 @@ export default function AccommodationFilter({
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Ordenar Por</h3>
                   <Select 
-                    value={localFilters.sortBy ?? 'newest'} 
-                    onValueChange={(value) => setLocalFilters({
-                      ...localFilters,
-                      sortBy: value as AccommodationFilters['sortBy']
-                    })}
+                    value={localFilters.sortBy || 'newest'} 
+                    onValueChange={updateLocalSortBy}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Ordenar por" />

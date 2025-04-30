@@ -1,7 +1,7 @@
-
 import { supabase } from '@/lib/supabase';
 import { Accommodation } from '@/types/database';
 import { BaseApiService } from './base-api';
+import { isValidPrice } from '@/utils/validationUtils';
 
 class AccommodationService extends BaseApiService {
   /**
@@ -9,7 +9,7 @@ class AccommodationService extends BaseApiService {
    */
   async getAccommodations(options = {
     searchQuery: '',
-    type: '',
+    type: 'all',
     minPrice: null as number | null,
     maxPrice: null as number | null,
     minRating: null as number | null,
@@ -102,7 +102,7 @@ class AccommodationService extends BaseApiService {
   /**
    * Creates a new accommodation
    */
-  async createAccommodation(accommodation: Partial<Accommodation>): Promise<Accommodation> {
+  async createAccommodation(accommodation: Accommodation): Promise<Accommodation> {
     console.log('Creating new accommodation:', accommodation);
     
     // Validate required fields
@@ -305,7 +305,7 @@ class AccommodationService extends BaseApiService {
       .from('accommodations')
       .select('type')
       .order('type')
-      .is('type', 'not.null');
+      .not('type', 'is', null);
       
     if (error) {
       console.error('Error fetching accommodation types:', error);
@@ -344,19 +344,23 @@ class AccommodationService extends BaseApiService {
   /**
    * Helper method to validate accommodation data
    */
-  private validateAccommodation(accommodation: Partial<Accommodation>): void {
+  private validateAccommodation(accommodation: Accommodation): void {
     if (!accommodation.title || !accommodation.description || !accommodation.short_description ||
         !accommodation.address || !accommodation.image_url || !accommodation.type ||
         accommodation.price_per_night === undefined || accommodation.bathrooms === undefined || 
         accommodation.bedrooms === undefined || accommodation.max_guests === undefined) {
       throw new Error('Missing required fields for accommodation');
     }
+    
+    if (!isValidPrice(accommodation.price_per_night)) {
+      throw new Error('Invalid price for accommodation');
+    }
   }
   
   /**
    * Helper method to prepare accommodation data with defaults
    */
-  private prepareAccommodationData(accommodation: Partial<Accommodation>): Partial<Accommodation> {
+  private prepareAccommodationData(accommodation: Accommodation): Accommodation {
     const now = new Date().toISOString();
     return {
       ...accommodation,

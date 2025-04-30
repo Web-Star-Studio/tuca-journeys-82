@@ -22,7 +22,9 @@ const FeaturedAccommodations = () => {
         minPrice: null,
         maxPrice: null,
         minRating: 4,
-        sortBy: 'rating'
+        sortBy: 'rating',
+        amenities: [], // Added the missing required property
+        maxGuests: null // Added the missing required property
       });
       
       // Return top 3 accommodations

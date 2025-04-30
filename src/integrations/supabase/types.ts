@@ -331,6 +331,7 @@ export type Database = {
       }
       event_bookings: {
         Row: {
+          attendee_info: Json | null
           created_at: string | null
           event_id: number | null
           id: number
@@ -343,6 +344,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          attendee_info?: Json | null
           created_at?: string | null
           event_id?: number | null
           id?: number
@@ -355,6 +357,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          attendee_info?: Json | null
           created_at?: string | null
           event_id?: number | null
           id?: number
@@ -369,6 +372,103 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "event_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_sessions: {
+        Row: {
+          available_spots: number
+          created_at: string
+          custom_price: number | null
+          description: string | null
+          end_time: string
+          event_id: number
+          id: number
+          name: string | null
+          session_date: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          available_spots: number
+          created_at?: string
+          custom_price?: number | null
+          description?: string | null
+          end_time: string
+          event_id: number
+          id?: number
+          name?: string | null
+          session_date: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          available_spots?: number
+          created_at?: string
+          custom_price?: number | null
+          description?: string | null
+          end_time?: string
+          event_id?: number
+          id?: number
+          name?: string | null
+          session_date?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tickets: {
+        Row: {
+          available_quantity: number
+          created_at: string
+          description: string | null
+          event_id: number
+          id: number
+          max_per_order: number | null
+          name: string
+          price: number
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          available_quantity: number
+          created_at?: string
+          description?: string | null
+          event_id: number
+          id?: number
+          max_per_order?: number | null
+          name: string
+          price: number
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number
+          created_at?: string
+          description?: string | null
+          event_id?: number
+          id?: number
+          max_per_order?: number | null
+          name?: string
+          price?: number
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tickets_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
@@ -391,10 +491,12 @@ export type Database = {
           is_featured: boolean | null
           location: string
           name: string
+          organizer: string | null
           partner_id: string | null
           price: number
           short_description: string
           start_time: string
+          status: string | null
           updated_at: string | null
         }
         Insert: {
@@ -411,10 +513,12 @@ export type Database = {
           is_featured?: boolean | null
           location: string
           name: string
+          organizer?: string | null
           partner_id?: string | null
           price: number
           short_description: string
           start_time: string
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -431,10 +535,12 @@ export type Database = {
           is_featured?: boolean | null
           location?: string
           name?: string
+          organizer?: string | null
           partner_id?: string | null
           price?: number
           short_description?: string
           start_time?: string
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1229,6 +1335,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_event_tickets: {
+        Args: {
+          p_event_id: number
+          p_user_id: string
+          p_ticket_count: number
+          p_total_price: number
+          p_ticket_data: Json
+        }
+        Returns: Json
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

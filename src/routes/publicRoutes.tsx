@@ -1,3 +1,4 @@
+
 import React from "react";
 import { RouteObject } from "react-router-dom";
 import Index from "@/pages/Index";
@@ -5,25 +6,26 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Tours from "@/pages/Tours";
 import TourDetail from "@/pages/TourDetail";
-import Accommodations from "@/pages/Accommodations";
-import AccommodationDetail from "@/pages/AccommodationDetail";
-import Bookings from "@/pages/Bookings";
-import Profile from "@/pages/Profile";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
-import ForgotPassword from "@/pages/ForgotPassword";
-import ResetPassword from "@/pages/ResetPassword";
-import Orders from "@/pages/Orders";
-import Wishlist from "@/pages/Wishlist";
-import Map from "@/pages/Map";
-import Packages from "@/pages/Packages";
-import PackageDetail from "@/pages/PackageDetail";
-import Products from "@/pages/Products";
-import ProductDetail from "@/pages/ProductDetail";
-import Coupons from "@/pages/Coupons";
-import Points from "@/pages/Points";
-import Notifications from "@/pages/Notifications";
+import Profile from "@/pages/Profile";
+import Events from "@/pages/Events";
 import Payments from "@/pages/Payments";
+import Notifications from "@/pages/Notifications";
+import FeaturedAccommodationsPage from "@/pages/FeaturedAccommodationsPage";
+import AccommodationDetailsPage from "@/pages/AccommodationDetailsPage";
+import BookingsPage from "@/pages/BookingsPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPassword from "@/pages/ResetPassword";
+import OrdersPage from "@/pages/OrdersPage";
+import WishlistPage from "@/pages/WishlistPage";
+import MapPage from "@/pages/MapPage";
+import PackagesPage from "@/pages/PackagesPage";
+import PackageDetailPage from "@/pages/PackageDetailPage";
+import ProductsPage from "@/pages/ProductsPage";
+import ProductDetailPage from "@/pages/ProductDetailPage";
+import CouponsPage from "@/pages/CouponsPage";
+import PointsPage from "@/pages/PointsPage";
 import SettingsPage from "@/pages/SettingsPage";
 
 // Add these imports:
@@ -54,15 +56,15 @@ const publicRoutes: RouteObject[] = [
   },
   {
     path: "/hospedagens",
-    element: <Accommodations />,
+    element: <FeaturedAccommodationsPage />,
   },
   {
     path: "/hospedagens/:id",
-    element: <AccommodationDetail />,
+    element: <AccommodationDetailsPage />,
   },
   {
     path: "/reservas",
-    element: <Bookings />,
+    element: <BookingsPage />,
   },
   {
     path: "/perfil",
@@ -78,7 +80,7 @@ const publicRoutes: RouteObject[] = [
   },
   {
     path: "/forgot-password",
-    element: <ForgotPassword />,
+    element: <ForgotPasswordPage />,
   },
   {
     path: "/reset-password",
@@ -86,39 +88,39 @@ const publicRoutes: RouteObject[] = [
   },
   {
     path: "/pedidos",
-    element: <Orders />,
+    element: <OrdersPage />,
   },
   {
     path: "/lista-de-desejos",
-    element: <Wishlist />,
+    element: <WishlistPage />,
   },
   {
     path: "/mapa",
-    element: <Map />,
+    element: <MapPage />,
   },
   {
     path: "/pacotes",
-    element: <Packages />,
+    element: <PackagesPage />,
   },
   {
     path: "/pacotes/:id",
-    element: <PackageDetail />,
+    element: <PackageDetailPage />,
   },
   {
     path: "/loja",
-    element: <Products />,
+    element: <ProductsPage />,
   },
   {
     path: "/loja/:id",
-    element: <ProductDetail />,
+    element: <ProductDetailPage />,
   },
   {
     path: "/cupons",
-    element: <Coupons />,
+    element: <CouponsPage />,
   },
   {
     path: "/pontos",
-    element: <Points />,
+    element: <PointsPage />,
   },
   {
     path: "/notificacoes",

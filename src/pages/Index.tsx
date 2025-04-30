@@ -1,3 +1,4 @@
+
 import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,6 +13,7 @@ import Testimonials from "@/components/Testimonials";
 import ContactCTA from "@/components/ContactCTA";
 import InstagramFeed from "@/components/InstagramFeed";
 import FeaturedEvents from "@/components/FeaturedEvents";
+import FeaturedAccommodations from "@/components/FeaturedAccommodations";
 
 const Index = () => {
   return (

@@ -218,7 +218,7 @@ class EventService extends BaseApiService {
   /**
    * Books tickets for an event
    */
-  async bookEventTickets(eventId: number, userId: string, ticketCount: number, ticketData: any): Promise<any> {
+  async bookEventTickets(eventId: number, userId: string, ticketCount: number, attendeeInfo: any): Promise<any> {
     console.log(`Booking ${ticketCount} tickets for event ID: ${eventId}`);
     
     // First get the event to check availability
@@ -231,13 +231,13 @@ class EventService extends BaseApiService {
       throw new Error('Not enough available spots for this booking');
     }
     
-    // Start a transaction
+    // Use the book_event_tickets function we created
     const { data, error } = await this.supabase.rpc('book_event_tickets', {
       p_event_id: eventId,
       p_user_id: userId,
       p_ticket_count: ticketCount,
       p_total_price: event.price * ticketCount,
-      p_ticket_data: ticketData
+      p_ticket_data: attendeeInfo
     });
 
     if (error) {

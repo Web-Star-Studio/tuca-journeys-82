@@ -1,81 +1,72 @@
 
 import React from "react";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { categories } from "@/data/events";
+import { Search } from "lucide-react";
 
 interface EventSearchFilterProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
-  // Add these new props to match Events.tsx
-  activeCategory?: string;
   categories?: string[];
   onSearchChange?: (query: string) => void;
   onCategoryChange?: (category: string) => void;
+  activeCategory?: string;
 }
 
-const EventSearchFilter = ({ 
-  searchQuery, 
-  setSearchQuery, 
-  selectedCategory, 
+const EventSearchFilter: React.FC<EventSearchFilterProps> = ({
+  searchQuery,
+  setSearchQuery,
+  selectedCategory,
   setSelectedCategory,
-  // Add fallback handling for the new props
-  activeCategory,
-  categories: categoryOptions,
+  categories = ['Todas', 'Música', 'Esporte', 'Cultural', 'Educativo', 'Gastronomia', 'Festival'],
   onSearchChange,
-  onCategoryChange
-}: EventSearchFilterProps) => {
-  // Handle both API styles
+  onCategoryChange,
+  activeCategory = 'Todas'
+}) => {
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    if (onCategoryChange) {
+      onCategoryChange(category);
+    }
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    if (onSearchChange) onSearchChange(value);
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (onSearchChange) {
+      onSearchChange(query);
+    }
   };
-  
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    if (onCategoryChange) onCategoryChange(value);
-  };
-  
-  // Use activeCategory as fallback if provided
-  const effectiveCategory = activeCategory || selectedCategory;
-  
-  // Use provided categories or default to imported categories
-  const categoriesList = categoryOptions || categories;
-  
+
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <div className="mb-8">
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <Input
+          type="text"
           placeholder="Buscar eventos..."
-          className="pl-10"
           value={searchQuery}
           onChange={handleSearchChange}
+          className="pl-10 py-6 text-base"
         />
       </div>
-      <Select value={effectiveCategory} onValueChange={handleCategoryChange}>
-        <SelectTrigger className="w-full md:w-[180px]">
-          <SelectValue placeholder="Categoria" />
-        </SelectTrigger>
-        <SelectContent>
-          {categoriesList.map((category) => (
-            <SelectItem key={category} value={category}>
-              {category}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+
+      <div className="flex flex-wrap gap-2 mb-2">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => handleCategoryClick(category)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              category === selectedCategory
+                ? 'bg-tuca-ocean-blue text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

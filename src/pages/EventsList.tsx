@@ -18,12 +18,7 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from "@/components/ui/sheet";
-import {
-  Slider,
-  SliderTrack,
-  SliderThumb,
-  SliderRange
-} from "@/components/ui/slider";
+import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -68,12 +63,17 @@ const EventsList = () => {
     updateFilters({ category });
   };
 
-  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
-    setDateRange(range);
-    updateFilters({
-      startDate: range.from ? format(range.from, 'yyyy-MM-dd') : undefined,
-      endDate: range.to ? format(range.to, 'yyyy-MM-dd') : undefined
-    });
+  const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
+    if (range) {
+      setDateRange(range);
+      updateFilters({
+        startDate: range.from ? format(range.from, 'yyyy-MM-dd') : undefined,
+        endDate: range.to ? format(range.to, 'yyyy-MM-dd') : undefined
+      });
+    } else {
+      setDateRange({ from: undefined, to: undefined });
+      updateFilters({ startDate: undefined, endDate: undefined });
+    }
   };
 
   const handlePriceRangeChange = (values: number[]) => {
@@ -150,7 +150,7 @@ const EventsList = () => {
                       <Calendar
                         mode="range"
                         selected={dateRange}
-                        onSelect={(range) => handleDateRangeChange(range || { from: undefined, to: undefined })}
+                        onSelect={handleDateRangeChange}
                         locale={ptBR}
                         showOutsideDays
                         className="mx-auto"

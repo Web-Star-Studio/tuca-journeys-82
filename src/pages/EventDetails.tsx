@@ -10,19 +10,149 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Clock, MapPin, Users, Calendar, Share2, Heart } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import EventDetailHeader from "@/components/event/detail/EventDetailHeader";
-import EventDetailInfo from "@/components/event/detail/EventDetailInfo";
-import EventBreadcrumb from "@/components/event/detail/EventBreadcrumb";
-import RelatedEvents from "@/components/event/detail/RelatedEvents";
-import EventLocationSection from "@/components/event/detail/EventLocationSection";
-import EventNotFound from "@/components/event/detail/EventNotFound";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { toast } from "sonner";
 import { AttendeeInfo } from "@/types/event";
+
+const EventBreadcrumb = ({ category, eventName }: { category: string; eventName: string }) => (
+  <div className="flex text-sm text-gray-500 mb-6">
+    <a href="/" className="hover:text-tuca-ocean-blue">Início</a>
+    <span className="mx-2">/</span>
+    <a href="/eventos" className="hover:text-tuca-ocean-blue">Eventos</a>
+    <span className="mx-2">/</span>
+    <a href={`/eventos?category=${category}`} className="hover:text-tuca-ocean-blue">{category}</a>
+    <span className="mx-2">/</span>
+    <span className="text-gray-700 font-medium">{eventName}</span>
+  </div>
+);
+
+const EventDetailHeader = ({ event }: { event: any }) => (
+  <div className="mb-8">
+    <h1 className="text-3xl md:text-4xl font-bold mb-4">{event.name}</h1>
+    <div className="flex items-center gap-4">
+      <span className="px-3 py-1 rounded-full bg-tuca-ocean-blue text-white text-sm font-medium">
+        {event.category}
+      </span>
+      {event.status === 'scheduled' && (
+        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
+          Agendado
+        </span>
+      )}
+      {event.status === 'ongoing' && (
+        <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+          Em andamento
+        </span>
+      )}
+      {event.status === 'completed' && (
+        <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-sm font-medium">
+          Finalizado
+        </span>
+      )}
+      {event.status === 'cancelled' && (
+        <span className="px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-medium">
+          Cancelado
+        </span>
+      )}
+    </div>
+  </div>
+);
+
+const EventDetailInfo = ({ event }: { event: any }) => (
+  <div className="mb-10">
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm mb-8">
+      <div className="h-96 relative">
+        <img 
+          src={event.image_url} 
+          alt={event.name} 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/placeholder.svg';
+          }}
+        />
+      </div>
+      <div className="p-6">
+        <h2 className="text-xl font-medium mb-4">Sobre o evento</h2>
+        <div className="prose prose-slate max-w-none">
+          <p>{event.description}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const EventLocationSection = ({ location }: { location: string }) => (
+  <div className="mb-10">
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div className="p-6">
+        <h2 className="text-xl font-medium mb-4">Localização</h2>
+        <div className="flex items-start">
+          <MapPin className="h-5 w-5 mt-0.5 mr-3 text-tuca-ocean-blue" />
+          <div>
+            <p className="text-gray-700">{location}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const EventNotFound = () => (
+  <div className="container mx-auto px-4 py-16 text-center">
+    <h2 className="text-2xl font-bold mb-4">Evento não encontrado</h2>
+    <p className="mb-8">O evento que você está procurando não existe ou foi removido.</p>
+    <Button asChild>
+      <a href="/eventos">Ver outros eventos</a>
+    </Button>
+  </div>
+);
+
+const RelatedEvents = ({ events }: { events: any[] }) => {
+  if (!events || events.length === 0) return null;
+  
+  return (
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold mb-8">Eventos relacionados</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {events.map(event => (
+          <a 
+            href={`/eventos/${event.id}`} 
+            key={event.id}
+            className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="h-48 relative">
+              <img 
+                src={event.image_url} 
+                alt={event.name} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-medium mb-2">{event.name}</h3>
+              <div className="flex items-center text-sm text-gray-600 mb-1">
+                <Calendar className="h-4 w-4 mr-1.5" />
+                <span>
+                  {format(parseISO(event.date), "dd MMM yyyy", { locale: ptBR })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                <span className="font-bold text-tuca-deep-blue">
+                  {event.price > 0 ? `R$ ${event.price.toFixed(2).replace('.', ',')}` : 'Gratuito'}
+                </span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const EventDetails = () => {
   const { id } = useParams<{ id: string }>();

@@ -25,15 +25,36 @@ const FeaturedTours = () => {
     // Convert from DB format to component format
     const componentTours = featuredTours.map(adaptDBTourToComponentTour);
     
+    // Add debugging logs to understand available categories
+    console.log("Active category:", activeCategory);
+    console.log("Available tours:", componentTours.map(tour => ({ 
+      id: tour.id,
+      title: tour.title,
+      category: tour.category 
+    })));
+    
     // Filter by category if needed
     if (activeCategory === "Todos") {
+      console.log("Showing all tours");
       setDisplayTours(componentTours);
     } else {
-      setDisplayTours(
-        componentTours.filter(tour => 
-          tour.category.toLowerCase() === activeCategory.toLowerCase()
-        )
-      );
+      // Use case-insensitive comparison and more flexible matching
+      const filteredTours = componentTours.filter(tour => {
+        // Normalize both strings for comparison
+        const normalizedTourCategory = tour.category.toLowerCase().trim();
+        const normalizedActiveCategory = activeCategory.toLowerCase().trim();
+        
+        // Check if tour category contains the selected category or vice versa
+        const isMatch = normalizedTourCategory.includes(normalizedActiveCategory) || 
+                      normalizedActiveCategory.includes(normalizedTourCategory);
+        
+        console.log(`Tour ${tour.id} (${tour.title}) - Category: ${tour.category} - Match with ${activeCategory}: ${isMatch}`);
+        
+        return isMatch;
+      });
+      
+      console.log(`Found ${filteredTours.length} tours for category ${activeCategory}`);
+      setDisplayTours(filteredTours);
     }
   }, [featuredTours, activeCategory]);
 

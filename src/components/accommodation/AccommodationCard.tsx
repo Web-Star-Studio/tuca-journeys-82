@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star, Wifi, Wind, Coffee, Waves, Users, Bed, Bath } from "lucide-react";
+import { MapPin, Star, Users, Bed, Bath } from "lucide-react";
 import { Accommodation } from "@/data/accommodations";
 import SafeImage from "@/components/ui/safe-image";
+import { getAmenityIcon } from "@/utils/accommodationUtils";
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
@@ -15,23 +16,6 @@ interface AccommodationCardProps {
 const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   
-  // Get icon for amenity
-  const getAmenityIcon = (amenity: string) => {
-    switch (amenity) {
-      case "Wi-Fi":
-        return <Wifi className="h-3 w-3" />;
-      case "Ar-condicionado":
-        return <Wind className="h-3 w-3" />;
-      case "Café da manhã":
-        return <Coffee className="h-3 w-3" />;
-      case "Piscina":
-      case "Piscina privativa":
-        return <Waves className="h-3 w-3" />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">
       <div className="relative aspect-[4/3] overflow-hidden">

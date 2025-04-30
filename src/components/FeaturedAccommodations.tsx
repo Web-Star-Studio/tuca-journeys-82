@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { accommodationService } from "@/services/accommodation-service";
 import { adaptDatabaseToUIAccommodations } from "@/utils/accommodationAdapters";
 
 const FeaturedAccommodations = () => {
+  
   const [hoveredAccommodation, setHoveredAccommodation] = useState<number | null>(null);
   
   // Fetch featured accommodations from the database

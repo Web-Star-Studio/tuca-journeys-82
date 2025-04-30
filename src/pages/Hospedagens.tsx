@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,6 +9,7 @@ import { getAmenityIcon } from "@/utils/accommodationUtils";
 import { useAccommodations } from "@/hooks/use-accommodations";
 
 const Hospedagens = () => {
+  
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   

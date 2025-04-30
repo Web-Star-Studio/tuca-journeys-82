@@ -30,6 +30,8 @@ export interface AccommodationFilters {
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
   amenities?: string[];
   maxGuests?: number | null;
+  limit?: number;      // Added for pagination
+  offset?: number;     // Added for pagination
 }
 
 // Export AccommodationFilterParams as an alias for AccommodationFilters to maintain compatibility

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, Edit, Trash2, Calendar, MapPin, Star } from "lucide-react";
@@ -111,7 +110,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               className="text-tuca-medium-blue hover:text-tuca-ocean-blue hover:bg-tuca-light-blue/40"
               disabled={disabled}
             >
-              <Link to={`/hospedagens/${accommodation.id}`} target="_blank">
+              <Link to={`/hospedagem/${accommodation.id}`} target="_blank">
                 <ExternalLink className="h-4 w-4" />
               </Link>
             </Button>

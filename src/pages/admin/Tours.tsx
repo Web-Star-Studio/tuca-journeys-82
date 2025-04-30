@@ -96,10 +96,11 @@ const Tours = () => {
     showGlobalSpinner(true);
     
     try {
+      // Fix the return type to match what deleteTour returns
       await withTimeout(
         () => deleteTour(tourToDelete.id), 
         10000,
-        false // Fallback value
+        { success: true } // Match the expected return type
       );
       
       setDeleteDialogOpen(false);

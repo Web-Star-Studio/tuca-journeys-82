@@ -34,7 +34,7 @@ export const useAccommodations = () => {
         await withTimeout(
           () => accommodationService.deleteAccommodation(accommodationId),
           15000, // 15 seconds timeout
-          false // Fallback value
+          undefined // Fallback value needs to be void/undefined, not boolean
         );
         return { success: true };
       } catch (error) {

@@ -46,10 +46,28 @@ const AdminAccommodations = () => {
         showGlobalSpinner(true);
         
         // Use withTimeout to ensure we don't block the UI indefinitely
+        // We need to return the same type as refetch() would return
         await withTimeout(
           () => refetch(), 
           12000, 
-          false // Fallback value
+          {
+            data: [] as Accommodation[],
+            isError: false,
+            error: null as any,
+            isLoading: false,
+            isSuccess: true,
+            // Add other required properties
+            status: 'success' as const,
+            isStale: false,
+            isFetching: false,
+            isPending: false,
+            isRefetching: false,
+            dataUpdatedAt: Date.now(),
+            errorUpdatedAt: Date.now(),
+            failureCount: 0,
+            failureReason: null,
+            errorUpdateCount: 0,
+          }
         );
         
         if (isMounted.current) {

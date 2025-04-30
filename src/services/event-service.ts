@@ -116,7 +116,9 @@ class EventService extends BaseApiService {
       .from('events')
       .insert({
         name: eventData.name || 'Novo Evento',
+        title: eventData.name || 'Novo Evento', // Ensure title is set (for database)
         description: eventData.description || '',
+        short_description: eventData.description?.substring(0, 150) || '', // Set short_description from description
         date: eventData.date || new Date().toISOString().split('T')[0],
         start_time: eventData.start_time || '19:00',
         end_time: eventData.end_time || '22:00',
@@ -150,7 +152,11 @@ class EventService extends BaseApiService {
     // Convert frontend model to database model
     const dbUpdates = {
       ...(updates.name !== undefined && { name: updates.name }),
+      ...(updates.name !== undefined && { title: updates.name }), // Update title as well for consistency
       ...(updates.description !== undefined && { description: updates.description }),
+      ...(updates.description !== undefined && { 
+        short_description: updates.description.substring(0, 150) // Update short_description from description
+      }),
       ...(updates.date !== undefined && { date: updates.date }),
       ...(updates.start_time !== undefined && { start_time: updates.start_time }),
       ...(updates.end_time !== undefined && { end_time: updates.end_time }),

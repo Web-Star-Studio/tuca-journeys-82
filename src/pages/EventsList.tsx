@@ -65,7 +65,10 @@ const EventsList = () => {
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
     if (range) {
-      setDateRange(range);
+      setDateRange({
+        from: range.from,
+        to: range.to
+      });
       updateFilters({
         startDate: range.from ? format(range.from, 'yyyy-MM-dd') : undefined,
         endDate: range.to ? format(range.to, 'yyyy-MM-dd') : undefined

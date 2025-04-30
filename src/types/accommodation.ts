@@ -22,14 +22,14 @@ export interface UIAccommodation {
 
 // Enhancement options for the UI Accommodation interface
 export interface AccommodationFilters {
-  searchQuery: string;  // Required to match service implementation
-  type: string;         // Required to match service implementation
-  minPrice: number | null;
-  maxPrice: number | null;
-  minRating: number | null;
-  sortBy: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
-  amenities: string[];
-  maxGuests: number | null;
+  searchQuery?: string;  // Changed from required to optional for consistency
+  type?: string;         // Changed from required to optional for consistency
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  minRating?: number | null;
+  sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
+  amenities?: string[];
+  maxGuests?: number | null;
   limit?: number;      // Property for pagination
   offset?: number;     // Property for pagination
 }

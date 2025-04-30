@@ -1,61 +1,55 @@
-
 import { supabase } from '@/lib/supabase';
-import { Accommodation } from '@/types/database';
+import { Accommodation, AccommodationAvailability } from '@/types/database';
 import { BaseApiService } from './base-api';
-import { isValidPrice } from '@/utils/validationUtils';
 import { AccommodationFilters } from '@/types/accommodation';
 
 class AccommodationService extends BaseApiService {
   /**
    * Retrieves all accommodations from the database with optional filtering
    */
-  async getAccommodations(options: AccommodationFilters): Promise<Accommodation[]> {
-    console.log('Fetching accommodations from Supabase with options:', options);
-    
+  async getAccommodations(filters: AccommodationFilters): Promise<Accommodation[]> {
+    console.log('Fetching accommodations from Supabase with filters:', filters);
+
     let query = this.supabase.from('accommodations').select('*');
 
     // Apply full-text search if search query is provided
-    if (options.searchQuery && options.searchQuery.trim() !== '') {
-      const cleanedQuery = options.searchQuery.trim().replace(/['\\]/g, '').replace(/\s+/g, ' & ');
-      query = query.textSearch('search_vector', cleanedQuery, {
-        type: 'websearch',
-        config: 'portuguese'
-      });
+    if (filters.searchQuery && filters.searchQuery.trim() !== '') {
+      const cleanedQuery = filters.searchQuery.trim().replace(/['\\]/g, '').replace(/\s+/g, ' & ');
+      query = query.ilike('title', `%${cleanedQuery}%`);
     }
 
     // Apply type filter
-    if (options.type && options.type !== 'all') {
-      query = query.eq('type', options.type);
+    if (filters.type && filters.type !== 'all') {
+      query = query.eq('type', filters.type);
     }
 
     // Apply price filters
-    if (options.minPrice !== null) {
-      query = query.gte('price_per_night', options.minPrice);
+    if (filters.minPrice !== undefined) {
+      query = query.gte('price_per_night', filters.minPrice);
     }
-    if (options.maxPrice !== null) {
-      query = query.lte('price_per_night', options.maxPrice);
+    if (filters.maxPrice !== undefined) {
+      query = query.lte('price_per_night', filters.maxPrice);
     }
 
     // Apply rating filter
-    if (options.minRating !== null) {
-      query = query.gte('rating', options.minRating);
+    if (filters.minRating !== undefined) {
+      query = query.gte('rating', filters.minRating);
     }
-    
-    // Apply max guests filter (new)
-    if (options.maxGuests !== null) {
-      query = query.gte('max_guests', options.maxGuests);
-    }
-    
-    // Apply amenities filter (new)
-    if (options.amenities && options.amenities.length > 0) {
-      // Using Postgres array contains operator
-      options.amenities.forEach(amenity => {
+
+    // Apply amenities filter
+    if (filters.amenities && filters.amenities.length > 0) {
+      filters.amenities.forEach(amenity => {
         query = query.contains('amenities', [amenity]);
       });
     }
 
+    // Apply max guests filter
+    if (filters.maxGuests !== undefined) {
+      query = query.lte('max_guests', filters.maxGuests);
+    }
+
     // Apply sorting
-    switch (options.sortBy) {
+    switch (filters.sortBy) {
       case 'newest':
         query = query.order('created_at', { ascending: false });
         break;
@@ -71,15 +65,17 @@ class AccommodationService extends BaseApiService {
       case 'alphabetical':
         query = query.order('title', { ascending: true });
         break;
+      default:
+        query = query.order('created_at', { ascending: false });
     }
 
     // Apply pagination if provided
-    if (options.limit !== undefined) {
-      query = query.limit(options.limit);
+    if (filters.limit !== undefined) {
+      query = query.limit(filters.limit);
     }
-    
-    if (options.offset !== undefined) {
-      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+
+    if (filters.offset !== undefined) {
+      query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
     }
 
     // Execute the query
@@ -90,7 +86,7 @@ class AccommodationService extends BaseApiService {
       throw error;
     }
 
-    return data as Accommodation[];
+    return data || [];
   }
 
   /**
@@ -113,53 +109,45 @@ class AccommodationService extends BaseApiService {
       throw error;
     }
 
-    return data as Accommodation;
+    return data;
   }
 
   /**
    * Creates a new accommodation
    */
-  async createAccommodation(accommodationData: Partial<Accommodation>): Promise<Accommodation> {
-    console.log('Creating new accommodation:', accommodationData);
+  async createAccommodation(accommodation: Partial<Accommodation>): Promise<Accommodation> {
+    console.log('Creating accommodation:', accommodation);
     
-    // Create a complete accommodation object with required fields
-    const accommodation: Omit<Accommodation, 'id' | 'search_vector'> = {
-      title: accommodationData.title || 'Nova Hospedagem',
-      description: accommodationData.description || '',
-      short_description: accommodationData.short_description || '',
-      price_per_night: accommodationData.price_per_night || 0,
-      image_url: accommodationData.image_url || '',
-      address: accommodationData.address || '',
-      type: accommodationData.type || 'Hospedagem',
-      bedrooms: accommodationData.bedrooms || 1,
-      bathrooms: accommodationData.bathrooms || 1,
-      max_guests: accommodationData.max_guests || 2,
-      amenities: accommodationData.amenities || [],
-      gallery_images: accommodationData.gallery_images || [],
-      rating: accommodationData.rating || 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      ...accommodationData
+    // These transformations ensure frontend properties map to database properties
+    const dbAccommodation = {
+      title: accommodation.title || 'Nova Hospedagem',
+      description: accommodation.description || '',
+      short_description: accommodation.short_description || accommodation.description?.substring(0, 150) || '',
+      price_per_night: accommodation.price_per_night || 0,
+      image_url: accommodation.image_url || '/default-accommodation.jpg',
+      address: accommodation.address || '',
+      type: accommodation.type || 'pousada',
+      bedrooms: accommodation.bedrooms || 1,
+      bathrooms: accommodation.bathrooms || 1,
+      max_guests: accommodation.max_guests || 2,
+      amenities: accommodation.amenities || ['Wi-Fi'],
+      gallery_images: accommodation.gallery_images || [],
+      rating: accommodation.rating || 0,
+      is_featured: accommodation.is_featured // Use is_featured instead of featured
     };
-    
-    // Validate required fields
-    this.validateAccommodation(accommodation);
-
-    // Ensure search_vector is not included
-    const { search_vector, ...cleanAccommodation } = accommodation as any;
     
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert(cleanAccommodation)
-      .select()
+      .insert(dbAccommodation)
+      .select('*')
       .single();
-
+      
     if (error) {
       console.error('Error creating accommodation:', error);
       throw error;
     }
-
-    return data as Accommodation;
+    
+    return data;
   }
 
   /**
@@ -167,23 +155,12 @@ class AccommodationService extends BaseApiService {
    */
   async updateAccommodation(id: number, updates: Partial<Accommodation>): Promise<Accommodation> {
     console.log(`Updating accommodation with ID: ${id}`, updates);
-    
-    // Create a new object without the search_vector property
-    const updatedAccommodation = { ...updates };
-    
-    // Always update the updated_at timestamp
-    updatedAccommodation.updated_at = new Date().toISOString();
-    
-    // Remove search_vector if it exists in the object at runtime
-    if ('search_vector' in updatedAccommodation) {
-      delete (updatedAccommodation as any).search_vector;
-    }
 
     const { data, error } = await this.supabase
       .from('accommodations')
-      .update(updatedAccommodation)
+      .update(updates)
       .eq('id', id)
-      .select()
+      .select('*')
       .single();
 
     if (error) {
@@ -191,7 +168,7 @@ class AccommodationService extends BaseApiService {
       throw error;
     }
 
-    return data as Accommodation;
+    return data;
   }
 
   /**
@@ -199,19 +176,24 @@ class AccommodationService extends BaseApiService {
    */
   async deleteAccommodation(id: number): Promise<void> {
     console.log(`Deleting accommodation with ID: ${id}`);
-    
-    // First, delete any availability data
-    const { error: availabilityError } = await this.supabase
-      .from('accommodation_availability')
-      .delete()
-      .eq('accommodation_id', id);
 
-    if (availabilityError) {
-      console.error(`Error deleting availability for accommodation ID: ${id}:`, availabilityError);
-      throw availabilityError;
+    // First check if there are any bookings for this accommodation
+    const { data: bookings, error: bookingError } = await this.supabase
+      .from('bookings')
+      .select('id')
+      .eq('accommodation_id', id)
+      .limit(1);
+
+    if (bookingError) {
+      console.error(`Error checking bookings for accommodation ID: ${id}:`, bookingError);
+      throw bookingError;
     }
-    
-    // Then delete the accommodation
+
+    // If there are bookings, don't allow deletion
+    if (bookings && bookings.length > 0) {
+      throw new Error('Cannot delete accommodation with existing bookings');
+    }
+
     const { error } = await this.supabase
       .from('accommodations')
       .delete()
@@ -224,24 +206,59 @@ class AccommodationService extends BaseApiService {
   }
 
   /**
-   * Gets availability for an accommodation
+   * Gets accommodation types
    */
-  async getAccommodationAvailability(accommodationId: number, startDate?: Date, endDate?: Date) {
+  async getAccommodationTypes(): Promise<string[]> {
+    return ['hotel', 'pousada', 'casa', 'apartamento', 'flat', 'chalé', 'bangalô', 'camping'];
+  }
+
+  /**
+   * Gets price range
+   */
+  async getPriceRange(): Promise<{ min: number; max: number }> {
+    const { data, error } = await this.supabase
+      .from('accommodations')
+      .select('price_per_night')
+      .order('price_per_night', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching accommodation prices:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return { min: 0, max: 5000 };
+    }
+
+    const prices = data.map(item => item.price_per_night);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+
+    return { min, max };
+  }
+
+  /**
+   * Gets accommodation availability
+   */
+  async getAccommodationAvailability(
+    accommodationId: number,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<AccommodationAvailability[]> {
+    console.log(`Fetching availability for accommodation ID: ${accommodationId}`);
+
     let query = this.supabase
       .from('accommodation_availability')
       .select('*')
       .eq('accommodation_id', accommodationId);
-    
-    // Apply date filters if provided
+
     if (startDate) {
       query = query.gte('date', startDate.toISOString().split('T')[0]);
     }
-    
+
     if (endDate) {
       query = query.lte('date', endDate.toISOString().split('T')[0]);
     }
-    
-    query = query.order('date', { ascending: true });
 
     const { data, error } = await query;
 
@@ -250,174 +267,149 @@ class AccommodationService extends BaseApiService {
       throw error;
     }
 
-    return data;
+    return data || [];
   }
 
   /**
-   * Updates availability for a specific date
+   * Updates accommodation availability
    */
   async updateAccommodationAvailability(
     accommodationId: number,
     date: Date,
     customPrice?: number,
-    status?: 'available' | 'unavailable'
-  ) {
-    const formattedDate = date.toISOString().split('T')[0];
-    
-    const { data, error } = await this.supabase
+    status: 'available' | 'unavailable' = 'available'
+  ): Promise<AccommodationAvailability> {
+    console.log(`Updating availability for accommodation ID: ${accommodationId} on date: ${date}`);
+
+    const dateString = date.toISOString().split('T')[0];
+
+    // Check if an entry already exists for the given accommodation and date
+    const { data: existingAvailability, error: existingError } = await this.supabase
       .from('accommodation_availability')
-      .upsert({
-        accommodation_id: accommodationId,
-        date: formattedDate,
-        ...(customPrice !== undefined && { custom_price: customPrice }),
-        ...(status !== undefined && { status })
-      })
-      .select()
+      .select('*')
+      .eq('accommodation_id', accommodationId)
+      .eq('date', dateString)
       .single();
 
-    if (error) {
-      console.error('Error updating accommodation availability:', error);
-      throw error;
+    if (existingError && existingError.code !== 'PGRST116') {
+      // An error occurred other than "no data found"
+      console.error('Error checking existing availability:', existingError);
+      throw existingError;
     }
 
-    return data;
+    if (existingAvailability) {
+      // Update the existing entry
+      const updates: Partial<AccommodationAvailability> = {
+        status: status,
+        custom_price: customPrice !== undefined ? customPrice : null,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await this.supabase
+        .from('accommodation_availability')
+        .update(updates)
+        .eq('accommodation_id', accommodationId)
+        .eq('date', dateString)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error updating accommodation availability:', error);
+        throw error;
+      }
+
+      return data;
+    } else {
+      // Create a new entry
+      const newAvailability: Omit<AccommodationAvailability, 'id' | 'created_at' | 'updated_at'> = {
+        accommodation_id: accommodationId,
+        date: dateString,
+        status: status,
+        custom_price: customPrice !== undefined ? customPrice : null
+      };
+
+      const { data, error } = await this.supabase
+        .from('accommodation_availability')
+        .insert(newAvailability)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error creating accommodation availability:', error);
+        throw error;
+      }
+
+      return data;
+    }
   }
 
   /**
-   * Sets availability for multiple dates at once
+   * Sets bulk accommodation availability
    */
   async setBulkAccommodationAvailability(
     accommodationId: number,
     dates: Date[],
     customPrice?: number,
-    status?: 'available' | 'unavailable'
-  ) {
-    if (!dates.length) return [];
+    status: 'available' | 'unavailable' = 'available'
+  ): Promise<void> {
+    console.log(`Setting bulk availability for accommodation ID: ${accommodationId} for ${dates.length} dates`);
 
-    const records = dates.map(date => ({
-      accommodation_id: accommodationId,
-      date: date.toISOString().split('T')[0],
-      ...(customPrice !== undefined && { custom_price: customPrice }),
-      ...(status !== undefined && { status })
-    }));
+    // Prepare the updates or inserts
+    const updates = dates.map(date => {
+      const dateString = date.toISOString().split('T')[0];
+      return {
+        accommodation_id: accommodationId,
+        date: dateString,
+        status: status,
+        custom_price: customPrice !== undefined ? customPrice : null
+      };
+    });
 
-    const { data, error } = await this.supabase
-      .from('accommodation_availability')
-      .upsert(records)
-      .select();
+    // Use a single SQL query to update or insert the availability records
+    const { data, error } = await this.supabase.from('accommodation_availability').upsert(
+      updates,
+      { onConflict: ['accommodation_id', 'date'] }
+    );
 
     if (error) {
       console.error('Error setting bulk accommodation availability:', error);
       throw error;
     }
-
-    return data;
   }
 
   /**
-   * Check if dates are available for booking
+   * Checks availability for booking
    */
-  async checkAvailability(accommodationId: number, startDate: Date, endDate: Date): Promise<boolean> {
-    const start = startDate.toISOString().split('T')[0];
-    const end = endDate.toISOString().split('T')[0];
-    
-    // Check if there are any unavailable dates in the range
+  async checkAvailability(
+    accommodationId: number,
+    startDate: Date,
+    endDate: Date
+  ): Promise<boolean> {
+    console.log(`Checking availability for accommodation ID: ${accommodationId} from ${startDate} to ${endDate}`);
+
+    const startDateString = startDate.toISOString().split('T')[0];
+    const endDateString = endDate.toISOString().split('T')[0];
+
     const { data, error } = await this.supabase
       .from('accommodation_availability')
-      .select('date')
+      .select('*')
       .eq('accommodation_id', accommodationId)
-      .eq('status', 'unavailable')
-      .gte('date', start)
-      .lte('date', end);
+      .gte('date', startDateString)
+      .lte('date', endDateString);
 
     if (error) {
       console.error('Error checking accommodation availability:', error);
       throw error;
     }
 
-    // If there are any unavailable dates, the accommodation is not available
-    return data.length === 0;
-  }
-  
-  /**
-   * Get accommodation types for filtering
-   */
-  async getAccommodationTypes(): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('accommodations')
-      .select('type')
-      .order('type')
-      .not('type', 'is', null);
-      
-    if (error) {
-      console.error('Error fetching accommodation types:', error);
-      throw error;
-    }
-    
-    // Extract unique types
-    return Array.from(new Set(data.map(item => item.type)));
-  }
-  
-  /**
-   * Get accommodation price range
-   */
-  async getPriceRange(): Promise<{ min: number, max: number }> {
-    const { data, error } = await this.supabase
-      .from('accommodations')
-      .select('price_per_night')
-      .order('price_per_night');
-      
-    if (error) {
-      console.error('Error fetching accommodation price range:', error);
-      throw error;
-    }
-    
-    if (data.length === 0) {
-      return { min: 0, max: 1000 }; // Default range if no data
-    }
-    
-    const prices = data.map(item => item.price_per_night);
-    return {
-      min: Math.floor(Math.min(...prices)),
-      max: Math.ceil(Math.max(...prices))
-    };
-  }
-
-  /**
-   * Toggles the featured status of an accommodation
-   */
-  async toggleAccommodationFeatured(accommodationId: number, isFeatured: boolean): Promise<Accommodation> {
-    console.log(`Toggling featured status for accommodation with ID: ${accommodationId} to ${isFeatured}`);
-    
-    const { data, error } = await this.supabase
-      .from('accommodations')
-      .update({ is_featured: isFeatured })
-      .eq('id', accommodationId)
-      .select()
-      .single();
-
-    if (error) {
-      console.error(`Error toggling featured status for accommodation with ID: ${accommodationId}:`, error);
-      throw error;
+    if (!data || data.length === 0) {
+      return false;
     }
 
-    return data as Accommodation;
-  }
+    // Check if all dates are available
+    const isAvailable = data.every(item => item.status === 'available');
 
-  /**
-   * Helper method to validate accommodation data
-   */
-  private validateAccommodation(accommodation: any): void {
-    if (!accommodation.title || !accommodation.description || !accommodation.short_description ||
-        !accommodation.address || !accommodation.image_url || !accommodation.type ||
-        accommodation.price_per_night === undefined || accommodation.bathrooms === undefined || 
-        accommodation.bedrooms === undefined || accommodation.max_guests === undefined) {
-      throw new Error('Missing required fields for accommodation');
-    }
-    
-    if (!isValidPrice(accommodation.price_per_night)) {
-      throw new Error('Invalid price for accommodation');
-    }
+    return isAvailable;
   }
 }
 

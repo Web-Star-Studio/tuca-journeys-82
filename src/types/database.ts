@@ -93,6 +93,7 @@ export interface Product {
   image_url: string;
   is_available: boolean;
   category: string;
+  featured?: boolean;  // Add featured field
 }
 
 export interface UserPreferences {

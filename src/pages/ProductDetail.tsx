@@ -1,19 +1,20 @@
 
-import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { useParams } from "react-router-dom";
 
-// This is a redirect component to make sure existing links to /loja/:id work
-const ProductDetail = () => {
-  const navigate = useNavigate();
+export const ProductDetail = () => {
   const { id } = useParams();
-
-  useEffect(() => {
-    // Redirect to the new URL
-    navigate(`/loja/${id}`, { replace: true });
-  }, [navigate, id]);
-
-  // Return null as this component will redirect immediately
-  return null;
+  
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <div className="pt-16 container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Detalhes do Produto</h1>
+        <p>Detalhes do produto ID: {id}</p>
+      </div>
+      <Footer />
+    </div>
+  );
 };
-
-export default ProductDetail;

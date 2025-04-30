@@ -12,7 +12,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { useAccommodations } from "@/hooks/use-accommodations";
+import { useAccommodations, useAccommodation } from "@/hooks/use-accommodations";
 import { Accommodation } from "@/types/database";
 import { toast } from "sonner";
 import { useUI } from "@/contexts/UIContext";
@@ -32,10 +32,15 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
 }) => {
   const { showGlobalSpinner } = useUI();
   const { 
-    getAccommodationById, 
     createAccommodation, 
     updateAccommodation 
   } = useAccommodations();
+  
+  // Use the dedicated hook for fetching a single accommodation
+  const { 
+    accommodation: fetchedAccommodation,
+    isLoading: isLoadingAccommodation
+  } = useAccommodation(accommodationId || undefined);
   
   // Initial form state
   const [formState, setFormState] = useState<Partial<Accommodation>>({
@@ -58,32 +63,22 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
   
   // Load existing accommodation data if in edit mode
   useEffect(() => {
-    const loadAccommodation = async () => {
-      if (accommodationId) {
-        showGlobalSpinner(true);
-        try {
-          const accommodation = getAccommodationById(accommodationId);
-          
-          if (accommodation) {
-            setFormState(accommodation);
-          } else {
-            toast.error("Hospedagem não encontrada");
-            onCancel();
-          }
-        } catch (error) {
-          console.error("Error loading accommodation:", error);
-          toast.error("Erro ao carregar dados da hospedagem");
-          onCancel();
-        } finally {
-          showGlobalSpinner(false);
-        }
-      }
-    };
+    if (isLoadingAccommodation) {
+      showGlobalSpinner(true);
+      return;
+    }
     
-    loadAccommodation();
-  }, [accommodationId]);
+    showGlobalSpinner(false);
+    
+    if (fetchedAccommodation) {
+      setFormState(fetchedAccommodation);
+    } else if (accommodationId) {
+      // Only show error if we're in edit mode and couldn't fetch the accommodation
+      toast.error("Hospedagem não encontrada");
+      onCancel();
+    }
+  }, [fetchedAccommodation, isLoadingAccommodation, accommodationId]);
   
-  // Handle form field changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { name: string; value: any }
   ) => {
@@ -104,7 +99,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }
   };
   
-  // Handle numeric input fields
   const handleNumericChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numericValue = value === "" ? 0 : parseFloat(value);
@@ -124,7 +118,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }
   };
   
-  // Handle image upload completion
   const handleImageUploaded = (url: string, fieldName: string) => {
     setFormState((prev) => ({
       ...prev,
@@ -141,7 +134,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }
   };
   
-  // Handle gallery images upload
   const handleGalleryImagesUpdated = (urls: string[]) => {
     setFormState((prev) => ({
       ...prev,
@@ -149,7 +141,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }));
   };
   
-  // Handle amenities update
   const handleAmenitiesUpdated = (amenities: string[]) => {
     setFormState((prev) => ({
       ...prev,
@@ -157,7 +148,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     }));
   };
   
-  // Form validation
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
     
@@ -193,7 +183,6 @@ export const AccommodationForm: React.FC<AccommodationFormProps> = ({
     return Object.keys(errors).length === 0;
   };
   
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     

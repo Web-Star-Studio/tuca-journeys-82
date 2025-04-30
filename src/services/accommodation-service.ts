@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Accommodation } from '@/types/database';
 import { BaseApiService } from './base-api';
@@ -148,8 +149,8 @@ class AccommodationService extends BaseApiService {
   async updateAccommodation(id: number, updates: Partial<Accommodation>): Promise<Accommodation> {
     console.log(`Updating accommodation with ID: ${id}`, updates);
     
-    // Always update the updated_at timestamp
-    const updatedAccommodation = {
+    // Always update the updated_at timestamp and remove search_vector if present
+    const { search_vector, ...updatedAccommodation } = {
       ...updates,
       updated_at: new Date().toISOString()
     };

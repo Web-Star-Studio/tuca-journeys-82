@@ -10,6 +10,7 @@ import { Accommodation } from "@/types/database";
 import { useUI } from "@/contexts/UIContext";
 import { toast } from "sonner";
 import PopulateDbButton from "@/components/admin/accommodations/PopulateDbButton";
+import AccommodationFormDialog from "@/components/admin/accommodations/AccommodationFormDialog";
 
 const AdminAccommodations = () => {
   // State management for UI
@@ -192,9 +193,9 @@ const AdminAccommodations = () => {
           isProcessing={isAnyProcessing}
         />
 
-        {/* Accommodation Form Dialog */}
-        <Dialog 
-          open={showAccommodationForm} 
+        {/* Use the AccommodationFormDialog component which handles fetching the data properly */}
+        <AccommodationFormDialog
+          open={showAccommodationForm}
           onOpenChange={(open) => {
             if (!isAnyProcessing) {
               setShowAccommodationForm(open);
@@ -203,25 +204,9 @@ const AdminAccommodations = () => {
               }
             }
           }}
-        >
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {accommodationToEdit ? "Editar Hospedagem" : "Nova Hospedagem"}
-              </DialogTitle>
-              <DialogDescription>
-                {accommodationToEdit
-                  ? "Edite os detalhes da hospedagem abaixo."
-                  : "Preencha os detalhes da nova hospedagem abaixo."}
-              </DialogDescription>
-            </DialogHeader>
-            <AccommodationForm
-              accommodationId={accommodationToEdit}
-              onCancel={handleFormClose}
-              onSuccess={handleFormClose}
-            />
-          </DialogContent>
-        </Dialog>
+          accommodationId={accommodationToEdit}
+          onSuccess={handleFormClose}
+        />
 
         {/* Delete Confirmation Dialog */}
         <AccommodationDeleteDialog

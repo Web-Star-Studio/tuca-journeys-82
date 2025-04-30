@@ -8,9 +8,10 @@ import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const Login = () => {
   // Use the hook without the invalid prop
-  const { isLoading: authRedirectLoading, isAuthenticated } = useAuthRedirect();
+  const { isLoading: authRedirectLoading, isAuthenticated, isAdmin } = useAuthRedirect();
   
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [userChecked, setUserChecked] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -19,11 +20,16 @@ const Login = () => {
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
   // Redirect authenticated users away from login page
+  // But don't redirect admins automatically - let handleSuccessfulLogin handle them
   useEffect(() => {
-    if (!authRedirectLoading && isAuthenticated) {
-      navigate('/dashboard');
+    if (!authRedirectLoading && isAuthenticated && !isRedirecting && !userChecked) {
+      setUserChecked(true);
+      // Only redirect regular users automatically, admin users are handled by handleSuccessfulLogin
+      if (!isAdmin) {
+        navigate(returnTo);
+      }
     }
-  }, [authRedirectLoading, isAuthenticated, navigate]);
+  }, [authRedirectLoading, isAuthenticated, navigate, returnTo, isAdmin, isRedirecting, userChecked]);
   
   // Handle successful login
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {

@@ -1,73 +1,38 @@
-
 import React from "react";
-import HeroSection from "@/components/HeroSection";
-import FeatureHighlights from "@/components/FeatureHighlights";
-import FeaturedPackages from "@/components/FeaturedPackages";
-import FeaturedTours from "@/components/FeaturedTours";
-import FeaturedAccommodations from "@/components/FeaturedAccommodations";
-import Testimonials from "@/components/Testimonials";
-import FeaturedProducts from "@/components/FeaturedProducts";
-import InstagramFeed from "@/components/InstagramFeed";
-import ContactCTA from "@/components/ContactCTA";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import BookingCTA from "@/components/BookingCTA";
+import HeroSection from "@/components/HeroSection";
+import FeatureHighlights from "@/components/FeatureHighlights";
 import DestinationHighlight from "@/components/DestinationHighlight";
-import PageContainer from "@/components/layout/PageContainer";
-import AnimatedSections from "@/components/layout/AnimatedSections";
-import AnimatedSection from "@/components/layout/AnimatedSection";
+import FeaturedTours from "@/components/FeaturedTours";
+import BookingCTA from "@/components/BookingCTA";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import FeaturedPackages from "@/components/FeaturedPackages";
+import Testimonials from "@/components/Testimonials";
+import ContactCTA from "@/components/ContactCTA";
+import InstagramFeed from "@/components/InstagramFeed";
+import FeaturedEvents from "@/components/FeaturedEvents";
 
 const Index = () => {
   return (
-    <PageContainer>
+    <div className="min-h-screen">
       <Header />
-      <main className="flex flex-col relative">
+      <div className="pt-16">
         <HeroSection />
-        
-        <AnimatedSections>
-          <AnimatedSection>
-            <FeatureHighlights />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <DestinationHighlight />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <FeaturedPackages />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <BookingCTA />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <FeaturedTours />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <FeaturedAccommodations />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <Testimonials />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <FeaturedProducts />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <InstagramFeed />
-          </AnimatedSection>
-          
-          <AnimatedSection>
-            <ContactCTA />
-          </AnimatedSection>
-        </AnimatedSections>
-      </main>
+        <FeatureHighlights />
+        <DestinationHighlight />
+        <FeaturedTours />
+        <FeaturedEvents />
+        <FeaturedAccommodations />
+        <BookingCTA />
+        <FeaturedProducts />
+        <FeaturedPackages />
+        <Testimonials />
+        <ContactCTA />
+        <InstagramFeed />
+      </div>
       <Footer />
-    </PageContainer>
+    </div>
   );
 };
 

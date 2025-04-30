@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -47,11 +46,11 @@ const UserDropdownContent = ({ user, onSignOut }: UserDropdownContentProps) => {
     { label: "Meu Painel", href: "/dashboard", icon: LayoutDashboard },
     { label: "Meu Perfil", href: "/profile", icon: UserIcon },
     { label: "Minhas Reservas", href: "/bookings", icon: CalendarDays },
+    { label: "Meus Ingressos", href: "/meus-ingressos", icon: Ticket },
     { label: "Minhas Compras", href: "/orders", icon: ShoppingBag },
     { label: "Lista de Desejos", href: "/lista-de-desejos", icon: Heart },
     { label: "Documentos de Viagem", href: "/profile?tab=documents", icon: FileText },
-    { label: "Cupons e Descontos", href: "/cupons", icon: Ticket },
-    { label: "Programa de Pontos", href: "/pontos", icon: BadgePercent },
+    { label: "Cupons e Descontos", href: "/cupons", icon: BadgePercent },
     { label: "Notificações", href: "/notificacoes", icon: Bell },
     { label: "Pagamentos", href: "/pagamentos", icon: CreditCard },
     { label: "Configurações", href: "/configuracoes", icon: Settings },

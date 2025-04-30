@@ -1,91 +1,32 @@
-
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const DesktopNavigation = () => {
-  const location = useLocation();
-  
   return (
-    <nav className="hidden md:flex space-x-8">
-      <Link
-        to="/"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname === "/" ? "font-medium" : ""
-        }`}
-      >
+    <nav className="hidden md:flex gap-1">
+      <Link to="/" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
         Home
       </Link>
-      <Link
-        to="/passeios"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/passeios") ? "font-medium" : ""
-        }`}
-      >
+      <Link to="/tours" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
         Passeios
       </Link>
-      <Link
-        to="/hospedagens"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/hospedagens") ? "font-medium" : ""
-        }`}
-      >
+      <Link to="/hospedagens" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
         Hospedagens
       </Link>
-      <Link
-        to="/pacotes"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/pacotes") ? "font-medium" : ""
-        }`}
-      >
-        Pacotes
-      </Link>
-      <Link
-        to="/loja"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/loja") ? "font-medium" : ""
-        }`}
-      >
-        Loja
-      </Link>
-      <Link
-        to="/eventos"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/eventos") ? "font-medium" : ""
-        }`}
-      >
+      <Link to="/eventos" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
         Eventos
       </Link>
-      <Link
-        to="/mapa"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/mapa") ? "font-medium" : ""
-        }`}
-      >
-        Mapa
+      <Link to="/mapa" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
+        Mapa Turístico
       </Link>
-      <Link
-        to="/parceiros"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/parceiros") ? "font-medium" : ""
-        }`}
-      >
-        Parceiros
+      <Link to="/pacotes" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
+        Pacotes
       </Link>
-      <Link
-        to="/sobre"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/sobre") ? "font-medium" : ""
-        }`}
-      >
-        Sobre
+      <Link to="/loja" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
+        Lojinha
       </Link>
-      <Link
-        to="/contato"
-        className={`hover:opacity-75 transition-opacity ${
-          location.pathname.includes("/contato") ? "font-medium" : ""
-        }`}
-      >
-        Contato
+      <Link to="/about" className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
+        Sobre Nós
       </Link>
     </nav>
   );

@@ -1,13 +1,12 @@
-
 import React from "react";
 import { RouteObject } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
-import Orders from "@/pages/Orders";
-import Wishlist from "@/pages/Wishlist";
-import Booking from "@/pages/Booking"; // Updated from Bookings to Booking
-import Settings from "@/pages/Settings";
+import { Orders } from "@/pages/Orders";
+import { Wishlist } from "@/pages/Wishlist";
+import { Bookings } from "@/pages/Bookings"; 
+import { Settings } from "@/pages/Settings";
 import Notifications from "@/pages/Notifications";
 import TravelPreferences from "@/pages/TravelPreferences";
 
@@ -49,7 +48,7 @@ export const protectedRoutes: RouteObject[] = [
     path: "/bookings",
     element: (
       <ProtectedRoute>
-        <Booking /> {/* Updated component name */}
+        <Bookings /> {/* Updated component name */}
       </ProtectedRoute>
     ),
   },

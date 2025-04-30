@@ -16,7 +16,7 @@ import { Accommodation as FeaturedAccommodationsPage } from "@/pages/Accommodati
 import { AccommodationDetail as AccommodationDetailsPage } from "@/pages/AccommodationDetail";
 import { Bookings as BookingsPage } from "@/pages/Bookings";
 import { ForgotPassword as ForgotPasswordPage } from "@/pages/ForgotPassword";
-import { ResetPassword } from "@/pages/ResetPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import { Orders as OrdersPage } from "@/pages/Orders";
 import { Wishlist as WishlistPage } from "@/pages/Wishlist";
 import { Map as MapPage } from "@/pages/Map";

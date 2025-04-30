@@ -271,6 +271,27 @@ class AccommodationService extends BaseApiService {
   }
 
   /**
+   * Toggles the featured status of an accommodation
+   */
+  async toggleAccommodationFeatured(id: number, isFeatured: boolean): Promise<Accommodation> {
+    console.log(`Toggling featured status for accommodation ID: ${id} to: ${isFeatured}`);
+
+    const { data, error } = await this.supabase
+      .from('accommodations')
+      .update({ is_featured: isFeatured })
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error(`Error toggling featured status for accommodation ID: ${id}:`, error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
    * Updates accommodation availability
    */
   async updateAccommodationAvailability(
@@ -299,7 +320,7 @@ class AccommodationService extends BaseApiService {
 
     if (existingAvailability) {
       // Update the existing entry
-      const updates: Partial<AccommodationAvailability> = {
+      const updates = {
         status: status,
         custom_price: customPrice !== undefined ? customPrice : null,
         updated_at: new Date().toISOString()
@@ -321,7 +342,7 @@ class AccommodationService extends BaseApiService {
       return data;
     } else {
       // Create a new entry
-      const newAvailability: Omit<AccommodationAvailability, 'id' | 'created_at' | 'updated_at'> = {
+      const newAvailability = {
         accommodation_id: accommodationId,
         date: dateString,
         status: status,

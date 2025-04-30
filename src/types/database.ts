@@ -51,6 +51,16 @@ export interface Accommodation {
   is_featured?: boolean;  // Explicitly declared to match database schema
 }
 
+export interface AccommodationAvailability {
+  id: number;
+  accommodation_id: number;
+  date: string;
+  status: 'available' | 'unavailable';
+  custom_price?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Booking {
   id: string;
   created_at: string;

@@ -22,7 +22,7 @@ export const useAccommodationsBase = () => {
         minPrice: null,
         maxPrice: null,
         minRating: null,
-        sortBy: 'created_at',
+        sortBy: 'newest', // Changed from 'created_at' to 'newest' to match allowed values
         amenities: [],
         maxGuests: null
       });

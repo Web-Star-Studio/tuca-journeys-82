@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { accommodationService } from '@/services/accommodation-service';
 import { useState } from 'react';
 import { AccommodationFilterParams } from '@/types/accommodation';
+import { Accommodation } from '@/types/database';
 
 /**
  * Hook for searching accommodations with pagination support
@@ -13,7 +14,7 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilterParam
   minPrice: null,
   maxPrice: null,
   minRating: null,
-  sortBy: 'created_at',
+  sortBy: 'newest',
   amenities: [],
   maxGuests: null
 }) => {
@@ -35,9 +36,14 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilterParam
         offset: (page - 1) * itemsPerPage
       });
       
+      // Calculate total count (if provided by the database or estimate from results)
+      const totalCount = result.length > 0 && 'total_count' in result[0] 
+        ? (result[0] as any).total_count 
+        : result.length;
+      
       return {
         accommodations: result,
-        total: result.length > 0 ? result[0].total_count || result.length : 0
+        total: totalCount
       };
     },
     staleTime: 1000 * 60, // Cache for 1 minute

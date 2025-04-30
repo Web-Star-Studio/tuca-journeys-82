@@ -382,6 +382,27 @@ class AccommodationService extends BaseApiService {
   }
 
   /**
+   * Toggles the featured status of an accommodation
+   */
+  async toggleAccommodationFeatured(accommodationId: number, isFeatured: boolean): Promise<Accommodation> {
+    console.log(`Toggling featured status for accommodation with ID: ${accommodationId} to ${isFeatured}`);
+    
+    const { data, error } = await this.supabase
+      .from('accommodations')
+      .update({ is_featured: isFeatured })
+      .eq('id', accommodationId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`Error toggling featured status for accommodation with ID: ${accommodationId}:`, error);
+      throw error;
+    }
+
+    return data as Accommodation;
+  }
+
+  /**
    * Helper method to validate accommodation data
    */
   private validateAccommodation(accommodation: any): void {

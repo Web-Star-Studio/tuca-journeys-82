@@ -28,7 +28,12 @@ export interface AccommodationFilters {
   maxPrice?: number | null;
   minRating?: number | null;
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
+  amenities?: string[];
+  maxGuests?: number | null;
 }
+
+// Export AccommodationFilterParams as an alias for AccommodationFilters to maintain compatibility
+export type AccommodationFilterParams = AccommodationFilters;
 
 // Type for accommodation availability
 export interface AccommodationAvailability {

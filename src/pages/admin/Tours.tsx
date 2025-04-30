@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useTours } from "@/hooks/use-tours";
@@ -96,12 +95,15 @@ const Tours = () => {
     showGlobalSpinner(true);
     
     try {
-      // Fix the return type to match what deleteTour returns
-      await withTimeout(
-        () => deleteTour(tourToDelete.id), 
-        10000,
-        { success: true } // Match the expected return type
-      );
+      // Use a different approach to handle the timeout for the deleteTour function
+      const deletePromise = deleteTour(tourToDelete.id);
+      
+      // Set up a race between the delete operation and a timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Delete operation timed out")), 10000);
+      });
+      
+      await Promise.race([deletePromise, timeoutPromise]);
       
       setDeleteDialogOpen(false);
       setTourToDelete(null);

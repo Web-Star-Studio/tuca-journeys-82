@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
@@ -45,30 +44,17 @@ const AdminAccommodations = () => {
         setIsProcessing(true);
         showGlobalSpinner(true);
         
-        // Use withTimeout to ensure we don't block the UI indefinitely
-        // We need to return the same type as refetch() would return
-        await withTimeout(
-          () => refetch(), 
-          12000, 
-          {
-            data: [] as Accommodation[],
-            isError: false,
-            error: null as any,
-            isLoading: false,
-            isSuccess: true,
-            // Add other required properties
-            status: 'success' as const,
-            isStale: false,
-            isFetching: false,
-            isPending: false,
-            isRefetching: false,
-            dataUpdatedAt: Date.now(),
-            errorUpdatedAt: Date.now(),
-            failureCount: 0,
-            failureReason: null,
-            errorUpdateCount: 0,
-          }
-        );
+        // Instead of creating a complex fallback object, let's just call refetch directly
+        // and handle any errors or timeouts separately
+        try {
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("Timeout exceeded")), 12000);
+          });
+          
+          await Promise.race([refetch(), timeoutPromise]);
+        } catch (error) {
+          console.error("Error or timeout fetching accommodations:", error);
+        }
         
         if (isMounted.current) {
           setInitialLoadComplete(true);

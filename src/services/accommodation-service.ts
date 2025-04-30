@@ -1,22 +1,15 @@
+
 import { supabase } from '@/lib/supabase';
 import { Accommodation } from '@/types/database';
 import { BaseApiService } from './base-api';
 import { isValidPrice } from '@/utils/validationUtils';
+import { AccommodationFilters } from '@/types/accommodation';
 
 class AccommodationService extends BaseApiService {
   /**
    * Retrieves all accommodations from the database with optional filtering
    */
-  async getAccommodations(options = {
-    searchQuery: '',
-    type: 'all',
-    minPrice: null as number | null,
-    maxPrice: null as number | null,
-    minRating: null as number | null,
-    sortBy: 'newest' as 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical',
-    amenities: [] as string[],
-    maxGuests: null as number | null
-  }): Promise<Accommodation[]> {
+  async getAccommodations(options: AccommodationFilters): Promise<Accommodation[]> {
     console.log('Fetching accommodations from Supabase with options:', options);
     
     let query = this.supabase.from('accommodations').select('*');
@@ -78,6 +71,15 @@ class AccommodationService extends BaseApiService {
       case 'alphabetical':
         query = query.order('title', { ascending: true });
         break;
+    }
+
+    // Apply pagination if provided
+    if (options.limit !== undefined) {
+      query = query.limit(options.limit);
+    }
+    
+    if (options.offset !== undefined) {
+      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
     }
 
     // Execute the query

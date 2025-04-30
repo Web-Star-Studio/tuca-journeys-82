@@ -22,8 +22,8 @@ export interface UIAccommodation {
 
 // Enhancement options for the UI Accommodation interface
 export interface AccommodationFilters {
-  searchQuery: string;  // Changed from optional to required to match service implementation
-  type: string;         // Changed from optional to required to match service implementation
+  searchQuery: string;  // Required to match service implementation
+  type: string;         // Required to match service implementation
   minPrice: number | null;
   maxPrice: number | null;
   minRating: number | null;

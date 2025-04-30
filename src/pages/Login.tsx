@@ -29,7 +29,7 @@ const Login = () => {
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
     setIsRedirecting(true);
     if (redirectToAdmin) {
-      navigate("/admin");
+      navigate("/admin"); // Redirect admins to admin dashboard
     } else {
       // Use the returnTo query param or default to dashboard
       navigate(returnTo);

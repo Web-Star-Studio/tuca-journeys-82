@@ -20,7 +20,7 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, isLoading, checkPermission } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -47,11 +47,14 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
         throw result.error;
       }
       
-      // If successful login and callback exists, call it
-      // Check if it's an admin login
-      const isAdmin = data.email === "admin@tucanoronha.com" || data.email === "felipe@webstar.studio";
+      // Check if the user has admin or master permissions
+      const isAdmin = await checkPermission('admin');
+      const isMaster = await checkPermission('master');
+      const hasAdminAccess = isAdmin || isMaster;
+      
+      // Call the callback with appropriate redirect flag
       if (onSuccessfulLogin) {
-        onSuccessfulLogin(isAdmin);
+        onSuccessfulLogin(hasAdminAccess);
       }
     } catch (error: any) {
       console.error("Login error:", error);

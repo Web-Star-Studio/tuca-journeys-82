@@ -1,3 +1,4 @@
+
 // Supabase types
 export interface Tour {
   id: number;
@@ -48,7 +49,7 @@ export interface Accommodation {
   amenities: string[];
   gallery_images: string[];
   rating: number;
-  is_featured?: boolean; // Added this property
+  is_featured?: boolean;
 }
 
 export interface Booking {

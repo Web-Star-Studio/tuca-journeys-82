@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAccommodations } from "@/hooks/use-accommodations";
@@ -7,7 +8,6 @@ import AccommodationList from "@/components/admin/accommodations/AccommodationLi
 import AccommodationSearch from "@/components/admin/accommodations/AccommodationSearch";
 import AccommodationDeleteDialog from "@/components/admin/accommodations/AccommodationDeleteDialog";
 import { Accommodation } from "@/types/database";
-import { withTimeout } from "@/utils/asyncUtils";
 import { useUI } from "@/contexts/UIContext";
 import { toast } from "sonner";
 
@@ -32,7 +32,13 @@ const AdminAccommodations = () => {
     isLoading, 
     error,
     refetch,
-    deleteAccommodation
+    deleteAccommodation,
+    filters,
+    applyFilters,
+    accommodationTypes,
+    priceRange,
+    isDeleting: isDeletingMutation,
+    isSaving
   } = useAccommodations();
 
   // Effect for initial data loading - only runs once
@@ -84,43 +90,10 @@ const AdminAccommodations = () => {
     // Skip on first render - only run when typeFilter changes
     if (!initialLoadComplete) return;
     
-    const applyFilter = async () => {
-      if (isProcessing) return;
-      
-      try {
-        setIsProcessing(true);
-        // Short loading spinner for filter changes
-        showGlobalSpinner(true);
-        
-        await refetch();
-      } catch (error) {
-        console.error("Error applying filter:", error);
-        toast.error("Não foi possível filtrar as hospedagens. Tente novamente.");
-      } finally {
-        if (isMounted.current) {
-          showGlobalSpinner(false);
-          setIsProcessing(false);
-        }
-      }
-    };
+    // Update filters when typeFilter changes
+    applyFilters({ type: typeFilter });
     
-    applyFilter();
-  }, [typeFilter]);
-
-  // Filter accommodations based on search query and type filter
-  const filteredAccommodations = accommodations?.filter(
-    (acc) => {
-      // Filter by search query
-      const matchesSearch = 
-        acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        acc.description.toLowerCase().includes(searchQuery.toLowerCase());
-        
-      // Filter by accommodation type
-      const matchesType = typeFilter === "all" || acc.type.toLowerCase() === typeFilter.toLowerCase();
-      
-      return matchesSearch && matchesType;
-    }
-  ) || [];
+  }, [typeFilter, initialLoadComplete]);
 
   // Handle accommodation edit with improved error handling
   const handleEditClick = (accommodation: Accommodation) => {
@@ -165,7 +138,6 @@ const AdminAccommodations = () => {
       if (isMounted.current) {
         setDeleteDialogOpen(false);
         setAccommodationToDelete(null);
-        toast.success("Hospedagem excluída com sucesso");
       }
     } catch (error) {
       console.error("Error deleting accommodation:", error);
@@ -185,7 +157,7 @@ const AdminAccommodations = () => {
   };
 
   // Combined processing state
-  const isAnyProcessing = isProcessing || isDeleting || isLoading;
+  const isAnyProcessing = isProcessing || isDeleting || isDeletingMutation || isSaving || isLoading;
 
   return (
     <AdminLayout pageTitle="Gerenciar Hospedagens">
@@ -200,10 +172,15 @@ const AdminAccommodations = () => {
               setShowAccommodationForm(true);
             }
           }}
+          filters={filters}
+          applyFilters={applyFilters}
+          accommodationTypes={accommodationTypes}
+          priceRange={priceRange}
+          isProcessing={isAnyProcessing}
         />
 
         <AccommodationList
-          accommodations={filteredAccommodations}
+          accommodations={accommodations || []}
           isLoading={isLoading && !isAnyProcessing}
           error={error}
           onEditAccommodation={handleEditClick}

@@ -2,15 +2,29 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { accommodations } from "@/data/accommodations";
+import { ArrowRight, Loader2 } from "lucide-react";
 import AccommodationCard from "./accommodation/AccommodationCard";
+import { useQuery } from "@tanstack/react-query";
+import { accommodationService } from "@/services/accommodation-service";
 
 const FeaturedAccommodations = () => {
   const [hoveredAccommodation, setHoveredAccommodation] = useState<number | null>(null);
   
-  // Select featured accommodations
-  const featuredAccommodations = accommodations.filter(accommodation => accommodation.featured).slice(0, 3);
+  // Fetch featured accommodations from the database
+  const { data: accommodations, isLoading, error } = useQuery({
+    queryKey: ['featured-accommodations'],
+    queryFn: async () => {
+      // Sort by rating descending to get the highest rated accommodations
+      const allAccommodations = await accommodationService.getAccommodations({
+        sortBy: 'rating',
+        minRating: 4 // Only show well-rated accommodations
+      });
+      
+      // Return top 3 accommodations
+      return allAccommodations.slice(0, 3);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   return (
     <section className="section-padding bg-white">
@@ -20,11 +34,23 @@ const FeaturedAccommodations = () => {
           Opções selecionadas para uma estadia perfeita em Fernando de Noronha
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-          {featuredAccommodations.map((accommodation) => (
-            <AccommodationCard key={accommodation.id} accommodation={accommodation} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-10">
+            <p className="text-muted-foreground">
+              Não foi possível carregar as hospedagens neste momento. Tente novamente mais tarde.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+            {accommodations?.map((accommodation) => (
+              <AccommodationCard key={accommodation.id} accommodation={accommodation} />
+            ))}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <Link to="/hospedagens" className="inline-flex items-center text-tuca-ocean-blue hover:text-tuca-ocean-blue/80 transition-colors group">

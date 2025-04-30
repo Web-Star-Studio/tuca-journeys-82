@@ -1,22 +1,52 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, QueryFunctionContext } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Accommodation } from '@/types/database';
 import { accommodationService } from '@/services/accommodation-service';
-import { withTimeout, debounce } from '@/utils/asyncUtils';
+import { withTimeout } from '@/utils/asyncUtils';
 import { useUI } from '@/contexts/UIContext';
+import { useState } from 'react';
 
-export const useAccommodations = () => {
+// Define type for filter options
+export interface AccommodationFilters {
+  searchQuery?: string;
+  type?: string;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  minRating?: number | null;
+  sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'alphabetical';
+}
+
+export const useAccommodations = (initialFilters?: AccommodationFilters) => {
   const queryClient = useQueryClient();
   const { showGlobalSpinner } = useUI();
+  
+  // State for filters
+  const [filters, setFilters] = useState<AccommodationFilters>(initialFilters || {
+    searchQuery: '',
+    type: 'all',
+    minPrice: null,
+    maxPrice: null,
+    minRating: null,
+    sortBy: 'newest'
+  });
 
   // Query to fetch accommodations with timeout to prevent UI blocking
-  const { data: accommodations, isLoading, error, refetch } = useQuery({
-    queryKey: ['accommodations'],
-    queryFn: async () => {
+  const { 
+    data: accommodations, 
+    isLoading, 
+    error, 
+    refetch,
+    isPending
+  } = useQuery({
+    queryKey: ['accommodations', filters],
+    queryFn: async ({ queryKey }: QueryFunctionContext) => {
       try {
+        // Extract filters from query key
+        const [_, currentFilters] = queryKey as [string, AccommodationFilters];
+        
         return await withTimeout(
-          () => accommodationService.getAccommodations(),
+          () => accommodationService.getAccommodations(currentFilters),
           15000, // 15 seconds timeout
           [] as Accommodation[] // Fallback value
         );
@@ -25,6 +55,7 @@ export const useAccommodations = () => {
         throw error;
       }
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Mutation to delete an accommodation with debounce and timeout
@@ -43,10 +74,12 @@ export const useAccommodations = () => {
       }
     },
     onSuccess: () => {
+      toast.success('Hospedagem excluída com sucesso');
       queryClient.invalidateQueries({ queryKey: ['accommodations'] });
     },
     onError: (error) => {
       console.error('Error deleting accommodation:', error);
+      toast.error('Erro ao excluir a hospedagem. Tente novamente.');
     }
   });
 
@@ -54,6 +87,7 @@ export const useAccommodations = () => {
   const saveAccommodationMutation = useMutation({
     mutationFn: async (accommodation: Partial<Accommodation>) => {
       try {
+        showGlobalSpinner(true);
         if (accommodation.id) {
           const result = await withTimeout(
             () => accommodationService.updateAccommodation(accommodation.id!, accommodation),
@@ -72,16 +106,32 @@ export const useAccommodations = () => {
       } catch (error) {
         console.error('Error in saveAccommodation mutationFn:', error);
         throw error;
+      } finally {
+        showGlobalSpinner(false);
       }
     },
-    onSuccess: () => {
-      toast.success('Hospedagem salva com sucesso');
+    onSuccess: (data) => {
+      toast.success(data.id ? 'Hospedagem atualizada com sucesso' : 'Hospedagem criada com sucesso');
       queryClient.invalidateQueries({ queryKey: ['accommodations'] });
     },
     onError: (error) => {
       toast.error('Erro ao salvar a hospedagem');
       console.error('Error saving accommodation:', error);
     }
+  });
+
+  // Query to get accommodation types for filtering
+  const { data: accommodationTypes = [] } = useQuery({
+    queryKey: ['accommodation-types'],
+    queryFn: () => accommodationService.getAccommodationTypes(),
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - types don't change often
+  });
+
+  // Query to get price range for filtering
+  const { data: priceRange = { min: 0, max: 5000 } } = useQuery({
+    queryKey: ['accommodation-price-range'],
+    queryFn: () => accommodationService.getPriceRange(),
+    staleTime: 60 * 60 * 1000, // 1 hour
   });
 
   // Public interface
@@ -103,21 +153,39 @@ export const useAccommodations = () => {
     return accommodations.find(accommodation => accommodation.id === id) || null;
   };
 
+  const applyFilters = (newFilters: Partial<AccommodationFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
   return {
     accommodations,
-    isLoading,
+    isLoading: isLoading || isPending,
     error,
     deleteAccommodation,
     createAccommodation,
     updateAccommodation,
     getAccommodationById,
-    refetch
+    refetch,
+    filters,
+    setFilters,
+    applyFilters,
+    accommodationTypes,
+    priceRange,
+    isDeleting: deleteAccommodationMutation.isPending,
+    isSaving: saveAccommodationMutation.isPending,
   };
 };
 
 // Hook for details of a single accommodation with timeout
 export const useAccommodation = (accommodationId?: number) => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const {
+    data: accommodation,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ['accommodation', accommodationId],
     queryFn: async () => {
       if (!accommodationId) throw new Error('Accommodation ID is required');
@@ -128,21 +196,33 @@ export const useAccommodation = (accommodationId?: number) => {
       );
     },
     enabled: !!accommodationId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  return {
+    accommodation,
+    isLoading,
+    error,
+    refetch
+  };
 };
 
 // Hook to manage availability of accommodations with timeout
-export const useAccommodationAvailability = (accommodationId?: number) => {
+export const useAccommodationAvailability = (accommodationId?: number, dateRange?: { start?: Date, end?: Date }) => {
   const queryClient = useQueryClient();
   const { showGlobalSpinner } = useUI();
 
   // Query to get the availability of an accommodation
   const availabilityQuery = useQuery({
-    queryKey: ['accommodation-availability', accommodationId],
+    queryKey: ['accommodation-availability', accommodationId, dateRange?.start, dateRange?.end],
     queryFn: async () => {
       if (!accommodationId) throw new Error('Accommodation ID is required');
       return await withTimeout(
-        () => accommodationService.getAccommodationAvailability(accommodationId),
+        () => accommodationService.getAccommodationAvailability(
+          accommodationId,
+          dateRange?.start,
+          dateRange?.end
+        ),
         8000, // 8 seconds timeout
         [] // Fallback value
       );
@@ -175,7 +255,9 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accommodation-availability', accommodationId] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['accommodation-availability', accommodationId] 
+      });
     },
     onError: (error) => {
       toast.error('Erro ao atualizar disponibilidade');
@@ -212,12 +294,37 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accommodation-availability', accommodationId] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['accommodation-availability', accommodationId] 
+      });
       toast.success('Disponibilidade atualizada com sucesso');
     },
     onError: (error) => {
       toast.error('Erro ao atualizar disponibilidade em lote');
       console.error('Error updating bulk availability:', error);
+    }
+  });
+
+  // Mutation to check availability for booking
+  const checkAvailabilityMutation = useMutation({
+    mutationFn: async ({ 
+      startDate, 
+      endDate 
+    }: { 
+      startDate: Date; 
+      endDate: Date;
+    }) => {
+      if (!accommodationId) throw new Error('Accommodation ID is required');
+      
+      return withTimeout(
+        () => accommodationService.checkAvailability(
+          accommodationId,
+          startDate,
+          endDate
+        ),
+        5000, // 5 seconds timeout
+        false // Fallback value
+      );
     }
   });
 
@@ -227,6 +334,9 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
     error: availabilityQuery.error,
     updateAvailability: updateAvailabilityMutation.mutate,
     updateBulkAvailability: updateBulkAvailabilityMutation.mutate,
+    checkAvailability: checkAvailabilityMutation.mutateAsync,
+    isAvailable: checkAvailabilityMutation.data,
+    isChecking: checkAvailabilityMutation.isPending,
     isUpdating: updateAvailabilityMutation.isPending || updateBulkAvailabilityMutation.isPending
   };
 };

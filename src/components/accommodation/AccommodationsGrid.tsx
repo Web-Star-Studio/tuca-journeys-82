@@ -1,66 +1,80 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import AccommodationCard from "./AccommodationCard";
-import { Accommodation } from "@/data/accommodations";
+import { Accommodation } from "@/types/database";
+import { useAccommodations } from "@/hooks/use-accommodations";
+import AccommodationFilter from "./AccommodationFilter";
+import { Loader2 } from "lucide-react";
 
 interface AccommodationsGridProps {
-  filteredAccommodations: Accommodation[];
-  resetFilters: () => void;
-  onSortChange: (value: string) => void;
-  sortBy: string;
+  initialAccommodations?: Accommodation[];
 }
 
-const AccommodationsGrid = ({ 
-  filteredAccommodations, 
-  resetFilters, 
-  onSortChange,
-  sortBy 
-}: AccommodationsGridProps) => {
-  return (
-    <div className="w-full md:w-3/4 lg:w-4/5">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-serif font-bold">
-          {filteredAccommodations.length} Hospedagens Disponíveis
-        </h2>
-        <div className="hidden md:block">
-          <Select value={sortBy} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Ordenar por" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="priceAsc">Menor Preço</SelectItem>
-              <SelectItem value="priceDesc">Maior Preço</SelectItem>
-              <SelectItem value="ratingDesc">Melhor Avaliação</SelectItem>
-              <SelectItem value="capacityAsc">Menor Capacidade</SelectItem>
-              <SelectItem value="capacityDesc">Maior Capacidade</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+const AccommodationsGrid = ({ initialAccommodations }: AccommodationsGridProps) => {
+  // Use our enhanced hook for accommodations with filters
+  const {
+    accommodations,
+    isLoading,
+    error,
+    filters,
+    applyFilters,
+    accommodationTypes,
+    priceRange,
+  } = useAccommodations({
+    searchQuery: "",
+    type: "all",
+    minPrice: null,
+    maxPrice: null,
+    minRating: null,
+    sortBy: "newest",
+  });
 
-      {filteredAccommodations.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAccommodations.map((accommodation) => (
-            <AccommodationCard key={accommodation.id} accommodation={accommodation} />
-          ))}
+  // Use either provided accommodations or fetched ones
+  const displayAccommodations = initialAccommodations || accommodations || [];
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <h3 className="text-xl font-medium mb-2 text-red-500">
+          Erro ao carregar hospedagens
+        </h3>
+        <p className="text-muted-foreground">
+          Ocorreu um erro ao buscar as hospedagens. Por favor, tente novamente mais tarde.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Filter Component */}
+      <AccommodationFilter
+        filters={filters}
+        applyFilters={applyFilters}
+        accommodationTypes={accommodationTypes}
+        priceRange={priceRange}
+        isLoading={isLoading}
+      />
+
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+        </div>
+      ) : displayAccommodations.length === 0 ? (
+        <div className="text-center py-10">
+          <h3 className="text-xl font-medium mb-2">
+            Nenhuma hospedagem encontrada
+          </h3>
+          <p className="text-muted-foreground">
+            Não encontramos hospedagens que correspondam aos filtros selecionados.
+          </p>
         </div>
       ) : (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium mb-2">Nenhuma hospedagem encontrada</h3>
-          <p className="text-gray-500 mb-6">
-            Nenhuma hospedagem corresponde aos filtros selecionados. Por favor, ajuste seus filtros.
-          </p>
-          <Button onClick={resetFilters} variant="outline">
-            Limpar Filtros
-          </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {displayAccommodations.map((accommodation) => (
+            <AccommodationCard key={accommodation.id} accommodation={accommodation} />
+          ))}
         </div>
       )}
     </div>

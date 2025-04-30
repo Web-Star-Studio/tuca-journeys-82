@@ -46,7 +46,11 @@ const AdminAccommodations = () => {
         showGlobalSpinner(true);
         
         // Use withTimeout to ensure we don't block the UI indefinitely
-        await withTimeout(() => refetch(), 12000);
+        await withTimeout(
+          () => refetch(), 
+          12000, 
+          false // Fallback value
+        );
         
         if (isMounted.current) {
           setInitialLoadComplete(true);

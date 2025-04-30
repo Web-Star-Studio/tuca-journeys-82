@@ -18,7 +18,7 @@ export const useAccommodations = () => {
         return await withTimeout(
           () => accommodationService.getAccommodations(),
           15000, // 15 seconds timeout
-          []
+          [] as Accommodation[] // Fallback value
         );
       } catch (error) {
         console.error('Error in useAccommodations queryFn:', error);
@@ -33,7 +33,8 @@ export const useAccommodations = () => {
       try {
         await withTimeout(
           () => accommodationService.deleteAccommodation(accommodationId),
-          15000 // 15 seconds timeout
+          15000, // 15 seconds timeout
+          false // Fallback value
         );
         return { success: true };
       } catch (error) {
@@ -56,13 +57,15 @@ export const useAccommodations = () => {
         if (accommodation.id) {
           const result = await withTimeout(
             () => accommodationService.updateAccommodation(accommodation.id!, accommodation),
-            15000 // 15 seconds timeout
+            15000, // 15 seconds timeout
+            null as any // Fallback value
           );
           return result;
         } else {
           const result = await withTimeout(
             () => accommodationService.createAccommodation(accommodation),
-            15000 // 15 seconds timeout
+            15000, // 15 seconds timeout
+            null as any // Fallback value
           );
           return result;
         }
@@ -121,7 +124,7 @@ export const useAccommodation = (accommodationId?: number) => {
       return await withTimeout(
         () => accommodationService.getAccommodationById(accommodationId),
         15000, // 15 seconds timeout
-        null
+        null // Fallback value
       );
     },
     enabled: !!accommodationId,
@@ -141,7 +144,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
       return await withTimeout(
         () => accommodationService.getAccommodationAvailability(accommodationId),
         8000, // 8 seconds timeout
-        []
+        [] // Fallback value
       );
     },
     enabled: !!accommodationId,
@@ -168,7 +171,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
           status
         ),
         5000, // 5 seconds timeout
-        null
+        null // Fallback value
       );
     },
     onSuccess: () => {
@@ -202,7 +205,7 @@ export const useAccommodationAvailability = (accommodationId?: number) => {
             status
           ),
           15000, // 15 seconds timeout
-          null
+          null // Fallback value
         );
       } finally {
         showGlobalSpinner(false);

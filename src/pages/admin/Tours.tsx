@@ -98,7 +98,8 @@ const Tours = () => {
     try {
       await withTimeout(
         () => deleteTour(tourToDelete.id), 
-        10000
+        10000,
+        false // Fallback value
       );
       
       setDeleteDialogOpen(false);

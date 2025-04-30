@@ -173,14 +173,16 @@ export const TourForm: React.FC<TourFormProps> = ({
         // Update existing tour with timeout
         await withTimeout(
           () => saveTour({ ...formattedData, id: tourId }), 
-          15000
+          15000,
+          null as any // Fallback value
         );
         toast.success("Passeio atualizado com sucesso.");
       } else {
         // Create new tour with timeout
         await withTimeout(
           () => saveTour(formattedData), 
-          15000
+          15000,
+          null as any // Fallback value
         );
         toast.success("Novo passeio criado com sucesso.");
       }

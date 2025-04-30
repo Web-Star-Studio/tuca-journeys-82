@@ -102,18 +102,35 @@ class AccommodationService extends BaseApiService {
   /**
    * Creates a new accommodation
    */
-  async createAccommodation(accommodation: Accommodation): Promise<Accommodation> {
-    console.log('Creating new accommodation:', accommodation);
+  async createAccommodation(accommodationData: Partial<Accommodation>): Promise<Accommodation> {
+    console.log('Creating new accommodation:', accommodationData);
+    
+    // Create a complete accommodation object with required fields
+    const accommodation: any = {
+      title: accommodationData.title || 'Nova Hospedagem',
+      description: accommodationData.description || '',
+      short_description: accommodationData.short_description || '',
+      price_per_night: accommodationData.price_per_night || 0,
+      image_url: accommodationData.image_url || '',
+      address: accommodationData.address || '',
+      type: accommodationData.type || 'Hospedagem',
+      bedrooms: accommodationData.bedrooms || 1,
+      bathrooms: accommodationData.bathrooms || 1,
+      max_guests: accommodationData.max_guests || 2,
+      amenities: accommodationData.amenities || [],
+      gallery_images: accommodationData.gallery_images || [],
+      rating: accommodationData.rating || 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      ...accommodationData
+    };
     
     // Validate required fields
     this.validateAccommodation(accommodation);
     
-    // Prepare the accommodation with default values
-    const accommodationToInsert = this.prepareAccommodationData(accommodation);
-
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert(accommodationToInsert)
+      .insert(accommodation)
       .select()
       .single();
 
@@ -344,7 +361,7 @@ class AccommodationService extends BaseApiService {
   /**
    * Helper method to validate accommodation data
    */
-  private validateAccommodation(accommodation: Accommodation): void {
+  private validateAccommodation(accommodation: any): void {
     if (!accommodation.title || !accommodation.description || !accommodation.short_description ||
         !accommodation.address || !accommodation.image_url || !accommodation.type ||
         accommodation.price_per_night === undefined || accommodation.bathrooms === undefined || 

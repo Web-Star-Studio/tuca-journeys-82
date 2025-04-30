@@ -7,10 +7,64 @@ import AccommodationHero from "@/components/accommodation/AccommodationHero";
 import AccommodationFilters from "@/components/accommodation/AccommodationFilters";
 import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
 import { getAmenityIcon } from "@/utils/accommodationUtils";
+import { useAccommodations } from "@/hooks/use-accommodations";
 
 const Hospedagens = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  // State for filters
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(3000);
+  const [capacityFilter, setCapacityFilter] = useState<number[]>([]);
+  const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
+  
+  // Get all available amenities for filtering
+  const commonAmenities = [
+    "Wi-Fi", 
+    "Ar-condicionado", 
+    "Café da manhã", 
+    "Piscina", 
+    "Cozinha equipada", 
+    "TV",
+    "Estacionamento"
+  ];
+  
+  // Handler to toggle capacity filter
+  const toggleCapacityFilter = (capacity: number) => {
+    if (capacityFilter.includes(capacity)) {
+      setCapacityFilter(capacityFilter.filter(item => item !== capacity));
+    } else {
+      setCapacityFilter([...capacityFilter, capacity]);
+    }
+  };
+  
+  // Handler to toggle amenity filter
+  const toggleAmenityFilter = (amenity: string) => {
+    if (amenitiesFilter.includes(amenity)) {
+      setAmenitiesFilter(amenitiesFilter.filter(item => item !== amenity));
+    } else {
+      setAmenitiesFilter([...amenitiesFilter, amenity]);
+    }
+  };
+  
+  // Apply filters function
+  const applyFilters = () => {
+    console.log("Applying filters:", {
+      minPrice,
+      maxPrice,
+      capacityFilter,
+      amenitiesFilter
+    });
+  };
+  
+  // Reset filters function
+  const resetFilters = () => {
+    setMinPrice(0);
+    setMaxPrice(3000);
+    setCapacityFilter([]);
+    setAmenitiesFilter([]);
+  };
 
   return (
     <div className="min-h-screen">
@@ -26,6 +80,17 @@ const Hospedagens = () => {
                 isFilterOpen={isFilterOpen}
                 setIsFilterOpen={setIsFilterOpen}
                 getAmenityIcon={getAmenityIcon}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                capacityFilter={capacityFilter}
+                amenitiesFilter={amenitiesFilter}
+                allAmenities={commonAmenities}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                toggleCapacityFilter={toggleCapacityFilter}
+                toggleAmenityFilter={toggleAmenityFilter}
+                applyFilters={applyFilters}
+                resetFilters={resetFilters}
               />
 
               <AccommodationsGrid />

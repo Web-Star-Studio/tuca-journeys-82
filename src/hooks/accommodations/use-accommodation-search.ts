@@ -2,13 +2,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { accommodationService } from '@/services/accommodation-service';
 import { useState } from 'react';
-import { AccommodationFilterParams } from '@/types/accommodation';
+import { AccommodationFilters } from '@/types/accommodation';
 import { Accommodation } from '@/types/database';
 
 /**
  * Hook for searching accommodations with pagination support
  */
-export const useSearchAccommodations = (initialFilters: AccommodationFilterParams = {
+export const useSearchAccommodations = (initialFilters: AccommodationFilters = {
   searchQuery: '',
   type: 'all',
   minPrice: null,
@@ -18,7 +18,7 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilterParam
   amenities: [],
   maxGuests: null
 }) => {
-  const [filters, setFilters] = useState<AccommodationFilterParams>(initialFilters);
+  const [filters, setFilters] = useState<AccommodationFilters>(initialFilters);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -36,7 +36,7 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilterParam
         offset: (page - 1) * itemsPerPage
       });
       
-      // Calculate total count (if provided by the database or estimate from results)
+      // Calculate total count from a hypothetical total_count property or estimate from results
       const totalCount = result.length > 0 && 'total_count' in result[0] 
         ? (result[0] as any).total_count 
         : result.length;
@@ -52,7 +52,7 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilterParam
 
   const totalPages = data?.total ? Math.ceil(data.total / itemsPerPage) : 0;
 
-  const updateFilters = (newFilters: Partial<AccommodationFilterParams>) => {
+  const updateFilters = (newFilters: Partial<AccommodationFilters>) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,46 +17,71 @@ const FeaturedTours = () => {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const { featuredTours, isFeaturedLoading } = useTours();
   const [displayTours, setDisplayTours] = useState<Tour[]>([]);
+  const lastActiveCategory = useRef(activeCategory);
   
-  // Process tours when data is loaded or category changes
+  // Create a memoized filter function to prevent unnecessary recalculations
+  const filterTours = useCallback((tours: Tour[], category: string) => {
+    console.log(`Filtering tours for category: ${category}`);
+    
+    if (!tours) {
+      console.log("No tours available to filter");
+      return [];
+    }
+    
+    if (category === "Todos") {
+      console.log(`Showing all ${tours.length} tours`);
+      return tours;
+    }
+    
+    const normalizedCategory = category.toLowerCase().trim();
+    
+    const filtered = tours.filter(tour => {
+      const normalizedTourCategory = tour.category.toLowerCase().trim();
+      const isMatch = normalizedTourCategory.includes(normalizedCategory) || 
+                      normalizedCategory.includes(normalizedTourCategory);
+      
+      console.log(`Tour ${tour.id} (${tour.title}) - Category: ${tour.category} - Match with ${category}: ${isMatch}`);
+      
+      return isMatch;
+    });
+    
+    console.log(`Found ${filtered.length} tours for category "${category}"`);
+    return filtered;
+  }, []);
+  
+  // Handle category change
+  const handleCategoryChange = useCallback((category: string) => {
+    console.log(`Category changed from ${activeCategory} to ${category}`);
+    setActiveCategory(category);
+    lastActiveCategory.current = category;
+  }, [activeCategory]);
+  
+  // Separate effect to update displayTours when tours or category changes
   useEffect(() => {
-    if (!featuredTours) return;
+    if (!featuredTours) {
+      console.log("Featured tours not loaded yet");
+      return;
+    }
+    
+    console.log(`Processing ${featuredTours.length} featured tours for category "${activeCategory}"`);
     
     // Convert from DB format to component format
     const componentTours = featuredTours.map(adaptDBTourToComponentTour);
+    console.log("Converted tours:", componentTours.map(t => ({ id: t.id, title: t.title, category: t.category })));
     
-    // Add debugging logs to understand available categories
-    console.log("Active category:", activeCategory);
-    console.log("Available tours:", componentTours.map(tour => ({ 
-      id: tour.id,
-      title: tour.title,
-      category: tour.category 
-    })));
+    // Apply filtering
+    const filtered = filterTours(componentTours, activeCategory);
+    console.log(`Setting displayTours with ${filtered.length} tours`);
     
-    // Filter by category if needed
-    if (activeCategory === "Todos") {
-      console.log("Showing all tours");
-      setDisplayTours(componentTours);
-    } else {
-      // Use case-insensitive comparison and more flexible matching
-      const filteredTours = componentTours.filter(tour => {
-        // Normalize both strings for comparison
-        const normalizedTourCategory = tour.category.toLowerCase().trim();
-        const normalizedActiveCategory = activeCategory.toLowerCase().trim();
-        
-        // Check if tour category contains the selected category or vice versa
-        const isMatch = normalizedTourCategory.includes(normalizedActiveCategory) || 
-                      normalizedActiveCategory.includes(normalizedTourCategory);
-        
-        console.log(`Tour ${tour.id} (${tour.title}) - Category: ${tour.category} - Match with ${activeCategory}: ${isMatch}`);
-        
-        return isMatch;
-      });
-      
-      console.log(`Found ${filteredTours.length} tours for category ${activeCategory}`);
-      setDisplayTours(filteredTours);
-    }
-  }, [featuredTours, activeCategory]);
+    // Force a clean state update by creating a new array
+    setDisplayTours([...filtered]);
+    
+  }, [featuredTours, activeCategory, filterTours]);
+  
+  // Debug effect to monitor state changes
+  useEffect(() => {
+    console.log("displayTours updated:", displayTours.map(tour => tour.title));
+  }, [displayTours]);
 
   // Animation variants
   const containerVariants = {
@@ -149,7 +174,7 @@ const FeaturedTours = () => {
                   ? "rounded-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white"
                   : "rounded-full text-foreground hover:bg-background hover:text-tuca-ocean-blue"
               }
-              onClick={() => setActiveCategory(category)}
+              onClick={() => handleCategoryChange(category)}
             >
               {category}
             </Button>
@@ -158,6 +183,7 @@ const FeaturedTours = () => {
 
         {displayTours.length > 0 ? (
           <motion.div
+            key={`tour-list-${activeCategory}`}
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -184,7 +210,7 @@ const FeaturedTours = () => {
             <Button 
               variant="outline" 
               className="rounded-full"
-              onClick={() => setActiveCategory("Todos")}
+              onClick={() => handleCategoryChange("Todos")}
             >
               Ver todos os passeios
             </Button>

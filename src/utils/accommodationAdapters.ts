@@ -3,11 +3,9 @@ import { Accommodation as DatabaseAccommodation } from "@/types/database";
 import { Accommodation as UIAccommodation } from "@/data/accommodations";
 
 /**
- * Adapts a database accommodation model to the UI accommodation model
+ * Adapts a database accommodation to the UI accommodation format
  */
-export const adaptDatabaseToUIAccommodation = (
-  dbAccommodation: DatabaseAccommodation
-): UIAccommodation => {
+export function adaptDatabaseToUIAccommodation(dbAccommodation: DatabaseAccommodation): UIAccommodation {
   return {
     id: dbAccommodation.id,
     title: dbAccommodation.title,
@@ -15,46 +13,42 @@ export const adaptDatabaseToUIAccommodation = (
     price: dbAccommodation.price_per_night,
     perNight: true,
     image: dbAccommodation.image_url,
-    location: dbAccommodation.address,
-    rating: dbAccommodation.rating || 0,
-    amenities: dbAccommodation.amenities || [],
+    location: dbAccommodation.location || dbAccommodation.address,
+    rating: dbAccommodation.rating,
+    amenities: dbAccommodation.amenities,
     capacity: dbAccommodation.max_guests,
     bedrooms: dbAccommodation.bedrooms,
     bathrooms: dbAccommodation.bathrooms,
-    featured: false // Default value, can be modified if needed
+    featured: false // Default value since database doesn't have this field
   };
-};
+}
 
 /**
- * Adapts a UI accommodation model to the database accommodation model
+ * Adapts an array of database accommodations to UI accommodations format
  */
-export const adaptUIToDatabaseAccommodation = (
-  uiAccommodation: UIAccommodation
-): Partial<DatabaseAccommodation> => {
+export function adaptDatabaseToUIAccommodations(dbAccommodations: DatabaseAccommodation[]): UIAccommodation[] {
+  return dbAccommodations.map(adaptDatabaseToUIAccommodation);
+}
+
+/**
+ * Adapts a UI accommodation to the database format
+ */
+export function adaptUIToDatabaseAccommodation(uiAccommodation: UIAccommodation): Partial<DatabaseAccommodation> {
   return {
     id: uiAccommodation.id,
     title: uiAccommodation.title,
     description: uiAccommodation.description,
+    short_description: uiAccommodation.description.substring(0, 150) + '...',
     price_per_night: uiAccommodation.price,
     image_url: uiAccommodation.image,
+    location: uiAccommodation.location,
     address: uiAccommodation.location,
-    rating: uiAccommodation.rating,
-    amenities: uiAccommodation.amenities,
-    max_guests: uiAccommodation.capacity,
+    type: 'hotel', // Default value
     bedrooms: uiAccommodation.bedrooms,
     bathrooms: uiAccommodation.bathrooms,
-    // Required fields that might not be in UI model
-    short_description: uiAccommodation.description.substring(0, 100) + "...",
-    type: "Hospedagem",
-    gallery_images: []
+    max_guests: uiAccommodation.capacity,
+    amenities: uiAccommodation.amenities,
+    gallery_images: [uiAccommodation.image],
+    rating: uiAccommodation.rating
   };
-};
-
-/**
- * Adapts an array of database accommodations to UI accommodations
- */
-export const adaptDatabaseToUIAccommodations = (
-  dbAccommodations: DatabaseAccommodation[]
-): UIAccommodation[] => {
-  return dbAccommodations.map(adaptDatabaseToUIAccommodation);
-};
+}

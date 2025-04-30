@@ -30,6 +30,16 @@ const Hospedagens = () => {
     "Estacionamento"
   ];
   
+  // Get accommodations with the useAccommodations hook
+  const { 
+    accommodations, 
+    isLoading, 
+    error, 
+    filters,
+    applyFilters: applyAccommodationFilters,
+    priceRange 
+  } = useAccommodations();
+  
   // Handler to toggle capacity filter
   const toggleCapacityFilter = (capacity: number) => {
     if (capacityFilter.includes(capacity)) {
@@ -50,6 +60,11 @@ const Hospedagens = () => {
   
   // Apply filters function
   const applyFilters = () => {
+    applyAccommodationFilters({
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      type: typeFilter
+    });
     console.log("Applying filters:", {
       minPrice,
       maxPrice,
@@ -60,10 +75,16 @@ const Hospedagens = () => {
   
   // Reset filters function
   const resetFilters = () => {
-    setMinPrice(0);
-    setMaxPrice(3000);
+    setMinPrice(priceRange?.min || 0);
+    setMaxPrice(priceRange?.max || 3000);
     setCapacityFilter([]);
     setAmenitiesFilter([]);
+    setTypeFilter("all");
+    applyAccommodationFilters({
+      minPrice: null,
+      maxPrice: null,
+      type: "all"
+    });
   };
 
   return (
@@ -91,9 +112,14 @@ const Hospedagens = () => {
                 toggleAmenityFilter={toggleAmenityFilter}
                 applyFilters={applyFilters}
                 resetFilters={resetFilters}
+                priceRange={priceRange}
               />
 
-              <AccommodationsGrid />
+              <AccommodationsGrid 
+                isLoading={isLoading} 
+                accommodations={accommodations || []} 
+                error={error}
+              />
             </div>
           </div>
         </section>

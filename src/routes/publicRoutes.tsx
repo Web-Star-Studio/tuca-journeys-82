@@ -6,6 +6,7 @@ import About from "@/pages/About";
 import Packages from "@/pages/Packages";
 import PackageDetail from "@/pages/PackageDetail";
 import Hospedagens from "@/pages/Hospedagens";
+import AccommodationDetail from "@/pages/AccommodationDetail";
 import Tours from "@/pages/Tours";
 import TourDetail from "@/pages/TourDetail";
 import Contact from "@/pages/Contact";
@@ -40,6 +41,10 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/hospedagens",
     element: <Hospedagens />,
+  },
+  {
+    path: "/hospedagem/:id",
+    element: <AccommodationDetail />,
   },
   {
     path: "/passeios",

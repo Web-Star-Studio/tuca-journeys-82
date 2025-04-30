@@ -19,24 +19,47 @@ const Login = () => {
   const searchParams = new URLSearchParams(location.search);
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
-  // Redirect authenticated users away from login page
-  // But don't redirect admins automatically - let handleSuccessfulLogin handle them
+  // Add debug logs to track what's happening
   useEffect(() => {
-    if (!authRedirectLoading && isAuthenticated && !isRedirecting && !userChecked) {
+    console.log("Login component - Auth state:", { 
+      isAuthenticated, 
+      isAdmin, 
+      isRedirecting, 
+      userChecked, 
+      authRedirectLoading,
+      returnTo 
+    });
+  }, [isAuthenticated, isAdmin, isRedirecting, userChecked, authRedirectLoading, returnTo]);
+  
+  // IMPORTANT: Don't auto-redirect admins in this useEffect
+  // Let handleSuccessfulLogin handle admin redirection
+  useEffect(() => {
+    if (authRedirectLoading || isRedirecting || userChecked) return;
+    
+    if (isAuthenticated) {
+      console.log("Login detected authenticated user, isAdmin:", isAdmin);
       setUserChecked(true);
-      // Only redirect regular users automatically, admin users are handled by handleSuccessfulLogin
-      if (!isAdmin) {
+      
+      if (isAdmin) {
+        console.log("Admin user detected, redirection will be handled by handleSuccessfulLogin");
+        // Do not navigate here for admin users
+      } else {
+        console.log("Regular user detected, redirecting to:", returnTo);
         navigate(returnTo);
       }
     }
   }, [authRedirectLoading, isAuthenticated, navigate, returnTo, isAdmin, isRedirecting, userChecked]);
   
-  // Handle successful login
+  // Handle successful login with priority
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
+    console.log("handleSuccessfulLogin called with redirectToAdmin:", redirectToAdmin);
     setIsRedirecting(true);
+    
     if (redirectToAdmin) {
+      console.log("Redirecting admin to /admin dashboard");
       navigate("/admin"); // Redirect admins to admin dashboard
     } else {
+      console.log("Redirecting regular user to:", returnTo);
       // Use the returnTo query param or default to dashboard
       navigate(returnTo);
     }

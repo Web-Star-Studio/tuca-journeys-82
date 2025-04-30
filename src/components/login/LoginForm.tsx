@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import QuickAccessButtons from "./QuickAccessButtons";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface LoginFormValues {
   email: string;
@@ -41,24 +41,40 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
     setIsSubmitting(true);
     
     try {
+      console.log("Attempting to sign in with email:", data.email);
       const result = await signIn(data.email, data.password);
       
       if (result.error) {
         throw result.error;
       }
       
+      console.log("Sign-in successful, checking permissions");
+      
       // Check if the user has admin or master permissions
       const isAdmin = await checkPermission('admin');
       const isMaster = await checkPermission('master');
       const hasAdminAccess = isAdmin || isMaster;
       
+      console.log("Permission check results:", { isAdmin, isMaster, hasAdminAccess });
+      
+      // Display success message
+      toast.success("Login realizado com sucesso!", { 
+        description: hasAdminAccess 
+          ? "Você será redirecionado para o painel administrativo." 
+          : "Bem-vindo de volta!" 
+      });
+      
       // Call the callback with appropriate redirect flag
       if (onSuccessfulLogin) {
+        console.log("Calling onSuccessfulLogin with hasAdminAccess:", hasAdminAccess);
         onSuccessfulLogin(hasAdminAccess);
       }
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Falha no login. Verifique seu email e senha.");
+      toast.error("Falha no login", {
+        description: error.message || "Verifique seu email e senha."
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -30,11 +30,12 @@ export const useSearchAccommodations = (initialFilters: AccommodationFilters = {
   } = useQuery({
     queryKey: ['accommodations', 'search', filters, page],
     queryFn: async () => {
+      // Use AccommodationFilters type which now includes limit and offset
       const result = await accommodationService.getAccommodations({
         ...filters,
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage
-      });
+      } as AccommodationFilters); // Add explicit type assertion
       
       // Calculate total count from a hypothetical total_count property or estimate from results
       const totalCount = result.length > 0 && 'total_count' in result[0] 

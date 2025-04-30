@@ -299,7 +299,7 @@ class AccommodationService extends BaseApiService {
     date: Date,
     customPrice?: number,
     status: 'available' | 'unavailable' = 'available'
-  ): Promise<AccommodationAvailability> {
+  ): Promise<any> {
     console.log(`Updating availability for accommodation ID: ${accommodationId} on date: ${date}`);
 
     const dateString = date.toISOString().split('T')[0];
@@ -387,9 +387,9 @@ class AccommodationService extends BaseApiService {
     });
 
     // Use a single SQL query to update or insert the availability records
-    const { data, error } = await this.supabase.from('accommodation_availability').upsert(
+    const { error } = await this.supabase.from('accommodation_availability').upsert(
       updates,
-      { onConflict: ['accommodation_id', 'date'] }
+      { onConflict: 'accommodation_id,date' }
     );
 
     if (error) {

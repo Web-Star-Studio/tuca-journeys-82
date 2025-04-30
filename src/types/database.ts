@@ -1,3 +1,4 @@
+
 // Supabase types
 export interface Tour {
   id: number;
@@ -55,7 +56,7 @@ export interface AccommodationAvailability {
   id: number;
   accommodation_id: number;
   date: string;
-  status: 'available' | 'unavailable';
+  status: string; // Changed from literal type to string to match database
   custom_price?: number | null;
   created_at: string;
   updated_at: string;

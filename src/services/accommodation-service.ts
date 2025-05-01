@@ -119,7 +119,7 @@ class AccommodationService extends BaseApiService {
     console.log('Creating accommodation:', accommodation);
     
     // These transformations ensure frontend properties map to database properties
-    const dbAccommodation = {
+    const dbAccommodation: Partial<Accommodation> = {
       title: accommodation.title || 'Nova Hospedagem',
       description: accommodation.description || '',
       short_description: accommodation.short_description || accommodation.description?.substring(0, 150) || '',
@@ -132,20 +132,16 @@ class AccommodationService extends BaseApiService {
       max_guests: accommodation.max_guests || 2,
       amenities: accommodation.amenities || ['Wi-Fi'],
       gallery_images: accommodation.gallery_images || [],
-      rating: accommodation.rating || 0
+      rating: accommodation.rating || 0,
+      is_featured: accommodation.is_featured  // Now safely typed
     };
-    
-    // If is_featured is provided, add it to the dbAccommodation object
-    if (accommodation.is_featured !== undefined) {
-      (dbAccommodation as any).is_featured = accommodation.is_featured;
-    }
     
     const { data, error } = await this.supabase
       .from('accommodations')
       .insert(dbAccommodation)
       .select('*')
       .single();
-      
+    
     if (error) {
       console.error('Error creating accommodation:', error);
       throw error;

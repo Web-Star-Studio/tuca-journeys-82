@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Accommodation, AccommodationAvailability } from '@/types/database';
 import { BaseApiService } from './base-api';
@@ -119,7 +120,7 @@ class AccommodationService extends BaseApiService {
     console.log('Creating accommodation:', accommodation);
     
     // Create a new object with only the properties that match the database schema
-    const dbAccommodation: Record<string, any> = {
+    const dbAccommodation: Partial<Accommodation> = {
       title: accommodation.title || 'Nova Hospedagem',
       description: accommodation.description || '',
       short_description: accommodation.short_description || accommodation.description?.substring(0, 150) || '',
@@ -142,7 +143,7 @@ class AccommodationService extends BaseApiService {
     
     const { data, error } = await this.supabase
       .from('accommodations')
-      .insert(dbAccommodation)
+      .insert(dbAccommodation as Accommodation)
       .select('*')
       .single();
     

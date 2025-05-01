@@ -1,4 +1,3 @@
-
 // Supabase types
 export interface Tour {
   id: number;

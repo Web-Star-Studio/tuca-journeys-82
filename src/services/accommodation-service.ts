@@ -132,9 +132,13 @@ class AccommodationService extends BaseApiService {
       max_guests: accommodation.max_guests || 2,
       amenities: accommodation.amenities || ['Wi-Fi'],
       gallery_images: accommodation.gallery_images || [],
-      rating: accommodation.rating || 0,
-      is_featured: accommodation.is_featured // Use is_featured instead of featured
+      rating: accommodation.rating || 0
     };
+    
+    // If is_featured is provided, add it to the dbAccommodation object
+    if (accommodation.is_featured !== undefined) {
+      (dbAccommodation as any).is_featured = accommodation.is_featured;
+    }
     
     const { data, error } = await this.supabase
       .from('accommodations')

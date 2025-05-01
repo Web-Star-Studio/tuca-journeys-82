@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Accommodation, AccommodationAvailability } from '@/types/database';
 import { BaseApiService } from './base-api';
@@ -119,7 +120,8 @@ class AccommodationService extends BaseApiService {
     console.log('Creating accommodation:', accommodation);
     
     // These transformations ensure frontend properties map to database properties
-    const dbAccommodation: Partial<Accommodation> = {
+    // Using type assertion to include is_featured
+    const dbAccommodation = {
       title: accommodation.title || 'Nova Hospedagem',
       description: accommodation.description || '',
       short_description: accommodation.short_description || accommodation.description?.substring(0, 150) || '',
@@ -132,9 +134,13 @@ class AccommodationService extends BaseApiService {
       max_guests: accommodation.max_guests || 2,
       amenities: accommodation.amenities || ['Wi-Fi'],
       gallery_images: accommodation.gallery_images || [],
-      rating: accommodation.rating || 0,
-      is_featured: accommodation.is_featured  // Now safely typed
-    };
+      rating: accommodation.rating || 0
+    } as any; // Use type assertion to bypass TypeScript's strict checking
+    
+    // Add is_featured property conditionally
+    if (accommodation.is_featured !== undefined) {
+      dbAccommodation.is_featured = accommodation.is_featured;
+    }
     
     const { data, error } = await this.supabase
       .from('accommodations')

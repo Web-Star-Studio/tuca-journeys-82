@@ -58,7 +58,7 @@ const Header = () => {
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px] py-6 px-0">
-                <NavigationMenu onClose={() => setIsOpen(false)} />
+                <NavigationMenu onLinkClick={() => setIsOpen(false)} />
               </SheetContent>
             </Sheet>
           </div>

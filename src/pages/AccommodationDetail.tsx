@@ -18,3 +18,5 @@ export const AccommodationDetail = () => {
     </div>
   );
 };
+
+export default AccommodationDetail;

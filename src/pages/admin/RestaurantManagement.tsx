@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit, Trash2, Search } from 'lucide-react';
 import {

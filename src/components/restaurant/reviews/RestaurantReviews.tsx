@@ -17,7 +17,10 @@ interface Review {
   comment: string;
   created_at: string;
   user_id: string;
-  user_profiles?: { name: string; avatar_url: string | null } | null;
+  user_profiles?: { 
+    name: string | null; 
+    avatar_url: string | null;
+  } | null;
 }
 
 interface RestaurantReviewsProps {
@@ -48,7 +51,7 @@ const RestaurantReviews: React.FC<RestaurantReviewsProps> = ({ restaurantId }) =
         throw error;
       }
       
-      return data as Review[];
+      return data as unknown as Review[];
     }
   });
 

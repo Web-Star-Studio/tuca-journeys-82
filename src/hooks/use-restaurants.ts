@@ -97,7 +97,7 @@ export const useRestaurantAdmin = () => {
 
   const addTableMutation = useMutation({
     mutationFn: restaurantService.addTable.bind(restaurantService),
-    onSuccess: (data) => {
+    onSuccess: (data: { restaurant_id: number }) => {
       queryClient.invalidateQueries({ queryKey: ['restaurantTables', data.restaurant_id] });
       toast.success('Table added successfully!');
     },

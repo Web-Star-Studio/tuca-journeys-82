@@ -806,6 +806,184 @@ export type Database = {
           },
         ]
       }
+      restaurant_reservations: {
+        Row: {
+          contact_email: string
+          contact_phone: string
+          created_at: string | null
+          guests: number
+          id: number
+          reservation_date: string
+          reservation_time: string
+          restaurant_id: number | null
+          restaurant_table_id: number | null
+          special_requests: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          contact_email: string
+          contact_phone: string
+          created_at?: string | null
+          guests: number
+          id?: number
+          reservation_date: string
+          reservation_time: string
+          restaurant_id?: number | null
+          restaurant_table_id?: number | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          contact_email?: string
+          contact_phone?: string
+          created_at?: string | null
+          guests?: number
+          id?: number
+          reservation_date?: string
+          reservation_time?: string
+          restaurant_id?: number | null
+          restaurant_table_id?: number | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_reservations_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_reservations_restaurant_table_id_fkey"
+            columns: ["restaurant_table_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_tables: {
+        Row: {
+          capacity: number
+          created_at: string | null
+          id: number
+          is_active: boolean | null
+          location: string
+          restaurant_id: number | null
+          table_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          capacity: number
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          location: string
+          restaurant_id?: number | null
+          table_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          location?: string
+          restaurant_id?: number | null
+          table_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          address: string
+          created_at: string | null
+          cuisine_type: string
+          description: string
+          gallery_images: string[] | null
+          id: number
+          image_url: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          location: string
+          name: string
+          opening_hours: Json
+          partner_id: string | null
+          payment_methods: string[] | null
+          price_range: string
+          rating: number | null
+          reservation_policy: string | null
+          short_description: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          cuisine_type: string
+          description: string
+          gallery_images?: string[] | null
+          id?: number
+          image_url: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location: string
+          name: string
+          opening_hours: Json
+          partner_id?: string | null
+          payment_methods?: string[] | null
+          price_range: string
+          rating?: number | null
+          reservation_policy?: string | null
+          short_description: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          cuisine_type?: string
+          description?: string
+          gallery_images?: string[] | null
+          id?: number
+          image_url?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string
+          name?: string
+          opening_hours?: Json
+          partner_id?: string | null
+          payment_methods?: string[] | null
+          price_range?: string
+          rating?: number | null
+          reservation_policy?: string | null
+          short_description?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -1356,6 +1534,19 @@ export type Database = {
           p_ticket_data: Json
         }
         Returns: Json
+      }
+      check_restaurant_availability: {
+        Args: {
+          p_restaurant_id: number
+          p_date: string
+          p_time: string
+          p_guests: number
+        }
+        Returns: {
+          table_id: number
+          capacity: number
+          available: boolean
+        }[]
       }
       create_event_ticket: {
         Args: {

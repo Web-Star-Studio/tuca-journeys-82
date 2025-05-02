@@ -1,92 +1,68 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { Home, Compass, Hotel, Package, ShoppingBag, Calendar, Users, Info, Phone, Heart, Map, X } from "lucide-react";
-import AuthButtons from "../user-menu/AuthButtons";
-import { useAuth } from "@/contexts/AuthContext";
-import { SheetClose } from "../ui/sheet";
+import { cn } from "@/lib/utils";
 
-interface NavigationMenuProps {
-  onClose: () => void;
+interface NavigationLinkProps {
+  to: string;
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
 }
 
-const NavigationMenu = ({ onClose }: NavigationMenuProps) => {
-  const location = useLocation();
-  const { user } = useAuth();
-  
-  const navigationItems = [
-    { path: "/", label: "Home", icon: Home },
-    { path: "/passeios", label: "Passeios", icon: Compass },
-    { path: "/hospedagens", label: "Hospedagens", icon: Hotel },
-    { path: "/pacotes", label: "Pacotes", icon: Package },
-    { path: "/loja", label: "Loja", icon: ShoppingBag },
-    { path: "/eventos", label: "Eventos", icon: Calendar },
-    { path: "/mapa", label: "Mapa", icon: Map },
-    { path: "/parceiros", label: "Parceiros", icon: Users },
-    { path: "/sobre", label: "Sobre", icon: Info },
-    { path: "/contato", label: "Contato", icon: Phone },
-  ];
-  
+const NavigationLink: React.FC<NavigationLinkProps> = ({
+  to,
+  children,
+  className,
+  onClick,
+}) => {
   return (
-    <nav className="flex flex-col h-full">
-      <div className="px-4 pb-4 flex justify-end">
-        <SheetClose className="rounded-full p-2 hover:bg-gray-100">
-          <X className="h-5 w-5" />
-        </SheetClose>
-      </div>
-      
-      <div className="flex flex-col space-y-1 px-2 overflow-y-auto flex-grow">
-        {navigationItems.map((item) => {
-          const isActive = item.path === "/"
-            ? location.pathname === "/"
-            : location.pathname.includes(item.path);
-          
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                isActive 
-                  ? "bg-tuca-light-blue text-tuca-ocean-blue font-medium" 
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={onClose}
-            >
-              <item.icon className="h-5 w-5 mr-3" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-        
-        <Link
-          to="/lista-de-desejos"
-          className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-            location.pathname.includes("/lista-de-desejos") 
-              ? "bg-tuca-light-blue text-tuca-ocean-blue font-medium" 
-              : "hover:bg-gray-100"
-          }`}
-          onClick={onClose}
-        >
-          <Heart className="h-5 w-5 mr-3" />
-          <span>Lista de Desejos</span>
-        </Link>
-      </div>
-      
-      <div className="mt-auto border-t pt-6 px-4 mb-4">
-        <Link
-          to="/reservar"
-          onClick={onClose}
-          className="w-full flex items-center justify-center px-4 py-3 bg-tuca-ocean-blue text-white rounded-lg hover:bg-tuca-deep-blue transition-colors"
-        >
-          Reservar
-        </Link>
-        
-        {!user && (
-          <div className="mt-4">
-            <AuthButtons />
-          </div>
-        )}
-      </div>
+    <Link
+      to={to}
+      className={cn(
+        "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-primary h-9 px-4 py-2",
+        className
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  );
+};
+
+const NavigationMenu: React.FC<{ className?: string; onLinkClick?: () => void }> = ({ 
+  className,
+  onLinkClick
+}) => {
+  return (
+    <nav className={cn("flex gap-1", className)}>
+      <NavigationLink to="/" onClick={onLinkClick}>
+        Home
+      </NavigationLink>
+      <NavigationLink to="/tours" onClick={onLinkClick}>
+        Tours
+      </NavigationLink>
+      <NavigationLink to="/accommodations" onClick={onLinkClick}>
+        Hospedagem
+      </NavigationLink>
+      <NavigationLink to="/packages" onClick={onLinkClick}>
+        Pacotes
+      </NavigationLink>
+      <NavigationLink to="/events" onClick={onLinkClick}>
+        Eventos
+      </NavigationLink>
+      <NavigationLink to="/restaurantes" onClick={onLinkClick}>
+        Restaurantes
+      </NavigationLink>
+      <NavigationLink to="/map" onClick={onLinkClick}>
+        Mapa
+      </NavigationLink>
+      <NavigationLink to="/store" onClick={onLinkClick}>
+        Loja
+      </NavigationLink>
+      <NavigationLink to="/about" onClick={onLinkClick}>
+        Sobre
+      </NavigationLink>
     </nav>
   );
 };

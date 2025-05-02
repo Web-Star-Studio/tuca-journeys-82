@@ -26,6 +26,7 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
       vehicle_bookings: OriginalDatabase['public']['Tables']['vehicle_bookings'];
       vehicle_units: OriginalDatabase['public']['Tables']['vehicle_units'];
       vehicles: OriginalDatabase['public']['Tables']['vehicles'];
+      event_tickets: OriginalDatabase['public']['Tables']['event_tickets'];
       
       // Add our new tables with overriding Relationships if needed
       audit_logs: {
@@ -326,60 +327,189 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
         ];
       };
       
-      event_tickets: {
+      restaurants: {
         Row: {
           id: number;
-          event_id: number;
           name: string;
-          description: string | null;
-          price: number;
-          available_quantity: number;
-          max_per_order: number | null;
-          type: string | null;
-          benefits: string[] | null;
-          created_at: string;
-          updated_at: string;
+          description: string;
+          short_description: string;
+          address: string;
+          location: string;
+          image_url: string;
+          gallery_images: string[] | null;
+          cuisine_type: string;
+          price_range: string;
+          opening_hours: any;
+          payment_methods: string[] | null;
+          reservation_policy: string | null;
+          partner_id: string | null;
+          is_featured: boolean | null;
+          is_active: boolean | null;
+          rating: number | null;
+          created_at: string | null;
+          updated_at: string | null;
         };
         Insert: {
           id?: number;
-          event_id: number;
           name: string;
-          description?: string | null;
-          price: number;
-          available_quantity: number;
-          max_per_order?: number | null;
-          type?: string | null;
-          benefits?: string[] | null;
-          created_at?: string;
-          updated_at?: string;
+          description: string;
+          short_description: string;
+          address: string;
+          location: string;
+          image_url: string;
+          gallery_images?: string[] | null;
+          cuisine_type: string;
+          price_range: string;
+          opening_hours: any;
+          payment_methods?: string[] | null;
+          reservation_policy?: string | null;
+          partner_id?: string | null;
+          is_featured?: boolean | null;
+          is_active?: boolean | null;
+          rating?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
         };
         Update: {
           id?: number;
-          event_id?: number;
           name?: string;
-          description?: string | null;
-          price?: number;
-          available_quantity?: number;
-          max_per_order?: number | null;
-          type?: string | null;
-          benefits?: string[] | null;
-          created_at?: string;
-          updated_at?: string;
+          description?: string;
+          short_description?: string;
+          address?: string;
+          location?: string;
+          image_url?: string;
+          gallery_images?: string[] | null;
+          cuisine_type?: string;
+          price_range?: string;
+          opening_hours?: any;
+          payment_methods?: string[] | null;
+          reservation_policy?: string | null;
+          partner_id?: string | null;
+          is_featured?: boolean | null;
+          is_active?: boolean | null;
+          rating?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "event_tickets_event_id_fkey";
-            columns: ["event_id"];
+            foreignKeyName: "restaurants_partner_id_fkey";
+            columns: ["partner_id"];
             isOneToOne: false;
-            referencedRelation: "events";
+            referencedRelation: "partners";
             referencedColumns: ["id"];
           }
         ];
-      }
+      };
+      
+      restaurant_tables: {
+        Row: {
+          id: number;
+          restaurant_id: number | null;
+          table_number: string;
+          capacity: number;
+          location: string;
+          is_active: boolean | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: number;
+          restaurant_id?: number | null;
+          table_number: string;
+          capacity: number;
+          location: string;
+          is_active?: boolean | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: number;
+          restaurant_id?: number | null;
+          table_number?: string;
+          capacity?: number;
+          location?: string;
+          is_active?: boolean | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      
+      restaurant_reservations: {
+        Row: {
+          id: number;
+          restaurant_id: number | null;
+          user_id: string | null;
+          restaurant_table_id: number | null;
+          reservation_date: string;
+          reservation_time: string;
+          guests: number;
+          status: string;
+          special_requests: string | null;
+          contact_phone: string;
+          contact_email: string;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: number;
+          restaurant_id?: number | null;
+          user_id?: string | null;
+          restaurant_table_id?: number | null;
+          reservation_date: string;
+          reservation_time: string;
+          guests: number;
+          status?: string;
+          special_requests?: string | null;
+          contact_phone: string;
+          contact_email: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: number;
+          restaurant_id?: number | null;
+          user_id?: string | null;
+          restaurant_table_id?: number | null;
+          reservation_date?: string;
+          reservation_time?: string;
+          guests?: number;
+          status?: string;
+          special_requests?: string | null;
+          contact_phone?: string;
+          contact_email?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_reservations_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "restaurant_reservations_restaurant_table_id_fkey";
+            columns: ["restaurant_table_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurant_tables";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: OriginalDatabase['public']['Views'];
     Functions: OriginalDatabase['public']['Functions'] & {
-      // Add our new RPC functions
       grant_permission: {
         Args: {
           target_user_id: string;
@@ -443,6 +573,19 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
           p_event_id: number;
         };
         Returns: any;
+      };
+      check_restaurant_availability: {
+        Args: {
+          p_restaurant_id: number;
+          p_date: string;
+          p_time: string;
+          p_guests: number;
+        };
+        Returns: {
+          table_id: number;
+          capacity: number;
+          available: boolean;
+        }[];
       };
     };
     Enums: OriginalDatabase['public']['Enums'];

@@ -1,157 +1,96 @@
 
-import { Suspense, lazy } from "react";
+import React from "react";
 import { RouteObject } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-
+import Dashboard from "@/pages/admin/Dashboard";
 import AdminLogin from "@/pages/admin/AdminLogin";
-
-// Lazy load all admin pages to improve performance
-const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
-const AdminTours = lazy(() => import("@/pages/admin/Tours"));
-const AdminTourAvailability = lazy(() => import("@/pages/admin/TourAvailability"));
-const AdminAccommodations = lazy(() => import("@/pages/admin/Accommodations"));
-const AdminAccommodationAvailability = lazy(() => import("@/pages/admin/AccommodationAvailability"));
-const AdminBookings = lazy(() => import("@/pages/admin/Bookings"));
-const AdminUsers = lazy(() => import("@/pages/admin/Users"));
-const AdminReports = lazy(() => import("@/pages/admin/Reports"));
-const AdminPackages = lazy(() => import("@/pages/admin/Packages"));
-const AdminMedia = lazy(() => import("@/pages/admin/Media"));
-const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
-const AdminProducts = lazy(() => import("@/pages/admin/Products"));
-const AdminAuditLogs = lazy(() => import("@/pages/admin/AuditLogs"));
-const AdminPermissions = lazy(() => import("@/pages/admin/Permissions"));
-const AdminEvents = lazy(() => import("@/pages/admin/Events"));
-
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
-  </div>
-);
+import Tours from "@/pages/admin/Tours";
+import Packages from "@/pages/admin/Packages";
+import Products from "@/pages/admin/Products";
+import Accommodations from "@/pages/admin/Accommodations";
+import Users from "@/pages/admin/Users";
+import Settings from "@/pages/admin/Settings";
+import Bookings from "@/pages/admin/Bookings";
+import TourAvailability from "@/pages/admin/TourAvailability";
+import AccommodationAvailability from "@/pages/admin/AccommodationAvailability";
+import Events from "@/pages/admin/Events";
+import Reports from "@/pages/admin/Reports";
+import Media from "@/pages/admin/Media";
+import Permissions from "@/pages/admin/Permissions";
+import AuditLogs from "@/pages/admin/AuditLogs";
+import RestaurantManagement from "@/pages/admin/RestaurantManagement";
 
 const adminRoutes: RouteObject[] = [
+  {
+    path: "/admin",
+    element: <Dashboard />,
+  },
   {
     path: "/admin/login",
     element: <AdminLogin />,
   },
   {
-    path: "/admin",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminDashboard />
-      </Suspense>
-    ),
+    path: "/admin/dashboard",
+    element: <Dashboard />,
   },
   {
     path: "/admin/tours",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminTours />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/tour-availability/:id",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminTourAvailability />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/accommodations",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminAccommodations />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/accommodation-availability/:id",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminAccommodationAvailability />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/bookings",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminBookings />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/users",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminUsers />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/reports",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminReports />
-      </Suspense>
-    ),
+    element: <Tours />,
   },
   {
     path: "/admin/packages",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminPackages />
-      </Suspense>
-    ),
+    element: <Packages />,
   },
   {
     path: "/admin/products",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminProducts />
-      </Suspense>
-    ),
+    element: <Products />,
   },
   {
-    path: "/admin/media",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminMedia />
-      </Suspense>
-    ),
+    path: "/admin/accommodations",
+    element: <Accommodations />,
+  },
+  {
+    path: "/admin/users",
+    element: <Users />,
   },
   {
     path: "/admin/settings",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminSettings />
-      </Suspense>
-    ),
+    element: <Settings />,
   },
   {
-    path: "/admin/audit-logs",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminAuditLogs />
-      </Suspense>
-    ),
+    path: "/admin/bookings",
+    element: <Bookings />,
   },
   {
-    path: "/admin/permissions",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminPermissions />
-      </Suspense>
-    ),
+    path: "/admin/tours/availability",
+    element: <TourAvailability />,
+  },
+  {
+    path: "/admin/accommodations/availability",
+    element: <AccommodationAvailability />,
   },
   {
     path: "/admin/events",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminEvents />
-      </Suspense>
-    ),
+    element: <Events />,
+  },
+  {
+    path: "/admin/reports",
+    element: <Reports />,
+  },
+  {
+    path: "/admin/media",
+    element: <Media />,
+  },
+  {
+    path: "/admin/permissions",
+    element: <Permissions />,
+  },
+  {
+    path: "/admin/audit",
+    element: <AuditLogs />,
+  },
+  {
+    path: "/admin/restaurants",
+    element: <RestaurantManagement />,
   },
 ];
 

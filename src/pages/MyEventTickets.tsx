@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { eventService } from "@/services/event-service";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { EventBooking } from "@/types/event";
 
 const MyEventTickets = () => {
   const { user, isLoading: isLoadingAuth } = useAuth();
@@ -23,9 +24,10 @@ const MyEventTickets = () => {
     error 
   } = useQuery({
     queryKey: ['myEventBookings', user?.id],
-    queryFn: () => {
+    queryFn: async () => {
       if (!user?.id) return Promise.resolve([]);
-      return eventService.getUserEventBookings(user.id);
+      const data = await eventService.getUserEventBookings(user.id);
+      return data as EventBooking[];
     },
     enabled: !!user?.id,
   });
@@ -85,27 +87,27 @@ const MyEventTickets = () => {
                     <div 
                       className="h-48 md:h-full bg-cover bg-center"
                       style={{ 
-                        backgroundImage: `url(${booking.event.image_url})` 
+                        backgroundImage: `url(${booking.event?.image_url})` 
                       }}
                     />
                     <div className="p-6 col-span-2">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h2 className="text-xl font-bold mb-2">{booking.event.name}</h2>
+                          <h2 className="text-xl font-bold mb-2">{booking.event?.name}</h2>
                           <div className="space-y-2">
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Calendar className="h-4 w-4 mr-2" />
                               <span>
-                                {format(new Date(booking.event.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                                {format(new Date(booking.event?.date || new Date()), "EEEE, d 'de' MMMM", { locale: ptBR })}
                               </span>
                             </div>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Clock className="h-4 w-4 mr-2" />
-                              <span>{booking.event.start_time} - {booking.event.end_time}</span>
+                              <span>{booking.event?.start_time} - {booking.event?.end_time}</span>
                             </div>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <MapPin className="h-4 w-4 mr-2" />
-                              <span>{booking.event.location}</span>
+                              <span>{booking.event?.location}</span>
                             </div>
                           </div>
                         </div>

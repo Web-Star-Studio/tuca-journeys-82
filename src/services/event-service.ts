@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Event, EventFilters } from '@/types/event';
+import { Event, EventFilters, EventTicket, EventBooking } from '@/types/event';
 import { BaseApiService } from './base-api';
 import { adaptDBEventToComponentEvent } from '@/utils/eventAdapter';
 
@@ -102,6 +102,46 @@ class EventService extends BaseApiService {
     }
 
     return adaptDBEventToComponentEvent(data);
+  }
+
+  /**
+   * Gets event categories
+   */
+  async getEventCategories(): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('events')
+      .select('category')
+      .order('category');
+      
+    if (error) {
+      console.error('Error fetching event categories:', error);
+      throw error;
+    }
+    
+    // Extract unique categories
+    const categories = Array.from(new Set(data.map(item => item.category)));
+    // Add "Todas" as the first category
+    return ['Todas', ...categories];
+  }
+
+  /**
+   * Gets featured events
+   */
+  async getFeaturedEvents(limit: number = 4): Promise<Event[]> {
+    const { data, error } = await this.supabase
+      .from('events')
+      .select('*')
+      .eq('is_featured', true)
+      .gt('date', new Date().toISOString().split('T')[0]) // Only future events
+      .order('date', { ascending: true })
+      .limit(limit);
+      
+    if (error) {
+      console.error('Error fetching featured events:', error);
+      throw error;
+    }
+    
+    return data.map(adaptDBEventToComponentEvent);
   }
 
   /**
@@ -219,14 +259,12 @@ class EventService extends BaseApiService {
     // Update tickets if provided
     if (tickets && tickets.length > 0) {
       try {
-        // First get existing tickets 
-        const { data: existingTickets } = await this.supabase
-          .rpc('get_event_tickets', { p_event_id: id });
+        // First get existing tickets
+        const existingTickets = await this.getEventTickets(id);
           
         // If we have existing tickets, delete them
         if (existingTickets && existingTickets.length > 0) {
-          await this.supabase
-            .rpc('delete_event_tickets', { p_event_id: id });
+          await this.deleteEventTickets(id);
         }
         
         // Create new tickets
@@ -251,7 +289,7 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Creates a ticket for an event
+   * Creates a ticket for an event - converted to use a direct database insert
    */
   private async createTicketForEvent(eventId: number, ticketData: {
     name: string;
@@ -263,16 +301,18 @@ class EventService extends BaseApiService {
     benefits?: string[];
   }) {
     try {
+      // Since we can't use RPC due to type issues, use direct insert
       await this.supabase
-        .rpc('create_event_ticket', {
-          p_event_id: eventId,
-          p_name: ticketData.name,
-          p_price: ticketData.price,
-          p_available_quantity: ticketData.available_quantity,
-          p_max_per_order: ticketData.max_per_order || 4,
-          p_description: ticketData.description || null,
-          p_type: ticketData.type || 'regular',
-          p_benefits: ticketData.benefits || []
+        .from('event_tickets')
+        .insert({
+          event_id: eventId,
+          name: ticketData.name,
+          price: ticketData.price,
+          available_quantity: ticketData.available_quantity,
+          max_per_order: ticketData.max_per_order || 4,
+          description: ticketData.description || null,
+          type: ticketData.type || 'regular',
+          benefits: ticketData.benefits || []
         });
     } catch (error) {
       console.error(`Error creating ticket for event ID: ${eventId}:`, error);
@@ -348,51 +388,14 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Gets event categories
-   */
-  async getEventCategories(): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('category')
-      .order('category');
-      
-    if (error) {
-      console.error('Error fetching event categories:', error);
-      throw error;
-    }
-    
-    // Extract unique categories
-    const categories = Array.from(new Set(data.map(item => item.category)));
-    // Add "Todas" as the first category
-    return ['Todas', ...categories];
-  }
-
-  /**
-   * Gets featured events
-   */
-  async getFeaturedEvents(limit: number = 4): Promise<Event[]> {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*')
-      .eq('is_featured', true)
-      .gt('date', new Date().toISOString().split('T')[0]) // Only future events
-      .order('date', { ascending: true })
-      .limit(limit);
-      
-    if (error) {
-      console.error('Error fetching featured events:', error);
-      throw error;
-    }
-    
-    return data.map(adaptDBEventToComponentEvent);
-  }
-
-  /**
-   * Gets event tickets
+   * Gets event tickets - changed to use direct query instead of RPC
    */
   async getEventTickets(eventId: number) {
     const { data, error } = await this.supabase
-      .rpc('get_event_tickets', { p_event_id: eventId });
+      .from('event_tickets')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('price', { ascending: true });
       
     if (error) {
       console.error(`Error fetching tickets for event ID: ${eventId}:`, error);
@@ -403,18 +406,39 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Gets user's event bookings
+   * Deletes event tickets - changed to use direct query instead of RPC
    */
-  async getUserEventBookings(userId: string) {
+  async deleteEventTickets(eventId: number) {
+    const { error } = await this.supabase
+      .from('event_tickets')
+      .delete()
+      .eq('event_id', eventId);
+      
+    if (error) {
+      console.error(`Error deleting tickets for event ID: ${eventId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Gets user's event bookings - changed to use direct query with joins instead of RPC
+   */
+  async getUserEventBookings(userId: string): Promise<EventBooking[]> {
     const { data, error } = await this.supabase
-      .rpc('get_user_event_bookings', { p_user_id: userId });
+      .from('event_bookings')
+      .select(`
+        *,
+        event:events(*)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
       
     if (error) {
       console.error(`Error fetching event bookings for user ID: ${userId}:`, error);
       throw error;
     }
     
-    return data;
+    return data as unknown as EventBooking[];
   }
 }
 

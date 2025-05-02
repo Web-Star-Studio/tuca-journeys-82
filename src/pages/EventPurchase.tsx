@@ -1,341 +1,315 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, CreditCard, QrCode, Calendar } from "lucide-react";
+
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { CalendarIcon, Clock, MapPin, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectedTicket } from "@/components/event/EventTicketSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { eventService } from "@/services/event-service";
-
-interface EventPurchaseLocationState {
-  selectedTickets: SelectedTicket[];
-  event: any;
-}
+import { AttendeeInfo, SelectedTicket } from "@/types/event";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const EventPurchase = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const eventId = parseInt(id || "", 10);
   const location = useLocation();
+  const navigate = useNavigate();
+  
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<string>("credit-card");
-  const [attendeeInfo, setAttendeeInfo] = useState<{ [key: number]: { name: string; email: string; document?: string }[] }>({});
-  
-  const state = location.state as EventPurchaseLocationState | undefined;
-  
-  // If we don't have state, redirect to event detail page
-  if (!state || !state.selectedTickets || !state.event) {
-    navigate(`/eventos/${id}`);
+  if (!user) {
+    navigate('/login', { state: { returnTo: `/eventos/${eventId}/comprar` } });
     return null;
   }
   
-  const { selectedTickets, event } = state;
+  const { state } = location;
+  const selectedTickets = state?.selectedTickets as SelectedTicket[] || [];
+  const eventFromState = state?.event;
   
-  // Initialize attendee info form fields for each ticket
-  React.useEffect(() => {
-    const initialAttendeeInfo: { [key: number]: { name: string; email: string; document?: string }[] } = {};
-    
-    selectedTickets.forEach(ticket => {
-      initialAttendeeInfo[ticket.ticketId] = Array(ticket.quantity).fill({
-        name: user?.email?.split('@')[0] || '',
-        email: user?.email || '',
-        document: ''
-      });
-    });
-    
-    setAttendeeInfo(initialAttendeeInfo);
-  }, [selectedTickets, user]);
+  const [attendees, setAttendees] = useState<AttendeeInfo[]>([]);
   
-  // Calculate total price
-  const totalPrice = selectedTickets.reduce(
-    (total, ticket) => total + ticket.price * ticket.quantity,
-    0
-  );
+  const { data: event, isLoading: isEventLoading } = useQuery({
+    queryKey: ['event', eventId],
+    queryFn: () => eventService.getEventById(eventId),
+    enabled: !eventFromState && !!eventId,
+    initialData: eventFromState,
+  });
   
-  // Calculate total tickets
-  const totalTickets = selectedTickets.reduce(
-    (total, ticket) => total + ticket.quantity,
-    0
-  );
+  const totalTickets = selectedTickets.reduce((sum, ticket) => sum + ticket.quantity, 0);
+  const totalPrice = selectedTickets.reduce((sum, ticket) => sum + (ticket.price * ticket.quantity), 0);
   
-  const bookEventMutation = useMutation({
-    mutationFn: async () => {
-      // Format attendee info for API
-      const formattedAttendeeInfo = [];
+  // Initialize attendees based on selected tickets
+  useEffect(() => {
+    if (selectedTickets.length > 0) {
+      const newAttendees: AttendeeInfo[] = [];
       
-      for (const ticketId in attendeeInfo) {
-        const ticketType = selectedTickets.find(t => t.ticketId === Number(ticketId))?.name || '';
-        
-        for (const attendee of attendeeInfo[Number(ticketId)]) {
-          formattedAttendeeInfo.push({
-            ...attendee,
-            ticketType
+      selectedTickets.forEach(ticket => {
+        for (let i = 0; i < ticket.quantity; i++) {
+          newAttendees.push({
+            name: user ? user.email?.split('@')[0] || '' : '',
+            email: user ? user.email || '' : '',
+            ticketType: ticket.name
           });
         }
-      }
+      });
       
+      setAttendees(newAttendees);
+    }
+  }, [selectedTickets, user]);
+  
+  const bookMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !user.id) throw new Error('User not authenticated');
       return eventService.bookEventTickets(
-        Number(id), 
-        user!.id, // Changed from uid to id
-        totalTickets, 
-        formattedAttendeeInfo
+        eventId,
+        user.id,
+        totalTickets,
+        attendees
       );
     },
     onSuccess: () => {
-      toast.success("Compra realizada com sucesso!", {
-        description: "Seus ingressos foram reservados."
-      });
-      navigate("/meus-ingressos");
+      toast.success('Ingressos reservados com sucesso!');
+      navigate('/meus-ingressos');
     },
-    onError: (error: any) => {
-      toast.error("Erro ao comprar ingressos", {
-        description: error.message || "Tente novamente mais tarde"
+    onError: (error) => {
+      toast.error('Erro ao reservar ingressos', { 
+        description: (error as Error).message
       });
-    },
+    }
   });
   
-  const handleAttendeeInfoChange = (
-    ticketId: number,
-    index: number,
-    field: string,
-    value: string
-  ) => {
-    setAttendeeInfo(prev => {
-      const updated = { ...prev };
-      updated[ticketId][index] = {
-        ...updated[ticketId][index],
-        [field]: value
-      };
+  const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
+    setAttendees(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleBookTickets = () => {
     // Validate attendee information
-    let isValid = true;
-    const requiredFields = ['name', 'email'];
+    const isValid = attendees.every(a => a.name.trim() && a.email.trim());
     
-    for (const ticketId in attendeeInfo) {
-      for (const [index, attendee] of attendeeInfo[Number(ticketId)].entries()) {
-        for (const field of requiredFields) {
-          if (!attendee[field as keyof typeof attendee]) {
-            toast.error(`Preencha todos os campos obrigatórios para cada participante`);
-            isValid = false;
-            break;
-          }
-        }
-      }
+    if (!isValid) {
+      toast.error('Por favor, preencha todos os campos obrigatórios');
+      return;
     }
     
-    if (isValid) {
-      bookEventMutation.mutate();
-    }
+    bookMutation.mutate();
   };
-
+  
+  if (isEventLoading || !event) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="container max-w-4xl mx-auto py-12 px-4">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+  
+  if (!selectedTickets.length) {
+    navigate(`/eventos/${eventId}`);
+    return null;
+  }
+  
   return (
-    <div className="container max-w-5xl mx-auto py-8 px-4">
-      <Button 
-        variant="ghost" 
-        className="mb-6" 
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Voltar para o Evento
-      </Button>
-      
-      <h1 className="text-3xl font-bold mb-8">Finalizar Compra</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="col-span-2">
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-medium mb-4">Informações do Evento</h2>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-tuca-ocean-blue" />
-                  <div>
-                    <div className="font-medium">{event.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {format(new Date(event.date), "EEEE, d 'de' MMMM", { locale: ptBR })} • {event.start_time} - {event.end_time}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {event.location}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen">
+      <Header />
+      <div className="container max-w-4xl mx-auto py-8 px-4">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            className="mb-4" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
           
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-8">
-              {selectedTickets.map(ticket => (
-                <Card key={ticket.ticketId} className="overflow-hidden">
-                  <CardContent className="p-6">
-                    <h2 className="text-lg font-medium mb-4">
-                      {ticket.quantity}x {ticket.name}
-                    </h2>
-                    
-                    {Array.from({ length: ticket.quantity }).map((_, index) => (
-                      <div key={index} className="border rounded-md p-4 mb-4 last:mb-0">
-                        <h3 className="text-sm font-medium mb-3">
-                          Ingresso #{index + 1}
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor={`name-${ticket.ticketId}-${index}`}>Nome Completo*</Label>
-                            <Input
-                              id={`name-${ticket.ticketId}-${index}`}
-                              value={attendeeInfo[ticket.ticketId]?.[index]?.name || ''}
-                              onChange={(e) => handleAttendeeInfoChange(ticket.ticketId, index, 'name', e.target.value)}
-                              placeholder="Nome do participante"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`email-${ticket.ticketId}-${index}`}>Email*</Label>
-                            <Input
-                              id={`email-${ticket.ticketId}-${index}`}
-                              type="email"
-                              value={attendeeInfo[ticket.ticketId]?.[index]?.email || ''}
-                              onChange={(e) => handleAttendeeInfoChange(ticket.ticketId, index, 'email', e.target.value)}
-                              placeholder="email@exemplo.com"
-                              required
-                            />
-                          </div>
-                          <div className="col-span-1 sm:col-span-2">
-                            <Label htmlFor={`document-${ticket.ticketId}-${index}`}>Documento (CPF/RG)</Label>
-                            <Input
-                              id={`document-${ticket.ticketId}-${index}`}
-                              value={attendeeInfo[ticket.ticketId]?.[index]?.document || ''}
-                              onChange={(e) => handleAttendeeInfoChange(ticket.ticketId, index, 'document', e.target.value)}
-                              placeholder="Opcional"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-              
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-lg font-medium mb-4">Método de Pagamento</h2>
-                  
-                  <Tabs defaultValue="credit-card" onValueChange={setPaymentMethod}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="credit-card">Cartão de Crédito</TabsTrigger>
-                      <TabsTrigger value="pix">PIX</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="credit-card" className="mt-4 space-y-4">
-                      <div>
-                        <Label htmlFor="card-name">Nome no Cartão</Label>
-                        <Input id="card-name" placeholder="Nome como está no cartão" />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="card-number">Número do Cartão</Label>
-                        <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="card-expiry">Data de Validade</Label>
-                          <Input id="card-expiry" placeholder="MM/AA" />
-                        </div>
-                        <div>
-                          <Label htmlFor="card-cvc">CVC</Label>
-                          <Input id="card-cvc" placeholder="123" />
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="pix" className="mt-4">
-                      <div className="flex flex-col items-center justify-center py-8">
-                        <div className="bg-gray-100 p-6 rounded-lg mb-4 flex items-center justify-center">
-                          <QrCode className="h-32 w-32 text-tuca-ocean-blue" />
-                        </div>
-                        <p className="text-sm text-center mb-2">
-                          Escaneie o QR code acima para pagar via PIX
-                        </p>
-                        <p className="text-xs text-muted-foreground text-center">
-                          O pagamento será confirmado automaticamente
-                        </p>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-              
-              <div className="flex justify-end mt-8">
-                <Button 
-                  type="submit" 
-                  size="lg"
-                  disabled={bookEventMutation.isPending}
-                >
-                  {bookEventMutation.isPending ? "Processando..." : "Finalizar Compra"}
-                </Button>
-              </div>
-            </div>
-          </form>
+          <h1 className="text-3xl font-bold mb-2">Finalizar compra</h1>
+          <p className="text-muted-foreground">
+            Complete seus dados para confirmar a reserva dos ingressos
+          </p>
         </div>
         
-        <div>
-          <div className="bg-white p-6 rounded-lg shadow-md sticky top-20">
-            <h2 className="text-lg font-medium mb-4">Resumo da Compra</h2>
-            
-            <div className="space-y-3">
-              {selectedTickets.map(ticket => (
-                <div key={ticket.ticketId} className="flex justify-between">
-                  <span>
-                    {ticket.quantity}x {ticket.name}
-                  </span>
-                  <span>R$ {(ticket.price * ticket.quantity).toFixed(2).replace('.', ',')}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardContent className="pt-6">
+                <h2 className="text-xl font-semibold mb-4">Informações do evento</h2>
+                
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div 
+                    className="h-28 w-28 bg-cover bg-center rounded-lg shrink-0"
+                    style={{ backgroundImage: `url(${event.image_url})` }}
+                  />
+                  
+                  <div>
+                    <h3 className="font-medium text-lg mb-2">{event.name}</h3>
+                    
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center">
+                        <CalendarIcon className="h-4 w-4 mr-2" />
+                        <span>
+                          {format(new Date(event.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        <span>{event.start_time} - {event.end_time}</span>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span>{event.location}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-              
-              <Separator />
-              
-              <div className="flex justify-between font-medium">
-                <span>Total</span>
-                <span>R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
-              </div>
-              
-              <div className="mt-6">
-                <RadioGroup defaultValue="full" className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="full" id="full-payment" />
-                    <Label htmlFor="full-payment">Pagamento à Vista</Label>
+                
+                <Separator className="mb-6" />
+                
+                <h2 className="text-xl font-semibold mb-4">Ingressos selecionados</h2>
+                
+                <div className="space-y-4 mb-6">
+                  {selectedTickets.map((ticket, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{ticket.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {ticket.quantity}x R$ {ticket.price.toFixed(2).replace('.', ',')}
+                        </p>
+                      </div>
+                      <div className="font-medium">
+                        R$ {(ticket.quantity * ticket.price).toFixed(2).replace('.', ',')}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="pt-4 border-t flex justify-between items-center font-medium text-lg">
+                    <span>Total</span>
+                    <span>R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="installments" id="installments" />
-                    <Label htmlFor="installments">Parcelar em até 3x sem juros</Label>
-                  </div>
-                </RadioGroup>
-              </div>
+                </div>
+                
+                <Separator className="mb-6" />
+                
+                <h2 className="text-xl font-semibold mb-4">Dados dos participantes</h2>
+                
+                <div className="space-y-6">
+                  {attendees.map((attendee, index) => (
+                    <div key={index} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-medium">Participante {index + 1}</h3>
+                        <span className="text-sm text-muted-foreground">{attendee.ticketType}</span>
+                      </div>
+                      
+                      <div className="grid gap-4">
+                        <div>
+                          <Label htmlFor={`name-${index}`}>Nome completo *</Label>
+                          <Input 
+                            id={`name-${index}`}
+                            value={attendee.name}
+                            onChange={(e) => updateAttendee(index, 'name', e.target.value)}
+                            className="mt-1"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor={`email-${index}`}>Email *</Label>
+                          <Input 
+                            id={`email-${index}`}
+                            type="email"
+                            value={attendee.email}
+                            onChange={(e) => updateAttendee(index, 'email', e.target.value)}
+                            className="mt-1"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor={`document-${index}`}>Documento (opcional)</Label>
+                          <Input 
+                            id={`document-${index}`}
+                            value={attendee.document || ''}
+                            onChange={(e) => updateAttendee(index, 'document', e.target.value)}
+                            className="mt-1"
+                            placeholder="CPF ou RG"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
               
-              <div className="mt-6">
-                <p className="text-xs text-muted-foreground">
-                  Ao finalizar a compra você concorda com os termos de uso e política de privacidade
-                </p>
-              </div>
-            </div>
+              <CardFooter className="flex justify-end">
+                <Button 
+                  onClick={handleBookTickets}
+                  disabled={bookMutation.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  {bookMutation.isPending ? 'Processando...' : 'Finalizar compra'}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24">
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-4">Resumo da compra</h3>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Ingressos</span>
+                    <span>{totalTickets}</span>
+                  </div>
+                  
+                  {selectedTickets.map((ticket, index) => (
+                    <div key={index} className="flex justify-between text-sm text-muted-foreground">
+                      <span>{ticket.name}</span>
+                      <span>{ticket.quantity}x</span>
+                    </div>
+                  ))}
+                  
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="font-medium">Total</span>
+                    <span className="font-bold">
+                      R$ {totalPrice.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t space-y-2 text-sm">
+                  <p className="font-medium">Informações importantes</p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Os ingressos serão enviados para o email informado</li>
+                    <li>• Apresente o ingresso no dia do evento</li>
+                    <li>• Cancelamentos são aceitos até 48h antes do evento</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -56,7 +56,17 @@ export interface EventBooking {
   payment_details?: any;
   created_at: string;
   attendee_info?: AttendeeInfo[];
-  event?: Event; // Added to support joined data
+  event?: {
+    id: number;
+    name: string;
+    description: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    location: string;
+    image_url: string;
+    // Include other event properties as needed
+  };
 }
 
 export interface AttendeeInfo {

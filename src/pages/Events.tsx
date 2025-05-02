@@ -1,128 +1,192 @@
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-import React, { useState, useEffect } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import EventHero from "@/components/event/EventHero";
-import EventSearchFilter from "@/components/event/EventSearchFilter";
-import EventsGrid from "@/components/event/EventsGrid";
-import { events, categories } from "@/data/events";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
-import { CalendarRange } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import EventForm from "@/components/admin/events/EventForm";
+import EventsTable from "@/components/admin/events/EventsTable";
+import { eventService } from "@/services/event-service";
+import { Event, EventFilters } from "@/types/event";
 
 const Events = () => {
-  const [activeCategory, setActiveCategory] = useState("Todas");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [displayCount, setDisplayCount] = useState(6);
-
-  // Simulate a loading state for better UX demonstration
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Filter events by category and search query
-  const filteredEvents = events.filter(event => {
-    const matchesCategory = activeCategory === "Todas" || event.category === activeCategory;
-    const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const [filters, setFilters] = useState<EventFilters>({
+    searchQuery: "",
+    sortBy: "date_asc",
+    limit: 20
+  });
+  
+  const queryClient = useQueryClient();
+  
+  const { data: events, isLoading, error } = useQuery({
+    queryKey: ['adminEvents', filters],
+    queryFn: () => eventService.getEvents(filters)
+  });
+  
+  const createEventMutation = useMutation({
+    mutationFn: (eventData: Partial<Event>) => eventService.createEvent(eventData),
+    onSuccess: () => {
+      toast.success("Evento criado com sucesso!");
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
+    },
+    onError: (err: any) => {
+      toast.error("Erro ao criar evento", { 
+        description: err.message || "Tente novamente mais tarde" 
+      });
+    }
+  });
+  
+  const updateEventMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: Partial<Event> }) => 
+      eventService.updateEvent(id, data),
+    onSuccess: () => {
+      toast.success("Evento atualizado com sucesso!");
+      setIsEditModalOpen(false);
+      setCurrentEvent(null);
+      queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
+      queryClient.invalidateQueries({ queryKey: ['event'] }); // Invalidate single event queries as well
+    },
+    onError: (err: any) => {
+      toast.error("Erro ao atualizar evento", { 
+        description: err.message || "Tente novamente mais tarde" 
+      });
+    }
+  });
+  
+  const deleteEventMutation = useMutation({
+    mutationFn: (eventId: number) => eventService.deleteEvent(eventId),
+    onSuccess: () => {
+      toast.success("Evento excluído com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
+    },
+    onError: (err: any) => {
+      toast.error("Erro ao excluir evento", { 
+        description: err.message || "Tente novamente mais tarde" 
+      });
+    }
   });
 
-  // Events to display with pagination
-  const displayedEvents = filteredEvents.slice(0, displayCount);
-  
-  const handleLoadMore = () => {
-    setDisplayCount(prevCount => Math.min(prevCount + 6, filteredEvents.length));
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFilters(prev => ({ ...prev, searchQuery }));
+  };
+
+  const handleCreateEvent = (data: any) => {
+    createEventMutation.mutate(data);
+  };
+
+  const handleEditEvent = (event: Event) => {
+    setCurrentEvent(event);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateEvent = (data: any) => {
+    if (currentEvent) {
+      updateEventMutation.mutate({ id: currentEvent.id, data });
+    }
+  };
+
+  const handleDeleteEvent = (eventId: number) => {
+    if (confirm("Tem certeza que deseja excluir este evento?")) {
+      deleteEventMutation.mutate(eventId);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-grow pt-16">
-        {/* Hero Section */}
-        <EventHero 
-          title="Eventos em Fernando de Noronha"
-          subtitle="Descubra experiências únicas e memoráveis no paraíso. De workshops gastronômicos a festivais de música, há sempre algo especial acontecendo na ilha."
-          backgroundImage="/hero-noronha-sunset.jpg"
-        />
-        
-        {/* Content Section */}
-        <section className="py-12 md:py-16 lg:py-20 px-4 bg-gray-50">
-          <div className="container mx-auto max-w-6xl">
-            {/* Search and Filter */}
-            <EventSearchFilter 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCategory={activeCategory}  
-              setSelectedCategory={setActiveCategory}
-              // These are optional props that will be used by the component
-              activeCategory={activeCategory}
-              categories={categories}
-              onSearchChange={setSearchQuery}
-              onCategoryChange={setActiveCategory}
-            />
-            
-            {/* Calendar Section Promo */}
-            <div className="mb-12 bg-gradient-to-r from-tuca-deep-blue to-tuca-ocean-blue rounded-xl p-6 text-white">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center">
-                  <CalendarRange className="h-10 w-10 mr-4 opacity-90" />
-                  <div>
-                    <h3 className="text-xl font-medium">Calendário de Eventos</h3>
-                    <p className="text-white/90">Consulte nosso calendário completo para planejar sua visita</p>
-                  </div>
-                </div>
-                <Button className="bg-white text-tuca-deep-blue hover:bg-white/90 px-6">
-                  Ver Calendário
-                </Button>
-              </div>
-            </div>
-            
-            {/* Events Grid */}
-            <EventsGrid events={displayedEvents} isLoading={isLoading} />
-            
-            {/* Load More Button */}
-            {!isLoading && displayCount < filteredEvents.length && (
-              <div className="mt-10 text-center">
-                <Button 
-                  variant="outline" 
-                  className="border-tuca-ocean-blue text-tuca-ocean-blue hover:bg-tuca-light-blue"
-                  onClick={handleLoadMore}
-                >
-                  Carregar Mais Eventos
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
-        
-        {/* Subscription Banner */}
-        <section className="py-12 px-4 bg-tuca-light-blue">
-          <div className="container mx-auto max-w-3xl text-center">
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">Não perca nenhum evento!</h2>
-            <p className="mb-6 text-gray-600 max-w-2xl mx-auto">
-              Inscreva-se em nossa newsletter para receber atualizações sobre novos eventos e promoções exclusivas.
+    <AdminLayout pageTitle="Gerenciar Eventos">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold">Eventos</h2>
+            <p className="text-sm text-muted-foreground">
+              Gerencie os eventos disponíveis na plataforma
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Seu melhor email"
-                className="px-4 py-2 rounded-lg border border-gray-300 flex-grow"
-              />
-              <Button>Inscrever-se</Button>
-            </div>
           </div>
-        </section>
-      </main>
-      
-      <Footer />
-    </div>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Evento
+          </Button>
+        </div>
+
+        <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
+          <Input
+            placeholder="Buscar eventos"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Button type="submit">
+            <Search className="h-4 w-4" />
+          </Button>
+        </form>
+
+        {isLoading ? (
+          <div className="flex justify-center items-center p-12">
+            <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 text-red-700 p-4 rounded-md">
+            Erro ao carregar eventos. Por favor, tente novamente mais tarde.
+          </div>
+        ) : (
+          <EventsTable 
+            events={events || []} 
+            onEdit={handleEditEvent} 
+            onDelete={handleDeleteEvent}
+          />
+        )}
+      </div>
+
+      {/* Create Event Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Evento</DialogTitle>
+            <DialogDescription>
+              Preencha os detalhes para criar um novo evento
+            </DialogDescription>
+          </DialogHeader>
+          <EventForm 
+            onSubmit={handleCreateEvent} 
+            onCancel={() => setIsCreateModalOpen(false)}
+            isLoading={createEventMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Evento</DialogTitle>
+            <DialogDescription>
+              Atualize os detalhes do evento
+            </DialogDescription>
+          </DialogHeader>
+          {currentEvent && (
+            <EventForm 
+              event={currentEvent}
+              onSubmit={handleUpdateEvent} 
+              onCancel={() => setIsEditModalOpen(false)}
+              isLoading={updateEventMutation.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
   );
 };
 

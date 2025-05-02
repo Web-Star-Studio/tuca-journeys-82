@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -29,8 +28,8 @@ const getStatusColor = (status: string, date: string) => {
   if (status === 'cancelled') return "destructive";
   
   if (eventDate < today) return "default";  // Past event
-  if (status === 'ongoing') return "warning";
-  return "success";  // Upcoming event (scheduled)
+  if (status === 'ongoing') return "secondary";  // Changed from "warning" to "secondary"
+  return "default";  // Changed from "success" to "default" for upcoming events
 };
 
 const getEventStatus = (event: Event): 'scheduled' | 'ongoing' | 'completed' | 'cancelled' => {

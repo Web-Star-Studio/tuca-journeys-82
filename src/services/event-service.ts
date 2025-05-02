@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Event, EventFilters } from '@/types/event';
 import { BaseApiService } from './base-api';
@@ -219,25 +218,15 @@ class EventService extends BaseApiService {
     
     // Update tickets if provided
     if (tickets && tickets.length > 0) {
-      // First get existing tickets
-      const { data: existingTickets, error: ticketsError } = await this.supabase
-        .from('event_tickets')
-        .select('id')
-        .eq('event_id', id);
-        
-      if (ticketsError) {
-        console.error(`Error fetching tickets for event ID: ${id}:`, ticketsError);
-      } else {
-        // Delete existing tickets if we have new ones
-        if (existingTickets.length > 0) {
-          const { error: deleteError } = await this.supabase
-            .from('event_tickets')
-            .delete()
-            .in('id', existingTickets.map(t => t.id));
-            
-          if (deleteError) {
-            console.error(`Error deleting existing tickets for event ID: ${id}:`, deleteError);
-          }
+      try {
+        // First get existing tickets 
+        const { data: existingTickets } = await this.supabase
+          .rpc('get_event_tickets', { p_event_id: id });
+          
+        // If we have existing tickets, delete them
+        if (existingTickets && existingTickets.length > 0) {
+          await this.supabase
+            .rpc('delete_event_tickets', { p_event_id: id });
         }
         
         // Create new tickets
@@ -252,6 +241,9 @@ class EventService extends BaseApiService {
             benefits: ticket.benefits || []
           });
         }
+      } catch (ticketError) {
+        console.error(`Error updating tickets for event ID: ${id}:`, ticketError);
+        // Continue despite ticket errors
       }
     }
 
@@ -270,25 +262,22 @@ class EventService extends BaseApiService {
     type?: string;
     benefits?: string[];
   }) {
-    const { data, error } = await this.supabase
-      .from('event_tickets')
-      .insert({
-        event_id: eventId,
-        name: ticketData.name,
-        price: ticketData.price,
-        available_quantity: ticketData.available_quantity,
-        max_per_order: ticketData.max_per_order || 4,
-        description: ticketData.description || null,
-        type: ticketData.type || 'regular',
-        benefits: ticketData.benefits || []
-      });
-      
-    if (error) {
+    try {
+      await this.supabase
+        .rpc('create_event_ticket', {
+          p_event_id: eventId,
+          p_name: ticketData.name,
+          p_price: ticketData.price,
+          p_available_quantity: ticketData.available_quantity,
+          p_max_per_order: ticketData.max_per_order || 4,
+          p_description: ticketData.description || null,
+          p_type: ticketData.type || 'regular',
+          p_benefits: ticketData.benefits || []
+        });
+    } catch (error) {
       console.error(`Error creating ticket for event ID: ${eventId}:`, error);
       throw error;
     }
-    
-    return data;
   }
 
   /**
@@ -403,10 +392,7 @@ class EventService extends BaseApiService {
    */
   async getEventTickets(eventId: number) {
     const { data, error } = await this.supabase
-      .from('event_tickets')
-      .select('*')
-      .eq('event_id', eventId)
-      .order('price', { ascending: true });
+      .rpc('get_event_tickets', { p_event_id: eventId });
       
     if (error) {
       console.error(`Error fetching tickets for event ID: ${eventId}:`, error);
@@ -421,13 +407,7 @@ class EventService extends BaseApiService {
    */
   async getUserEventBookings(userId: string) {
     const { data, error } = await this.supabase
-      .from('event_bookings')
-      .select(`
-        *,
-        event:events (*)
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .rpc('get_user_event_bookings', { p_user_id: userId });
       
     if (error) {
       console.error(`Error fetching event bookings for user ID: ${userId}:`, error);

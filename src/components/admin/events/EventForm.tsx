@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +28,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ImageUploader } from "@/components/admin/shared/ImageUploader";
+import ImageUploader from "@/components/admin/shared/ImageUploader";
 import { Badge } from "@/components/ui/badge";
 import { Event } from "@/types/event";
 
@@ -411,9 +410,9 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
                   <FormLabel>Imagem Principal</FormLabel>
                   <FormControl>
                     <ImageUploader
-                      value={image}
-                      onChange={setImage}
-                      maxSize={2}
+                      currentImage={image}
+                      onImageUploaded={setImage}
+                      folder="events"
                     />
                   </FormControl>
                   <FormMessage />

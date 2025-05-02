@@ -56,6 +56,7 @@ export interface EventBooking {
   payment_details?: any;
   created_at: string;
   attendee_info?: AttendeeInfo[];
+  event?: Event; // Added to support joined data
 }
 
 export interface AttendeeInfo {

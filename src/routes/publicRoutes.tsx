@@ -12,7 +12,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import { Loader2 } from "lucide-react";
 
-// Lazy loaded routes
+// Lazy loaded routes - fix default exports
 const EventsList = lazy(() => import("@/pages/EventsList"));
 const EventDetail = lazy(() => import("@/pages/EventDetail"));
 const EventPurchase = lazy(() => import("@/pages/EventPurchase"));
@@ -20,20 +20,20 @@ const MyEventTickets = lazy(() => import("@/pages/MyEventTickets"));
 const Tours = lazy(() => import("@/pages/Tours"));
 const TourDetail = lazy(() => import("@/pages/TourDetail"));
 const TourBooking = lazy(() => import("@/pages/TourBooking"));
-const Accommodations = lazy(() => import("@/pages/Accommodation"));
-const AccommodationDetail = lazy(() => import("@/pages/AccommodationDetail"));
-const Packages = lazy(() => import("@/pages/Packages"));
-const PackageDetail = lazy(() => import("@/pages/PackageDetail"));
+const Accommodations = lazy(() => import("@/pages/Accommodations").then(module => ({ default: module.Accommodations })));
+const AccommodationDetail = lazy(() => import("@/pages/AccommodationDetail").then(module => ({ default: module.AccommodationDetail })));
+const Packages = lazy(() => import("@/pages/Packages").then(module => ({ default: module.Packages })));
+const PackageDetail = lazy(() => import("@/pages/PackageDetail").then(module => ({ default: module.PackageDetail })));
 const Store = lazy(() => import("@/pages/Store"));
 const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
 const Cart = lazy(() => import("@/pages/Cart"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
-const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Wishlist = lazy(() => import("@/pages/Wishlist").then(module => ({ default: module.Wishlist })));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Profile = lazy(() => import("@/pages/Profile"));
-const Bookings = lazy(() => import("@/pages/Bookings"));
+const Bookings = lazy(() => import("@/pages/Bookings").then(module => ({ default: module.Bookings })));
 const BookingDetail = lazy(() => import("@/pages/BookingDetail"));
-const Map = lazy(() => import("@/pages/Map"));
+const Map = lazy(() => import("@/pages/Map").then(module => ({ default: module.Map })));
 const Partners = lazy(() => import("@/pages/Partners"));
 const PartnerDetail = lazy(() => import("@/pages/PartnerDetail"));
 const Unauthorized = lazy(() => import("@/pages/Unauthorized"));

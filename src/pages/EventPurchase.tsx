@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -47,7 +46,7 @@ const EventPurchase = () => {
     
     selectedTickets.forEach(ticket => {
       initialAttendeeInfo[ticket.ticketId] = Array(ticket.quantity).fill({
-        name: user?.displayName || '',
+        name: user?.email?.split('@')[0] || '',
         email: user?.email || '',
         document: ''
       });
@@ -86,7 +85,7 @@ const EventPurchase = () => {
       
       return eventService.bookEventTickets(
         Number(id), 
-        user!.uid, 
+        user!.id, // Changed from uid to id
         totalTickets, 
         formattedAttendeeInfo
       );

@@ -18,6 +18,7 @@ import {
   Image,
   ShieldAlert,
   CalendarDays,
+  Utensils,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
     { title: "Passeios", icon: Landmark, path: "/admin/tours" },
     { title: "Eventos", icon: CalendarDays, path: "/admin/events" },
     { title: "Hospedagens", icon: Hotel, path: "/admin/accommodations" },
+    { title: "Restaurantes", icon: Utensils, path: "/admin/restaurants" },
     { title: "Pacotes", icon: Package, path: "/admin/packages" },
     { title: "Produtos", icon: ShoppingBag, path: "/admin/products" },
     { title: "Reservas", icon: Calendar, path: "/admin/bookings" },

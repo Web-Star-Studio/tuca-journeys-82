@@ -29,7 +29,7 @@ const TableManagement: React.FC = () => {
 
   const handleDeleteTable = async (tableId: number) => {
     if (confirm('Tem certeza que deseja excluir esta mesa?')) {
-      await deleteTable(tableId);
+      deleteTable(tableId);
     }
   };
 

@@ -39,7 +39,7 @@ import ImageUploader from '@/components/admin/shared/ImageUploader';
 import TagInput from '@/components/admin/shared/TagInput';
 import { isValidUrl } from '@/utils/validationUtils';
 import { Loader2 } from 'lucide-react';
-import type { Restaurant } from '@/types/restaurant';
+import type { Restaurant, RestaurantHours } from '@/types/restaurant';
 
 interface RestaurantFormDialogProps {
   isOpen: boolean;
@@ -180,13 +180,13 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
     
     if (restaurant) {
       // Update existing restaurant
-      await updateRestaurant({ 
+      updateRestaurant({ 
         id: restaurant.id, 
         restaurant: restaurantData 
       });
     } else {
       // Create new restaurant
-      await createRestaurant(restaurantData);
+      createRestaurant(restaurantData);
     }
     
     onOpenChange(false);
@@ -333,7 +333,9 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
                             <TagInput
                               placeholder="Adicione métodos de pagamento e pressione Enter (ex: Dinheiro, Cartão, PIX)"
                               value={field.value || ""}
-                              onChange={(value) => field.onChange(value)}
+                              onChange={field.onChange}
+                              tags={field.value ? stringToArray(field.value) : []}
+                              onTagsChange={(tags) => field.onChange(tags.join(','))}
                             />
                           </FormControl>
                           <FormMessage />
@@ -472,7 +474,9 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
                             <TagInput
                               placeholder="Adicione URLs de imagens e pressione Enter"
                               value={field.value || ""}
-                              onChange={(value) => field.onChange(value)}
+                              onChange={field.onChange}
+                              tags={field.value ? stringToArray(field.value) : []}
+                              onTagsChange={(tags) => field.onChange(tags.join(','))}
                             />
                           </FormControl>
                           <FormMessage />

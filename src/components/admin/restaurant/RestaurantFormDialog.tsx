@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -162,7 +161,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
     }
   }, [restaurant, form]);
   
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = (values: FormValues) => {
     // Convert string fields to arrays for API
     const restaurantData = {
       ...values,
@@ -175,14 +174,14 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
     };
     
     // Remove string fields that were converted
-    delete restaurantData.payment_methods_string;
-    delete restaurantData.gallery_images_string;
+    delete (restaurantData as any).payment_methods_string;
+    delete (restaurantData as any).gallery_images_string;
     
     if (restaurant) {
       // Update existing restaurant
       updateRestaurant({ 
         id: restaurant.id, 
-        restaurant: restaurantData 
+        restaurant: restaurantData as Partial<Restaurant>
       });
     } else {
       // Create new restaurant

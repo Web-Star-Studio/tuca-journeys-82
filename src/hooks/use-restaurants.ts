@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantService } from '@/services/restaurant-service';
@@ -136,7 +135,7 @@ export const useRestaurantAdmin = () => {
   return {
     createRestaurant: createRestaurantMutation.mutate,
     updateRestaurant: updateRestaurantMutation.mutate,
-    deleteRestaurant: deleteRestaurantMutation.mutate,
+    deleteRestaurant: (id: number) => deleteRestaurantMutation.mutate(id),
     addTable: addTableMutation.mutate,
     updateTable: updateTableMutation.mutate,
     deleteTable: deleteTableMutation.mutate,

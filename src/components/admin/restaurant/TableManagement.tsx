@@ -27,9 +27,9 @@ const TableManagement: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteTable = (tableId: number) => {
+  const handleDeleteTable = async (tableId: number) => {
     if (confirm('Tem certeza que deseja excluir esta mesa?')) {
-      deleteTable(tableId);
+      await deleteTable(tableId);
     }
   };
 

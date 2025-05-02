@@ -90,6 +90,8 @@ const cuisineTypeOptions = [
   'Frutos do Mar', 'Churrascaria', 'Pizzaria', 'Fast Food', 'Contemporânea'
 ];
 
+type FormValues = z.infer<typeof formSchema>;
+
 const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
   isOpen,
   onOpenChange,
@@ -98,7 +100,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
   const { createRestaurant, updateRestaurant, isLoading } = useRestaurantAdmin();
   const [activeTab, setActiveTab] = useState("informacoes");
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -129,6 +131,18 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
   // Populate form with existing restaurant data if editing
   useEffect(() => {
     if (restaurant) {
+      // Convert the restaurant.opening_hours to the expected record format
+      let formattedOpeningHours: Record<string, { open?: string; close?: string }> = {};
+      
+      if (restaurant.opening_hours) {
+        weekdays.forEach(day => {
+          const dayId = day.id as keyof typeof restaurant.opening_hours;
+          if (restaurant.opening_hours[dayId]) {
+            formattedOpeningHours[dayId] = restaurant.opening_hours[dayId] || { open: "", close: "" };
+          }
+        });
+      }
+      
       form.reset({
         name: restaurant.name,
         short_description: restaurant.short_description,
@@ -143,20 +157,12 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
         payment_methods_string: arrayToString(restaurant.payment_methods),
         reservation_policy: restaurant.reservation_policy || "",
         gallery_images_string: arrayToString(restaurant.gallery_images),
-        opening_hours: restaurant.opening_hours || {
-          monday: { open: "08:00", close: "22:00" },
-          tuesday: { open: "08:00", close: "22:00" },
-          wednesday: { open: "08:00", close: "22:00" },
-          thursday: { open: "08:00", close: "22:00" },
-          friday: { open: "08:00", close: "22:00" },
-          saturday: { open: "08:00", close: "22:00" },
-          sunday: { open: "08:00", close: "22:00" }
-        }
+        opening_hours: formattedOpeningHours
       });
     }
   }, [restaurant, form]);
   
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     // Convert string fields to arrays for API
     const restaurantData = {
       ...values,
@@ -174,13 +180,13 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
     
     if (restaurant) {
       // Update existing restaurant
-      updateRestaurant({ 
+      await updateRestaurant({ 
         id: restaurant.id, 
         restaurant: restaurantData 
       });
     } else {
       // Create new restaurant
-      createRestaurant(restaurantData);
+      await createRestaurant(restaurantData);
     }
     
     onOpenChange(false);
@@ -327,7 +333,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
                             <TagInput
                               placeholder="Adicione métodos de pagamento e pressione Enter (ex: Dinheiro, Cartão, PIX)"
                               value={field.value || ""}
-                              onChange={field.onChange}
+                              onChange={(value) => field.onChange(value)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -335,7 +341,6 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
                       )}
                     />
                   </div>
-
                 </div>
               </TabsContent>
               
@@ -467,7 +472,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
                             <TagInput
                               placeholder="Adicione URLs de imagens e pressione Enter"
                               value={field.value || ""}
-                              onChange={field.onChange}
+                              onChange={(value) => field.onChange(value)}
                             />
                           </FormControl>
                           <FormMessage />

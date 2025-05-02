@@ -113,13 +113,27 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
   }, [activity, form]);
 
   const onSubmit = (values: ActivityFormValues) => {
+    // Ensure all required fields have values (non-optional)
     const processedValues = {
-      ...values,
+      title: values.title,
+      short_description: values.short_description,
+      description: values.description,
+      price: values.price,
+      category: values.category,
+      difficulty: values.difficulty,
+      duration: values.duration,
+      meeting_point: values.meeting_point,
+      min_participants: values.min_participants,
+      max_participants: values.max_participants, 
       includes: values.includes ? values.includes.split("\n").filter(Boolean) : [],
       excludes: values.excludes ? values.excludes.split("\n").filter(Boolean) : [],
       notes: values.notes ? values.notes.split("\n").filter(Boolean) : [],
       schedule: values.schedule ? values.schedule.split("\n").filter(Boolean) : [],
+      image_url: values.image_url,
       gallery_images: values.gallery_images ? values.gallery_images.split(",").filter(Boolean) : [],
+      rating: values.rating || 4.5,
+      is_active: values.is_active,
+      is_featured: values.is_featured,
     };
 
     if (activityId) {

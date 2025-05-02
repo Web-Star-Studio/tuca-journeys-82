@@ -1,35 +1,34 @@
 
-import React, { useState } from 'react';
-import RestaurantsGrid from '@/components/restaurant/RestaurantsGrid';
-import RestaurantFilters from '@/components/restaurant/RestaurantFilters';
-import { useRestaurants } from '@/hooks/use-restaurants';
-import type { RestaurantFilters as FilterType } from '@/types/restaurant';
+import React from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { useRestaurants } from "@/hooks/use-restaurants";
+import RestaurantFilters from "@/components/restaurant/RestaurantFilters";
+import RestaurantsGrid from "@/components/restaurant/RestaurantsGrid";
 
-const Restaurants: React.FC = () => {
-  const [filters, setFilters] = useState<FilterType>({});
-  const { restaurants, isLoading } = useRestaurants(filters);
+const Restaurants = () => {
+  const { restaurants = [], isLoading } = useRestaurants();
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Restaurants</h1>
-      
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar filters */}
-        <aside className="w-full md:w-64 flex-shrink-0">
-          <RestaurantFilters 
-            filters={filters} 
-            onFilterChange={setFilters} 
-          />
-        </aside>
-        
-        {/* Main content */}
-        <main className="flex-1">
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-grow py-12 px-4 md:px-6 lg:px-8 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Restaurantes em Fernando de Noronha</h1>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Descubra os melhores restaurantes e experiências gastronômicas da ilha
+            </p>
+          </div>
+
+          <RestaurantFilters />
           <RestaurantsGrid 
-            restaurants={restaurants || []}
+            restaurants={restaurants}
             isLoading={isLoading}
           />
-        </main>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 };

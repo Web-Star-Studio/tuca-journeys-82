@@ -1,14 +1,13 @@
 
 import { BaseApiService } from './base-api';
-import type { Activity } from '@/types/activity';
-import type { ActivityAvailability } from '@/types/activity';
+import type { Activity, ActivityAvailability, ActivityFilters } from '@/types/activity';
 import { toast } from 'sonner';
 
 class ActivityService extends BaseApiService {
   /**
    * Get all activities with optional filters
    */
-  async getActivities(filters = {}) {
+  async getActivities(filters: ActivityFilters = {}) {
     let query = this.supabase.from('tours').select('*');
     
     // Apply filters if provided
@@ -18,10 +17,10 @@ class ActivityService extends BaseApiService {
     if (filters.difficulty) {
       query = query.eq('difficulty', filters.difficulty);
     }
-    if (filters.minPrice !== null) {
+    if (filters.minPrice !== undefined && filters.minPrice !== null) {
       query = query.gte('price', filters.minPrice);
     }
-    if (filters.maxPrice !== null) {
+    if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
       query = query.lte('price', filters.maxPrice);
     }
     if (filters.searchQuery) {
@@ -123,13 +122,18 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
-    return data as ActivityAvailability[];
+    return data as unknown as ActivityAvailability[];
   }
 
   /**
    * Update activity availability
    */
-  async updateActivityAvailability(activityId: number, availability: any) {
+  async updateActivityAvailability(activityId: number, availability: {
+    date: Date;
+    available_spots: number;
+    custom_price?: number;
+    status?: string;
+  }) {
     const { date, available_spots, custom_price, status } = availability;
     
     // Check if availability entry exists
@@ -138,7 +142,7 @@ class ActivityService extends BaseApiService {
       .select('id')
       .eq('tour_id', activityId)
       .eq('date', date.toISOString().split('T')[0])
-      .single();
+      .maybeSingle();
 
     let result;
     
@@ -181,7 +185,12 @@ class ActivityService extends BaseApiService {
   /**
    * Bulk update activity availability
    */
-  async bulkUpdateActivityAvailability(activityId: number, bulkData: any) {
+  async bulkUpdateActivityAvailability(activityId: number, bulkData: {
+    dates: Date[];
+    available_spots: number;
+    custom_price?: number;
+    status?: string;
+  }) {
     const { dates, available_spots, custom_price, status } = bulkData;
     
     const availabilityEntries = dates.map(date => ({
@@ -197,8 +206,7 @@ class ActivityService extends BaseApiService {
       .upsert(availabilityEntries, { 
         onConflict: 'tour_id,date',
         ignoreDuplicates: false
-      })
-      .select();
+      });
 
     if (error) {
       console.error(`Error bulk updating availability for activity ${activityId}:`, error);

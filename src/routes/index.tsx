@@ -23,7 +23,7 @@ import Unauthorized from '@/pages/Unauthorized';
 import NotFound from '@/pages/NotFound';
 
 // Protected route wrapper
-import ProtectedRoute from './ProtectedRoute';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const AppRoutes = () => {
   return (

@@ -58,7 +58,8 @@ export const useRestaurantAdmin = () => {
   const queryClient = useQueryClient();
 
   const createRestaurantMutation = useMutation({
-    mutationFn: restaurantService.createRestaurant.bind(restaurantService),
+    mutationFn: (restaurantData: Omit<Restaurant, 'id' | 'created_at' | 'updated_at' | 'rating'>) => 
+      restaurantService.createRestaurant(restaurantData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       toast.success('Restaurant created successfully!');

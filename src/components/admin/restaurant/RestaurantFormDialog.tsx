@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -185,7 +186,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
       });
     } else {
       // Create new restaurant
-      createRestaurant(restaurantData);
+      createRestaurant(restaurantData as Omit<Restaurant, 'id' | 'created_at' | 'updated_at' | 'rating'>);
     }
     
     onOpenChange(false);

@@ -1357,6 +1357,39 @@ export type Database = {
         }
         Returns: Json
       }
+      create_event_ticket: {
+        Args: {
+          p_event_id: number
+          p_name: string
+          p_price: number
+          p_available_quantity: number
+          p_max_per_order?: number
+          p_description?: string
+          p_type?: string
+          p_benefits?: string[]
+        }
+        Returns: Json
+      }
+      delete_event_tickets: {
+        Args: { p_event_id: number }
+        Returns: Json
+      }
+      get_event_tickets: {
+        Args: { p_event_id: number }
+        Returns: {
+          available_quantity: number
+          benefits: string[] | null
+          created_at: string
+          description: string | null
+          event_id: number
+          id: number
+          max_per_order: number | null
+          name: string
+          price: number
+          type: string | null
+          updated_at: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

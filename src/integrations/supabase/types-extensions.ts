@@ -1,4 +1,3 @@
-
 import { Database as OriginalDatabase } from './types';
 
 // Extend the original Database type with our custom tables
@@ -326,6 +325,57 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
           }
         ];
       };
+      
+      event_tickets: {
+        Row: {
+          id: number;
+          event_id: number;
+          name: string;
+          description: string | null;
+          price: number;
+          available_quantity: number;
+          max_per_order: number | null;
+          type: string | null;
+          benefits: string[] | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          event_id: number;
+          name: string;
+          description?: string | null;
+          price: number;
+          available_quantity: number;
+          max_per_order?: number | null;
+          type?: string | null;
+          benefits?: string[] | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          event_id?: number;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          available_quantity?: number;
+          max_per_order?: number | null;
+          type?: string | null;
+          benefits?: string[] | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_tickets_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          }
+        ];
+      }
     };
     Views: OriginalDatabase['public']['Views'];
     Functions: OriginalDatabase['public']['Functions'] & {
@@ -356,6 +406,43 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
           required_permission: string;
         };
         Returns: boolean;
+      };
+      create_event_ticket: {
+        Args: {
+          p_event_id: number;
+          p_name: string;
+          p_price: number;
+          p_available_quantity: number;
+          p_max_per_order?: number;
+          p_description?: string | null;
+          p_type?: string;
+          p_benefits?: string[];
+        };
+        Returns: any;
+      };
+      get_event_tickets: {
+        Args: {
+          p_event_id: number;
+        };
+        Returns: {
+          id: number;
+          event_id: number;
+          name: string;
+          description: string | null;
+          price: number;
+          available_quantity: number;
+          max_per_order: number | null;
+          type: string | null;
+          benefits: string[] | null;
+          created_at: string;
+          updated_at: string;
+        }[];
+      };
+      delete_event_tickets: {
+        Args: {
+          p_event_id: number;
+        };
+        Returns: any;
       };
     };
     Enums: OriginalDatabase['public']['Enums'];

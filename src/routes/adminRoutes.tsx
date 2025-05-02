@@ -18,6 +18,7 @@ import Media from "@/pages/admin/Media";
 import Permissions from "@/pages/admin/Permissions";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import RestaurantManagement from "@/pages/admin/RestaurantManagement";
+import RestaurantDetail from "@/pages/admin/RestaurantDetail";
 
 const adminRoutes: RouteObject[] = [
   {
@@ -85,13 +86,17 @@ const adminRoutes: RouteObject[] = [
     element: <Permissions />,
   },
   {
-    path: "/admin/audit",
+    path: "/admin/audit-logs",
     element: <AuditLogs />,
   },
   {
     path: "/admin/restaurants",
     element: <RestaurantManagement />,
   },
+  {
+    path: "/admin/restaurants/:id",
+    element: <RestaurantDetail />,
+  }
 ];
 
 export default adminRoutes;

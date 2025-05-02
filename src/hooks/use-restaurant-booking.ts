@@ -92,7 +92,7 @@ export const useUserReservations = () => {
   });
 
   const cancelReservationMutation = useMutation({
-    mutationFn: restaurantService.cancelReservation.bind(restaurantService),
+    mutationFn: (reservationId: number) => restaurantService.cancelReservation(reservationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userReservations'] });
       toast.success('Reservation cancelled successfully!');

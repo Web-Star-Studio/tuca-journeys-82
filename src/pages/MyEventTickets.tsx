@@ -27,7 +27,7 @@ const MyEventTickets = () => {
     queryFn: async () => {
       if (!user?.id) return Promise.resolve([]);
       const data = await eventService.getUserEventBookings(user.id);
-      return data as EventBooking[];
+      return data;
     },
     enabled: !!user?.id,
   });
@@ -78,9 +78,9 @@ const MyEventTickets = () => {
           </Card>
         )}
         
-        {hasBookings && (
+        {hasBookings && bookings && (
           <div className="space-y-6">
-            {bookings.map(booking => (
+            {bookings.map((booking) => (
               <Card key={booking.id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="grid grid-cols-1 md:grid-cols-3">

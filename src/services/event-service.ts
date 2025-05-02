@@ -289,7 +289,7 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Creates a ticket for an event - converted to use a direct database insert
+   * Creates a ticket for an event - Using direct database insert instead of RPC
    */
   private async createTicketForEvent(eventId: number, ticketData: {
     name: string;
@@ -388,9 +388,9 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Gets event tickets - changed to use direct query instead of RPC
+   * Gets event tickets - Using direct database query instead of RPC
    */
-  async getEventTickets(eventId: number) {
+  async getEventTickets(eventId: number): Promise<EventTicket[]> {
     const { data, error } = await this.supabase
       .from('event_tickets')
       .select('*')
@@ -402,13 +402,13 @@ class EventService extends BaseApiService {
       throw error;
     }
     
-    return data;
+    return data as EventTicket[];
   }
 
   /**
-   * Deletes event tickets - changed to use direct query instead of RPC
+   * Deletes event tickets - Using direct database query instead of RPC
    */
-  async deleteEventTickets(eventId: number) {
+  async deleteEventTickets(eventId: number): Promise<void> {
     const { error } = await this.supabase
       .from('event_tickets')
       .delete()
@@ -421,7 +421,7 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Gets user's event bookings - changed to use direct query with joins instead of RPC
+   * Gets user's event bookings - Using direct database query with joins
    */
   async getUserEventBookings(userId: string): Promise<EventBooking[]> {
     const { data, error } = await this.supabase

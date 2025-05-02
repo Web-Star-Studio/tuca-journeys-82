@@ -15,3 +15,5 @@ export const Bookings = () => {
     </div>
   );
 };
+
+export default Bookings;

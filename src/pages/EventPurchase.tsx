@@ -54,8 +54,8 @@ const EventPurchase = () => {
       selectedTickets.forEach(ticket => {
         for (let i = 0; i < ticket.quantity; i++) {
           newAttendees.push({
-            name: user ? user.email?.split('@')[0] || '' : '',
-            email: user ? user.email || '' : '',
+            name: user ? (user.email?.split('@')[0] || '') : '',
+            email: user ? (user.email || '') : '',
             ticketType: ticket.name
           });
         }

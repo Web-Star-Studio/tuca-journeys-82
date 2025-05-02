@@ -44,6 +44,14 @@ export interface EventTicket {
   benefits?: string[];
 }
 
+// Adding the SelectedTicket interface that's imported in EventPurchase.tsx
+export interface SelectedTicket {
+  ticketId: number;
+  quantity: number;
+  price: number;
+  name: string;
+}
+
 export interface EventBooking {
   id: number;
   event_id: number;

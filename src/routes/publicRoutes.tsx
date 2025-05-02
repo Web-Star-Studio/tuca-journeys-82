@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { RouteObject } from "react-router-dom";
 
@@ -12,7 +11,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import { Loader2 } from "lucide-react";
 
-// Lazy loaded routes - fix default exports
+// Lazy loaded routes
 const EventsList = lazy(() => import("@/pages/EventsList"));
 const EventDetail = lazy(() => import("@/pages/EventDetail"));
 const EventPurchase = lazy(() => import("@/pages/EventPurchase"));
@@ -21,23 +20,22 @@ const Tours = lazy(() => import("@/pages/Tours"));
 const TourDetail = lazy(() => import("@/pages/TourDetail"));
 const TourBooking = lazy(() => import("@/pages/TourBooking"));
 
-// Fix imports for components that don't have default exports
-// Use import() and then access the named export
-const Accommodations = lazy(() => import("@/pages/Accommodations").then(module => ({ default: module.Accommodations || module.default })));
-const AccommodationDetail = lazy(() => import("@/pages/AccommodationDetail").then(module => ({ default: module.AccommodationDetail || module.default })));
-const Packages = lazy(() => import("@/pages/Packages").then(module => ({ default: module.Packages || module.default })));
-const PackageDetail = lazy(() => import("@/pages/PackageDetail").then(module => ({ default: module.PackageDetail || module.default })));
+// Import pages with named exports
+const Accommodations = lazy(() => import("@/pages/Accommodation").then(module => ({ default: module.Accommodation })));
+const AccommodationDetail = lazy(() => import("@/pages/AccommodationDetail").then(module => ({ default: module.AccommodationDetail })));
+const Packages = lazy(() => import("@/pages/Packages").then(module => ({ default: module.Packages })));
+const PackageDetail = lazy(() => import("@/pages/PackageDetail").then(module => ({ default: module.PackageDetail })));
 
 const Store = lazy(() => import("@/pages/Store"));
 const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
 const Cart = lazy(() => import("@/pages/Cart"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
-const Wishlist = lazy(() => import("@/pages/Wishlist").then(module => ({ default: module.Wishlist || module.default })));
+const Wishlist = lazy(() => import("@/pages/Wishlist").then(module => ({ default: module.Wishlist })));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Profile = lazy(() => import("@/pages/Profile"));
-const Bookings = lazy(() => import("@/pages/Bookings").then(module => ({ default: module.Bookings || module.default })));
+const Bookings = lazy(() => import("@/pages/Bookings").then(module => ({ default: module.Bookings })));
 const BookingDetail = lazy(() => import("@/pages/BookingDetail"));
-const Map = lazy(() => import("@/pages/Map").then(module => ({ default: module.Map || module.default })));
+const Map = lazy(() => import("@/pages/Map").then(module => ({ default: module.Map })));
 const Partners = lazy(() => import("@/pages/Partners"));
 const PartnerDetail = lazy(() => import("@/pages/PartnerDetail"));
 const Unauthorized = lazy(() => import("@/pages/Unauthorized"));

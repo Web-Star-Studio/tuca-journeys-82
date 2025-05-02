@@ -8,10 +8,12 @@ export const Packages = () => {
     <div className="min-h-screen">
       <Header />
       <div className="pt-16 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Pacotes Turísticos</h1>
-        <p>Página de pacotes turísticos em construção</p>
+        <h1 className="text-3xl font-bold mb-6">Pacotes</h1>
+        <p>Página de pacotes em construção</p>
       </div>
       <Footer />
     </div>
   );
 };
+
+export default Packages;

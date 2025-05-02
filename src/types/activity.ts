@@ -43,6 +43,7 @@ export interface ActivityFilters {
   maxPrice?: number | null;
   searchQuery?: string;
   date?: Date;
+  sortBy?: string; // Added sortBy property
 }
 
 export interface ActivityBooking {

@@ -1,226 +1,198 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Filter } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-interface AccommodationFiltersProps {
-  minPrice: number;
-  maxPrice: number;
-  capacityFilter: number[];
-  amenitiesFilter: string[];
-  allAmenities: string[];
-  isFilterOpen: boolean;
-  setIsFilterOpen: (isOpen: boolean) => void;
-  setMinPrice: (price: number) => void;
-  setMaxPrice: (price: number) => void;
-  toggleCapacityFilter: (capacity: number) => void;
-  toggleAmenityFilter: (amenity: string) => void;
-  applyFilters: () => void;
-  resetFilters: () => void;
-  getAmenityIcon: (amenity: string) => React.ReactNode;
-  priceRange?: { min: number; max: number };
+export interface AccommodationFiltersProps {
+  filters: {
+    priceRange: number[];
+    amenities: any[];
+    guests: number;
+    bedrooms: number;
+    bathrooms: number;
+    types: any[];
+    searchQuery: string;
+  };
+  onFilterChange: (filters: any) => void;
 }
 
-const AccommodationFilters = ({
-  minPrice,
-  maxPrice,
-  capacityFilter,
-  amenitiesFilter,
-  allAmenities,
-  isFilterOpen,
-  setIsFilterOpen,
-  setMinPrice,
-  setMaxPrice,
-  toggleCapacityFilter,
-  toggleAmenityFilter,
-  applyFilters,
-  resetFilters,
-  getAmenityIcon,
-  priceRange,
-}: AccommodationFiltersProps) => {
+const AccommodationFilters = ({ filters, onFilterChange }: AccommodationFiltersProps) => {
+  // Handler for price range changes
+  const handlePriceRangeChange = (values: number[]) => {
+    onFilterChange({ ...filters, priceRange: values });
+  };
+
+  // Handler for amenities changes
+  const handleAmenityChange = (amenity: string, checked: boolean) => {
+    let newAmenities = [...filters.amenities];
+    
+    if (checked) {
+      newAmenities.push(amenity);
+    } else {
+      newAmenities = newAmenities.filter(a => a !== amenity);
+    }
+    
+    onFilterChange({ ...filters, amenities: newAmenities });
+  };
+
+  // Handler for accommodation type changes
+  const handleTypeChange = (type: string, checked: boolean) => {
+    let newTypes = [...filters.types];
+    
+    if (checked) {
+      newTypes.push(type);
+    } else {
+      newTypes = newTypes.filter(t => t !== type);
+    }
+    
+    onFilterChange({ ...filters, types: newTypes });
+  };
+
+  // Handler for search query changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFilterChange({ ...filters, searchQuery: e.target.value });
+  };
+
+  // Handler for number-based filters (guests, bedrooms, bathrooms)
+  const handleNumericFilterChange = (type: 'guests' | 'bedrooms' | 'bathrooms', value: number) => {
+    onFilterChange({ ...filters, [type]: value });
+  };
+
+  const amenitiesList = [
+    "Wi-Fi", "Ar-condicionado", "Piscina", "Café da manhã", 
+    "Estacionamento", "Cozinha", "Vista para o mar", "Churrasqueira"
+  ];
+
+  const typesList = [
+    "Pousada", "Casa", "Apartamento", "Chalé", "Villa", "Eco-hospedagem"
+  ];
+
   return (
-    <>
-      {/* Mobile filter button */}
-      <div className="md:hidden w-full mb-4">
-        <Collapsible
-          open={isFilterOpen}
-          onOpenChange={setIsFilterOpen}
+    <Card className="p-6 mb-8 bg-white">
+      <div className="mb-6">
+        <h3 className="text-lg font-medium mb-2">Buscar</h3>
+        <Input
+          placeholder="Buscar hospedagens..."
+          value={filters.searchQuery}
+          onChange={handleSearchChange}
           className="w-full"
-        >
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" className="w-full flex justify-between items-center">
-              <span className="flex items-center">
-                <Filter className="mr-2 h-4 w-4" />
-                Filtrar Hospedagens
-              </span>
-              <span>{isFilterOpen ? "−" : "+"}</span>
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4 p-4 border rounded-md">
-            {/* Filter content for mobile */}
-            <div className="space-y-6">
-              {/* Price range filter */}
-              <div>
-                <h3 className="text-lg font-medium mb-3">Faixa de Preço (por noite)</h3>
-                <div className="mb-6">
-                  <Slider
-                    defaultValue={[minPrice, maxPrice]}
-                    max={3000}
-                    step={50}
-                    onValueChange={(value) => {
-                      setMinPrice(value[0]);
-                      setMaxPrice(value[1]);
-                    }}
-                    className="my-6"
-                  />
-                  <div className="flex justify-between">
-                    <span>R$ {minPrice.toLocaleString('pt-BR')}</span>
-                    <span>R$ {maxPrice.toLocaleString('pt-BR')}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Capacity filter */}
-              <div>
-                <h3 className="text-lg font-medium mb-3">Capacidade</h3>
-                <div className="flex flex-wrap gap-2">
-                  {[1, 2, 4, 6, 8].map((capacity) => (
-                    <Button
-                      key={capacity}
-                      variant={capacityFilter.includes(capacity) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleCapacityFilter(capacity)}
-                      className={capacityFilter.includes(capacity) ? "bg-tuca-ocean-blue" : ""}
-                    >
-                      {capacity} {capacity === 1 ? "pessoa" : "pessoas"}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Amenities filter */}
-              <div>
-                <h3 className="text-lg font-medium mb-3">Comodidades</h3>
-                <div className="flex flex-wrap gap-2">
-                  {allAmenities.map((amenity) => (
-                    <Button
-                      key={amenity}
-                      variant={amenitiesFilter.includes(amenity) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleAmenityFilter(amenity)}
-                      className={amenitiesFilter.includes(amenity) ? "bg-tuca-ocean-blue" : ""}
-                    >
-                      {amenity}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Filter actions */}
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={applyFilters}
-                  className="flex-1 bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white"
-                >
-                  Aplicar Filtros
-                </Button>
-                <Button
-                  onClick={resetFilters}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Limpar
-                </Button>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        />
       </div>
 
-      {/* Desktop sidebar filter */}
-      <div className="hidden md:block w-full md:w-1/4 lg:w-1/5">
-        <div className="sticky top-24 bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-serif font-bold mb-6">Filtros</h2>
-
-          {/* Price range filter */}
-          <div className="mb-8">
-            <h3 className="text-lg font-medium mb-3">Faixa de Preço (por noite)</h3>
-            <Slider
-              defaultValue={[minPrice, maxPrice]}
-              max={3000}
-              step={50}
-              onValueChange={(value) => {
-                setMinPrice(value[0]);
-                setMaxPrice(value[1]);
-              }}
-              className="my-6"
-            />
-            <div className="flex justify-between text-sm">
-              <span>R$ {minPrice.toLocaleString('pt-BR')}</span>
-              <span>R$ {maxPrice.toLocaleString('pt-BR')}</span>
+      <div className="mb-6">
+        <h3 className="text-lg font-medium mb-2">Faixa de Preço</h3>
+        <div className="mb-2 flex justify-between text-sm">
+          <span>R$ {filters.priceRange[0]}</span>
+          <span>R$ {filters.priceRange[1]}</span>
+        </div>
+        <Slider
+          defaultValue={filters.priceRange}
+          min={0}
+          max={5000}
+          step={100}
+          onValueChange={handlePriceRangeChange}
+          className="my-4"
+        />
+      </div>
+      
+      <div className="mb-6">
+        <h3 className="text-lg font-medium mb-3">Tipo de Hospedagem</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {typesList.map((type) => (
+            <div key={type} className="flex items-center space-x-2">
+              <Checkbox 
+                id={`type-${type}`} 
+                checked={filters.types.includes(type)} 
+                onCheckedChange={(checked) => handleTypeChange(type, checked === true)}
+              />
+              <Label htmlFor={`type-${type}`}>{type}</Label>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Capacity filter */}
-          <div className="mb-8">
-            <h3 className="text-lg font-medium mb-3">Capacidade</h3>
-            <div className="flex flex-wrap gap-2">
-              {[1, 2, 4, 6, 8].map((capacity) => (
-                <Button
-                  key={capacity}
-                  variant={capacityFilter.includes(capacity) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleCapacityFilter(capacity)}
-                  className={capacityFilter.includes(capacity) ? "bg-tuca-ocean-blue" : ""}
-                >
-                  {capacity} {capacity === 1 ? "pessoa" : "pessoas"}
-                </Button>
-              ))}
+      <div className="mb-6">
+        <h3 className="text-lg font-medium mb-3">Comodidades</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {amenitiesList.map((amenity) => (
+            <div key={amenity} className="flex items-center space-x-2">
+              <Checkbox 
+                id={`amenity-${amenity}`} 
+                checked={filters.amenities.includes(amenity)} 
+                onCheckedChange={(checked) => handleAmenityChange(amenity, checked === true)}
+              />
+              <Label htmlFor={`amenity-${amenity}`}>{amenity}</Label>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Amenities filter */}
-          <div className="mb-8">
-            <h3 className="text-lg font-medium mb-3">Comodidades</h3>
-            <div className="flex flex-col gap-2">
-              {allAmenities.map((amenity) => (
-                <Button
-                  key={amenity}
-                  variant={amenitiesFilter.includes(amenity) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleAmenityFilter(amenity)}
-                  className={`justify-start ${amenitiesFilter.includes(amenity) ? "bg-tuca-ocean-blue" : ""}`}
-                >
-                  {getAmenityIcon(amenity) && (
-                    <span className="mr-2">{getAmenityIcon(amenity)}</span>
-                  )}
-                  {amenity}
-                </Button>
-              ))}
-            </div>
+      <div className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="guests">Hóspedes: {filters.guests}</Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('guests', Math.max(1, filters.guests - 1))}
+              disabled={filters.guests <= 1}
+            >-</Button>
+            <div className="w-full text-center">{filters.guests}</div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('guests', filters.guests + 1)}
+            >+</Button>
+          </div>
+        </div>
 
-          {/* Filter actions */}
-          <div className="flex flex-col gap-2">
-            <Button
-              onClick={applyFilters}
-              className="w-full bg-tuca-ocean-blue hover:bg-tuca-deep-blue text-white"
-            >
-              Aplicar Filtros
-            </Button>
-            <Button
-              onClick={resetFilters}
-              variant="outline"
-              className="w-full"
-            >
-              Limpar Filtros
-            </Button>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="bedrooms">Quartos: {filters.bedrooms}</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('bedrooms', Math.max(0, filters.bedrooms - 1))}
+              disabled={filters.bedrooms <= 0}
+            >-</Button>
+            <div className="w-full text-center">{filters.bedrooms}</div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('bedrooms', filters.bedrooms + 1)}
+            >+</Button>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="bathrooms">Banheiros: {filters.bathrooms}</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('bathrooms', Math.max(0, filters.bathrooms - 1))}
+              disabled={filters.bathrooms <= 0}
+            >-</Button>
+            <div className="w-full text-center">{filters.bathrooms}</div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handleNumericFilterChange('bathrooms', filters.bathrooms + 1)}
+            >+</Button>
           </div>
         </div>
       </div>
-    </>
+    </Card>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,12 +11,12 @@ const Hospedagens = () => {
   
   // Define proper filter types
   const [filters, setFilters] = useState({
-    priceRange: [0, 5000], // Changed from number to number[]
-    amenities: [],
+    priceRange: [0, 5000] as number[], // Explicitly typed as number[]
+    amenities: [] as string[],
     guests: 1,
     bedrooms: 0,
     bathrooms: 0,
-    types: [],
+    types: [] as string[],
     searchQuery: '',
   });
   

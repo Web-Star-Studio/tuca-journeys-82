@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { useSearchActivities } from "@/hooks/activities/use-activity-search";
 import ActivityFilters from "@/components/activity/ActivityFilters";
 import ActivityGrid from "@/components/activity/ActivityGrid";
-import { ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS } from "@/types/activity";
+import { ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS, ActivityFilters as ActivityFiltersType } from "@/types/activity";
 import { Loader2 } from "lucide-react";
 
 const Activities = () => {
@@ -27,7 +27,7 @@ const Activities = () => {
   });
 
   // Updated to match the expected props and types
-  const handleFilterChange = (filters: any) => {
+  const handleFilterChange = (filters: ActivityFiltersType) => {
     updateSearch({
       query: filters.searchQuery,
       category: filters.category,
@@ -59,8 +59,7 @@ const Activities = () => {
                 searchQuery: searchParams.query || "",
                 difficulty: searchParams.difficulty || "",
                 minPrice: searchParams.minPrice || 0,
-                maxPrice: searchParams.maxPrice || 0,
-                sortBy: searchParams.sortBy || "recommended"
+                maxPrice: searchParams.maxPrice || 0
               }}
               onFilterChange={handleFilterChange}
             />

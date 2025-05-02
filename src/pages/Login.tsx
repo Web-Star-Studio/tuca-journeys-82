@@ -31,26 +31,19 @@ const Login = () => {
     });
   }, [isAuthenticated, isAdmin, isRedirecting, userChecked, authRedirectLoading, returnTo]);
   
-  // IMPORTANT: Don't auto-redirect admins in this useEffect
-  // Let handleSuccessfulLogin handle admin redirection
+  // Don't auto-redirect in useEffect, let the LoginForm handle it
   useEffect(() => {
     if (authRedirectLoading || isRedirecting || userChecked) return;
     
     if (isAuthenticated) {
       console.log("Login detected authenticated user, isAdmin:", isAdmin);
       setUserChecked(true);
-      
-      if (isAdmin) {
-        console.log("Admin user detected, redirection will be handled by handleSuccessfulLogin");
-        // Do not navigate here for admin users
-      } else {
-        console.log("Regular user detected, redirecting to:", returnTo);
-        navigate(returnTo);
-      }
+      // We'll let handleSuccessfulLogin handle all redirections
+      // for consistent redirection behavior
     }
   }, [authRedirectLoading, isAuthenticated, navigate, returnTo, isAdmin, isRedirecting, userChecked]);
   
-  // Handle successful login with priority
+  // Handle successful login with priority for admin redirection
   const handleSuccessfulLogin = (redirectToAdmin: boolean) => {
     console.log("handleSuccessfulLogin called with redirectToAdmin:", redirectToAdmin);
     setIsRedirecting(true);

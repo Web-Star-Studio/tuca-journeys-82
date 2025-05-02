@@ -50,12 +50,17 @@ const LoginForm = ({ onSuccessfulLogin }: LoginFormProps) => {
       
       console.log("Sign-in successful, checking permissions");
       
-      // Check if the user has admin or master permissions
-      const isAdmin = await checkPermission('admin');
+      // First, check if the user has master permissions (highest priority)
       const isMaster = await checkPermission('master');
-      const hasAdminAccess = isAdmin || isMaster;
+      console.log("Master permission check result:", isMaster);
       
-      console.log("Permission check results:", { isAdmin, isMaster, hasAdminAccess });
+      // Only if not master, check if they have admin permissions
+      const isAdmin = isMaster ? true : await checkPermission('admin');
+      console.log("Admin permission check result:", isAdmin);
+      
+      const hasAdminAccess = isMaster || isAdmin;
+      
+      console.log("Permission check final results:", { isMaster, isAdmin, hasAdminAccess });
       
       // Display success message
       toast.success("Login realizado com sucesso!", { 

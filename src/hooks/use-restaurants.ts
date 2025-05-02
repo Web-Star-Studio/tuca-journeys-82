@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantService } from '@/services/restaurant-service';
@@ -82,8 +83,9 @@ export const useRestaurantAdmin = () => {
     }
   });
 
-  const deleteRestaurantMutation = useMutation({
-    mutationFn: restaurantService.deleteRestaurant.bind(restaurantService),
+  // Explicitly type the mutation function to accept a number parameter
+  const deleteRestaurantMutation = useMutation<void, Error, number>({
+    mutationFn: (id: number) => restaurantService.deleteRestaurant(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       toast.success('Restaurant deleted successfully!');
@@ -135,7 +137,7 @@ export const useRestaurantAdmin = () => {
   return {
     createRestaurant: createRestaurantMutation.mutate,
     updateRestaurant: updateRestaurantMutation.mutate,
-    deleteRestaurant: (id: number) => deleteRestaurantMutation.mutate(id),
+    deleteRestaurant: deleteRestaurantMutation.mutate,
     addTable: addTableMutation.mutate,
     updateTable: updateTableMutation.mutate,
     deleteTable: deleteTableMutation.mutate,

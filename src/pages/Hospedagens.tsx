@@ -1,71 +1,45 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAccommodations } from "@/hooks/use-accommodations";
-import AccommodationHero from "@/components/accommodation/AccommodationHero";
+import AccommodationGrid from "@/components/accommodation/AccommodationGrid";
 import AccommodationFilters from "@/components/accommodation/AccommodationFilters";
-import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
-
-// Create a proper props interface for AccommodationFilters
-interface AccommodationFiltersProps {
-  minPrice: number;
-  maxPrice: number;
-  capacityFilter: number;
-  amenitiesFilter: string[];
-  typeFilter: string[];
-  sortOrder: string;
-  searchQuery: string;
-  bedroomsFilter: number;
-  bathroomsFilter: number;
-  locationFilter: string;
-  dateFilter: Date | null;
-  featuredOnly: boolean;
-  ratingFilter: number;
-  onFilterChange: (filters: any) => void; 
-}
+import { useAccommodations } from "@/hooks/use-accommodations";
 
 const Hospedagens = () => {
   const { accommodations = [], isLoading } = useAccommodations();
+  
+  // Define proper filter types
   const [filters, setFilters] = useState({
-    minPrice: 0,
-    maxPrice: 5000,
-    capacityFilter: 2,
-    amenitiesFilter: [] as string[],
-    typeFilter: [] as string[],
-    sortOrder: "price_asc",
-    searchQuery: "",
-    bedroomsFilter: 1,
-    bathroomsFilter: 1,
-    locationFilter: "",
-    dateFilter: null as Date | null,
-    featuredOnly: false,
-    ratingFilter: 0
+    priceRange: [0, 5000], // Changed from number to number[]
+    amenities: [],
+    guests: 1,
+    bedrooms: 0,
+    bathrooms: 0,
+    types: [],
+    searchQuery: '',
   });
+  
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow">
-        <AccommodationHero />
-        <div className="container mx-auto py-12 px-4 md:px-6">
+      <main className="flex-grow py-12 px-4 md:px-6 lg:px-8 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Hospedagens em Fernando de Noronha</h1>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Encontre o lugar perfeito para sua estadia neste paraíso tropical
+            </p>
+          </div>
+
           <AccommodationFilters 
-            minPrice={filters.minPrice}
-            maxPrice={filters.maxPrice}
-            capacityFilter={filters.capacityFilter}
-            amenitiesFilter={filters.amenitiesFilter}
-            typeFilter={filters.typeFilter}
-            sortOrder={filters.sortOrder}
-            searchQuery={filters.searchQuery}
-            bedroomsFilter={filters.bedroomsFilter}
-            bathroomsFilter={filters.bathroomsFilter}
-            locationFilter={filters.locationFilter}
-            dateFilter={filters.dateFilter}
-            featuredOnly={filters.featuredOnly}
-            ratingFilter={filters.ratingFilter}
-            onFilterChange={setFilters}
+            filters={filters}
+            onFilterChange={handleFilterChange}
           />
-          <AccommodationsGrid 
+          <AccommodationGrid 
             accommodations={accommodations}
             isLoading={isLoading}
           />

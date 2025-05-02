@@ -2,7 +2,7 @@
 import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useSearchActivities } from "@/hooks/use-activities";
+import { useSearchActivities } from "@/hooks/activities/use-activity-search";
 import ActivityFilters from "@/components/activity/ActivityFilters";
 import ActivityGrid from "@/components/activity/ActivityGrid";
 import { ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS } from "@/types/activity";
@@ -16,7 +16,15 @@ const Activities = () => {
     updateSearch, 
     selectedCategory, 
     handleCategoryChange 
-  } = useSearchActivities();
+  } = useSearchActivities({
+    // Initialize with all required properties
+    query: '',
+    category: 'Todos',
+    sortBy: 'recommended',
+    minPrice: undefined,
+    maxPrice: undefined,
+    difficulty: ''
+  });
 
   // Updated to match the expected props and types
   const handleFilterChange = (filters: any) => {
@@ -25,7 +33,8 @@ const Activities = () => {
       category: filters.category,
       difficulty: filters.difficulty,
       minPrice: filters.minPrice,
-      maxPrice: filters.maxPrice
+      maxPrice: filters.maxPrice,
+      sortBy: filters.sortBy
     });
   };
 
@@ -47,10 +56,11 @@ const Activities = () => {
               difficultyLevels={ACTIVITY_DIFFICULTY_LEVELS}
               filters={{
                 category: selectedCategory,
+                searchQuery: searchParams.query || "",
                 difficulty: searchParams.difficulty || "",
                 minPrice: searchParams.minPrice || 0,
                 maxPrice: searchParams.maxPrice || 0,
-                searchQuery: searchParams.query || ""
+                sortBy: searchParams.sortBy || "recommended"
               }}
               onFilterChange={handleFilterChange}
             />

@@ -16,7 +16,7 @@ export interface Event {
   gallery_images: string[];
   organizer?: string;
   is_featured: boolean;
-  featured?: boolean; // Adding this as an alias for backward compatibility
+  featured?: boolean; // Added for backward compatibility
   status: 'scheduled' | 'cancelled' | 'postponed' | 'completed' | 'ongoing';
   partner_id?: string;
   policies?: string;
@@ -47,11 +47,13 @@ export interface EventTicket {
   benefits: string[];
 }
 
-// Add missing interfaces
+// Update AttendeeInfo to include ticketType and document fields
 export interface AttendeeInfo {
   name: string;
   email: string;
   phone?: string;
+  ticketType?: string;
+  document?: string;
 }
 
 export interface SelectedTicket {

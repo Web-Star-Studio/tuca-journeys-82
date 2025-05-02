@@ -12,7 +12,7 @@ export function useFeaturedEvents(limit?: number) {
   });
 
   const { data: events = [], isLoading } = useQuery({
-    queryKey: ['events', 'featured', filters],
+    queryKey: ['events', 'featured', filters, limit],
     queryFn: async () => {
       const featuredEvents = await eventService.getFeaturedEvents(filters);
       return limit ? featuredEvents.slice(0, limit) : featuredEvents;

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { useEventDetail, useFeaturedEvents } from "@/hooks/events/use-event-search";
+import { useFeaturedEvents } from "@/hooks/events/use-event-search";
 import { useEventBooking } from "@/hooks/events/use-event-booking";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Clock, MapPin, Users, Calendar, Share2, Heart } from "lucide-react";
@@ -16,6 +16,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { toast } from "sonner";
 import { AttendeeInfo } from "@/types/event";
+import { useQuery } from "@tanstack/react-query";
+import { eventService } from "@/services/event-service";
 
 const EventBreadcrumb = ({ category, eventName }: { category: string; eventName: string }) => (
   <div className="flex text-sm text-gray-500 mb-6">
@@ -156,6 +158,7 @@ const RelatedEvents = ({ events }: { events: any[] }) => {
 const EventDetails = () => {
   const { id } = useParams<{ id: string }>();
   const eventId = parseInt(id || "0", 10);
+  
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -165,11 +168,15 @@ const EventDetails = () => {
   const [attendees, setAttendees] = useState<AttendeeInfo[]>([{ name: "", email: "" }]);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   
-  // Fetch event details
-  const { data: event, isLoading, error } = useEventDetail(eventId);
+  // Fetch event details directly
+  const { data: event, isLoading, error } = useQuery({
+    queryKey: ['event', eventId],
+    queryFn: () => eventService.getEventById(eventId),
+    enabled: !!eventId && eventId > 0
+  });
   
   // Fetch related events
-  const { data: featuredEvents = [] } = useFeaturedEvents(3);
+  const { events: featuredEvents = [] } = useFeaturedEvents(3);
   const relatedEvents = featuredEvents.filter(featEvent => featEvent.id !== eventId);
   
   // Booking mutation

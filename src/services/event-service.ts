@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Event, EventFilters, AttendeeInfo } from '@/types/event';
 
@@ -77,9 +76,12 @@ class EventService extends BaseApiService {
   }
 
   async createEvent(eventData: Partial<Event>) {
+    // Convert eventData from array to single object if needed
+    const dataToInsert = Array.isArray(eventData) ? eventData[0] : eventData;
+    
     const { data, error } = await this.supabase
       .from('events')
-      .insert([eventData])
+      .insert([dataToInsert])
       .select()
       .single();
 
@@ -125,23 +127,26 @@ class EventService extends BaseApiService {
     return ["Todas", "Festas", "Música", "Cultura", "Gastronomia", "Esporte", "Tecnologia", "Educação"];
   }
   
-  async bookEventTickets(eventId: number, userId: string, ticketCount: number, attendeeInfo: AttendeeInfo[]) {
+  async bookEventTickets(eventId: number, userId: string, ticketCount: number, attendeeInfo: any[]) {
     try {
       // First get the event to calculate the total price
       const event = await this.getEventById(eventId);
       const totalPrice = event.price * ticketCount;
       
       // Insert the booking
-      const { data, error } = await this.supabase.rpc(
-        'book_event_tickets',
-        {
-          p_event_id: eventId,
-          p_user_id: userId,
-          p_ticket_count: ticketCount,
-          p_total_price: totalPrice,
-          p_ticket_data: JSON.stringify(attendeeInfo)
-        }
-      );
+      const { data, error } = await this.supabase
+        .from('event_bookings')
+        .insert([{
+          event_id: eventId,
+          user_id: userId,
+          tickets: ticketCount,
+          total_price: totalPrice,
+          status: 'confirmed',
+          payment_status: 'pending',
+          attendee_info: attendeeInfo
+        }])
+        .select()
+        .single();
       
       if (error) {
         throw error;

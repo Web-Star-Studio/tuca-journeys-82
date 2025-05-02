@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { activityService } from '@/services/activity-service';
 
@@ -11,6 +11,9 @@ export const useSearchActivities = (initialFilters = {}) => {
     query: '',
     category: 'Todos',
     sortBy: 'recommended',
+    minPrice: undefined,
+    maxPrice: undefined,
+    difficulty: '',
     ...initialFilters,
   });
 
@@ -49,7 +52,7 @@ export const useFeaturedActivities = (limit = 6) => {
   const [activeCategory, setActiveCategory] = useState('Todos');
   
   const { data: featuredActivities, isLoading: isFeaturedLoading } = useQuery({
-    queryKey: ['featured-activities'],
+    queryKey: ['featured-activities', limit],
     queryFn: () => activityService.getFeaturedActivities(limit),
   });
   

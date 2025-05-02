@@ -8,7 +8,7 @@ export interface Activity {
   category: string;
   difficulty: string;
   duration: string;
-  rating: number;
+  rating: number; // Making this required
   meeting_point: string;
   min_participants: number;
   max_participants: number;

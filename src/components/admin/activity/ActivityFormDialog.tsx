@@ -161,7 +161,7 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
       schedule: values.schedule ? values.schedule.split("\n").filter(Boolean) : [],
       image_url: values.image_url,
       gallery_images: values.gallery_images ? values.gallery_images.split(",").filter(Boolean) : [],
-      rating: values.rating || 4.5,
+      rating: values.rating || 4.5, // Ensure rating is always provided
       is_active: values.is_active,
       is_featured: values.is_featured,
     };
@@ -170,7 +170,7 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
       updateActivity({ id: activityId, data: processedValues });
     } else {
       // Cast processedValues to the expected type when creating
-      createActivity(processedValues as Omit<Activity, 'id' | 'created_at' | 'updated_at'>);
+      createActivity(processedValues as any);
     }
 
     if (onSuccess) {

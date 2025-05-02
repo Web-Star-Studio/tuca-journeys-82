@@ -6,14 +6,27 @@ import { useRestaurants } from "@/hooks/use-restaurants";
 import RestaurantFilters from "@/components/restaurant/RestaurantFilters";
 import RestaurantsGrid from "@/components/restaurant/RestaurantsGrid";
 
+// Defining RestaurantFilters interface properly
+interface RestaurantFilters {
+  cuisineType: string;
+  priceRange: string;
+  rating: number;
+  searchQuery: string;
+}
+
 const Restaurants = () => {
   const { restaurants = [], isLoading } = useRestaurants();
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<RestaurantFilters>({
     cuisineType: "",
     priceRange: "",
     rating: 0,
     searchQuery: ""
   });
+
+  // Create a handler function to type-safely update filters
+  const handleFilterChange = (newFilters: RestaurantFilters) => {
+    setFilters(newFilters);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -29,7 +42,7 @@ const Restaurants = () => {
 
           <RestaurantFilters 
             filters={filters}
-            onFilterChange={setFilters}
+            onFilterChange={handleFilterChange}
           />
           <RestaurantsGrid 
             restaurants={restaurants}

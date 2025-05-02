@@ -25,6 +25,11 @@ import NotFound from '@/pages/NotFound';
 // Protected route wrapper
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+// Define the proper ProtectedRouteProps interface
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
 const AppRoutes = () => {
   return (
     <Routes>

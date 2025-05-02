@@ -16,7 +16,8 @@ export interface Event {
   gallery_images: string[];
   organizer?: string;
   is_featured: boolean;
-  status: 'scheduled' | 'cancelled' | 'postponed' | 'completed';
+  featured?: boolean; // Adding this as an alias for backward compatibility
+  status: 'scheduled' | 'cancelled' | 'postponed' | 'completed' | 'ongoing';
   partner_id?: string;
   policies?: string;
   created_at: string;
@@ -27,6 +28,10 @@ export interface EventFilters {
   category?: string;
   date?: Date | null;
   searchQuery?: string;
+  sortBy?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  difficulty?: string;
   [key: string]: any;
 }
 
@@ -40,4 +45,47 @@ export interface EventTicket {
   description?: string;
   type: 'regular' | 'vip' | 'early_bird' | 'student';
   benefits: string[];
+}
+
+// Add missing interfaces
+export interface AttendeeInfo {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
+export interface SelectedTicket {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  type: string;
+}
+
+export interface EventBooking {
+  id: number;
+  event_id: number;
+  user_id: string;
+  tickets: number;
+  total_price: number;
+  status: string;
+  payment_status: string;
+  payment_method?: string;
+  payment_details?: Record<string, any>;
+  attendee_info?: AttendeeInfo[];
+  created_at: string;
+  updated_at: string;
+  events?: Event;
+}
+
+export interface EventHeroProps {
+  title: string;
+  subtitle: string;
+}
+
+export interface EventSearchFilterProps {
+  filters: EventFilters;
+  onFilterChange: (filters: EventFilters) => void;
+  categories: string[];
+  isLoading?: boolean;
 }

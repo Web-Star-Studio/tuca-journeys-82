@@ -7,20 +7,38 @@ import AccommodationHero from "@/components/accommodation/AccommodationHero";
 import AccommodationFilters from "@/components/accommodation/AccommodationFilters";
 import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
 
+// Create a proper props interface for AccommodationFilters
+interface AccommodationFiltersProps {
+  minPrice: number;
+  maxPrice: number;
+  capacityFilter: number;
+  amenitiesFilter: string[];
+  typeFilter: string[];
+  sortOrder: string;
+  searchQuery: string;
+  bedroomsFilter: number;
+  bathroomsFilter: number;
+  locationFilter: string;
+  dateFilter: Date | null;
+  featuredOnly: boolean;
+  ratingFilter: number;
+  onFilterChange: (filters: any) => void; 
+}
+
 const Hospedagens = () => {
   const { accommodations = [], isLoading } = useAccommodations();
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 5000,
     capacityFilter: 2,
-    amenitiesFilter: [],
-    typeFilter: [],
+    amenitiesFilter: [] as string[],
+    typeFilter: [] as string[],
     sortOrder: "price_asc",
     searchQuery: "",
     bedroomsFilter: 1,
     bathroomsFilter: 1,
     locationFilter: "",
-    dateFilter: null,
+    dateFilter: null as Date | null,
     featuredOnly: false,
     ratingFilter: 0
   });

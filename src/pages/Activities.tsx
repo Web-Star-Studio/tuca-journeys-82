@@ -18,6 +18,17 @@ const Activities = () => {
     handleCategoryChange 
   } = useSearchActivities();
 
+  // Updated to match the expected props and types
+  const handleFilterChange = (filters: any) => {
+    updateSearch({
+      query: filters.searchQuery,
+      category: filters.category,
+      difficulty: filters.difficulty,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice
+    });
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -37,19 +48,11 @@ const Activities = () => {
               filters={{
                 category: selectedCategory,
                 difficulty: searchParams.difficulty || "",
-                minPrice: searchParams.minPrice || null,
-                maxPrice: searchParams.maxPrice || null,
+                minPrice: searchParams.minPrice || 0,
+                maxPrice: searchParams.maxPrice || 0,
                 searchQuery: searchParams.query || ""
               }}
-              onFilterChange={(filters) => {
-                updateSearch({
-                  category: filters.category,
-                  difficulty: filters.difficulty,
-                  minPrice: filters.minPrice,
-                  maxPrice: filters.maxPrice,
-                  query: filters.searchQuery
-                });
-              }}
+              onFilterChange={handleFilterChange}
             />
             
             {isLoading ? (

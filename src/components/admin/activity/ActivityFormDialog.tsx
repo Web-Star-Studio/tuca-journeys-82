@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +13,32 @@ import ActivityMediaForm from "./ActivityMediaForm";
 import ActivityScheduleForm from "./ActivityScheduleForm";
 import ActivityDetailsForm from "./ActivityDetailsForm";
 import ActivityFormActions from "./ActivityFormActions";
+
+// Define interface for Activity type
+interface Activity {
+  id: number;
+  title: string;
+  short_description: string;
+  description: string;
+  price: number;
+  category: string;
+  difficulty: string;
+  duration: string;
+  meeting_point: string;
+  min_participants: number;
+  max_participants: number;
+  includes: string[];
+  excludes: string[];
+  notes: string[];
+  schedule: string[];
+  image_url: string;
+  gallery_images: string[];
+  rating?: number;
+  is_active: boolean;
+  is_featured: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
 
 // Form schema for activity creation/edition
 const activityFormSchema = z.object({

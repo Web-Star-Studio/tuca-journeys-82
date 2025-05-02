@@ -8,7 +8,7 @@ import EventCard from "@/components/event/EventCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FeaturedEvents = () => {
-  const { data: events = [], isLoading } = useFeaturedEvents(3);
+  const { events, isLoading } = useFeaturedEvents(3);
 
   if (isLoading) {
     return (

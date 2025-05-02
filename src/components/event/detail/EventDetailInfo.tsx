@@ -47,8 +47,9 @@ const EventDetailInfo = ({ event }: EventDetailInfoProps) => {
             <li><span className="font-medium">Vagas disponíveis:</span> {event.available_spots}</li>
             <li><span className="font-medium">Status:</span> {
               event.status === 'scheduled' ? 'Agendado' :
-              event.status === 'ongoing' ? 'Em andamento' :
-              event.status === 'completed' ? 'Finalizado' : 'Cancelado'
+              event.status === 'postponed' ? 'Adiado' :
+              event.status === 'completed' ? 'Finalizado' : 
+              event.status === 'ongoing' ? 'Em andamento' : 'Cancelado'
             }</li>
           </ul>
         </div>

@@ -45,7 +45,7 @@ const EventCard = ({ event }: EventCardProps) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
         />
-        {event.featured && (
+        {event.is_featured && (
           <div className="absolute top-3 right-3 bg-tuca-ocean-blue/90 text-white text-xs font-medium px-2 py-1 rounded">
             Destaque
           </div>

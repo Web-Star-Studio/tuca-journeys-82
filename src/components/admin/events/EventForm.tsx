@@ -154,6 +154,11 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
       if (event.date) {
         form.setValue("date", new Date(event.date));
       }
+      
+      // Handle featured/is_featured property
+      if (event.is_featured !== undefined) {
+        form.setValue("featured", event.is_featured);
+      }
     }
   }, [event, form]);
 

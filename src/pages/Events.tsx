@@ -8,9 +8,10 @@ import EventSearchFilter from "@/components/event/EventSearchFilter";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { eventService } from "@/services/event-service";
+import { EventFilters } from "@/types/event";
 
 const Events = () => {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<EventFilters>({
     category: "",
     date: null,
     searchQuery: ""
@@ -19,6 +20,11 @@ const Events = () => {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events', filters],
     queryFn: () => eventService.getFeaturedEvents(filters)
+  });
+  
+  const { data: categories = ["Todos", "Festas", "Música", "Cultura", "Gastronomia", "Esporte"] } = useQuery({
+    queryKey: ['eventCategories'],
+    queryFn: () => eventService.getEventCategories()
   });
 
   return (
@@ -33,7 +39,7 @@ const Events = () => {
           <EventSearchFilter 
             filters={filters}
             onFilterChange={setFilters}
-            categories={["Todos", "Festas", "Música", "Cultura", "Gastronomia", "Esporte"]}
+            categories={categories}
           />
           <EventsGrid 
             events={events}

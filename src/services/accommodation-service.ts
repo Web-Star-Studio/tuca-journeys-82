@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Accommodation, AccommodationAvailability } from '@/types/database';
 import { BaseApiService } from './base-api';
@@ -112,7 +111,7 @@ class AccommodationService extends BaseApiService {
 
     return data;
   }
-
+  
   /**
    * Creates a new accommodation
    */
@@ -133,13 +132,9 @@ class AccommodationService extends BaseApiService {
       max_guests: accommodation.max_guests || 2,
       amenities: accommodation.amenities || ['Wi-Fi'],
       gallery_images: accommodation.gallery_images || [],
-      rating: accommodation.rating || 0
+      rating: accommodation.rating || 0,
+      is_featured: accommodation.is_featured
     };
-    
-    // Add is_featured property conditionally
-    if (accommodation.is_featured !== undefined) {
-      dbAccommodation.is_featured = accommodation.is_featured;
-    }
     
     const { data, error } = await this.supabase
       .from('accommodations')

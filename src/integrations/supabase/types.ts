@@ -58,6 +58,7 @@ export type Database = {
           gallery_images: string[]
           id: number
           image_url: string
+          is_featured: boolean | null
           max_guests: number
           partner_id: string | null
           price_per_night: number
@@ -78,6 +79,7 @@ export type Database = {
           gallery_images?: string[]
           id?: number
           image_url: string
+          is_featured?: boolean | null
           max_guests: number
           partner_id?: string | null
           price_per_night: number
@@ -98,6 +100,7 @@ export type Database = {
           gallery_images?: string[]
           id?: number
           image_url?: string
+          is_featured?: boolean | null
           max_guests?: number
           partner_id?: string | null
           price_per_night?: number

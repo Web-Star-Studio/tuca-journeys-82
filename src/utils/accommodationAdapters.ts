@@ -21,7 +21,7 @@ export function adaptDatabaseToUIAccommodation(dbAccommodation: DatabaseAccommod
     capacity: dbAccommodation.max_guests,
     bedrooms: dbAccommodation.bedrooms,
     bathrooms: dbAccommodation.bathrooms,
-    featured: false // Default value since database doesn't have this field
+    featured: dbAccommodation.is_featured || false
   };
 }
 
@@ -53,6 +53,7 @@ export function adaptUIToDatabaseAccommodation(uiAccommodation: UIAccommodation)
     max_guests: uiAccommodation.capacity,
     amenities: uiAccommodation.amenities,
     gallery_images: [uiAccommodation.image],
-    rating: uiAccommodation.rating || 0
+    rating: uiAccommodation.rating || 0,
+    is_featured: uiAccommodation.featured
   };
 }

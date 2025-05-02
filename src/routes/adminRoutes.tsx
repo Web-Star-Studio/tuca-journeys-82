@@ -1,21 +1,32 @@
 
-import React from "react";
+import { Suspense, lazy } from "react";
 import { RouteObject } from "react-router-dom";
-import AdminDashboard from "@/pages/admin/Dashboard";
-import Tours from "@/pages/admin/Tours";
-import TourAvailability from "@/pages/admin/TourAvailability";
-import Accommodations from "@/pages/admin/Accommodations";
-import AccommodationAvailability from "@/pages/admin/AccommodationAvailability";
-import Products from "@/pages/admin/Products";
-import Users from "@/pages/admin/Users";
-import Media from "@/pages/admin/Media";
-import Reports from "@/pages/admin/Reports";
-import Settings from "@/pages/admin/Settings";
-import Bookings from "@/pages/admin/Bookings";
-import Packages from "@/pages/admin/Packages";
-import Permissions from "@/pages/admin/Permissions";
-import AuditLogs from "@/pages/admin/AuditLogs";
+import { Loader2 } from "lucide-react";
+
 import AdminLogin from "@/pages/admin/AdminLogin";
+
+// Lazy load all admin pages to improve performance
+const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
+const AdminTours = lazy(() => import("@/pages/admin/Tours"));
+const AdminTourAvailability = lazy(() => import("@/pages/admin/TourAvailability"));
+const AdminAccommodations = lazy(() => import("@/pages/admin/Accommodations"));
+const AdminAccommodationAvailability = lazy(() => import("@/pages/admin/AccommodationAvailability"));
+const AdminBookings = lazy(() => import("@/pages/admin/Bookings"));
+const AdminUsers = lazy(() => import("@/pages/admin/Users"));
+const AdminReports = lazy(() => import("@/pages/admin/Reports"));
+const AdminPackages = lazy(() => import("@/pages/admin/Packages"));
+const AdminMedia = lazy(() => import("@/pages/admin/Media"));
+const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
+const AdminProducts = lazy(() => import("@/pages/admin/Products"));
+const AdminAuditLogs = lazy(() => import("@/pages/admin/AuditLogs"));
+const AdminPermissions = lazy(() => import("@/pages/admin/Permissions"));
+const AdminEvents = lazy(() => import("@/pages/admin/Events"));
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+  </div>
+);
 
 const adminRoutes: RouteObject[] = [
   {
@@ -24,59 +35,123 @@ const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin",
-    element: <AdminDashboard />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminDashboard />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/tours",
-    element: <Tours />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminTours />
+      </Suspense>
+    ),
   },
   {
-    path: "/admin/tours/:id/availability",
-    element: <TourAvailability />,
+    path: "/admin/tour-availability/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminTourAvailability />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/accommodations",
-    element: <Accommodations />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminAccommodations />
+      </Suspense>
+    ),
   },
   {
-    path: "/admin/accommodations/:id/availability",
-    element: <AccommodationAvailability />,
-  },
-  {
-    path: "/admin/packages",
-    element: <Packages />,
-  },
-  {
-    path: "/admin/products",
-    element: <Products />,
+    path: "/admin/accommodation-availability/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminAccommodationAvailability />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/bookings",
-    element: <Bookings />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminBookings />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/users",
-    element: <Users />,
-  },
-  {
-    path: "/admin/permissions",
-    element: <Permissions />,
-  },
-  {
-    path: "/admin/audit-logs",
-    element: <AuditLogs />,
-  },
-  {
-    path: "/admin/media",
-    element: <Media />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminUsers />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/reports",
-    element: <Reports />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminReports />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/packages",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminPackages />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/products",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminProducts />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/media",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminMedia />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/settings",
-    element: <Settings />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminSettings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/audit-logs",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminAuditLogs />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/permissions",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminPermissions />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/events",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AdminEvents />
+      </Suspense>
+    ),
   },
 ];
 

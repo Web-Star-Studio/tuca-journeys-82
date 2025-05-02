@@ -1,37 +1,48 @@
 
-import React from "react";
+import { Suspense, lazy } from "react";
 import { RouteObject } from "react-router-dom";
+
 import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
-import Tours from "@/pages/Tours";
-import TourDetail from "@/pages/TourDetail";
+import NotFound from "@/pages/NotFound";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
-import Profile from "@/pages/Profile";
-import Events from "@/pages/Events";
-import Payments from "@/pages/Payments";
-import Notifications from "@/pages/Notifications";
-import { Accommodation as FeaturedAccommodationsPage } from "@/pages/Accommodation";
-import { AccommodationDetail as AccommodationDetailsPage } from "@/pages/AccommodationDetail";
-import { Bookings as BookingsPage } from "@/pages/Bookings";
-import { ForgotPassword as ForgotPasswordPage } from "@/pages/ForgotPassword";
+import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
-import { Orders as OrdersPage } from "@/pages/Orders";
-import { Wishlist as WishlistPage } from "@/pages/Wishlist";
-import { Map as MapPage } from "@/pages/Map";
-import { Packages as PackagesPage } from "@/pages/Packages";
-import { PackageDetail as PackageDetailPage } from "@/pages/PackageDetail";
-import { Products as ProductsPage } from "@/pages/Products";
-import { ProductDetail as ProductDetailPage } from "@/pages/ProductDetail";
-import { Coupons as CouponsPage } from "@/pages/Coupons";
-import { Points as PointsPage } from "@/pages/Points";
-import { Settings as SettingsPage } from "@/pages/Settings";
+import { Loader2 } from "lucide-react";
 
-// Add these imports:
-import EventsList from "@/pages/EventsList";
-import EventDetails from "@/pages/EventDetails";
-import MyEventTickets from "@/pages/MyEventTickets";
+// Lazy loaded routes
+const EventsList = lazy(() => import("@/pages/EventsList"));
+const EventDetail = lazy(() => import("@/pages/EventDetail"));
+const EventPurchase = lazy(() => import("@/pages/EventPurchase"));
+const MyEventTickets = lazy(() => import("@/pages/MyEventTickets"));
+const Tours = lazy(() => import("@/pages/Tours"));
+const TourDetail = lazy(() => import("@/pages/TourDetail"));
+const TourBooking = lazy(() => import("@/pages/TourBooking"));
+const Accommodations = lazy(() => import("@/pages/Accommodation"));
+const AccommodationDetail = lazy(() => import("@/pages/AccommodationDetail"));
+const Packages = lazy(() => import("@/pages/Packages"));
+const PackageDetail = lazy(() => import("@/pages/PackageDetail"));
+const Store = lazy(() => import("@/pages/Store"));
+const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
+const Cart = lazy(() => import("@/pages/Cart"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Bookings = lazy(() => import("@/pages/Bookings"));
+const BookingDetail = lazy(() => import("@/pages/BookingDetail"));
+const Map = lazy(() => import("@/pages/Map"));
+const Partners = lazy(() => import("@/pages/Partners"));
+const PartnerDetail = lazy(() => import("@/pages/PartnerDetail"));
+const Unauthorized = lazy(() => import("@/pages/Unauthorized"));
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-12 w-12 animate-spin text-tuca-ocean-blue" />
+  </div>
+);
 
 const publicRoutes: RouteObject[] = [
   {
@@ -39,117 +50,225 @@ const publicRoutes: RouteObject[] = [
     element: <Index />,
   },
   {
-    path: "/sobre",
+    path: "/about",
     element: <About />,
   },
   {
-    path: "/contato",
+    path: "/contact",
     element: <Contact />,
   },
   {
-    path: "/passeios",
-    element: <Tours />,
+    path: "/eventos",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <EventsList />
+      </Suspense>
+    ),
   },
   {
-    path: "/passeios/:id",
-    element: <TourDetail />,
+    path: "/eventos/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <EventDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/eventos/:id/comprar",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <EventPurchase />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/meus-ingressos",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <MyEventTickets />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/tours",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Tours />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/tours/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <TourDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/tours/:id/reservar",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <TourBooking />
+      </Suspense>
+    ),
   },
   {
     path: "/hospedagens",
-    element: <FeaturedAccommodationsPage />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Accommodations />
+      </Suspense>
+    ),
   },
   {
     path: "/hospedagens/:id",
-    element: <AccommodationDetailsPage />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AccommodationDetail />
+      </Suspense>
+    ),
   },
   {
-    path: "/reservas",
-    element: <BookingsPage />,
+    path: "/pacotes",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Packages />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/pacotes/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <PackageDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/loja",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Store />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/produtos/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <ProductDetails />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/carrinho",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Cart />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/checkout",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Checkout />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/favoritos",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Wishlist />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Dashboard />
+      </Suspense>
+    ),
   },
   {
     path: "/perfil",
-    element: <Profile />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Profile />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/reservas",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Bookings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/reservas/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <BookingDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/mapa",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Map />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/parceiros",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Partners />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/parceiros/:id",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <PartnerDetail />
+      </Suspense>
+    ),
   },
   {
     path: "/login",
     element: <Login />,
   },
   {
-    path: "/register",
+    path: "/cadastro",
     element: <Register />,
   },
   {
-    path: "/forgot-password",
-    element: <ForgotPasswordPage />,
+    path: "/recuperar-senha",
+    element: <ForgotPassword />,
   },
   {
-    path: "/reset-password",
+    path: "/redefinir-senha",
     element: <ResetPassword />,
   },
   {
-    path: "/pedidos",
-    element: <OrdersPage />,
+    path: "/unauthorized",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <Unauthorized />
+      </Suspense>
+    ),
   },
   {
-    path: "/lista-de-desejos",
-    element: <WishlistPage />,
+    path: "*",
+    element: <NotFound />,
   },
-  {
-    path: "/mapa",
-    element: <MapPage />,
-  },
-  {
-    path: "/pacotes",
-    element: <PackagesPage />,
-  },
-  {
-    path: "/pacotes/:id",
-    element: <PackageDetailPage />,
-  },
-  {
-    path: "/loja",
-    element: <ProductsPage />,
-  },
-  {
-    path: "/loja/:id",
-    element: <ProductDetailPage />,
-  },
-  {
-    path: "/cupons",
-    element: <CouponsPage />,
-  },
-  {
-    path: "/pontos",
-    element: <PointsPage />,
-  },
-  {
-    path: "/notificacoes",
-    element: <Notifications />,
-  },
-  {
-    path: "/pagamentos",
-    element: <Payments />,
-  },
-  {
-    path: "/configuracoes",
-    element: <SettingsPage />,
-  },
-  
-  // Update the existing Events route with our new component
-  {
-    path: "/eventos",
-    element: <EventsList />,
-  },
-  // Add the event details and tickets pages
-  {
-    path: "/eventos/:id",
-    element: <EventDetails />,
-  },
-  {
-    path: "/meus-ingressos",
-    element: <MyEventTickets />,
-  },
-  
 ];
 
 export default publicRoutes;

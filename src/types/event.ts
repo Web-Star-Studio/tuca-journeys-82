@@ -15,6 +15,9 @@ export interface Event {
   available_spots: number;
   organizer: string;
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  policies?: string; // Added for event policies
+  tickets?: EventTicket[]; // Added for event tickets
+  short_description?: string; // For display in cards
 }
 
 export interface EventFilters {
@@ -38,6 +41,7 @@ export interface EventTicket {
   available_quantity: number;
   max_per_order: number;
   type: 'regular' | 'vip' | 'discount' | 'free';
+  benefits?: string[];
 }
 
 export interface EventBooking {
@@ -49,6 +53,7 @@ export interface EventBooking {
   status: 'pending' | 'confirmed' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'refunded';
   payment_method?: string;
+  payment_details?: any;
   created_at: string;
   attendee_info?: AttendeeInfo[];
 }

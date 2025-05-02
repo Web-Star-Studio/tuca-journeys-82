@@ -338,6 +338,7 @@ export type Database = {
           created_at: string | null
           event_id: number | null
           id: number
+          payment_details: Json | null
           payment_method: string | null
           payment_status: string
           status: string
@@ -351,6 +352,7 @@ export type Database = {
           created_at?: string | null
           event_id?: number | null
           id?: number
+          payment_details?: Json | null
           payment_method?: string | null
           payment_status: string
           status: string
@@ -364,6 +366,7 @@ export type Database = {
           created_at?: string | null
           event_id?: number | null
           id?: number
+          payment_details?: Json | null
           payment_method?: string | null
           payment_status?: string
           status?: string
@@ -435,6 +438,7 @@ export type Database = {
       event_tickets: {
         Row: {
           available_quantity: number
+          benefits: string[] | null
           created_at: string
           description: string | null
           event_id: number
@@ -447,6 +451,7 @@ export type Database = {
         }
         Insert: {
           available_quantity: number
+          benefits?: string[] | null
           created_at?: string
           description?: string | null
           event_id: number
@@ -459,6 +464,7 @@ export type Database = {
         }
         Update: {
           available_quantity?: number
+          benefits?: string[] | null
           created_at?: string
           description?: string | null
           event_id?: number
@@ -496,6 +502,7 @@ export type Database = {
           name: string
           organizer: string | null
           partner_id: string | null
+          policies: string | null
           price: number
           short_description: string
           start_time: string
@@ -518,6 +525,7 @@ export type Database = {
           name: string
           organizer?: string | null
           partner_id?: string | null
+          policies?: string | null
           price: number
           short_description: string
           start_time: string
@@ -540,6 +548,7 @@ export type Database = {
           name?: string
           organizer?: string | null
           partner_id?: string | null
+          policies?: string | null
           price?: number
           short_description?: string
           start_time?: string

@@ -1,159 +1,128 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Calendar, ShoppingCart, Image, Package, Home, Store, Settings, BarChart2, LogOut, ChevronLeft, ChevronRight, Shield, ClipboardList } from "lucide-react";
+import {
+  Calendar,
+  Home,
+  Landmark,
+  Users,
+  Package,
+  ShoppingBag,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  Hotel,
+  FileText,
+  LogOut,
+  Image,
+  ShieldAlert,
+  CalendarDays,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useSignOut } from "@/hooks/auth/use-sign-out";
-import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePermission } from '@/hooks/use-permission';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminSidebarProps {
   collapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface SidebarItem {
   title: string;
   icon: React.ElementType;
   path: string;
-  dividerAfter?: boolean;
-  requiredPermission?: 'read' | 'write' | 'delete' | 'admin' | 'master';
+  requiresMaster?: boolean;
 }
 
-const AdminSidebar = ({
-  collapsed,
-  setCollapsed
-}: AdminSidebarProps) => {
+const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   const location = useLocation();
-  const { signOut } = useSignOut();
-  const { toast } = useToast();
   const { hasPermission: isMaster } = usePermission('master');
+  const { signOut } = useAuth();
   
-  const sidebarItems: SidebarItem[] = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/admin"
-    },
-    {
-      title: "Passeios",
-      icon: Calendar,
-      path: "/admin/tours"
-    },
-    {
-      title: "Hospedagens",
-      icon: Home,
-      path: "/admin/accommodations"
-    },
-    {
-      title: "Pacotes",
-      icon: Package,
-      path: "/admin/packages"
-    },
-    {
-      title: "Produtos",
-      icon: Store,
-      path: "/admin/products",
-      dividerAfter: true
-    },
-    {
-      title: "Reservas",
-      icon: ShoppingCart,
-      path: "/admin/bookings"
-    },
-    {
-      title: "Usuários",
-      icon: Users,
-      path: "/admin/users",
-      dividerAfter: true
-    },
-    {
-      title: "Logs de Auditoria",
-      icon: ClipboardList,
-      path: "/admin/audit-logs",
-      requiredPermission: 'master'
-    },
-    {
-      title: "Permissões",
-      icon: Shield,
-      path: "/admin/permissions",
-      requiredPermission: 'master',
-      dividerAfter: true
-    },
-    {
-      title: "Mídia",
-      icon: Image,
-      path: "/admin/media"
-    },
-    {
-      title: "Relatórios",
-      icon: BarChart2,
-      path: "/admin/reports"
-    },
-    {
-      title: "Configurações",
-      icon: Settings,
-      path: "/admin/settings"
-    }
+  const menuItems: SidebarItem[] = [
+    { title: "Dashboard", icon: Home, path: "/admin" },
+    { title: "Passeios", icon: Landmark, path: "/admin/tours" },
+    { title: "Eventos", icon: CalendarDays, path: "/admin/events" },
+    { title: "Hospedagens", icon: Hotel, path: "/admin/accommodations" },
+    { title: "Pacotes", icon: Package, path: "/admin/packages" },
+    { title: "Produtos", icon: ShoppingBag, path: "/admin/products" },
+    { title: "Reservas", icon: Calendar, path: "/admin/bookings" },
+    { title: "Usuários", icon: Users, path: "/admin/users" },
+    { title: "Relatórios", icon: BarChart3, path: "/admin/reports" },
+    { title: "Mídias", icon: Image, path: "/admin/media" },
+    { title: "Logs de Auditoria", icon: FileText, path: "/admin/audit-logs", requiresMaster: true },
+    { title: "Permissões", icon: ShieldAlert, path: "/admin/permissions", requiresMaster: true },
+    { title: "Configurações", icon: Settings, path: "/admin/settings" },
   ];
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso."
-      });
-    } catch (error) {
-      console.error("Error signing out:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível realizar o logout.",
-        variant: "destructive"
-      });
-    }
-  };
+  return (
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-30 h-screen bg-white shadow-lg border-r transition-all duration-300 overflow-hidden",
+        collapsed ? "w-20" : "w-64"
+      )}
+    >
+      <div className="flex h-full flex-col">
+        <div className={cn("flex h-16 items-center border-b px-4", collapsed ? "justify-center" : "justify-between")}>
+          {!collapsed && (
+            <Link to="/" className="flex items-center space-x-2">
+              <span className="font-bold text-xl">Tuca Noronha</span>
+            </Link>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-8 w-8", collapsed && "mx-auto")}
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <ChevronRight /> : <ChevronLeft />}
+          </Button>
+        </div>
 
-  // Filter items based on permissions
-  const filteredItems = sidebarItems.filter(item => {
-    if (!item.requiredPermission) return true;
-    if (item.requiredPermission === 'master') return isMaster;
-    return true;
-  });
-
-  return <div className={`fixed h-screen bg-white shadow-md transition-all duration-300 z-40 ${collapsed ? "w-20" : "w-64"}`}>
-      <div className="flex h-16 items-center justify-between px-4 border-b">
-        <Link to="/admin" className="flex items-center">
-          {!collapsed && <span className="text-xl font-bold text-black">Administrativo</span>}
-        </Link>
-        <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} className="text-gray-500 hover:text-tuca-ocean-blue">
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </Button>
-      </div>
-
-      <div className="py-4">
-        <ul className="space-y-1">
-          {filteredItems.map((item, index) => (
-            <div key={item.path} className="contents">
-              <li>
-                <Link to={item.path} className={cn("flex items-center py-3 text-gray-700 hover:bg-tuca-light-blue/40 hover:text-tuca-ocean-blue", collapsed ? "justify-center px-2" : "px-4", location.pathname === item.path && "bg-tuca-light-blue/60 text-tuca-ocean-blue font-medium")}>
-                  <item.icon size={20} className="shrink-0" />
-                  {!collapsed && <span className="ml-4 text-sm font-medium">{item.title}</span>}
+        <ScrollArea className="flex-1 px-3 py-4">
+          <div className="space-y-2">
+            {menuItems
+              .filter(item => !item.requiresMaster || isMaster)
+              .map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center space-x-2 rounded-md px-3 py-2.5 transition-colors",
+                    location.pathname === item.path
+                      ? "bg-muted text-tuca-ocean-blue font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    collapsed && "justify-center"
+                  )}
+                >
+                  <item.icon className={cn("h-5 w-5", collapsed ? "mx-auto" : "")} />
+                  {!collapsed && <span className="text-sm">{item.title}</span>}
                 </Link>
-              </li>
-              {item.dividerAfter && <li className="my-2 border-b border-gray-200"></li>}
-            </div>
-          ))}
-        </ul>
-      </div>
+              ))}
+          </div>
+        </ScrollArea>
 
-      <div className="absolute bottom-5 w-full px-4">
-        <Button variant="ghost" className={cn("flex w-full items-center py-3 text-gray-700 hover:bg-red-50 hover:text-red-600", collapsed ? "justify-center px-2" : "px-4")} onClick={handleSignOut}>
-          <LogOut size={20} className="shrink-0" />
-          {!collapsed && <span className="ml-4 text-sm font-medium">Sair</span>}
-        </Button>
+        <div className="mt-auto border-t px-3 py-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "flex items-center space-x-2 rounded-md px-3 py-2 w-full justify-start text-muted-foreground hover:bg-muted hover:text-foreground",
+              collapsed && "justify-center"
+            )}
+            onClick={signOut}
+          >
+            <LogOut className={cn("h-5 w-5", collapsed ? "mx-auto" : "")} />
+            {!collapsed && <span className="text-sm">Sair</span>}
+          </Button>
+        </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default AdminSidebar;

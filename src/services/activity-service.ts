@@ -111,6 +111,7 @@ class ActivityService extends BaseApiService {
    * Get activity availability
    */
   async getActivityAvailability(activityId: number) {
+    // Fix: This should use the correct table name that exists in your database
     const { data, error } = await this.supabase
       .from('tour_availability')
       .select('*')
@@ -122,6 +123,7 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
+    // Cast to the expected type
     return data as unknown as ActivityAvailability[];
   }
 
@@ -201,9 +203,15 @@ class ActivityService extends BaseApiService {
       status: status || 'available'
     }));
 
+    // Make an array of objects for bulk insert or update
+    const entries = availabilityEntries.map(entry => ({
+      ...entry
+    }));
+
+    // Use insert with onConflict to handle both inserts and updates
     const { data, error } = await this.supabase
       .from('tour_availability')
-      .upsert(availabilityEntries, { 
+      .upsert(entries, {
         onConflict: 'tour_id,date',
         ignoreDuplicates: false
       });

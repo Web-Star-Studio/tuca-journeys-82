@@ -41,14 +41,12 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
 
       {/* Admin routes - protected */}
-      <Route path="/admin" element={<ProtectedRoute />}>
-        <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="hospedagens" element={<AdminAccommodations />} />
-        <Route path="atividades" element={<AdminActivities />} />
-        <Route path="eventos" element={<AdminEvents />} />
-        <Route path="restaurantes" element={<AdminRestaurants />} />
-      </Route>
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/hospedagens" element={<ProtectedRoute><AdminAccommodations /></ProtectedRoute>} />
+      <Route path="/admin/atividades" element={<ProtectedRoute><AdminActivities /></ProtectedRoute>} />
+      <Route path="/admin/eventos" element={<ProtectedRoute><AdminEvents /></ProtectedRoute>} />
+      <Route path="/admin/restaurantes" element={<ProtectedRoute><AdminRestaurants /></ProtectedRoute>} />
 
       {/* Catch all route */}
       <Route path="*" element={<NotFound />} />

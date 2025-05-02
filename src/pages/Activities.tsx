@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { useSearchActivities } from "@/hooks/use-activities";
 import ActivityFilters from "@/components/activity/ActivityFilters";
 import ActivityGrid from "@/components/activity/ActivityGrid";
-import { ACTIVITY_CATEGORIES } from "@/types/activity";
+import { ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS } from "@/types/activity";
 import { Loader2 } from "lucide-react";
 
 const Activities = () => {
@@ -33,14 +33,23 @@ const Activities = () => {
           <div className="flex flex-col lg:flex-row gap-6">
             <ActivityFilters
               categories={ACTIVITY_CATEGORIES}
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-              priceRange={[searchParams.minPrice || 0, searchParams.maxPrice || 1000]}
-              onPriceChange={(range) => updateSearch({ minPrice: range[0], maxPrice: range[1] })}
-              searchQuery={searchParams.query || ""}
-              onSearchChange={(query) => updateSearch({ query })}
-              sortBy={searchParams.sortBy || "recommended"}
-              onSortChange={(sortBy) => updateSearch({ sortBy })}
+              difficultyLevels={ACTIVITY_DIFFICULTY_LEVELS}
+              filters={{
+                category: selectedCategory,
+                difficulty: searchParams.difficulty || "",
+                minPrice: searchParams.minPrice || null,
+                maxPrice: searchParams.maxPrice || null,
+                searchQuery: searchParams.query || ""
+              }}
+              onFilterChange={(filters) => {
+                updateSearch({
+                  category: filters.category,
+                  difficulty: filters.difficulty,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  query: filters.searchQuery
+                });
+              }}
             />
             
             {isLoading ? (

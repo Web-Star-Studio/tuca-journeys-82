@@ -41,7 +41,8 @@ const activityFormSchema = z.object({
 export type ActivityFormValues = z.infer<typeof activityFormSchema>;
 
 interface ActivityFormDialogProps {
-  open: boolean;
+  open?: boolean;
+  isOpen?: boolean;
   onOpenChange: (open: boolean) => void;
   activityId?: number | null;
   onSuccess?: () => void;
@@ -49,6 +50,7 @@ interface ActivityFormDialogProps {
 
 const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
   open,
+  isOpen,
   onOpenChange,
   activityId,
   onSuccess,
@@ -58,6 +60,9 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
   
   const { createActivity, updateActivity, isCreating, isUpdating } = useActivities();
   const { activity, isLoading } = useActivity(activityId || undefined);
+
+  // Use either open or isOpen prop
+  const dialogOpen = open || isOpen || false;
 
   const form = useForm<ActivityFormValues>({
     resolver: zodResolver(activityFormSchema),
@@ -124,7 +129,7 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
       duration: values.duration,
       meeting_point: values.meeting_point,
       min_participants: values.min_participants,
-      max_participants: values.max_participants, 
+      max_participants: values.max_participants,
       includes: values.includes ? values.includes.split("\n").filter(Boolean) : [],
       excludes: values.excludes ? values.excludes.split("\n").filter(Boolean) : [],
       notes: values.notes ? values.notes.split("\n").filter(Boolean) : [],
@@ -139,7 +144,8 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
     if (activityId) {
       updateActivity({ id: activityId, data: processedValues });
     } else {
-      createActivity(processedValues);
+      // Cast processedValues to the expected type when creating
+      createActivity(processedValues as Omit<Activity, 'id' | 'created_at' | 'updated_at'>);
     }
 
     if (onSuccess) {
@@ -150,7 +156,7 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>

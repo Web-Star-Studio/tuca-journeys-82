@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useRestaurants } from "@/hooks/use-restaurants";
@@ -8,6 +8,12 @@ import RestaurantsGrid from "@/components/restaurant/RestaurantsGrid";
 
 const Restaurants = () => {
   const { restaurants = [], isLoading } = useRestaurants();
+  const [filters, setFilters] = useState({
+    cuisineType: "",
+    priceRange: "",
+    rating: 0,
+    searchQuery: ""
+  });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -21,7 +27,10 @@ const Restaurants = () => {
             </p>
           </div>
 
-          <RestaurantFilters />
+          <RestaurantFilters 
+            filters={filters}
+            onFilterChange={setFilters}
+          />
           <RestaurantsGrid 
             restaurants={restaurants}
             isLoading={isLoading}

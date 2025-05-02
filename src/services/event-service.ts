@@ -289,7 +289,7 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Creates a ticket for an event - Using direct database insert instead of RPC
+   * Creates a ticket for an event - Using RPC call instead of direct database access
    */
   private async createTicketForEvent(eventId: number, ticketData: {
     name: string;
@@ -301,22 +301,38 @@ class EventService extends BaseApiService {
     benefits?: string[];
   }) {
     try {
-      // Since we can't use RPC due to type issues, use direct insert
-      await this.supabase
-        .from('event_tickets')
-        .insert({
-          event_id: eventId,
-          name: ticketData.name,
-          price: ticketData.price,
-          available_quantity: ticketData.available_quantity,
-          max_per_order: ticketData.max_per_order || 4,
-          description: ticketData.description || null,
-          type: ticketData.type || 'regular',
-          benefits: ticketData.benefits || []
-        });
+      // Use RPC to avoid type issues
+      await this.supabase.rpc('create_event_ticket', {
+        p_event_id: eventId,
+        p_name: ticketData.name,
+        p_price: ticketData.price,
+        p_available_quantity: ticketData.available_quantity,
+        p_max_per_order: ticketData.max_per_order || 4,
+        p_description: ticketData.description || null,
+        p_type: ticketData.type || 'regular',
+        p_benefits: ticketData.benefits || []
+      });
     } catch (error) {
       console.error(`Error creating ticket for event ID: ${eventId}:`, error);
-      throw error;
+      
+      // Fallback approach with type assertion if RPC fails
+      try {
+        await (this.supabase
+          .from('event_tickets' as any)
+          .insert({
+            event_id: eventId,
+            name: ticketData.name,
+            price: ticketData.price,
+            available_quantity: ticketData.available_quantity,
+            max_per_order: ticketData.max_per_order || 4,
+            description: ticketData.description || null,
+            type: ticketData.type || 'regular',
+            benefits: ticketData.benefits || []
+          } as any) as any);
+      } catch (fallbackError) {
+        console.error(`Fallback error creating ticket for event ID: ${eventId}:`, fallbackError);
+        throw fallbackError;
+      }
     }
   }
 
@@ -388,35 +404,67 @@ class EventService extends BaseApiService {
   }
 
   /**
-   * Gets event tickets - Using direct database query instead of RPC
+   * Gets event tickets - Using RPC call instead of direct database query
    */
   async getEventTickets(eventId: number): Promise<EventTicket[]> {
-    const { data, error } = await this.supabase
-      .from('event_tickets')
-      .select('*')
-      .eq('event_id', eventId)
-      .order('price', { ascending: true });
+    try {
+      // First try using RPC
+      const { data, error } = await this.supabase.rpc('get_event_tickets', {
+        p_event_id: eventId
+      });
       
-    if (error) {
-      console.error(`Error fetching tickets for event ID: ${eventId}:`, error);
-      throw error;
+      if (error) throw error;
+      return data as EventTicket[];
+      
+    } catch (error) {
+      console.error(`Error fetching tickets with RPC for event ID: ${eventId}:`, error);
+      
+      // Fallback approach with type assertion
+      try {
+        const { data, error } = await (this.supabase
+          .from('event_tickets' as any)
+          .select('*')
+          .eq('event_id', eventId)
+          .order('price', { ascending: true }) as any);
+          
+        if (error) throw error;
+        return data as EventTicket[];
+        
+      } catch (fallbackError) {
+        console.error(`Fallback error fetching tickets for event ID: ${eventId}:`, fallbackError);
+        throw fallbackError;
+      }
     }
-    
-    return data as EventTicket[];
   }
 
   /**
-   * Deletes event tickets - Using direct database query instead of RPC
+   * Deletes event tickets - Using RPC call instead of direct database query
    */
   async deleteEventTickets(eventId: number): Promise<void> {
-    const { error } = await this.supabase
-      .from('event_tickets')
-      .delete()
-      .eq('event_id', eventId);
+    try {
+      // First try using RPC
+      const { error } = await this.supabase.rpc('delete_event_tickets', {
+        p_event_id: eventId
+      });
       
-    if (error) {
-      console.error(`Error deleting tickets for event ID: ${eventId}:`, error);
-      throw error;
+      if (error) throw error;
+      
+    } catch (error) {
+      console.error(`Error deleting tickets with RPC for event ID: ${eventId}:`, error);
+      
+      // Fallback approach with type assertion
+      try {
+        const { error } = await (this.supabase
+          .from('event_tickets' as any)
+          .delete()
+          .eq('event_id', eventId) as any);
+          
+        if (error) throw error;
+        
+      } catch (fallbackError) {
+        console.error(`Fallback error deleting tickets for event ID: ${eventId}:`, fallbackError);
+        throw fallbackError;
+      }
     }
   }
 

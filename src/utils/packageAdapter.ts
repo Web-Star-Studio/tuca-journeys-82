@@ -54,5 +54,7 @@ export const adaptFormPackageToPackage = (formPackage: PackageFormValues): Packa
     is_featured: false,
     short_description: formPackage.description?.substring(0, 150) || '',
     gallery_images: [],
+    created_at: "",
+    updated_at: ""
   };
 };

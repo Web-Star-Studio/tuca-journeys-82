@@ -11,7 +11,7 @@ export type DBPackage = {
   short_description: string;
   price: number;
   image_url: string;
-  duration: string; // Updated to string to match the DB schema
+  duration: string; // Changed from number to string to match database structure
   max_guests: number;
   itinerary: any;
   includes: string[];
@@ -39,7 +39,7 @@ class PackageService extends BaseApiService {
     }
 
     // Convert the database packages to our component package type
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
   }
 
   async getPackageById(id: number): Promise<Package> {
@@ -54,7 +54,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
 
   async getFeaturedPackages(limit: number = 3): Promise<Package[]> {
@@ -69,16 +69,17 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
   }
   
   async createPackage(packageData: Omit<Package, 'id'>): Promise<Package> {
+    // Convert from canonical Package type to DB format
     const dbData = this.adaptComponentPackageToDB(packageData);
     
     // Remove the array wrapper as we're inserting a single item
     const { data, error } = await this.supabase
       .from('packages')
-      .insert([dbData])
+      .insert([dbData as any])
       .select()
       .single();
       
@@ -87,15 +88,16 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
   
   async updatePackage(id: number, packageData: Partial<Package>): Promise<Package> {
+    // Convert from canonical Package type to DB format
     const dbData = this.adaptComponentPackageToDB({...packageData, id});
     
     const { data, error } = await this.supabase
       .from('packages')
-      .update(dbData)
+      .update(dbData as any)
       .eq('id', id)
       .select()
       .single();
@@ -105,7 +107,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
   
   async deletePackage(id: number): Promise<void> {
@@ -144,7 +146,7 @@ class PackageService extends BaseApiService {
     };
   }
 
-  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Omit<DBPackage, 'created_at' | 'updated_at'> {
+  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Partial<DBPackage> {
     // Create an object with the specific fields needed by the DB
     return {
       id: packageData.id,

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useActivity, useActivityAvailability } from "@/hooks/activities";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, CalendarDays, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, ArrowLeft, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 
 const ActivityAvailability = () => {
@@ -32,28 +32,29 @@ const ActivityAvailability = () => {
     if (!activityId || !selectedDates.length) return;
     
     await bulkUpdateAvailability({
-      activityId,
       dates: selectedDates,
       availableSpots: spots,
       customPrice: customPrice ? parseFloat(customPrice) : undefined,
-      status: 'available'
+      status: 'available',
+      activityId // Add activityId to match the expected params
     });
     
     setSelectedDates([]);
   };
 
   const getDateAvailability = (date: Date) => {
+    if (!availability) return null;
     const dateStr = format(date, 'yyyy-MM-dd');
-    return availability?.find(a => a.date === dateStr);
+    return availability.find(a => a.date === dateStr);
   };
 
   // Custom renderer for calendar dates to show availability
-  const renderDay = (day: Date) => {
-    const dateAvailability = getDateAvailability(day);
+  const renderDay = (date: Date) => {
+    const dateAvailability = getDateAvailability(date);
     
     return (
       <div className="relative w-full h-full flex items-center justify-center">
-        {day.getDate()}
+        {date.getDate()}
         {dateAvailability && (
           <span 
             className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-1 rounded-full ${
@@ -62,9 +63,9 @@ const ActivityAvailability = () => {
           />
         )}
         {selectedDates.some(d => 
-          d.getDate() === day.getDate() && 
-          d.getMonth() === day.getMonth() && 
-          d.getFullYear() === day.getFullYear()
+          d.getDate() === date.getDate() && 
+          d.getMonth() === date.getMonth() && 
+          d.getFullYear() === date.getFullYear()
         ) && (
           <div className="absolute inset-0 border-2 border-tuca-ocean-blue rounded-md pointer-events-none" />
         )}
@@ -121,9 +122,9 @@ const ActivityAvailability = () => {
               onSelect={setSelectedDates}
               className="border rounded-md p-3"
               components={{
-                Day: ({ day, ...props }) => (
+                Day: ({ date, ...props }: { date: Date } & Record<string, any>) => (
                   <button {...props}>
-                    {renderDay(day)}
+                    {renderDay(date)}
                   </button>
                 ),
               }}

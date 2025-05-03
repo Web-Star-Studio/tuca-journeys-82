@@ -39,7 +39,9 @@ export const usePackageDetail = () => {
     if (isInList) {
       removeFromWishlist(package_.id, "package");
     } else {
-      addToWishlist(package_.id, "package", {
+      addToWishlist({
+        id: package_.id,
+        type: "package",
         title: package_.title,
         image: package_.image_url
       });

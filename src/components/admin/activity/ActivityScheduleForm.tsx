@@ -1,114 +1,96 @@
 
 import React from "react";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
-import { ActivityFormValues } from "../../../components/admin/activity/ActivityForm";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { ActivityFormValues } from "./ActivityForm";
 
 interface ActivityScheduleFormProps {
   form: UseFormReturn<ActivityFormValues>;
 }
 
-const ActivityScheduleForm: React.FC<ActivityScheduleFormProps> = ({ form }) => {
+const ActivityScheduleForm: React.FC<ActivityScheduleFormProps> = ({
+  form,
+}) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="schedule"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Cronograma</FormLabel>
+            <FormLabel>Cronograma (uma etapa por linha)</FormLabel>
             <FormControl>
-              <Textarea
+              <Textarea 
                 placeholder="09:00 - Encontro no ponto de partida
-10:00 - Início do passeio
-12:00 - Parada para almoço
-15:00 - Retorno"
-                className="min-h-[120px]"
+10:00 - Início da trilha
+12:00 - Almoço
+15:00 - Retorno" 
                 {...field}
+                rows={4}
               />
             </FormControl>
-            <FormDescription>
-              Adicione uma linha para cada item do cronograma.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="includes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>O que está incluído</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Guia turístico
-Equipamentos
-Lanche"
-                  className="min-h-[120px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Adicione uma linha para cada item incluído.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="excludes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>O que não está incluído</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Bebidas alcoólicas
-Despesas pessoais
-Transporte até o ponto de encontro"
-                  className="min-h-[120px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Adicione uma linha para cada item não incluído.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      
+
+      <FormField
+        control={form.control}
+        name="includes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>O que está incluído (um item por linha)</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Transporte
+Guia local
+Equipamentos de segurança
+Lanche" 
+                {...field}
+                rows={4}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="excludes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>O que não está incluído (um item por linha)</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Refeições principais
+Bebidas alcoólicas
+Gorjetas" 
+                {...field}
+                rows={4}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={form.control}
         name="notes"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Observações importantes</FormLabel>
+            <FormLabel>Observações importantes (um item por linha)</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Usar roupas confortáveis
-Levar protetor solar
-Hidratação recomendada"
-                className="min-h-[120px]"
+              <Textarea 
+                placeholder="Traga protetor solar
+Use roupas adequadas para caminhada
+Atividade não recomendada para pessoas com mobilidade reduzida" 
                 {...field}
+                rows={4}
               />
             </FormControl>
-            <FormDescription>
-              Adicione uma linha para cada observação importante.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

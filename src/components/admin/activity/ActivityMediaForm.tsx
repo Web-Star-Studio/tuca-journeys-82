@@ -1,78 +1,62 @@
 
 import React from "react";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { ActivityFormValues } from "../../../components/admin/activity/ActivityForm";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ActivityFormValues } from "./ActivityForm";
 
 interface ActivityMediaFormProps {
   form: UseFormReturn<ActivityFormValues>;
-  previewUrl: string;
-  setPreviewUrl: (url: string) => void;
+  previewUrl?: string;
 }
 
 const ActivityMediaForm: React.FC<ActivityMediaFormProps> = ({
   form,
-  previewUrl,
-  setPreviewUrl,
+  previewUrl = "",
 }) => {
-  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    form.setValue("image_url", value);
-    setPreviewUrl(value);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="image_url"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>URL da Imagem Principal</FormLabel>
+            <FormLabel>Imagem principal</FormLabel>
             <FormControl>
-              <Input
-                placeholder="URL da imagem principal"
-                {...field}
-                onChange={handleMainImageChange}
-              />
+              <Input placeholder="https://example.com/image.jpg" {...field} />
             </FormControl>
             <FormMessage />
-            {previewUrl && (
-              <div className="mt-2 rounded-md overflow-hidden border">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-            )}
           </FormItem>
         )}
       />
+
+      {previewUrl && (
+        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+          <img 
+            src={previewUrl} 
+            alt="Preview" 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/placeholder.jpg";
+            }}
+          />
+        </div>
+      )}
 
       <FormField
         control={form.control}
         name="gallery_images"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>URLs das Imagens da Galeria</FormLabel>
+            <FormLabel>Galeria de imagens (URLs separadas por vírgula)</FormLabel>
             <FormControl>
-              <Input
-                placeholder="URLs separadas por vírgula"
-                {...field}
+              <Input 
+                placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" 
+                {...field} 
               />
             </FormControl>
             <FormMessage />
-            <p className="text-xs text-muted-foreground mt-1">
-              Insira URLs separadas por vírgula. Ex: url1,url2,url3
-            </p>
           </FormItem>
         )}
       />

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/utils/formatters";
 import { Switch } from "@/components/ui/switch";
-import { useActivities } from "@/hooks/use-activities";
+import { useActivities } from "@/modules/activities";
 
 interface ActivityCardProps {
   activity: Activity;

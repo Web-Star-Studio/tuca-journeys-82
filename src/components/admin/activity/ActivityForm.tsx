@@ -1,48 +1,48 @@
 
 import React, { useState, useEffect } from "react";
-import { useActivity } from "@/hooks/activities";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
-import { useActivitiesBase } from "@/hooks/activities/use-activities-base";
+import { Activity, ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS } from "@/types/activity";
+import { useActivity } from "@/hooks/activities";
 import { useActivityMutations } from "@/hooks/activities/use-activity-mutations";
+import ActivityBasicInfoForm from "./ActivityBasicInfoForm";
+import ActivityMediaForm from "./ActivityMediaForm";
+import ActivityScheduleForm from "./ActivityScheduleForm";
+import ActivityDetailsForm from "./ActivityDetailsForm";
 
-// Define form schema using zod
+// Activity form schema
 export const activityFormSchema = z.object({
-  title: z.string().min(3, { message: "Título deve ter pelo menos 3 caracteres" }),
-  description: z.string().min(10, { message: "Descrição deve ter pelo menos 10 caracteres" }),
-  short_description: z.string().optional(),
-  price: z.string().or(z.number()).transform(val => Number(val)),
-  category: z.string().min(1, { message: "Categoria é obrigatória" }),
-  difficulty: z.string().min(1, { message: "Nível de dificuldade é obrigatório" }),
-  duration: z.string().min(1, { message: "Duração é obrigatória" }),
+  title: z.string().min(3, "O título deve ter no mínimo 3 caracteres"),
+  description: z.string().min(10, "A descrição deve ter no mínimo 10 caracteres"),
+  short_description: z.string().min(10, "A descrição curta deve ter no mínimo 10 caracteres"),
+  image_url: z.string().url("URL de imagem inválida"),
+  price: z.coerce.number().min(0, "O preço deve ser maior ou igual a zero"),
+  duration: z.string().min(1, "A duração é obrigatória"),
+  category: z.string().min(1, "A categoria é obrigatória"),
+  max_participants: z.coerce.number().min(1, "O número máximo de participantes deve ser pelo menos 1"),
+  difficulty: z.string(),
+  rating: z.coerce.number().min(0, "A avaliação deve ser maior ou igual a zero"),
   meeting_point: z.string().optional(),
-  min_participants: z.string().or(z.number()).transform(val => Number(val)),
-  max_participants: z.string().or(z.number()).transform(val => Number(val)),
+  schedule: z.string().optional(),
   includes: z.string().optional(),
   excludes: z.string().optional(),
   notes: z.string().optional(),
-  schedule: z.string().optional(),
-  image_url: z.string().min(1, { message: "Imagem principal é obrigatória" }),
   gallery_images: z.string().optional(),
-  is_active: z.boolean().default(true),
-  is_featured: z.boolean().default(false),
-  rating: z.string().or(z.number()).transform(val => Number(val)).default(0),
 });
 
+// Export the type based on the schema
 export type ActivityFormValues = z.infer<typeof activityFormSchema>;
 
 interface ActivityFormProps {
   activityId?: number;
   onSuccess: () => void;
   onCancel: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  setLoading?: (loading: boolean) => void;
+  setError?: (error: string | null) => void;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({
@@ -50,149 +50,151 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   onSuccess,
   onCancel,
   setLoading,
-  setError,
+  setError
 }) => {
-  const [activeTab, setActiveTab] = useState("basic");
   const [previewUrl, setPreviewUrl] = useState("");
-  
-  const { activity, isLoading } = useActivity(activityId);
-  const { createActivity, updateActivity, isSaving } = useActivityMutations();
+  const { data: activity, isLoading: isActivityLoading } = useActivity(activityId);
+  const { createActivity, updateActivity, isCreating, isUpdating } = useActivityMutations();
 
-  // Initialize form with empty values
+  // Create form
   const form = useForm<ActivityFormValues>({
     resolver: zodResolver(activityFormSchema),
     defaultValues: {
       title: "",
       description: "",
       short_description: "",
+      image_url: "",
       price: 0,
-      category: "",
-      difficulty: "fácil",
       duration: "",
-      meeting_point: "",
-      min_participants: 1,
+      category: "",
       max_participants: 10,
+      difficulty: "fácil",
+      rating: 4.5,
+      meeting_point: "",
+      schedule: "",
       includes: "",
       excludes: "",
       notes: "",
-      schedule: "",
-      image_url: "",
       gallery_images: "",
-      is_active: true,
-      is_featured: false,
-      rating: 0,
     },
   });
 
-  // Update form values when activity data is loaded
+  // Update external loading state
   useEffect(() => {
-    if (activity) {
-      // Update form values with activity data
+    if (setLoading) {
+      setLoading(isActivityLoading || isCreating || isUpdating);
+    }
+  }, [isActivityLoading, isCreating, isUpdating, setLoading]);
+
+  // Fill form with activity data when available
+  useEffect(() => {
+    if (activity && !isCreating && !isUpdating) {
       form.reset({
         title: activity.title,
         description: activity.description,
         short_description: activity.short_description,
-        price: activity.price,
-        category: activity.category,
-        difficulty: activity.difficulty,
-        duration: activity.duration,
-        meeting_point: activity.meeting_point,
-        min_participants: activity.min_participants,
-        max_participants: activity.max_participants,
-        includes: activity.includes?.join("\n"),
-        excludes: activity.excludes?.join("\n"),
-        notes: activity.notes?.join("\n"),
-        schedule: activity.schedule?.join("\n"),
         image_url: activity.image_url,
-        gallery_images: activity.gallery_images?.join(","),
-        is_active: activity.is_active,
-        is_featured: activity.is_featured,
+        price: activity.price,
+        duration: activity.duration,
+        category: activity.category,
+        max_participants: activity.max_participants,
+        difficulty: activity.difficulty || "fácil",
         rating: activity.rating,
+        meeting_point: activity.meeting_point || "",
+        schedule: activity.schedule?.join("\n") || "",
+        includes: activity.includes?.join("\n") || "",
+        excludes: activity.excludes?.join("\n") || "",
+        notes: activity.notes?.join("\n") || "",
+        gallery_images: activity.gallery_images?.join(",") || "",
       });
-      
       setPreviewUrl(activity.image_url);
     }
-  }, [activity, form]);
-
-  useEffect(() => {
-    setLoading(isLoading);
-  }, [isLoading, setLoading]);
+  }, [activity, form, isCreating, isUpdating]);
 
   // Handle form submission
-  const onSubmit = async (values: ActivityFormValues) => {
+  const onSubmit = async (data: ActivityFormValues) => {
     try {
-      const activityData = {
-        ...values,
-        includes: values.includes ? values.includes.split("\n").filter(Boolean) : [],
-        excludes: values.excludes ? values.excludes.split("\n").filter(Boolean) : [],
-        notes: values.notes ? values.notes.split("\n").filter(Boolean) : [],
-        schedule: values.schedule ? values.schedule.split("\n").filter(Boolean) : [],
-        gallery_images: values.gallery_images ? values.gallery_images.split(",").filter(Boolean) : [],
+      // Helper function to convert string to array
+      const stringToArray = (str: string | undefined, separator: string) => {
+        return str ? str.split(separator).filter(item => item.trim() !== '') : [];
       };
-      
+
+      const formattedData = {
+        ...data,
+        price: data.price || 0,
+        gallery_images: stringToArray(data.gallery_images, ","),
+        schedule: stringToArray(data.schedule, "\n"),
+        includes: stringToArray(data.includes, "\n"),
+        excludes: stringToArray(data.excludes, "\n"),
+        notes: stringToArray(data.notes, "\n"),
+      };
+
+      if (setLoading) setLoading(true);
+
       if (activityId) {
-        await updateActivity({ id: activityId, data: activityData });
+        await updateActivity({ id: activityId, data: formattedData });
       } else {
-        await createActivity(activityData);
+        await createActivity(formattedData);
       }
       
       onSuccess();
-      toast.success(
-        activityId ? "Atividade atualizada com sucesso!" : "Atividade criada com sucesso!"
-      );
-    } catch (error) {
-      console.error("Error saving activity:", error);
-      toast.error("Erro ao salvar atividade");
-      setError(error instanceof Error ? error.message : "Erro desconhecido");
+    } catch (error: any) {
+      if (setError) {
+        setError(error.message || "Ocorreu um erro ao salvar a atividade.");
+      }
+    } finally {
+      if (setLoading) setLoading(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full grid grid-cols-4">
-              <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
-              <TabsTrigger value="details">Detalhes</TabsTrigger>
-              <TabsTrigger value="media">Mídia</TabsTrigger>
-              <TabsTrigger value="schedule">Cronograma e Itens</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="basic" className="p-4">
-              <p className="text-center">Componente de Informações Básicas</p>
-            </TabsContent>
-            
-            <TabsContent value="details" className="p-4">
-              <p className="text-center">Componente de Detalhes</p>
-            </TabsContent>
-            
-            <TabsContent value="media" className="p-4">
-              <p className="text-center">Componente de Mídia</p>
-            </TabsContent>
-            
-            <TabsContent value="schedule" className="p-4">
-              <p className="text-center">Componente de Cronograma e Itens</p>
-            </TabsContent>
-          </Tabs>
+  // Show loading state
+  if (activityId && isActivityLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSaving}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {activityId ? "Atualizar" : "Criar"}
-            </Button>
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <ActivityBasicInfoForm 
+              form={form} 
+              categories={ACTIVITY_CATEGORIES} 
+              difficultyLevels={ACTIVITY_DIFFICULTY_LEVELS} 
+            />
+            <ActivityDetailsForm form={form} />
           </div>
-        </form>
-      </Form>
-    </div>
+          
+          <div className="space-y-6">
+            <ActivityMediaForm form={form} previewUrl={previewUrl} />
+            <ActivityScheduleForm form={form} />
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isCreating || isUpdating}
+          >
+            {(isCreating || isUpdating) ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {activityId ? "Atualizando..." : "Criando..."}
+              </>
+            ) : (
+              activityId ? "Atualizar Atividade" : "Criar Atividade"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

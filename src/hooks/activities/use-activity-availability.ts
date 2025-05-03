@@ -2,7 +2,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { activityService } from '@/services/activity-service';
 import { toast } from 'sonner';
-import { ActivityAvailabilityParams, ActivityBulkAvailabilityParams } from '../use-activities';
+
+export interface ActivityAvailabilityParams {
+  date: Date;
+  availableSpots: number;
+  customPrice?: number;
+  status?: 'available' | 'unavailable';
+}
+
+export interface ActivityBulkAvailabilityParams {
+  dates: Date[];
+  availableSpots: number;
+  customPrice?: number;
+  status?: 'available' | 'unavailable';
+  activityId: number; // Added to match the expected type
+}
 
 /**
  * Hook to manage activity availability
@@ -40,10 +54,7 @@ export const useActivityAvailability = (activityId: number) => {
   // Bulk update availability for multiple dates
   const bulkUpdateAvailabilityMutation = useMutation({
     mutationFn: (params: ActivityBulkAvailabilityParams) =>
-      activityService.bulkUpdateActivityAvailability({
-        ...params,
-        activityId
-      }),
+      activityService.bulkUpdateActivityAvailability(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-availability', activityId] });
       toast.success('Disponibilidade atualizada com sucesso!');

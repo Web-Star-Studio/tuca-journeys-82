@@ -150,18 +150,23 @@ class ActivityService extends BaseApiService {
 
   // Methods for activity availability
   async getActivityAvailability(activityId: number) {
-    // Using a direct query instead of RPC
-    const { data, error } = await this.supabase
-      .from('tour_availability')
-      .select('*')
-      .eq('tour_id', activityId);
+    try {
+      // Using direct table query instead of RPC
+      const { data, error } = await this.supabase
+        .from('tour_availability')
+        .select('*')
+        .eq('tour_id', activityId);
 
-    if (error) {
-      console.error(`Error fetching availability for activity ${activityId}:`, error);
-      throw error;
+      if (error) {
+        console.error(`Error fetching availability for activity ${activityId}:`, error);
+        throw error;
+      }
+
+      return data;
+    } catch (err) {
+      console.error(`Error in getActivityAvailability:`, err);
+      return [];
     }
-
-    return data;
   }
 
   async updateActivityAvailability(
@@ -171,73 +176,82 @@ class ActivityService extends BaseApiService {
     customPrice?: number,
     status: 'available' | 'unavailable' = 'available'
   ) {
-    // Direct database operation instead of RPC
-    const dateStr = date.toISOString().split('T')[0];
-    
-    // First check if record exists
-    const { data: existingData } = await this.supabase
-      .from('tour_availability')
-      .select('id')
-      .eq('tour_id', activityId)
-      .eq('date', dateStr)
-      .maybeSingle();
+    try {
+      // Format date as YYYY-MM-DD
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // First check if record exists
+      const { data: existingData } = await this.supabase
+        .from('tour_availability')
+        .select('id')
+        .eq('tour_id', activityId)
+        .eq('date', dateStr)
+        .maybeSingle();
 
-    let result;
-    
-    if (existingData) {
-      // Update existing record
-      const { data, error } = await this.supabase
-        .from('tour_availability')
-        .update({ 
-          available_spots: availableSpots,
-          custom_price: customPrice,
-          status: status
-        })
-        .eq('id', existingData.id)
-        .select()
-        .single();
-        
-      if (error) throw error;
-      result = data;
-    } else {
-      // Insert new record
-      const { data, error } = await this.supabase
-        .from('tour_availability')
-        .insert({ 
-          tour_id: activityId,
-          date: dateStr,
-          available_spots: availableSpots,
-          custom_price: customPrice,
-          status: status
-        })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      result = data;
+      let result;
+      
+      if (existingData) {
+        // Update existing record
+        const { data, error } = await this.supabase
+          .from('tour_availability')
+          .update({ 
+            available_spots: availableSpots,
+            custom_price: customPrice,
+            status: status
+          })
+          .eq('id', existingData.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
+      } else {
+        // Insert new record
+        const { data, error } = await this.supabase
+          .from('tour_availability')
+          .insert({ 
+            tour_id: activityId,
+            date: dateStr,
+            available_spots: availableSpots,
+            custom_price: customPrice,
+            status: status
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
+      }
+
+      return result;
+    } catch (err) {
+      console.error(`Error in updateActivityAvailability:`, err);
+      throw err;
     }
-
-    return result;
   }
   
   async bulkUpdateActivityAvailability(params: any) {
-    // Implementation for bulk update using direct database operations
-    const { activityId, dates, availableSpots, customPrice, status = 'available' } = params;
-    
-    // Simple implementation that calls updateActivityAvailability for each date
-    const results = await Promise.all(
-      dates.map((date: Date) => 
-        this.updateActivityAvailability(
-          activityId,
-          date,
-          availableSpots,
-          customPrice,
-          status
+    try {
+      const { activityId, dates, availableSpots, customPrice, status = 'available' } = params;
+      
+      // Simple implementation that calls updateActivityAvailability for each date
+      const results = await Promise.all(
+        dates.map((date: Date) => 
+          this.updateActivityAvailability(
+            activityId,
+            date,
+            availableSpots,
+            customPrice,
+            status
+          )
         )
-      )
-    );
-    
-    return results;
+      );
+      
+      return results;
+    } catch (err) {
+      console.error(`Error in bulkUpdateActivityAvailability:`, err);
+      throw err;
+    }
   }
 }
 

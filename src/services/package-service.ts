@@ -146,10 +146,9 @@ class PackageService extends BaseApiService {
     };
   }
 
-  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Partial<DBPackage> {
+  private adaptComponentPackageToDB(packageData: Partial<Package>): Partial<DBPackage> {
     // Create an object with the specific fields needed by the DB
-    return {
-      id: packageData.id,
+    const dbPackage: Partial<DBPackage> = {
       title: packageData.title || '',
       name: packageData.title || '', // Ensure both fields are set
       description: packageData.description || '',
@@ -167,6 +166,13 @@ class PackageService extends BaseApiService {
       partner_id: packageData.partner_id,
       rating: packageData.rating || 0
     };
+    
+    // Only include id if it exists to avoid type issues
+    if (packageData.id !== undefined) {
+      dbPackage.id = packageData.id;
+    }
+    
+    return dbPackage;
   }
 }
 

@@ -1,22 +1,21 @@
 
 import React from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface ActivityDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirmDelete: () => void;
-  isDeleting: boolean;
+  onConfirmDelete: () => Promise<void>;
+  isDeleting?: boolean;
   activityName: string;
 }
 
@@ -24,50 +23,52 @@ const ActivityDeleteDialog: React.FC<ActivityDeleteDialogProps> = ({
   open,
   onOpenChange,
   onConfirmDelete,
-  isDeleting,
+  isDeleting = false,
   activityName,
 }) => {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-          <AlertDialogDescription>
-            {activityName ? (
-              <>
-                Tem certeza que deseja excluir a atividade <strong>{activityName}</strong>?<br />
-                Esta ação não pode ser desfeita.
-              </>
-            ) : (
-              <>
-                Tem certeza que deseja excluir esta atividade?<br />
-                Esta ação não pode ser desfeita.
-              </>
-            )}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              onConfirmDelete();
-            }}
+    <Dialog 
+      open={open} 
+      onOpenChange={(newValue) => {
+        // Prevent closing while deletion is in progress
+        if (!isDeleting) {
+          onOpenChange(newValue);
+        }
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmar exclusão</DialogTitle>
+          <DialogDescription>
+            Tem certeza que deseja excluir a atividade "{activityName}"?
+            Esta ação não pode ser desfeita.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
             disabled={isDeleting}
-            className="bg-destructive hover:bg-destructive/90"
+          >
+            Cancelar
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={() => onConfirmDelete()}
+            disabled={isDeleting}
           >
             {isDeleting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Excluindo...
               </>
             ) : (
               "Excluir"
             )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

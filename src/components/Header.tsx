@@ -1,67 +1,136 @@
+import React from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useUI } from '@/contexts/UIContext';
+import { ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import UserMenu from "./UserMenu";
-import Logo from "./header/Logo";
-import WishlistIcon from "./header/WishlistIcon";
-import { useScrollPosition } from "./header/useScrollPosition";
-import NavigationMenu from "./header/NavigationMenu";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose
-} from "./ui/sheet";
+const navigationLinks = [
+  { name: 'Home', href: '/' },
+  { name: 'Atividades', href: '/atividades' }, // Updated from Passeios
+  { name: 'Eventos', href: '/eventos' },
+  { name: 'Restaurantes', href: '/restaurantes' },
+  { name: 'Acomodações', href: '/acomodacoes' },
+  { name: 'Sobre', href: '/sobre' },
+  { name: 'Contato', href: '/contato' },
+];
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { scrollPosition } = useScrollPosition();
-  const location = useLocation();
-  
-  // Determine if we're on the homepage
-  const isHomePage = location.pathname === "/";
-  
-  // Apply transparent header on home page when at the top
-  const isTransparent = isHomePage && scrollPosition < 30;
+  const { user, logout } = useAuth();
+  const { wishlist } = useWishlist();
+  const { isCartOpen, toggleCart, isWishlistOpen, toggleWishlist } = useUI();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isTransparent
-          ? "bg-transparent text-white"
-          : "bg-white/90 backdrop-blur-md text-gray-900 shadow-sm"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Logo />
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="text-2xl font-bold text-tuca-ocean-blue">
+          Lovable
+        </Link>
 
-          {/* User Menu and Burger Menu Button */}
-          <div className="flex items-center space-x-4">
-            <WishlistIcon isTransparent={isTransparent} />
-            
-            <UserMenu />
-            
-            <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-              <SheetTrigger asChild>
+        <nav className="hidden md:flex items-center space-x-6">
+          {navigationLinks.map((link) => (
+            <NavLink
+              key={link.name}
+              to={link.href}
+              className={({ isActive }) =>
+                isActive
+                  ? 'text-tuca-ocean-blue font-medium'
+                  : 'text-gray-700 hover:text-tuca-ocean-blue transition-colors'
+              }
+            >
+              {link.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={toggleWishlist}
+            className="relative hover:text-tuca-ocean-blue transition-colors"
+            aria-label="Abrir lista de desejos"
+          >
+            <Heart className="h-6 w-6" />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-tuca-coral text-white text-xs rounded-full px-2 py-0">
+                {wishlist.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={toggleCart}
+            className="relative hover:text-tuca-ocean-blue transition-colors"
+            aria-label="Abrir carrinho de compras"
+          >
+            <ShoppingCart className="h-6 w-6" />
+          </button>
+
+          {user ? (
+            <div className="relative group">
+              <button className="flex items-center hover:text-tuca-ocean-blue transition-colors">
+                <User className="h-6 w-6" />
+                <span className="ml-2 hidden md:inline-block">{user.user_metadata?.name}</span>
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-md hidden group-hover:block">
+                <Link to="/perfil" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                  Meu Perfil
+                </Link>
                 <button
-                  className="focus:outline-none flex items-center justify-center"
-                  aria-label="Open menu"
+                  onClick={logout}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                 >
-                  <Menu className="h-6 w-6" />
+                  Sair
                 </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px] py-6 px-0">
-                <NavigationMenu onLinkClick={() => setIsOpen(false)} />
-              </SheetContent>
-            </Sheet>
-          </div>
+              </div>
+            </div>
+          ) : (
+            <Link to="/login" className="text-gray-700 hover:text-tuca-ocean-blue transition-colors hidden md:inline-block">
+              Entrar
+            </Link>
+          )}
+
+          {/* Mobile menu button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="sm:w-2/3 md:w-1/2 lg:w-1/3">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription>
+                  Explore o Lovable e planeje sua viagem
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                {navigationLinks.map((link) => (
+                  <Link key={link.name} to={link.href} className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                    {link.name}
+                  </Link>
+                ))}
+                {user ? (
+                  <>
+                    <Link to="/perfil" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                      Meu Perfil
+                    </Link>
+                    <Button variant="outline" onClick={logout}>Sair</Button>
+                  </>
+                ) : (
+                  <Link to="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                    Entrar
+                  </Link>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

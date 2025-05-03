@@ -1,58 +1,64 @@
-
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, useRoutes } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
-import { UIProvider } from './contexts/UIContext';
-import publicRoutes from './routes/publicRoutes';
-import { protectedRoutes } from './routes/protectedRoutes';
+import Home from './pages/Home';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import Activities from './pages/Activities';
+import ActivityDetail from './pages/ActivityDetail';
+import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
+import Accommodations from './pages/Accommodations';
+import AccommodationDetail from './pages/AccommodationDetail';
+import Restaurants from './pages/Restaurants';
+import UserProfile from './pages/UserProfile';
+import ActivityBooking from './pages/ActivityBooking';
+import AccommodationBooking from './pages/AccommodationBooking';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import adminRoutes from './routes/adminRoutes';
-import ScrollToTop from './components/utils/ScrollToTop';
-import GlobalLoading from './components/utils/GlobalLoading';
+import { ToastProvider } from './hooks/use-toast';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
-// Component to render all routes
-const AppRoutes = () => {
-  // Combine all routes
-  const allRoutes = [...publicRoutes, ...protectedRoutes, ...adminRoutes];
-  return useRoutes(allRoutes);
-};
-
-const App: React.FC = () => {
+// Update the routes section to include Activities instead of Tours
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <UIProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <Router>
-                  <ScrollToTop />
-                  <Suspense fallback={<GlobalLoading />}>
-                    <AppRoutes />
-                  </Suspense>
-                </Router>
-                <Toaster position="top-center" richColors closeButton />
-              </WishlistProvider>
-            </CartProvider>
-          </UIProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <div className="App">
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <WishlistProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/atividades" element={<Activities />} /> {/* Updated from /passeios */}
+                <Route path="/atividades/:id" element={<ActivityDetail />} /> {/* Updated from /passeios/:id */}
+                <Route path="/eventos" element={<Events />} />
+                <Route path="/eventos/:id" element={<EventDetail />} />
+                <Route path="/acomodacoes" element={<Accommodations />} />
+                <Route path="/acomodacoes/:id" element={<AccommodationDetail />} />
+                <Route path="/restaurantes" element={<Restaurants />} />
+                <Route path="/perfil" element={<UserProfile />} />
+                <Route path="/reservar/atividade/:id" element={<ActivityBooking />} /> {/* Updated from /reservar/passeio/:id */}
+                <Route path="/reservar/acomodacao/:id" element={<AccommodationBooking />} />
+                <Route path="/sobre" element={<About />} />
+                <Route path="/contato" element={<Contact />} />
+                {/* Admin routes */}
+                {adminRoutes.map((route) => (
+                  <Route key={route.path} path={route.path} element={route.element} />
+                ))}
+              </Routes>
+              <ToastProvider />
+            </WishlistProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </div>
   );
-};
+}
 
 export default App;

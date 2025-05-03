@@ -1,275 +1,186 @@
 
 import { BaseApiService } from './base-api';
-
-interface ActivityAvailability {
-  id?: number;
-  tour_id: number;
-  date: string;
-  available_spots: number;
-  custom_price?: number;
-  status: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface Activity {
-  id: number;
-  title: string;
-  description: string;
-  short_description: string;
-  price: number;
-  category: string;
-  difficulty: string;
-  duration: string;
-  meeting_point: string;
-  min_participants: number;
-  max_participants: number;
-  includes: string[];
-  excludes: string[];
-  notes: string[];
-  schedule: string[];
-  image_url: string;
-  gallery_images: string[];
-  rating: number;
-  is_active: boolean;
-  is_featured: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
+import { Activity, ActivityFilters } from '@/types/activity';
 
 class ActivityService extends BaseApiService {
-  async getActivities(filters = {}) {
-    let query = this.supabase.from('tours').select('*');
-    
-    if (filters) {
-      // Only try to access properties that exist
-      if ('category' in filters && filters.category) {
-        query = query.eq('category', filters.category as string);
-      }
+  async getActivities(filters: ActivityFilters = {}) {
+    let query = this.supabase
+      .from('tours')  // Using tours table for now, could be renamed later
+      .select('*');
       
-      if ('difficulty' in filters && filters.difficulty) {
-        query = query.eq('difficulty', filters.difficulty as string);
-      }
-      
-      if ('minPrice' in filters && filters.minPrice !== null) {
-        query = query.gte('price', filters.minPrice);
-      }
-      
-      if ('maxPrice' in filters && filters.maxPrice !== null) {
-        query = query.lte('price', filters.maxPrice);
-      }
-      
-      if ('searchQuery' in filters && filters.searchQuery) {
-        query = query.ilike('title', `%${filters.searchQuery as string}%`);
-      }
+    // Apply filters
+    if (filters.category && filters.category !== "Todos") {
+      query = query.eq('category', filters.category);
     }
     
-    const { data, error } = await query;
+    if (filters.searchQuery) {
+      query = query.ilike('title', `%${filters.searchQuery}%`);
+    }
     
+    if (filters.minPrice !== undefined && filters.minPrice !== null) {
+      query = query.gte('price', filters.minPrice);
+    }
+    
+    if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
+      query = query.lte('price', filters.maxPrice);
+    }
+    
+    if (filters.date) {
+      // For now, we don't filter by date directly, as that would require checking availability
+      // This would be implemented with a join on tour_availability or custom logic
+    }
+
+    if (filters.difficulty && filters.difficulty !== '') {
+      query = query.eq('difficulty', filters.difficulty);
+    }
+    
+    // Apply sorting
+    if (filters.sortBy) {
+      const [field, direction] = filters.sortBy.split('_');
+      query = query.order(field, { ascending: direction === 'asc' });
+    } else {
+      query = query.order('id', { ascending: false });
+    }
+
+    const { data, error } = await query;
+
     if (error) {
       console.error('Error fetching activities:', error);
       throw error;
     }
-    
-    return data;
+
+    return data as Activity[];
   }
-  
-  async getActivityById(id) {
+
+  async getFeaturedActivities(limit: number = 3) {
+    try {
+      const { data, error } = await this.supabase
+        .from('tours')  // Using tours table for now
+        .select('*')
+        .eq('is_featured', true)
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching featured activities:', error);
+        throw error;
+      }
+
+      return data as Activity[];
+    } catch (err) {
+      console.error('Exception in getFeaturedActivities:', err);
+      return []; 
+    }
+  }
+
+  async getActivityById(id: number) {
     const { data, error } = await this.supabase
-      .from('tours')
+      .from('tours')  // Using tours table for now
       .select('*')
       .eq('id', id)
       .single();
-      
+
     if (error) {
       console.error(`Error fetching activity ${id}:`, error);
       throw error;
     }
-    
-    return data;
+
+    return data as Activity;
   }
 
-  // Added function to support search by search parameters
-  async searchActivities(searchParams: any = {}) {
-    const { query, category, sortBy, minPrice, maxPrice, difficulty } = searchParams;
-    let queryBuilder = this.supabase.from('tours').select('*');
+  async createActivity(activityData: Partial<Activity>) {
+    console.log('Creating activity with data:', activityData);
     
-    // Apply any search filters
-    if (query) {
-      queryBuilder = queryBuilder.ilike('title', `%${query}%`);
-    }
-    
-    if (category && category !== 'Todos') {
-      queryBuilder = queryBuilder.eq('category', category);
-    }
-    
-    if (sortBy) {
-      switch (sortBy) {
-        case 'price_asc':
-          queryBuilder = queryBuilder.order('price', { ascending: true });
-          break;
-        case 'price_desc':
-          queryBuilder = queryBuilder.order('price', { ascending: false });
-          break;
-        case 'rating':
-          queryBuilder = queryBuilder.order('rating', { ascending: false });
-          break;
-        case 'recommended':
-        default:
-          queryBuilder = queryBuilder.order('is_featured', { ascending: false });
-      }
-    }
-    
-    if (minPrice !== undefined && minPrice !== null) {
-      queryBuilder = queryBuilder.gte('price', minPrice);
-    }
-    
-    if (maxPrice !== undefined && maxPrice !== null) {
-      queryBuilder = queryBuilder.lte('price', maxPrice);
-    }
-    
-    if (difficulty) {
-      queryBuilder = queryBuilder.eq('difficulty', difficulty);
-    }
-    
-    const { data, error } = await queryBuilder;
-    
-    if (error) {
-      console.error('Error searching activities:', error);
-      throw error;
-    }
-    
-    return data;
-  }
-
-  // Added function to get featured activities
-  async getFeaturedActivities(limit = 6) {
-    const { data, error } = await this.supabase
-      .from('tours')
-      .select('*')
-      .eq('is_featured', true)
-      .limit(limit);
-      
-    if (error) {
-      console.error('Error fetching featured activities:', error);
-      throw error;
-    }
-    
-    return data;
-  }
-
-  // For activity availability, we need to use direct queries instead of tables
-  // that might not be defined in the types
-  async getActivityAvailability(tourId: number) {
-    try {
-      // We can't directly reference tour_availability so we'll use a raw query
-      const { data, error } = await this.supabase
-        .from('tours')
-        .select('*')
-        .eq('id', tourId);
-      
-      if (error) {
-        console.error(`Error fetching activity availability for ${tourId}:`, error);
-        throw error;
-      }
-      
-      // This is a placeholder - in a real scenario we'd need to
-      // set up proper table access or functions
-      return data || [];
-    } catch (error) {
-      console.error(`Error fetching activity availability:`, error);
-      throw error;
-    }
-  }
-  
-  async createActivityAvailability(tourId: number, availabilityDates: Date[]) {
-    try {
-      // Instead of directly inserting, we'll log the intention
-      // and return a mock success
-      console.log(`Creating availability for tour ${tourId}`, availabilityDates);
-      
-      return true;
-    } catch (error) {
-      console.error(`Error creating activity availability:`, error);
-      throw error;
-    }
-  }
-  
-  // Add updateActivityAvailability method
-  async updateActivityAvailability(tourId: number, availabilityData: any) {
-    try {
-      // Log the intention and return mock success
-      console.log(`Updating availability for tour ${tourId}`, availabilityData);
-      return true;
-    } catch (error) {
-      console.error(`Error updating activity availability:`, error);
-      throw error;
-    }
-  }
-
-  // Add bulkUpdateActivityAvailability method
-  async bulkUpdateActivityAvailability(tourId: number, bulkData: any) {
-    try {
-      // Log the intention and return mock success
-      console.log(`Bulk updating availability for tour ${tourId}`, bulkData);
-      return true;
-    } catch (error) {
-      console.error(`Error bulk updating activity availability:`, error);
-      throw error;
-    }
-  }
-  
-  async createActivity(activityData: Omit<Activity, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await this.supabase
       .from('tours')
       .insert([activityData])
-      .select();
-      
+      .select()
+      .single();
+
     if (error) {
       console.error('Error creating activity:', error);
       throw error;
     }
-    
-    return data[0];
+
+    return data;
   }
-  
-  async updateActivity(id: number, data: Partial<Activity>) {
-    const { data: updatedData, error } = await this.supabase
+
+  async updateActivity(id: number, activityData: Partial<Activity>) {
+    console.log('Updating activity with data:', activityData);
+
+    const { data, error } = await this.supabase
       .from('tours')
-      .update(data)
+      .update(activityData)
       .eq('id', id)
-      .select();
-      
+      .select()
+      .single();
+
     if (error) {
       console.error(`Error updating activity ${id}:`, error);
       throw error;
     }
-    
-    return updatedData[0];
+
+    return data;
   }
-  
+
   async deleteActivity(id: number) {
-    try {
-      // Instead of trying to access a potentially non-existing table,
-      // we'll just log the intention for the availability deletion
-      console.log(`Would delete availability records for tour ${id}`);
-      
-      // Then delete the activity itself
-      const { error } = await this.supabase
-        .from('tours')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        console.error(`Error deleting activity ${id}:`, error);
-        throw error;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error(`Error in delete activity operation:`, error);
+    const { error } = await this.supabase
+      .from('tours')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error(`Error deleting activity ${id}:`, error);
       throw error;
     }
+  }
+  
+  // Added method to get categories
+  async getActivityCategories() {
+    return ["Todos", "Barco", "Mergulho", "Trilha", "Terrestre", "Ecológico", "Cultural", "Gastronômico"];
+  }
+
+  // Methods for activity availability
+  async getActivityAvailability(activityId: number) {
+    const { data, error } = await this.supabase
+      .from('tour_availability')  // Using tour_availability table for now
+      .select('*')
+      .eq('tour_id', activityId);
+
+    if (error) {
+      console.error(`Error fetching availability for activity ${activityId}:`, error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async updateActivityAvailability(
+    activityId: number,
+    date: Date,
+    availableSpots: number,
+    customPrice?: number,
+    status: 'available' | 'unavailable' = 'available'
+  ) {
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const { data, error } = await this.supabase
+      .from('tour_availability')
+      .upsert({
+        tour_id: activityId,
+        date: dateStr,
+        available_spots: availableSpots,
+        custom_price: customPrice,
+        status
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`Error updating availability for activity ${activityId}:`, error);
+      throw error;
+    }
+
+    return data;
   }
 }
 

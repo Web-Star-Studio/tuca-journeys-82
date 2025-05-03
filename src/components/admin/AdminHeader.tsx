@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import UserMenu from "./UserMenu";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface AdminHeaderProps {
   pageTitle: string;
@@ -60,7 +60,7 @@ const AdminHeader = ({ pageTitle }: AdminHeaderProps) => {
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
-    useToast().toast({
+    toast({
       title: "Notificações",
       description: "Todas as notificações foram marcadas como lidas",
     });
@@ -153,7 +153,7 @@ const AdminHeader = ({ pageTitle }: AdminHeaderProps) => {
           </PopoverContent>
         </Popover>
         
-        {user && <UserMenu user={user} />}
+        <UserMenu user={user} />
       </div>
     </header>
   );

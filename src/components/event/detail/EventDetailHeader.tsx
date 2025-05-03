@@ -25,7 +25,7 @@ const EventDetailHeader = ({ event }: EventDetailHeaderProps) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
         
-        {event.is_featured && (
+        {event.featured && (
           <Badge className="absolute top-4 right-4 bg-tuca-ocean-blue">
             Evento em Destaque
           </Badge>

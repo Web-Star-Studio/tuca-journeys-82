@@ -9,8 +9,8 @@ interface WishlistIconProps {
 }
 
 const WishlistIcon = ({ isTransparent }: WishlistIconProps) => {
-  const { wishlist } = useWishlist();
-  const hasItems = wishlist.length > 0;
+  const { wishlistItems } = useWishlist();
+  const hasItems = wishlistItems.length > 0;
 
   return (
     <Link
@@ -27,7 +27,7 @@ const WishlistIcon = ({ isTransparent }: WishlistIconProps) => {
         <span
           className={`absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-tuca-coral text-white text-xs font-medium`}
         >
-          {wishlist.length}
+          {wishlistItems.length}
         </span>
       )}
     </Link>

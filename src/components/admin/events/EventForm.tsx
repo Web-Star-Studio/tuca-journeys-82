@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +32,7 @@ import ImageUploader from "@/components/admin/shared/ImageUploader";
 import { Badge } from "@/components/ui/badge";
 import { Event } from "@/types/event";
 
-// Define the schema for event form - improved to match API expectations
+// Define the schema for event form
 const eventSchema = z.object({
   name: z.string().min(3, { message: "Nome do evento é obrigatório" }),
   description: z.string().min(10, { message: "Descrição mais detalhada é necessária" }),
@@ -52,8 +51,7 @@ const eventSchema = z.object({
   organizer: z.string().min(1, { message: "Organizador é obrigatório" }),
   capacity: z.coerce.number().int().positive({ message: "Capacidade deve ser positiva" }),
   available_spots: z.coerce.number().int().nonnegative({ message: "Vagas disponíveis não pode ser negativo" }),
-  // Change from featured to is_featured to match API
-  is_featured: z.boolean().optional().default(false),
+  featured: z.boolean().optional(),
   policies: z.string().optional(),
   tickets: z.array(z.object({
     name: z.string().min(1, { message: "Nome do ingresso é obrigatório" }),
@@ -96,7 +94,6 @@ const TICKET_TYPES = [
 const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormProps) => {
   const [image, setImage] = useState<string>(event?.image_url || "");
   
-  // Correctly handle is_featured/featured when initializing the form
   const defaultValues: Partial<EventFormValues> = {
     name: event?.name || "",
     description: event?.description || "",
@@ -111,7 +108,7 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
     organizer: event?.organizer || "Fernando de Noronha Eventos",
     capacity: event?.capacity || 100,
     available_spots: event?.available_spots || 100,
-    is_featured: event?.is_featured || event?.featured || false,
+    featured: event?.featured || false,
     policies: event?.policies || "",
     tickets: [],
   };
@@ -143,13 +140,8 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
       // Initialize all fields from event
       Object.entries(event).forEach(([key, value]) => {
         if (key in form.getValues() && value !== undefined) {
-          // Handle is_featured/featured special case
-          if (key === 'is_featured' || key === 'featured') {
-            form.setValue("is_featured", !!value);
-          } else {
-            // @ts-ignore - Dynamically setting form values
-            form.setValue(key, value);
-          }
+          // @ts-ignore - Dynamically setting form values
+          form.setValue(key, value);
         }
       });
       
@@ -166,20 +158,9 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
   }, [event, form]);
 
   const handleFormSubmit = (data: EventFormValues) => {
-    // Log form data for debugging
-    console.log('Form data before submission:', data);
-    
     // Ensure short_description is set if not provided
     if (!data.short_description && data.description) {
       data.short_description = data.description.substring(0, 150);
-    }
-    
-    // Format date correctly
-    if (data.date) {
-      // Ensure date is a string in YYYY-MM-DD format
-      const formattedDate = format(data.date, 'yyyy-MM-dd');
-      // @ts-ignore - We know this should be a string for API
-      data.date = formattedDate;
     }
     
     onSubmit(data);
@@ -397,14 +378,14 @@ const EventForm = ({ event, onSubmit, onCancel, isLoading = false }: EventFormPr
 
             <FormField
               control={form.control}
-              name="is_featured"
+              name="featured"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <input
                       type="checkbox"
                       checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
+                      onChange={field.onChange}
                       className="h-4 w-4 rounded border-gray-300 text-tuca-ocean-blue focus:ring-tuca-ocean-blue"
                     />
                   </FormControl>

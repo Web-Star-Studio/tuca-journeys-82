@@ -1,7 +1,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Package } from '@/types/package';
-import { packageService } from '@/services/package-service';
+import { Package } from '@/data/types/packageTypes';
 
 /**
  * Custom hook for package mutations (create, update, delete)
@@ -12,8 +11,16 @@ export const usePackageMutations = () => {
 
   // Create package mutation
   const createPackage = useMutation({
-    mutationFn: (packageData: Omit<Package, 'id'>) => 
-      packageService.createPackage(packageData),
+    mutationFn: async (packageData: Omit<Package, 'id'>) => {
+      // In a real application, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+      
+      // Mock implementation - create with random ID
+      return {
+        ...packageData,
+        id: Math.floor(Math.random() * 1000) + 10
+      } as Package;
+    },
     onSuccess: () => {
       // Invalidate packages query to refetch data
       queryClient.invalidateQueries({ queryKey: ['packages'] });
@@ -22,8 +29,13 @@ export const usePackageMutations = () => {
 
   // Update package mutation
   const updatePackage = useMutation({
-    mutationFn: (packageData: Package) => 
-      packageService.updatePackage(packageData.id, packageData),
+    mutationFn: async (packageData: Package) => {
+      // In a real application, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+      
+      // Mock implementation - return the updated package
+      return packageData;
+    },
     onSuccess: (updatedPackage) => {
       // Invalidate specific package query and packages list
       queryClient.invalidateQueries({ queryKey: ['package', updatedPackage.id] });
@@ -33,9 +45,14 @@ export const usePackageMutations = () => {
 
   // Delete package mutation
   const deletePackage = useMutation({
-    mutationFn: (packageId: number) => 
-      packageService.deletePackage(packageId),
-    onSuccess: (_, packageId) => {
+    mutationFn: async (packageId: number) => {
+      // In a real application, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+      
+      // Mock implementation - just return the ID of deleted package
+      return packageId;
+    },
+    onSuccess: (packageId) => {
       // Invalidate specific package query and packages list
       queryClient.invalidateQueries({ queryKey: ['package', packageId] });
       queryClient.invalidateQueries({ queryKey: ['packages'] });

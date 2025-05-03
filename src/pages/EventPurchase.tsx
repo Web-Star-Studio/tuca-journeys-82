@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -55,8 +56,7 @@ const EventPurchase = () => {
           newAttendees.push({
             name: user ? (user.email?.split('@')[0] || '') : '',
             email: user ? (user.email || '') : '',
-            phone: '',
-            ticketType: ticket.name // This is now valid with our updated interface
+            ticketType: ticket.name
           });
         }
       });
@@ -86,7 +86,6 @@ const EventPurchase = () => {
     }
   });
   
-  // Update the updateAttendee function to work with our interface
   const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
     setAttendees(prev => {
       const updated = [...prev];

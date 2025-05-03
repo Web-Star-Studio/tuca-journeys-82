@@ -20,12 +20,13 @@ export const useActivityAvailability = (activityId: number) => {
   // Add or update availability for a specific date
   const updateAvailabilityMutation = useMutation({
     mutationFn: ({ date, availableSpots, customPrice, status }: ActivityAvailabilityParams) =>
-      activityService.updateActivityAvailability(activityId, {
-        date,
-        available_spots: availableSpots,
-        custom_price: customPrice,
-        status: status || 'available',
-      }),
+      activityService.updateActivityAvailability(
+        activityId, 
+        date, 
+        availableSpots, 
+        customPrice, 
+        status || 'available'
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-availability', activityId] });
       toast.success('Availability updated successfully!');
@@ -39,12 +40,18 @@ export const useActivityAvailability = (activityId: number) => {
   // Bulk update availability for multiple dates
   const bulkUpdateAvailabilityMutation = useMutation({
     mutationFn: ({ dates, availableSpots, customPrice, status }: ActivityBulkAvailabilityParams) =>
-      activityService.bulkUpdateActivityAvailability(activityId, {
-        dates,
-        available_spots: availableSpots,
-        custom_price: customPrice,
-        status: status || 'available',
-      }),
+      // Since bulk update isn't implemented yet, we'll use the single update for now
+      Promise.all(
+        dates.map(date => 
+          activityService.updateActivityAvailability(
+            activityId, 
+            date, 
+            availableSpots, 
+            customPrice, 
+            status || 'available'
+          )
+        )
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-availability', activityId] });
       toast.success('Availability bulk updated successfully!');

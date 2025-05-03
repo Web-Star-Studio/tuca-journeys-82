@@ -6,13 +6,10 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { ActivityFormValues } from "./ActivityFormDialog";
-import ImageUpload from "@/components/ui/image-upload";
-import GalleryUpload from "@/components/ui/gallery-upload";
+import { ActivityFormValues } from "../../../components/admin/activity/ActivityForm";
 
 interface ActivityMediaFormProps {
   form: UseFormReturn<ActivityFormValues>;
@@ -25,17 +22,11 @@ const ActivityMediaForm: React.FC<ActivityMediaFormProps> = ({
   previewUrl,
   setPreviewUrl,
 }) => {
-  const handleMainImageUploaded = (url: string) => {
-    form.setValue("image_url", url);
-    setPreviewUrl(url);
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    form.setValue("image_url", value);
+    setPreviewUrl(value);
   };
-
-  const handleGalleryImagesChange = (urls: string[]) => {
-    form.setValue("gallery_images", urls.join(","));
-  };
-
-  const galleryImages = form.watch("gallery_images") || "";
-  const galleryImagesArray = galleryImages.split(",").filter(Boolean);
 
   return (
     <div className="space-y-6">
@@ -44,17 +35,24 @@ const ActivityMediaForm: React.FC<ActivityMediaFormProps> = ({
         name="image_url"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Imagem Principal</FormLabel>
+            <FormLabel>URL da Imagem Principal</FormLabel>
             <FormControl>
-              <ImageUpload 
-                currentImageUrl={field.value}
-                onImageUploaded={handleMainImageUploaded}
-                height="200px"
-                bucketName="activity-images"
-                folderPath="main"
+              <Input
+                placeholder="URL da imagem principal"
+                {...field}
+                onChange={handleMainImageChange}
               />
             </FormControl>
             <FormMessage />
+            {previewUrl && (
+              <div className="mt-2 rounded-md overflow-hidden border">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+            )}
           </FormItem>
         )}
       />
@@ -64,40 +62,17 @@ const ActivityMediaForm: React.FC<ActivityMediaFormProps> = ({
         name="gallery_images"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Galeria de Imagens</FormLabel>
-            <FormControl>
-              <GalleryUpload 
-                initialImages={galleryImagesArray}
-                onImagesChange={handleGalleryImagesChange}
-                maxImages={5}
-                bucketName="activity-images"
-                folderPath="gallery"
-              />
-            </FormControl>
-            <FormDescription>
-              Adicione até 5 imagens para a galeria da atividade
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="rating"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Avaliação (0-5)</FormLabel>
+            <FormLabel>URLs das Imagens da Galeria</FormLabel>
             <FormControl>
               <Input
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
+                placeholder="URLs separadas por vírgula"
                 {...field}
               />
             </FormControl>
             <FormMessage />
+            <p className="text-xs text-muted-foreground mt-1">
+              Insira URLs separadas por vírgula. Ex: url1,url2,url3
+            </p>
           </FormItem>
         )}
       />

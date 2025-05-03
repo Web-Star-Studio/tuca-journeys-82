@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,11 +20,10 @@ import AccommodationBooking from './pages/AccommodationBooking';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import adminRoutes from './routes/adminRoutes';
-import { ToastProvider } from './hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 const queryClient = new QueryClient();
 
-// Update the routes section to include Activities instead of Tours
 function App() {
   return (
     <div className="App">
@@ -35,15 +35,15 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/atividades" element={<Activities />} /> {/* Updated from /passeios */}
-                <Route path="/atividades/:id" element={<ActivityDetail />} /> {/* Updated from /passeios/:id */}
+                <Route path="/atividades" element={<Activities />} />
+                <Route path="/atividades/:id" element={<ActivityDetail />} />
                 <Route path="/eventos" element={<Events />} />
                 <Route path="/eventos/:id" element={<EventDetail />} />
                 <Route path="/acomodacoes" element={<Accommodations />} />
                 <Route path="/acomodacoes/:id" element={<AccommodationDetail />} />
                 <Route path="/restaurantes" element={<Restaurants />} />
                 <Route path="/perfil" element={<UserProfile />} />
-                <Route path="/reservar/atividade/:id" element={<ActivityBooking />} /> {/* Updated from /reservar/passeio/:id */}
+                <Route path="/reservar/atividade/:id" element={<ActivityBooking />} />
                 <Route path="/reservar/acomodacao/:id" element={<AccommodationBooking />} />
                 <Route path="/sobre" element={<About />} />
                 <Route path="/contato" element={<Contact />} />
@@ -52,7 +52,7 @@ function App() {
                   <Route key={route.path} path={route.path} element={route.element} />
                 ))}
               </Routes>
-              <ToastProvider />
+              <Toaster />
             </WishlistProvider>
           </AuthProvider>
         </QueryClientProvider>

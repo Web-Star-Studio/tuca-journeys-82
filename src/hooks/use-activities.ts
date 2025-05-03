@@ -1,3 +1,36 @@
 
-// Re-export everything from the activities directory
-export * from './activities';
+import { useActivitiesBase, useActivity } from './activities/use-activities-base';
+import { useActivityMutations } from './activities/use-activity-mutations';
+import { useActivityAvailability } from './activities/use-activity-availability';
+import { useSearchActivities } from './activities/use-activity-search';
+
+/**
+ * Main hook that combines all activity-related hooks
+ */
+export const useActivities = () => {
+  const baseHook = useActivitiesBase();
+  const mutationsHook = useActivityMutations();
+
+  return {
+    ...baseHook,
+    ...mutationsHook,
+  };
+};
+
+// Re-export all other hooks for convenience
+export { useActivity, useActivityAvailability, useSearchActivities };
+
+// Export types if needed
+export type ActivityAvailabilityParams = {
+  date: Date;
+  availableSpots: number;
+  customPrice?: number;
+  status?: 'available' | 'unavailable';
+};
+
+export type ActivityBulkAvailabilityParams = {
+  dates: Date[];
+  availableSpots: number;
+  customPrice?: number;
+  status?: 'available' | 'unavailable';
+};

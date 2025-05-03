@@ -1,5 +1,6 @@
 
 import React from "react";
+import { ActivityFormValues } from "../../../components/admin/activity/ActivityForm";
 import {
   FormField,
   FormItem,
@@ -9,7 +10,6 @@ import {
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import { ActivityFormValues } from "./ActivityFormDialog";
 
 interface ActivityDetailsFormProps {
   form: UseFormReturn<ActivityFormValues>;

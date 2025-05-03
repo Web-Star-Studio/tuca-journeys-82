@@ -52,10 +52,60 @@ export const useActivityMutations = () => {
     },
   });
 
+  // Toggle activity featured status
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: ({
+      activityId,
+      isFeatured,
+    }: {
+      activityId: number;
+      isFeatured: boolean;
+    }) => activityService.updateActivity(activityId, { is_featured: isFeatured }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['activity', data.id] });
+      toast.success(
+        data.is_featured
+          ? 'Activity set as featured!'
+          : 'Activity removed from featured!'
+      );
+    },
+    onError: (error) => {
+      console.error('Error toggling featured status:', error);
+      toast.error('Failed to update featured status');
+    },
+  });
+
+  // Toggle activity active status
+  const toggleActiveMutation = useMutation({
+    mutationFn: ({
+      activityId,
+      isActive,
+    }: {
+      activityId: number;
+      isActive: boolean;
+    }) => activityService.updateActivity(activityId, { is_active: isActive }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['activity', data.id] });
+      toast.success(
+        data.is_active
+          ? 'Activity is now active!'
+          : 'Activity deactivated!'
+      );
+    },
+    onError: (error) => {
+      console.error('Error toggling active status:', error);
+      toast.error('Failed to update activity status');
+    },
+  });
+
   return {
     createActivity: createMutation.mutate,
     updateActivity: updateMutation.mutate,
     deleteActivity: deleteMutation.mutate,
+    toggleActivityFeatured: toggleFeaturedMutation.mutate,
+    toggleActivityActive: toggleActiveMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,

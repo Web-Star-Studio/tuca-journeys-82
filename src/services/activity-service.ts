@@ -1,6 +1,7 @@
 
 import { BaseApiService } from './base-api';
 import { Activity, ActivityFilters } from '@/types/activity';
+import { adaptComponentActivityToDB, adaptDBActivityToComponentActivity } from '@/utils/activityAdapter';
 
 class ActivityService extends BaseApiService {
   async getActivities(filters: ActivityFilters = {}) {
@@ -49,7 +50,11 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
-    return data as Activity[];
+    return data.map(adaptDBActivityToComponentActivity) as Activity[];
+  }
+
+  async searchActivities(filters: ActivityFilters = {}) {
+    return this.getActivities(filters);
   }
 
   async getFeaturedActivities(limit: number = 3) {
@@ -65,7 +70,7 @@ class ActivityService extends BaseApiService {
         throw error;
       }
 
-      return data as Activity[];
+      return data.map(adaptDBActivityToComponentActivity) as Activity[];
     } catch (err) {
       console.error('Exception in getFeaturedActivities:', err);
       return []; 
@@ -84,15 +89,17 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
-    return data as Activity;
+    return adaptDBActivityToComponentActivity(data) as Activity;
   }
 
   async createActivity(activityData: Partial<Activity>) {
     console.log('Creating activity with data:', activityData);
     
+    const dbData = adaptComponentActivityToDB(activityData);
+    
     const { data, error } = await this.supabase
       .from('tours')
-      .insert([activityData])
+      .insert([dbData])
       .select()
       .single();
 
@@ -101,15 +108,17 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
-    return data;
+    return adaptDBActivityToComponentActivity(data);
   }
 
   async updateActivity(id: number, activityData: Partial<Activity>) {
     console.log('Updating activity with data:', activityData);
 
+    const dbData = adaptComponentActivityToDB(activityData);
+
     const { data, error } = await this.supabase
       .from('tours')
-      .update(activityData)
+      .update(dbData)
       .eq('id', id)
       .select()
       .single();
@@ -119,7 +128,7 @@ class ActivityService extends BaseApiService {
       throw error;
     }
 
-    return data;
+    return adaptDBActivityToComponentActivity(data);
   }
 
   async deleteActivity(id: number) {

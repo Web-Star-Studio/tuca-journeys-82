@@ -1,57 +1,39 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-interface UIContextType {
-  isSidebarOpen: boolean;
-  toggleSidebar: () => void;
-  isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
-  showGlobalSpinner: (show: boolean) => void;
+export interface UIContextType {
+  isCartOpen: boolean;
+  isWishlistOpen: boolean;
+  toggleCart: () => void;
+  toggleWishlist: () => void;
 }
 
-const UIContext = createContext<UIContextType | undefined>(undefined);
+const UIContext = createContext<UIContextType>({
+  isCartOpen: false,
+  isWishlistOpen: false,
+  toggleCart: () => {},
+  toggleWishlist: () => {}
+});
 
-export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  
-  const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+    if (!isCartOpen) setIsWishlistOpen(false);
   };
-  
-  const showGlobalSpinner = (show: boolean) => {
-    setIsLoading(show);
+
+  const toggleWishlist = () => {
+    setIsWishlistOpen(!isWishlistOpen);
+    if (!isWishlistOpen) setIsCartOpen(false);
   };
-  
-  const value = {
-    isSidebarOpen,
-    toggleSidebar,
-    isLoading,
-    setIsLoading,
-    showGlobalSpinner,
-  };
-  
+
   return (
-    <UIContext.Provider value={value}>
+    <UIContext.Provider value={{ isCartOpen, isWishlistOpen, toggleCart, toggleWishlist }}>
       {children}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tuca-ocean-blue"></div>
-            <p className="text-sm font-medium">Carregando...</p>
-          </div>
-        </div>
-      )}
     </UIContext.Provider>
   );
 };
 
-export const useUI = (): UIContextType => {
-  const context = useContext(UIContext);
-  
-  if (context === undefined) {
-    throw new Error('useUI must be used within a UIProvider');
-  }
-  
-  return context;
-};
+export const useUI = () => useContext(UIContext);

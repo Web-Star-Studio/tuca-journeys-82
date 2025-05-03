@@ -1,12 +1,13 @@
 
 import React from "react";
+import { ActivityFormValues } from "../../../components/admin/activity/ActivityForm";
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
   FormDescription,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,34 +19,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { ActivityFormValues } from "./ActivityFormDialog";
+import { ACTIVITY_CATEGORIES, ACTIVITY_DIFFICULTY_LEVELS } from "@/types/activity";
 
 interface ActivityBasicInfoFormProps {
   form: UseFormReturn<ActivityFormValues>;
-  categories: string[];
-  difficultyLevels: string[];
 }
 
-const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
-  form,
-  categories,
-  difficultyLevels,
-}) => {
+const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({ form }) => {
   return (
     <div className="space-y-6">
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Título</FormLabel>
-            <FormControl>
-              <Input placeholder="Título da atividade" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Título</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: Passeio de Barco na Ilha" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ACTIVITY_CATEGORIES.filter(cat => cat !== "Todos").map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={form.control}
@@ -55,13 +81,13 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
             <FormLabel>Descrição Curta</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Uma breve descrição da atividade"
-                className="min-h-[80px]"
+                placeholder="Breve descrição da atividade (exibida nos cartões)"
+                className="resize-none"
                 {...field}
               />
             </FormControl>
             <FormDescription>
-              Será exibida na listagem de atividades
+              Máximo 150 caracteres. Será exibida nos cartões e listagens.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -85,8 +111,8 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
           </FormItem>
         )}
       />
-
-      <div className="grid grid-cols-2 gap-4">
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={form.control}
           name="price"
@@ -94,13 +120,19 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
             <FormItem>
               <FormLabel>Preço (R$)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="duration"
@@ -108,44 +140,13 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
             <FormItem>
               <FormLabel>Duração</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: 3 horas" {...field} />
+                <Input placeholder="Ex: 2 horas" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                value={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        
         <FormField
           control={form.control}
           name="difficulty"
@@ -159,11 +160,11 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {difficultyLevels.map((level) => (
+                  {ACTIVITY_DIFFICULTY_LEVELS.map((level) => (
                     <SelectItem key={level} value={level}>
                       {level.charAt(0).toUpperCase() + level.slice(1)}
                     </SelectItem>
@@ -175,30 +176,54 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
           )}
         />
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={form.control}
-          name="min_participants"
+          name="meeting_point"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mínimo de Participantes</FormLabel>
+              <FormLabel>Ponto de Encontro</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input placeholder="Ex: Porto de Santo Antônio" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
+        <FormField
+          control={form.control}
+          name="min_participants"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Participantes Mínimo</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="1"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <FormField
           control={form.control}
           name="max_participants"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Máximo de Participantes</FormLabel>
+              <FormLabel>Participantes Máximo</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="10"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -208,13 +233,17 @@ const ActivityBasicInfoForm: React.FC<ActivityBasicInfoFormProps> = ({
       
       <FormField
         control={form.control}
-        name="meeting_point"
+        name="rating"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Ponto de Encontro</FormLabel>
+            <FormLabel>Avaliação (0 a 5)</FormLabel>
             <FormControl>
               <Input
-                placeholder="Local de encontro para a atividade"
+                type="number"
+                min="0"
+                max="5"
+                step="0.1"
+                placeholder="5"
                 {...field}
               />
             </FormControl>

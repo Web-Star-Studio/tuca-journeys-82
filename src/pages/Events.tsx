@@ -19,7 +19,7 @@ const Events = () => {
   
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events', filters],
-    queryFn: () => eventService.getFeaturedEvents(filters)
+    queryFn: () => eventService.getEvents(filters)
   });
   
   const { data: categories = ["Todos", "Festas", "Música", "Cultura", "Gastronomia", "Esporte"] } = useQuery({

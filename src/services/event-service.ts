@@ -1,4 +1,3 @@
-
 import { BaseApiService } from './base-api';
 import { Event, EventFilters, AttendeeInfo } from '@/types/event';
 
@@ -47,13 +46,35 @@ class EventService extends BaseApiService {
     return data as Event[];
   }
 
-  async getFeaturedEvents(limit: number = 3) {
+  // Updated to handle both number and filters as parameters
+  async getFeaturedEvents(limitOrFilters: number | EventFilters = 3) {
     try {
-      const { data, error } = await this.supabase
+      let query = this.supabase
         .from('events')
         .select('*')
-        .eq('is_featured', true)
-        .limit(limit);
+        .eq('is_featured', true);
+
+      // If parameter is a number, treat it as limit
+      if (typeof limitOrFilters === 'number') {
+        query = query.limit(limitOrFilters);
+      } else {
+        // If parameter is an object, apply filters
+        const filters = limitOrFilters;
+
+        if (filters.category && filters.category !== "Todas") {
+          query = query.eq('category', filters.category);
+        }
+        
+        if (filters.searchQuery) {
+          query = query.ilike('name', `%${filters.searchQuery}%`);
+        }
+        
+        if (filters.date) {
+          query = query.eq('date', filters.date.toISOString().split('T')[0]);
+        }
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching featured events:', error);

@@ -4,18 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { eventService } from '@/services/event-service';
 import { Event, EventFilters } from '@/types/event';
 
-export function useFeaturedEvents(limit?: number) {
-  const [filters, setFilters] = useState({
+export function useFeaturedEvents(limit: number = 3) {
+  const [filters, setFilters] = useState<EventFilters>({
     category: '',
     date: null,
     searchQuery: ''
   });
 
   const { data: events = [], isLoading } = useQuery({
-    queryKey: ['events', 'featured', filters, limit],
+    queryKey: ['events', 'featured', limit],
     queryFn: async () => {
-      const featuredEvents = await eventService.getFeaturedEvents(filters);
-      return limit ? featuredEvents.slice(0, limit) : featuredEvents;
+      const featuredEvents = await eventService.getFeaturedEvents(limit);
+      return featuredEvents;
     }
   });
 

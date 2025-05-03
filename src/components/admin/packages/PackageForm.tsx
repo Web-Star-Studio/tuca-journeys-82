@@ -11,6 +11,7 @@ import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
 import { usePackageForm } from "@/hooks/packages/usePackageForm";
 import { usePackageDetail } from "@/hooks/use-packages";
 import { Form } from "@/components/ui/form";
+import { adaptPackageToFormPackage } from "@/utils/packageAdapter";
 
 interface PackageFormProps {
   packageId: number | null;
@@ -33,7 +34,10 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
     excludesArray, 
     itineraryArray, 
     datesArray 
-  } = usePackageForm(packageId && packageData ? packageData : undefined);
+  } = usePackageForm(
+    // Convert from canonical Package to form Package if data is available
+    packageId && packageData ? adaptPackageToFormPackage(packageData) as any : undefined
+  );
   
   // Setup submission handler
   const { handleSubmit, isSubmitting } = usePackageSubmit(packageId, onSuccess);

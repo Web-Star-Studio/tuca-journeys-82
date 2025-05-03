@@ -3,14 +3,14 @@ import React from "react";
 import { RouteObject } from "react-router-dom";
 import Dashboard from "@/pages/admin/Dashboard";
 import AdminLogin from "@/pages/admin/AdminLogin";
-import Tours from "@/pages/admin/Tours";
+import Activities from "@/pages/admin/Activities";
 import Packages from "@/pages/admin/Packages";
 import Products from "@/pages/admin/Products";
 import Accommodations from "@/pages/admin/Accommodations";
 import Users from "@/pages/admin/Users";
 import Settings from "@/pages/admin/Settings";
 import Bookings from "@/pages/admin/Bookings";
-import TourAvailability from "@/pages/admin/TourAvailability";
+import ActivityAvailability from "@/pages/admin/ActivityAvailability";
 import AccommodationAvailability from "@/pages/admin/AccommodationAvailability";
 import Events from "@/pages/admin/Events";
 import Reports from "@/pages/admin/Reports";
@@ -34,8 +34,8 @@ const adminRoutes: RouteObject[] = [
     element: <Dashboard />,
   },
   {
-    path: "/admin/tours",
-    element: <Tours />,
+    path: "/admin/atividades", // Updated from tours
+    element: <Activities />,
   },
   {
     path: "/admin/packages",
@@ -62,8 +62,8 @@ const adminRoutes: RouteObject[] = [
     element: <Bookings />,
   },
   {
-    path: "/admin/tours/availability",
-    element: <TourAvailability />,
+    path: "/admin/atividades/availability", // Updated from tours
+    element: <ActivityAvailability />,
   },
   {
     path: "/admin/accommodations/availability",

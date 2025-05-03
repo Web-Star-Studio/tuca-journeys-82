@@ -3,53 +3,65 @@ export interface Event {
   id: number;
   name: string;
   description: string;
+  short_description: string;
   date: string;
   start_time: string;
   end_time: string;
   location: string;
-  price: number;
-  image_url: string;
-  category: string;
-  featured: boolean;
   capacity: number;
   available_spots: number;
-  organizer: string;
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
-  policies?: string; // Added for event policies
-  tickets?: EventTicket[]; // Added for event tickets
-  short_description?: string; // For display in cards
+  price: number;
+  category: string;
+  image_url: string;
+  gallery_images: string[];
+  organizer?: string;
+  is_featured: boolean;
+  featured?: boolean; // Added for backward compatibility
+  status: 'scheduled' | 'cancelled' | 'postponed' | 'completed' | 'ongoing';
+  partner_id?: string;
+  policies?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EventFilters {
-  searchQuery?: string;
   category?: string;
-  startDate?: string;
-  endDate?: string;
+  date?: Date | null;
+  searchQuery?: string;
+  sortBy?: string;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: 'date_asc' | 'date_desc' | 'price_asc' | 'price_desc' | 'name';
-  limit?: number;
-  offset?: number;
+  difficulty?: string;
+  [key: string]: any;
 }
 
 export interface EventTicket {
   id: number;
   event_id: number;
   name: string;
-  description?: string;
   price: number;
   available_quantity: number;
   max_per_order: number;
-  type: 'regular' | 'vip' | 'discount' | 'free';
-  benefits?: string[];
+  description?: string;
+  type: 'regular' | 'vip' | 'early_bird' | 'student';
+  benefits: string[];
 }
 
-// Adding the SelectedTicket interface that's imported in EventPurchase.tsx
-export interface SelectedTicket {
-  ticketId: number;
-  quantity: number;
-  price: number;
+// Update AttendeeInfo to include ticketType and document fields
+export interface AttendeeInfo {
   name: string;
+  email: string;
+  phone?: string;
+  ticketType?: string;
+  document?: string;
+}
+
+export interface SelectedTicket {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  type: string;
 }
 
 export interface EventBooking {
@@ -58,28 +70,24 @@ export interface EventBooking {
   user_id: string;
   tickets: number;
   total_price: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'refunded';
+  status: string;
+  payment_status: string;
   payment_method?: string;
-  payment_details?: any;
-  created_at: string;
+  payment_details?: Record<string, any>;
   attendee_info?: AttendeeInfo[];
-  event?: {
-    id: number;
-    name: string;
-    description: string;
-    date: string;
-    start_time: string;
-    end_time: string;
-    location: string;
-    image_url: string;
-    // Include other event properties as needed
-  };
+  created_at: string;
+  updated_at: string;
+  events?: Event;
 }
 
-export interface AttendeeInfo {
-  name: string;
-  email: string;
-  document?: string;
-  ticketType?: string;
+export interface EventHeroProps {
+  title: string;
+  subtitle: string;
+}
+
+export interface EventSearchFilterProps {
+  filters: EventFilters;
+  onFilterChange: (filters: EventFilters) => void;
+  categories: string[];
+  isLoading?: boolean;
 }

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Ticket, ArrowRight } from "lucide-react";
@@ -8,7 +7,8 @@ import EventCard from "@/components/event/EventCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FeaturedEvents = () => {
-  const { data: events = [], isLoading } = useFeaturedEvents(3);
+  // Changed to show 4 events instead of 3
+  const { events, isLoading } = useFeaturedEvents(4);
 
   if (isLoading) {
     return (
@@ -21,8 +21,8 @@ const FeaturedEvents = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="rounded-lg overflow-hidden bg-white shadow-md">
                 <Skeleton className="h-56 w-full" />
                 <div className="p-5">
@@ -52,30 +52,40 @@ const FeaturedEvents = () => {
   }
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-20 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap items-center justify-between mb-10">
           <div>
-            <h2 className="text-3xl font-bold mb-3">Eventos em Destaque</h2>
-            <p className="text-gray-600 max-w-2xl">
+            <h2 className="text-4xl font-bold mb-3 text-tuca-deep-blue">Eventos em Destaque</h2>
+            <div className="h-1 w-24 bg-tuca-coral mb-4"></div>
+            <p className="text-gray-600 max-w-2xl text-lg">
               Descubra experiências exclusivas em Fernando de Noronha. Nossos eventos destacados oferecem momentos inesquecíveis na ilha.
             </p>
           </div>
 
-          <Link to="/eventos" className="mt-4 md:mt-0 inline-flex items-center text-tuca-ocean-blue hover:text-tuca-deep-blue transition-colors">
-            <span className="mr-2">Ver todos os eventos</span>
-            <ArrowRight className="h-4 w-4" />
+          <Link to="/eventos" className="mt-4 md:mt-0 inline-flex items-center text-tuca-ocean-blue hover:text-tuca-deep-blue transition-colors group">
+            <span className="mr-2 font-medium">Ver todos os eventos</span>
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard 
+              key={event.id}
+              id={event.id}
+              name={event.name}
+              image_url={event.image_url}
+              date={event.date}
+              location={event.location}
+              price={event.price}
+              short_description={event.short_description}
+            />
           ))}
         </div>
         
         <div className="text-center mt-12">
-          <Button asChild size="lg" className="gap-2">
+          <Button asChild size="lg" className="gap-2 bg-tuca-coral hover:bg-tuca-coral/90 text-white px-8 py-6 text-lg">
             <Link to="/eventos">
               <Ticket className="h-5 w-5" />
               <span>Explorar Todos os Eventos</span>

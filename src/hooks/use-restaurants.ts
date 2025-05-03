@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantService } from '@/services/restaurant-service';
-import type { Restaurant, RestaurantFilters } from '@/types/restaurant';
+import type { Restaurant, RestaurantFilters, RestaurantTable } from '@/types/restaurant';
 import { toast } from 'sonner';
 
 export const useRestaurants = (initialFilters?: RestaurantFilters) => {
@@ -58,7 +58,8 @@ export const useRestaurantAdmin = () => {
   const queryClient = useQueryClient();
 
   const createRestaurantMutation = useMutation({
-    mutationFn: restaurantService.createRestaurant.bind(restaurantService),
+    mutationFn: (restaurantData: Omit<Restaurant, 'id' | 'created_at' | 'updated_at' | 'rating'>) => 
+      restaurantService.createRestaurant(restaurantData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       toast.success('Restaurant created successfully!');
@@ -109,7 +110,7 @@ export const useRestaurantAdmin = () => {
   });
 
   const updateTableMutation = useMutation({
-    mutationFn: ({ id, table }: { id: number; table: Partial<any> }) => 
+    mutationFn: ({ id, table }: { id: number; table: Partial<RestaurantTable> }) => 
       restaurantService.updateTable(id, table),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['restaurantTables', data.restaurant_id] });
@@ -121,8 +122,8 @@ export const useRestaurantAdmin = () => {
     }
   });
 
-  const deleteTableMutation = useMutation({
-    mutationFn: restaurantService.deleteTable.bind(restaurantService),
+  const deleteTableMutation = useMutation<any, Error, number>({
+    mutationFn: (id: number) => restaurantService.deleteTable(id),
     onSuccess: () => {
       // Need to invalidate all restaurant tables since we don't know the restaurant_id here
       queryClient.invalidateQueries({ queryKey: ['restaurantTables'] });

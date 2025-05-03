@@ -4,23 +4,42 @@ import { X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface TagInputProps {
-  tags: string[];
-  onTagsChange: (tags: string[]) => void;
+  tags?: string[];
+  onTagsChange?: (tags: string[]) => void;
   placeholder?: string;
   suggestions?: string[];
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 const TagInput: React.FC<TagInputProps> = ({
-  tags,
+  tags: propTags,
   onTagsChange,
   placeholder = "Adicione um item e pressione Enter",
-  suggestions = []
+  suggestions = [],
+  value = "",
+  onChange
 }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [tags, setTags] = useState<string[]>(propTags || []);
+  const [inputValue, setInputValue] = useState(value || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Handle direct value/onChange props (string-based usage)
+  useEffect(() => {
+    if (value !== undefined && value !== inputValue) {
+      setInputValue(value);
+    }
+  }, [value]);
+
+  // Handle tags prop changes
+  useEffect(() => {
+    if (propTags) {
+      setTags(propTags);
+    }
+  }, [propTags]);
 
   // Filter suggestions based on input
   useEffect(() => {
@@ -57,8 +76,13 @@ const TagInput: React.FC<TagInputProps> = ({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    setInputValue(newValue);
     setShowSuggestions(true);
+    
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -69,7 +93,7 @@ const TagInput: React.FC<TagInputProps> = ({
       // Remove last tag when backspace is pressed and input is empty
       const newTags = [...tags];
       newTags.pop();
-      onTagsChange(newTags);
+      updateTags(newTags);
     }
   };
 
@@ -81,14 +105,25 @@ const TagInput: React.FC<TagInputProps> = ({
     }
     
     const newTags = [...tags, normalizedTag];
-    onTagsChange(newTags);
+    updateTags(newTags);
     setInputValue("");
     setShowSuggestions(false);
   };
 
   const removeTag = (tagToRemove: string) => {
     const newTags = tags.filter((tag) => tag !== tagToRemove);
-    onTagsChange(newTags);
+    updateTags(newTags);
+  };
+
+  const updateTags = (newTags: string[]) => {
+    setTags(newTags);
+    if (onTagsChange) {
+      onTagsChange(newTags);
+    }
+    
+    if (onChange) {
+      onChange(newTags.join(','));
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {

@@ -32,7 +32,16 @@ const EventsGrid = ({ events, isLoading = false }: EventsGridProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       {events.map((event) => (
-        <EventCard key={event.id} event={event} />
+        <EventCard 
+          key={event.id}
+          id={event.id}
+          name={event.name}
+          image_url={event.image_url}
+          date={event.date}
+          location={event.location}
+          price={event.price}
+          short_description={event.short_description}
+        />
       ))}
     </div>
   );

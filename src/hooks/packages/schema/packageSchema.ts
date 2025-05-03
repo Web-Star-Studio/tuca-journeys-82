@@ -17,6 +17,7 @@ const itineraryItemSchema = z.object({
 
 // Define the package schema
 export const packageSchema = z.object({
+  id: z.number().optional(),
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string().min(1, "A descrição é obrigatória"),
   image: z.string().min(1, "A imagem é obrigatória"),

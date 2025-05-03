@@ -1,140 +1,50 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ContactCTA from "@/components/ContactCTA";
-import AccommodationHero from "@/components/accommodation/AccommodationHero";
+import AccommodationGrid from "@/components/accommodation/AccommodationGrid";
 import AccommodationFilters from "@/components/accommodation/AccommodationFilters";
-import AccommodationsGrid from "@/components/accommodation/AccommodationsGrid";
-import { getAmenityIcon } from "@/utils/accommodationUtils";
 import { useAccommodations } from "@/hooks/use-accommodations";
 
 const Hospedagens = () => {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { accommodations = [], isLoading } = useAccommodations();
   
-  // Get all available amenities for filtering
-  const commonAmenities = [
-    "Wi-Fi", 
-    "Ar-condicionado", 
-    "Café da manhã", 
-    "Piscina", 
-    "Cozinha equipada", 
-    "TV",
-    "Estacionamento"
-  ];
+  // Define proper filter types
+  const [filters, setFilters] = useState({
+    priceRange: [0, 5000] as number[], // Explicitly typed as number[]
+    amenities: [] as string[],
+    guests: 1,
+    bedrooms: 0,
+    bathrooms: 0,
+    types: [] as string[],
+    searchQuery: '',
+  });
   
-  // Get accommodations with the useAccommodations hook
-  const { 
-    accommodations, 
-    isLoading, 
-    error, 
-    filters,
-    applyFilters,
-    priceRange 
-  } = useAccommodations();
-  
-  // State for filters that will be applied to the database query
-  const [minPrice, setMinPrice] = useState(priceRange?.min || 0);
-  const [maxPrice, setMaxPrice] = useState(priceRange?.max || 3000);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [capacityFilter, setCapacityFilter] = useState<number[]>([]);
-  const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
-  
-  // Update local state when price range is fetched
-  useEffect(() => {
-    if (priceRange) {
-      setMinPrice(priceRange.min);
-      setMaxPrice(priceRange.max);
-    }
-  }, [priceRange]);
-  
-  // Handler to toggle capacity filter
-  const toggleCapacityFilter = (capacity: number) => {
-    if (capacityFilter.includes(capacity)) {
-      setCapacityFilter(capacityFilter.filter(item => item !== capacity));
-    } else {
-      setCapacityFilter([...capacityFilter, capacity]);
-    }
-  };
-  
-  // Handler to toggle amenity filter
-  const toggleAmenityFilter = (amenity: string) => {
-    if (amenitiesFilter.includes(amenity)) {
-      setAmenitiesFilter(amenitiesFilter.filter(item => item !== amenity));
-    } else {
-      setAmenitiesFilter([...amenitiesFilter, amenity]);
-    }
-  };
-  
-  // Apply filters function - this now applies filters to the database query
-  const applyAllFilters = () => {
-    // Determine max guests based on capacity filter
-    const maxGuests = capacityFilter.length > 0 ? Math.max(...capacityFilter) : null;
-    
-    applyFilters({
-      minPrice: minPrice,
-      maxPrice: maxPrice,
-      type: typeFilter,
-      amenities: amenitiesFilter,
-      maxGuests: maxGuests
-    });
-  };
-  
-  // Reset filters function
-  const resetFilters = () => {
-    setMinPrice(priceRange?.min || 0);
-    setMaxPrice(priceRange?.max || 3000);
-    setCapacityFilter([]);
-    setAmenitiesFilter([]);
-    setTypeFilter("all");
-    
-    applyFilters({
-      minPrice: null,
-      maxPrice: null,
-      type: "all",
-      amenities: [],
-      maxGuests: null
-    });
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <main>
-        <AccommodationHero />
-
-        {/* Accommodations content */}
-        <section className="section-padding py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row gap-8">
-              <AccommodationFilters
-                isFilterOpen={isFilterOpen}
-                setIsFilterOpen={setIsFilterOpen}
-                getAmenityIcon={getAmenityIcon}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                capacityFilter={capacityFilter}
-                amenitiesFilter={amenitiesFilter}
-                allAmenities={commonAmenities}
-                setMinPrice={setMinPrice}
-                setMaxPrice={setMaxPrice}
-                toggleCapacityFilter={toggleCapacityFilter}
-                toggleAmenityFilter={toggleAmenityFilter}
-                applyFilters={applyAllFilters}
-                resetFilters={resetFilters}
-                priceRange={priceRange}
-              />
-
-              <AccommodationsGrid 
-                isLoading={isLoading} 
-                accommodations={accommodations || []} 
-                error={error}
-              />
-            </div>
+      <main className="flex-grow py-12 px-4 md:px-6 lg:px-8 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Hospedagens em Fernando de Noronha</h1>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Encontre o lugar perfeito para sua estadia neste paraíso tropical
+            </p>
           </div>
-        </section>
 
-        <ContactCTA />
+          <AccommodationFilters 
+            filters={filters}
+            onFilterChange={handleFilterChange}
+          />
+          <AccommodationGrid 
+            accommodations={accommodations}
+            isLoading={isLoading}
+          />
+        </div>
       </main>
       <Footer />
     </div>

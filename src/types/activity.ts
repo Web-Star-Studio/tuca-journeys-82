@@ -1,81 +1,87 @@
 
-export interface Activity {
-  id: number;
-  title: string;
-  description: string;
-  short_description: string;
-  price: number;
-  category: string;
-  difficulty: string;
-  duration: string;
-  rating: number; // Making this required
-  meeting_point: string;
-  min_participants: number;
-  max_participants: number;
-  includes: string[];
-  excludes: string[];
-  notes: string[];
-  schedule: string[];
-  image_url: string;
-  gallery_images: string[];
-  is_active: boolean;
-  is_featured: boolean;
-  partner_id?: string;
-  created_at: string;
-  updated_at: string;
-}
+// This file contains activity-related types and constants
 
-export interface ActivityAvailability {
-  id: number;
-  tour_id: number;
-  date: string;
-  available_spots: number;
-  custom_price?: number;
-  status: 'available' | 'unavailable' | 'fully_booked';
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ActivityFilters {
-  category?: string;
-  difficulty?: string;
-  minPrice?: number | null;
-  maxPrice?: number | null;
-  searchQuery?: string;
-  date?: Date;
-  sortBy?: string; // Added sortBy property
-}
-
-export interface ActivityBooking {
-  id: number;
-  activity_id: number;
-  user_id: string;
-  booking_date: string;
-  participants: number;
-  total_price: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'refunded';
-  special_requests?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// Activity categories used for filtering
 export const ACTIVITY_CATEGORIES = [
-  "Todos", 
-  "Barco", 
+  "Todos",
+  "Barco",
   "Mergulho", 
-  "Trilha", 
+  "Trilha",
   "Terrestre", 
   "Ecológico", 
-  "Cultural", 
+  "Cultural",
   "Gastronômico"
 ];
 
-// Activity difficulty levels
 export const ACTIVITY_DIFFICULTY_LEVELS = [
   "fácil",
   "moderado",
   "difícil",
   "extremo"
 ];
+
+export interface Activity {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  image_url: string;
+  price: number;
+  duration: string;
+  category: string;
+  max_participants: number;
+  difficulty: string;
+  meeting_point?: string;
+  includes: string[];
+  excludes: string[];
+  notes?: string[];
+  schedule?: string[];
+  rating?: number;
+  gallery_images: string[];
+  is_featured?: boolean;
+  is_active?: boolean;
+  partner_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityFilters {
+  category?: string;
+  date?: Date | null;
+  searchQuery?: string;
+  sortBy?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  difficulty?: string;
+  [key: string]: any;
+}
+
+export interface ActivityAvailability {
+  id: number;
+  activityId: number;
+  date: string;
+  availableSpots: number;
+  customPrice?: number | null;
+  status: 'available' | 'unavailable';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivityBooking {
+  id: number;
+  activityId: number;
+  userId: string;
+  date: string;
+  guests: number;
+  totalPrice: number;
+  status: 'confirmed' | 'cancelled' | 'pending';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivityBulkAvailabilityParams {
+  activityId: number;
+  dates: Date[];
+  availableSpots: number;
+  customPrice?: number;
+  status?: 'available' | 'unavailable';
+}

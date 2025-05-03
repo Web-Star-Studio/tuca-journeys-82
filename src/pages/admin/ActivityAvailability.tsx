@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowLeft, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
+import { ActivityAvailability as ActivityAvailabilityType } from "@/types/activity";
 
 const ActivityAvailability = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,18 +33,18 @@ const ActivityAvailability = () => {
     if (!activityId || !selectedDates.length) return;
     
     await bulkUpdateAvailability({
+      activityId,
       dates: selectedDates,
       availableSpots: spots,
       customPrice: customPrice ? parseFloat(customPrice) : undefined,
-      status: 'available',
-      activityId // Add activityId to match the expected params
+      status: 'available'
     });
     
     setSelectedDates([]);
   };
 
-  const getDateAvailability = (date: Date) => {
-    if (!availability) return null;
+  const getDateAvailability = (date: Date): ActivityAvailabilityType | undefined => {
+    if (!availability) return undefined;
     const dateStr = format(date, 'yyyy-MM-dd');
     return availability.find(a => a.date === dateStr);
   };
@@ -122,7 +123,7 @@ const ActivityAvailability = () => {
               onSelect={setSelectedDates}
               className="border rounded-md p-3"
               components={{
-                Day: ({ date, ...props }: { date: Date } & Record<string, any>) => (
+                Day: ({ date, ...props }) => (
                   <button {...props}>
                     {renderDay(date)}
                   </button>

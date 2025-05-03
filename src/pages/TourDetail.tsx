@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Tour } from "@/data/tours";
 import { tourService } from "@/services/tour-service";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,6 +11,23 @@ import SafeImage from "@/components/ui/safe-image";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+interface Tour {
+  id: number;
+  title: string;
+  description: string;
+  short_description: string;
+  price: number;
+  duration: string;
+  category: string;
+  maxParticipants: number; 
+  minParticipants: number;
+  rating: number;
+  featured?: boolean;
+  image: string;
+  include?: string[];
+  location: string;
+}
 
 const TourDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +47,24 @@ const TourDetail = () => {
       try {
         if (!id) throw new Error("Tour ID is required");
         const tourData = await tourService.getTourById(parseInt(id));
-        setTour(tourData);
+        
+        // Map the API response fields to our interface
+        setTour({
+          id: tourData.id,
+          title: tourData.title,
+          description: tourData.description,
+          short_description: tourData.short_description,
+          price: tourData.price,
+          duration: tourData.duration,
+          category: tourData.category,
+          maxParticipants: tourData.max_participants,
+          minParticipants: tourData.min_participants || 1,
+          rating: tourData.rating,
+          featured: tourData.is_featured,
+          image: tourData.image_url,
+          include: tourData.includes,
+          location: tourData.meeting_point || "Fernando de Noronha"
+        });
       } catch (err: any) {
         setError(err.message || "Failed to load tour");
         console.error("Error fetching tour:", err);
@@ -52,7 +86,7 @@ const TourDetail = () => {
         id: tour.id,
         type: 'tour',
         title: tour.title,
-        image: tour.image_url
+        image: tour.image
       });
     }
   };
@@ -111,7 +145,7 @@ const TourDetail = () => {
             <div className="md:order-1">
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-md">
                 <SafeImage
-                  src={tour.image_url}
+                  src={tour.image}
                   alt={tour.title}
                   className={`w-full h-full object-cover transition-transform duration-700 ${imageLoaded ? 'hover:scale-110' : ''}`}
                   onLoadSuccess={() => setImageLoaded(true)}
@@ -147,7 +181,7 @@ const TourDetail = () => {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Users className="h-4 w-4 mr-2" />
-                  <span>Até {tour.max_participants} pessoas</span>
+                  <span>Até {tour.maxParticipants} pessoas</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <CalendarDays className="h-4 w-4 mr-2" />
@@ -175,7 +209,7 @@ const TourDetail = () => {
           <div className="py-12">
             <h2 className="text-2xl font-semibold mb-6">Destaques do Passeio</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tour.includes?.map((highlight, index) => (
+              {tour.include?.map((highlight, index) => (
                 <div key={index} className="flex items-center text-gray-700">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
                   <span>{highlight}</span>

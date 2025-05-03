@@ -1,50 +1,44 @@
-
 import React from "react";
-import { Activity } from "@/types/activity";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, PencilIcon, CalendarIcon, Trash2, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/utils/formatters";
 import { Switch } from "@/components/ui/switch";
-import { useActivities } from "@/modules/activities";
+import { Activity } from "@/types/activity";
+import { useActivityMutations } from "@/hooks/activities/use-activity-mutations";
 
 interface ActivityCardProps {
   activity: Activity;
-  onEdit: (activity: Activity) => void;
-  onDelete: (activity: Activity) => void;
+  onEditActivity: (activity: Activity) => void;
+  onDeleteActivity: (activity: Activity) => void;
   disabled?: boolean;
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = ({
   activity,
-  onEdit,
-  onDelete,
+  onEditActivity,
+  onDeleteActivity,
   disabled = false,
 }) => {
-  const { toggleActivityFeatured, toggleActivityActive } = useActivities();
+  const { toggleActivityFeatured, toggleActivityActive } = useActivityMutations();
 
   const handleFeaturedToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (disabled) return;
     
-    toggleActivityFeatured({ 
-      activityId: activity.id, 
-      isFeatured: !(activity.is_featured ?? false) 
-    });
+    toggleActivityFeatured(activity);
   };
   
   const handleActiveToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (disabled) return;
     
-    toggleActivityActive({ 
-      activityId: activity.id, 
-      isActive: !(activity.is_active ?? true)
-    });
+    toggleActivityActive(activity);
   };
   
+  // We're keeping this card but adding a visual indicator for inactive activities
   return (
     <Card className={`overflow-hidden ${!(activity.is_active ?? true) ? 'opacity-70' : ''}`}>
       <div
@@ -89,64 +83,61 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           <span className="text-sm text-gray-500">Preço:</span>
           <span className="font-medium">{formatCurrency(activity.price)}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Categoria:</span>
-          <span className="font-medium">{activity.category}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Dificuldade:</span>
-          <span className="font-medium capitalize">{activity.difficulty}</span>
-        </div>
         
-        <div className="pt-3 border-t flex items-center justify-between">
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(activity)}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex items-center">
+            <span className="text-sm text-gray-500 mr-2">Destaque:</span>
+            <Switch 
+              checked={activity.is_featured ?? false} 
+              onCheckedChange={() => {}} 
+              onClick={handleFeaturedToggle}
               disabled={disabled}
-            >
-              <PencilIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() => onDelete(activity)}
-              className="text-red-500 hover:text-red-500"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-            >
-              <Link to={`/atividades/${activity.id}`}>
-                <Eye className="h-4 w-4" />
-              </Link>
-            </Button>
+            />
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex items-center space-x-1" onClick={handleFeaturedToggle}>
-              <Switch
-                checked={activity.is_featured ?? false}
-                disabled={disabled}
-              />
-              <span className="text-xs">Destaque</span>
-            </div>
-            
-            <div className="flex items-center space-x-1" onClick={handleActiveToggle}>
-              <Switch
-                checked={activity.is_active ?? true}
-                disabled={disabled}
-              />
-              <span className="text-xs">Ativo</span>
-            </div>
+          <div className="flex items-center">
+            <span className="text-sm text-gray-500 mr-2">Ativo:</span>
+            <Switch 
+              checked={activity.is_active ?? true} 
+              onCheckedChange={() => {}} 
+              onClick={handleActiveToggle}
+              disabled={disabled}
+            />
           </div>
         </div>
       </CardContent>
+      <CardFooter className="grid grid-cols-3 gap-2 pt-2 border-t">
+        <Link to={`/admin/activities/${activity.id}/availability`}>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            size="sm"
+            disabled={disabled}
+          >
+            <CalendarIcon className="h-4 w-4 mr-1" />
+            <span className="sr-only sm:not-sr-only sm:inline-block sm:text-xs">Datas</span>
+          </Button>
+        </Link>
+        <Button
+          variant="outline"
+          className="w-full"
+          size="sm"
+          onClick={() => onEditActivity(activity)}
+          disabled={disabled}
+        >
+          <PencilIcon className="h-4 w-4 mr-1" />
+          <span className="sr-only sm:not-sr-only sm:inline-block sm:text-xs">Editar</span>
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+          size="sm"
+          onClick={() => onDeleteActivity(activity)}
+          disabled={disabled}
+        >
+          <Trash2 className="h-4 w-4 mr-1" />
+          <span className="sr-only sm:not-sr-only sm:inline-block sm:text-xs">Excluir</span>
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

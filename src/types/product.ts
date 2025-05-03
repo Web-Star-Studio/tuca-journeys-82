@@ -3,15 +3,16 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  image_url: string;
   price: number;
   category: string;
   stock: number;
-  status: "active" | "out_of_stock" | "discontinued";
+  featured: boolean;
+  image_url: string;
+  gallery?: string[];
   weight?: number;
   dimensions?: string;
-  gallery?: string[];
-  featured?: boolean;
+  partner_id?: string;
   created_at?: string;
   updated_at?: string;
+  status: 'active' | 'inactive' | 'out_of_stock';
 }

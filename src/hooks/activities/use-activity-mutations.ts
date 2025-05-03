@@ -1,92 +1,89 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Activity } from '@/types/activity';
 import { activityService } from '@/services/activity-service';
+import { Activity } from '@/types/activity';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
-/**
- * Hook for activity mutations (create, update, delete)
- */
 export const useActivityMutations = () => {
   const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Create activity mutation
-  const createMutation = useMutation({
-    mutationFn: (activityData: Partial<Activity>) => {
-      return activityService.createActivity(activityData);
-    },
+  const {
+    mutateAsync: createActivity,
+    isPending: isCreating
+  } = useMutation({
+    mutationFn: activityService.createActivity.bind(activityService),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success('Atividade criada com sucesso');
     },
-    onError: (error: any) => {
-      toast.error(`Erro ao criar atividade: ${error.message}`);
+    onError: (error) => {
+      console.error('Error creating activity:', error);
+      toast.error('Erro ao criar atividade');
     }
   });
 
-  // Update activity mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Activity> }) => {
-      return activityService.updateActivity(id, data);
-    },
+  const {
+    mutateAsync: updateActivity,
+    isPending: isUpdating
+  } = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: Partial<Activity> }) => 
+      activityService.updateActivity(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success('Atividade atualizada com sucesso');
     },
-    onError: (error: any) => {
-      toast.error(`Erro ao atualizar atividade: ${error.message}`);
+    onError: (error) => {
+      console.error('Error updating activity:', error);
+      toast.error('Erro ao atualizar atividade');
     }
   });
 
-  // Delete activity mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => {
-      return activityService.deleteActivity(id);
-    },
-    onSuccess: () => {
+  const deleteActivity = async (id: number) => {
+    try {
+      setIsDeleting(true);
+      await activityService.deleteActivity(id);
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success('Atividade excluída com sucesso');
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao excluir atividade: ${error.message}`);
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      toast.error('Erro ao excluir atividade');
+    } finally {
+      setIsDeleting(false);
     }
-  });
+  };
 
-  // Toggle activity featured status
-  const toggleFeaturedMutation = useMutation({
-    mutationFn: ({ activityId, isFeatured }: { activityId: number; isFeatured: boolean }) => {
-      return activityService.updateActivity(activityId, { is_featured: isFeatured });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao atualizar destaque da atividade: ${error.message}`);
+  const toggleActivityFeatured = async (activity: Activity) => {
+    try {
+      await updateActivity({
+        id: activity.id,
+        data: { is_featured: !activity.is_featured }
+      });
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
     }
-  });
+  };
 
-  // Toggle activity active status
-  const toggleActiveMutation = useMutation({
-    mutationFn: ({ activityId, isActive }: { activityId: number; isActive: boolean }) => {
-      return activityService.updateActivity(activityId, { is_active: isActive });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao atualizar status da atividade: ${error.message}`);
+  const toggleActivityActive = async (activity: Activity) => {
+    try {
+      await updateActivity({
+        id: activity.id,
+        data: { is_active: !activity.is_active }
+      });
+    } catch (error) {
+      console.error('Error toggling active status:', error);
     }
-  });
+  };
 
   return {
-    createActivity: createMutation.mutate,
-    updateActivity: updateMutation.mutate,
-    deleteActivity: deleteMutation.mutate,
-    toggleActivityFeatured: toggleFeaturedMutation.mutate,
-    toggleActivityActive: toggleActiveMutation.mutate,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
-    isSaving: createMutation.isPending || updateMutation.isPending,
+    createActivity,
+    updateActivity,
+    deleteActivity,
+    toggleActivityFeatured,
+    toggleActivityActive,
+    isCreating,
+    isUpdating,
+    isDeleting
   };
 };

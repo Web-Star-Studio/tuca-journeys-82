@@ -53,7 +53,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   setError
 }) => {
   const [previewUrl, setPreviewUrl] = useState("");
-  const { data: activity, isLoading: isActivityLoading } = useActivity(activityId);
+  const { activity, isLoading: isActivityLoading } = useActivity(activityId);
   const { createActivity, updateActivity, isCreating, isUpdating } = useActivityMutations();
 
   // Create form

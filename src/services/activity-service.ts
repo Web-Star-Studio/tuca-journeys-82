@@ -1,6 +1,6 @@
 
 import { BaseApiService } from './base-api';
-import { Activity, ActivityFilters } from '@/types/activity';
+import { Activity, ActivityFilters, ActivityAvailability, ActivityBulkAvailabilityParams } from '@/types/activity';
 import { adaptComponentActivityToDB, adaptDBActivityToComponentActivity } from '@/utils/activityAdapter';
 
 class ActivityService extends BaseApiService {
@@ -149,9 +149,9 @@ class ActivityService extends BaseApiService {
   }
 
   // Methods for activity availability
-  async getActivityAvailability(activityId: number) {
+  async getActivityAvailability(activityId: number): Promise<ActivityAvailability[]> {
     try {
-      // Using direct table query instead of RPC
+      // Using tours table directly instead of RPC
       const { data, error } = await this.supabase
         .from('tour_availability')
         .select('*')
@@ -162,7 +162,16 @@ class ActivityService extends BaseApiService {
         throw error;
       }
 
-      return data;
+      return data.map(item => ({
+        id: item.id,
+        activityId: item.tour_id,
+        date: item.date,
+        availableSpots: item.available_spots,
+        customPrice: item.custom_price,
+        status: item.status,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
     } catch (err) {
       console.error(`Error in getActivityAvailability:`, err);
       return [];
@@ -175,7 +184,7 @@ class ActivityService extends BaseApiService {
     availableSpots: number,
     customPrice?: number,
     status: 'available' | 'unavailable' = 'available'
-  ) {
+  ): Promise<ActivityAvailability> {
     try {
       // Format date as YYYY-MM-DD
       const dateStr = date.toISOString().split('T')[0];
@@ -223,31 +232,58 @@ class ActivityService extends BaseApiService {
         result = data;
       }
 
-      return result;
+      return {
+        id: result.id,
+        activityId: result.tour_id,
+        date: result.date,
+        availableSpots: result.available_spots,
+        customPrice: result.custom_price,
+        status: result.status,
+        createdAt: result.created_at,
+        updatedAt: result.updated_at
+      };
     } catch (err) {
       console.error(`Error in updateActivityAvailability:`, err);
       throw err;
     }
   }
   
-  async bulkUpdateActivityAvailability(params: any) {
+  async bulkUpdateActivityAvailability(params: ActivityBulkAvailabilityParams): Promise<ActivityAvailability[]> {
     try {
       const { activityId, dates, availableSpots, customPrice, status = 'available' } = params;
       
-      // Simple implementation that calls updateActivityAvailability for each date
-      const results = await Promise.all(
-        dates.map((date: Date) => 
-          this.updateActivityAvailability(
-            activityId,
-            date,
-            availableSpots,
-            customPrice,
-            status
-          )
-        )
-      );
+      // Create array of objects for bulk insert
+      const records = dates.map(date => ({
+        tour_id: activityId,
+        date: date.toISOString().split('T')[0],
+        available_spots: availableSpots,
+        custom_price: customPrice,
+        status
+      }));
       
-      return results;
+      // Use upsert to handle both insert and update cases
+      const { data, error } = await this.supabase
+        .from('tour_availability')
+        .upsert(records, { 
+          onConflict: 'tour_id,date',
+          ignoreDuplicates: false 
+        })
+        .select();
+      
+      if (error) {
+        throw error;
+      }
+      
+      return data.map(item => ({
+        id: item.id,
+        activityId: item.tour_id,
+        date: item.date,
+        availableSpots: item.available_spots,
+        customPrice: item.custom_price,
+        status: item.status,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
     } catch (err) {
       console.error(`Error in bulkUpdateActivityAvailability:`, err);
       throw err;

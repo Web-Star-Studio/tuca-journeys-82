@@ -3,7 +3,7 @@ import { BaseApiService } from './base-api';
 import { Package } from '@/types/package';
 
 // Define an explicit type for database package row
-type DBPackage = {
+export type DBPackage = {
   id: number;
   title: string;
   name: string;
@@ -38,8 +38,8 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    // Use type assertion to help TypeScript understand the data flow
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
+    // Convert the database packages to our component package type
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
   }
 
   async getPackageById(id: number): Promise<Package> {
@@ -54,7 +54,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as DBPackage);
   }
 
   async getFeaturedPackages(limit: number = 3): Promise<Package[]> {
@@ -69,7 +69,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
   }
   
   async createPackage(packageData: Omit<Package, 'id'>): Promise<Package> {
@@ -78,7 +78,7 @@ class PackageService extends BaseApiService {
     // Remove the array wrapper as we're inserting a single item
     const { data, error } = await this.supabase
       .from('packages')
-      .insert(dbData)
+      .insert([dbData])
       .select()
       .single();
       
@@ -87,7 +87,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as DBPackage);
   }
   
   async updatePackage(id: number, packageData: Partial<Package>): Promise<Package> {
@@ -105,7 +105,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as DBPackage);
   }
   
   async deletePackage(id: number): Promise<void> {
@@ -144,35 +144,27 @@ class PackageService extends BaseApiService {
     };
   }
 
-  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Record<string, any> {
+  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Omit<DBPackage, 'created_at' | 'updated_at'> {
     // Create an object with the specific fields needed by the DB
-    const dbPackage: Record<string, any> = {
-      title: packageData.title,
-      name: packageData.title, // Ensure both fields are set
-      description: packageData.description,
-      short_description: packageData.short_description,
-      price: packageData.price,
-      duration: packageData.duration,
-      image_url: packageData.image_url,
-      gallery_images: packageData.gallery_images,
-      category: packageData.category,
-      includes: packageData.includes,
-      excludes: packageData.excludes,
-      itinerary: packageData.itinerary,
-      max_guests: packageData.max_participants,
-      is_featured: packageData.is_featured,
+    return {
+      id: packageData.id,
+      title: packageData.title || '',
+      name: packageData.title || '', // Ensure both fields are set
+      description: packageData.description || '',
+      short_description: packageData.short_description || '',
+      price: packageData.price || 0,
+      duration: packageData.duration || '',
+      image_url: packageData.image_url || '',
+      gallery_images: packageData.gallery_images || [],
+      category: packageData.category || 'Uncategorized',
+      includes: packageData.includes || [],
+      excludes: packageData.excludes || [],
+      itinerary: packageData.itinerary || [],
+      max_guests: packageData.max_participants || 0,
+      is_featured: packageData.is_featured || false,
       partner_id: packageData.partner_id,
-      rating: packageData.rating
+      rating: packageData.rating || 0
     };
-
-    // Remove undefined fields to avoid overwriting with nulls
-    Object.keys(dbPackage).forEach(key => {
-      if (dbPackage[key as keyof typeof dbPackage] === undefined) {
-        delete dbPackage[key as keyof typeof dbPackage];
-      }
-    });
-
-    return dbPackage;
   }
 }
 

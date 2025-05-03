@@ -12,7 +12,6 @@ import { usePackageForm } from "@/hooks/packages/usePackageForm";
 import { usePackageDetail } from "@/hooks/use-packages";
 import { Form } from "@/components/ui/form";
 import { adaptPackageToFormPackage } from "@/utils/packageAdapter";
-import { Package } from "@/types/package";
 
 interface PackageFormProps {
   packageId: number | null;

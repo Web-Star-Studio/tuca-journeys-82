@@ -1,6 +1,7 @@
+
 import { useQuery } from '@tanstack/react-query';
-import { Package } from '@/data/types/packageTypes';
-import { packages, getPackageById, getPackagesByCategory } from '@/data/packages';
+import { Package } from '@/types/package';
+import { packageService } from '@/services/package-service';
 
 /**
  * Custom hook to query packages with optional category filter
@@ -10,9 +11,10 @@ import { packages, getPackageById, getPackagesByCategory } from '@/data/packages
 export const usePackageQuery = (category?: string) => {
   return useQuery({
     queryKey: ['packages', { category }],
-    queryFn: () => {
+    queryFn: async () => {
+      const packages = await packageService.getPackages();
       if (category && category !== 'all') {
-        return getPackagesByCategory(category);
+        return packages.filter(pkg => pkg.category?.toLowerCase() === category.toLowerCase());
       }
       return packages;
     },
@@ -28,13 +30,7 @@ export const usePackageQuery = (category?: string) => {
 export const usePackageDetail = (id: number) => {
   return useQuery({
     queryKey: ['package', id],
-    queryFn: () => {
-      const pkg = getPackageById(id);
-      if (!pkg) {
-        throw new Error(`Package with ID ${id} not found`);
-      }
-      return pkg;
-    },
+    queryFn: () => packageService.getPackageById(id),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

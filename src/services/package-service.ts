@@ -1,6 +1,7 @@
 
 import { BaseApiService } from './base-api';
 import { Package } from '@/types/package';
+import { adaptDBPackageToComponentPackage, adaptComponentPackageToDB } from '@/utils/packageAdapter';
 
 class PackageService extends BaseApiService {
   async getPackages(filters = {}) {
@@ -15,7 +16,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return data as Package[];
+    return data.map(adaptDBPackageToComponentPackage);
   }
 
   async getPackageById(id: number) {
@@ -30,7 +31,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return data as Package;
+    return adaptDBPackageToComponentPackage(data);
   }
 
   async getFeaturedPackages(limit: number = 3) {
@@ -45,7 +46,55 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return data as Package[];
+    return data.map(adaptDBPackageToComponentPackage);
+  }
+
+  // Add methods to create, update, and delete packages
+  async createPackage(packageData: Omit<Package, 'id'>) {
+    const dbData = adaptComponentPackageToDB(packageData);
+    
+    const { data, error } = await this.supabase
+      .from('packages')
+      .insert([dbData])
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Error creating package:', error);
+      throw error;
+    }
+    
+    return adaptDBPackageToComponentPackage(data);
+  }
+  
+  async updatePackage(id: number, packageData: Partial<Package>) {
+    const dbData = adaptComponentPackageToDB(packageData);
+    
+    const { data, error } = await this.supabase
+      .from('packages')
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error(`Error updating package ${id}:`, error);
+      throw error;
+    }
+    
+    return adaptDBPackageToComponentPackage(data);
+  }
+  
+  async deletePackage(id: number) {
+    const { error } = await this.supabase
+      .from('packages')
+      .delete()
+      .eq('id', id);
+      
+    if (error) {
+      console.error(`Error deleting package ${id}:`, error);
+      throw error;
+    }
   }
 }
 

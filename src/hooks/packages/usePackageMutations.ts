@@ -12,7 +12,8 @@ export const usePackageMutations = () => {
 
   // Create package mutation
   const createPackage = useMutation({
-    mutationFn: (packageData: Omit<Package, 'id'>) => packageService.createPackage(packageData),
+    mutationFn: (packageData: Omit<Package, 'id'>) => 
+      packageService.createPackage(packageData),
     onSuccess: () => {
       // Invalidate packages query to refetch data
       queryClient.invalidateQueries({ queryKey: ['packages'] });
@@ -21,7 +22,8 @@ export const usePackageMutations = () => {
 
   // Update package mutation
   const updatePackage = useMutation({
-    mutationFn: (packageData: Package) => packageService.updatePackage(packageData.id, packageData),
+    mutationFn: (packageData: Package) => 
+      packageService.updatePackage(packageData.id, packageData),
     onSuccess: (updatedPackage) => {
       // Invalidate specific package query and packages list
       queryClient.invalidateQueries({ queryKey: ['package', updatedPackage.id] });
@@ -31,7 +33,8 @@ export const usePackageMutations = () => {
 
   // Delete package mutation
   const deletePackage = useMutation({
-    mutationFn: (packageId: number) => packageService.deletePackage(packageId),
+    mutationFn: (packageId: number) => 
+      packageService.deletePackage(packageId),
     onSuccess: (_, packageId) => {
       // Invalidate specific package query and packages list
       queryClient.invalidateQueries({ queryKey: ['package', packageId] });

@@ -1,8 +1,8 @@
 
 import { usePackages } from "@/hooks/use-packages";
 import { PackageFormValues } from "@/components/admin/packages/types";
-import { Package as OldPackage } from "@/data/types/packageTypes";
 import { adaptFormPackageToPackage } from "@/utils/packageAdapter";
+import { Package } from "@/types/package";
 
 export const usePackageSubmit = (
   packageId: number | null,
@@ -17,15 +17,17 @@ export const usePackageSubmit = (
       const packageData = adaptFormPackageToPackage({
         id: packageId,
         ...data,
-      } as OldPackage);
+      });
       
       updatePackage.mutate(packageData, {
         onSuccess: onSuccess,
       });
     } else {
       // Create new package - convert from form Package to our canonical Package
-      const packageData = adaptFormPackageToPackage(data as OldPackage);
-      createPackage.mutate(packageData, {
+      const packageData = adaptFormPackageToPackage(data);
+      
+      // Type assertion to handle the omission of the id field for creation
+      createPackage.mutate(packageData as Omit<Package, 'id'>, {
         onSuccess: onSuccess,
       });
     }

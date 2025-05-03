@@ -2,6 +2,7 @@
 import { BaseApiService } from './base-api';
 import { Activity, ActivityFilters, ActivityAvailability, ActivityBulkAvailabilityParams } from '@/types/activity';
 import { adaptComponentActivityToDB, adaptDBActivityToComponentActivity } from '@/utils/activityAdapter';
+import { Database } from '@/integrations/supabase/types-extensions';
 
 class ActivityService extends BaseApiService {
   async getActivities(filters: ActivityFilters = {}) {
@@ -151,7 +152,7 @@ class ActivityService extends BaseApiService {
   // Methods for activity availability
   async getActivityAvailability(activityId: number): Promise<ActivityAvailability[]> {
     try {
-      // We need to use 'tour_availability' table
+      // Use the properly typed tour_availability table from our extended Database type
       const { data, error } = await this.supabase
         .from('tour_availability')
         .select('*')
@@ -162,7 +163,9 @@ class ActivityService extends BaseApiService {
         throw error;
       }
 
-      // Map the DB data to our ActivityAvailability type
+      if (!data) return [];
+
+      // Map the DB data to our ActivityAvailability type with proper type safety
       return data.map(item => ({
         id: item.id,
         activityId: item.tour_id,
@@ -172,7 +175,7 @@ class ActivityService extends BaseApiService {
         status: item.status as 'available' | 'unavailable',
         createdAt: item.created_at,
         updatedAt: item.updated_at
-      })) as ActivityAvailability[];
+      }));
     } catch (err) {
       console.error(`Error in getActivityAvailability:`, err);
       return [];
@@ -233,6 +236,10 @@ class ActivityService extends BaseApiService {
         result = data;
       }
 
+      if (!result) {
+        throw new Error("Failed to update or create availability record");
+      }
+
       // Map the result to our ActivityAvailability type
       return {
         id: result.id,
@@ -274,6 +281,10 @@ class ActivityService extends BaseApiService {
       
       if (error) {
         throw error;
+      }
+      
+      if (!data) {
+        return [];
       }
       
       // Map the results to our ActivityAvailability type

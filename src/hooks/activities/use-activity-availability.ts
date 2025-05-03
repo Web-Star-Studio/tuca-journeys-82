@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { activityService } from '@/services/activity-service';
 import { toast } from 'sonner';
+import { ActivityAvailability } from '@/types/activity';
 
 export interface ActivityAvailabilityParams {
   date: Date;

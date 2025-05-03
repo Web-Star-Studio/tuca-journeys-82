@@ -507,6 +507,49 @@ export interface Database extends Omit<OriginalDatabase, 'public'> {
           }
         ];
       };
+      
+      // Add tour_availability table definition
+      tour_availability: {
+        Row: {
+          id: number;
+          tour_id: number;
+          date: string;
+          available_spots: number;
+          custom_price: number | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          tour_id: number;
+          date: string;
+          available_spots: number;
+          custom_price?: number | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          tour_id?: number;
+          date?: string;
+          available_spots?: number;
+          custom_price?: number | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_availability_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: OriginalDatabase['public']['Views'];
     Functions: OriginalDatabase['public']['Functions'] & {

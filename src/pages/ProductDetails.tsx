@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Header from "@/components/Header";
@@ -8,6 +9,7 @@ import ProductActions from "@/components/product/ProductActions";
 import { useWishlist } from "@/contexts/WishlistContext";
 import Footer from "@/components/Footer";
 import { Product } from "@/types/product";
+import { toast } from "sonner";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +29,7 @@ const ProductDetails = () => {
         description:
           "Camiseta de algodão orgânico com design exclusivo da Tuca Noronha. Confortável e estilosa para você aproveitar ao máximo sua viagem.",
         price: 79.9,
-        image: "/products/camiseta.jpg",
+        image_url: "/products/camiseta.jpg",
         category: "Vestuário",
         stock: 10,
         featured: true,
@@ -50,28 +52,30 @@ const ProductDetails = () => {
     );
   }
 
-  const relatedProductsData = [
+  const relatedProductsData: Product[] = [
     {
       id: 2,
       name: "Boné Tuca Noronha",
       description: "Boné com a logo da Tuca Noronha",
       price: 49.9,
-      image: "/products/bone.jpg",
+      image_url: "/products/bone.jpg",
       category: "Acessórios",
       stock: 5,
       featured: false,
       status: 'active',
+      gallery: [],
     },
     {
       id: 3,
       name: "Caneca Tuca Noronha",
       description: "Caneca para você tomar seu café",
       price: 29.9,
-      image: "/products/caneca.jpg",
+      image_url: "/products/caneca.jpg",
       category: "Acessórios",
       stock: 20,
       featured: false,
       status: 'active',
+      gallery: [],
     },
   ];
 
@@ -80,14 +84,21 @@ const ProductDetails = () => {
     
     if (isInWishlist(product.id, 'product')) {
       removeFromWishlist(product.id, 'product');
+      toast.info("Produto removido dos favoritos");
     } else {
       addToWishlist({
         id: product.id,
         type: 'product',
         title: product.name,
-        image: product.image
+        image: product.image_url
       });
+      toast.success("Produto adicionado aos favoritos");
     }
+  };
+
+  const handleAddToCart = (quantity: number) => {
+    toast.success(`${quantity} unidade(s) de ${product.name} adicionado(s) ao carrinho`);
+    // Implement actual cart functionality here
   };
 
   return (
@@ -95,14 +106,18 @@ const ProductDetails = () => {
       <Header />
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <ProductImage image={product.image} name={product.name} />
+          <ProductImage product={product} />
           <div>
             <h1 className="text-3xl font-medium mb-4">{product.name}</h1>
             <p className="text-gray-700 mb-6">{product.description}</p>
-            <div className="text-tuca-ocean-blue text-xl font-medium mb-4">
-              R$ {product.price.toFixed(2).replace(".", ",")}
-            </div>
-            <ProductActions productName={product.name} inStock={product.stock > 0} />
+            
+            <ProductActions 
+              product={product}
+              isInWishlist={isInWishlist(product.id, 'product')}
+              toggleWishlist={handleWishlistToggle}
+              addToCart={handleAddToCart}
+            />
+            
             <ProductBenefits benefits={product.benefits || []} />
           </div>
         </div>

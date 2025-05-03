@@ -151,7 +151,7 @@ class ActivityService extends BaseApiService {
   // Methods for activity availability
   async getActivityAvailability(activityId: number): Promise<ActivityAvailability[]> {
     try {
-      // We need to use 'tours.tour_availability' for now - will adapt to match ActivityAvailability type
+      // We need to use 'tour_availability' table
       const { data, error } = await this.supabase
         .from('tour_availability')
         .select('*')
@@ -169,10 +169,10 @@ class ActivityService extends BaseApiService {
         date: item.date,
         availableSpots: item.available_spots,
         customPrice: item.custom_price,
-        status: item.status,
+        status: item.status as 'available' | 'unavailable',
         createdAt: item.created_at,
         updatedAt: item.updated_at
-      }));
+      })) as ActivityAvailability[];
     } catch (err) {
       console.error(`Error in getActivityAvailability:`, err);
       return [];
@@ -240,7 +240,7 @@ class ActivityService extends BaseApiService {
         date: result.date,
         availableSpots: result.available_spots,
         customPrice: result.custom_price,
-        status: result.status,
+        status: result.status as 'available' | 'unavailable',
         createdAt: result.created_at,
         updatedAt: result.updated_at
       };
@@ -283,7 +283,7 @@ class ActivityService extends BaseApiService {
         date: item.date,
         availableSpots: item.available_spots,
         customPrice: item.custom_price,
-        status: item.status,
+        status: item.status as 'available' | 'unavailable',
         createdAt: item.created_at,
         updatedAt: item.updated_at
       }));

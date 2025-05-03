@@ -7,7 +7,7 @@ export interface Product {
   category: string;
   stock: number;
   featured: boolean;
-  image: string;
+  image_url: string; // Changed from image to image_url to match the database
   gallery?: string[];
   weight?: number;
   dimensions?: string;

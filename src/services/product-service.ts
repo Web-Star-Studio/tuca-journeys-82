@@ -74,7 +74,7 @@ class ProductService extends BaseApiService {
       category: dbProduct.category,
       stock: dbProduct.stock,
       featured: dbProduct.featured || false,
-      image: dbProduct.image_url, // map image_url to image
+      image_url: dbProduct.image_url,
       gallery: dbProduct.gallery,
       weight: dbProduct.weight,
       dimensions: dbProduct.dimensions,

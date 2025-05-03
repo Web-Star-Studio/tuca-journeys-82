@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Ticket, ArrowRight } from "lucide-react";
@@ -72,7 +71,16 @@ const FeaturedEvents = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard 
+              key={event.id}
+              id={event.id}
+              name={event.name}
+              image_url={event.image_url}
+              date={event.date}
+              location={event.location}
+              price={event.price}
+              short_description={event.short_description}
+            />
           ))}
         </div>
         

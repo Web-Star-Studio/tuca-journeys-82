@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Product } from "@/types/product";
 import { productService } from "@/services/product-service";
@@ -8,6 +9,7 @@ import { Link } from "react-router-dom";
 import { formatCurrency } from "@/utils/formatters";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
 
 const Loja = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,6 +35,7 @@ const Loja = () => {
     e.preventDefault();
     if (isInWishlist(productId, "product")) {
       removeFromWishlist(productId, "product");
+      toast.info("Produto removido dos favoritos");
     } else {
       addToWishlist({
         id: productId,
@@ -40,6 +43,7 @@ const Loja = () => {
         title: productName,
         image: productImage,
       });
+      toast.success("Produto adicionado aos favoritos");
     }
   };
 

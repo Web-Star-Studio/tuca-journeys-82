@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Heart, ShoppingCart, MinusCircle, PlusCircle } from 'lucide-react';
-import { Product } from '@/types/product';
 import { formatCurrency } from '@/utils/formatters';
 
 interface ProductActionsProps {
-  product: Product;
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    stock: number;
+  };
   isInWishlist: boolean;
   toggleWishlist: () => void;
   addToCart: (quantity: number) => void;

@@ -19,7 +19,7 @@ class PackageService extends BaseApiService {
     return data.map(adaptDBPackageToComponentPackage);
   }
 
-  async getPackageById(id: number) {
+  async getPackageById(id: number): Promise<Package> {
     const { data, error } = await this.supabase
       .from('packages')
       .select('*')
@@ -34,7 +34,7 @@ class PackageService extends BaseApiService {
     return adaptDBPackageToComponentPackage(data);
   }
 
-  async getFeaturedPackages(limit: number = 3) {
+  async getFeaturedPackages(limit: number = 3): Promise<Package[]> {
     const { data, error } = await this.supabase
       .from('packages')
       .select('*')
@@ -48,9 +48,8 @@ class PackageService extends BaseApiService {
 
     return data.map(adaptDBPackageToComponentPackage);
   }
-
-  // Add methods to create, update, and delete packages
-  async createPackage(packageData: Omit<Package, 'id'>) {
+  
+  async createPackage(packageData: Omit<Package, 'id'>): Promise<Package> {
     const dbData = adaptComponentPackageToDB(packageData);
     
     const { data, error } = await this.supabase
@@ -67,7 +66,7 @@ class PackageService extends BaseApiService {
     return adaptDBPackageToComponentPackage(data);
   }
   
-  async updatePackage(id: number, packageData: Partial<Package>) {
+  async updatePackage(id: number, packageData: Partial<Package>): Promise<Package> {
     const dbData = adaptComponentPackageToDB(packageData);
     
     const { data, error } = await this.supabase
@@ -85,7 +84,7 @@ class PackageService extends BaseApiService {
     return adaptDBPackageToComponentPackage(data);
   }
   
-  async deletePackage(id: number) {
+  async deletePackage(id: number): Promise<void> {
     const { error } = await this.supabase
       .from('packages')
       .delete()

@@ -12,7 +12,7 @@ export const usePackageQuery = (category?: string) => {
   return useQuery({
     queryKey: ['packages', { category }],
     queryFn: async () => {
-      const packages = await packageService.getPackages();
+      const packages: Package[] = await packageService.getPackages();
       if (category && category !== 'all') {
         return packages.filter(pkg => pkg.category?.toLowerCase() === category.toLowerCase());
       }

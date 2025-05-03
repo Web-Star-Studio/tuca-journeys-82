@@ -11,6 +11,7 @@ import { usePackageSubmit } from "@/hooks/packages/usePackageSubmit";
 import { usePackageForm } from "@/hooks/packages/usePackageForm";
 import { usePackageDetail } from "@/hooks/use-packages";
 import { Form } from "@/components/ui/form";
+import { adaptPackageToFormPackage } from "@/utils/packageAdapter";
 
 interface PackageFormProps {
   packageId: number | null;
@@ -24,7 +25,7 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
   // Fetch package details if editing an existing package
   const { data: packageData, isLoading: isLoadingPackage } = usePackageDetail(packageId || 0);
   
-  // Initialize form with package data if available
+  // Initialize form with package data if available, converting from our canonical Package to the form Package type
   const { 
     form, 
     previewUrl,
@@ -33,7 +34,7 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
     excludesArray, 
     itineraryArray, 
     datesArray 
-  } = usePackageForm(packageId && packageData ? packageData : undefined);
+  } = usePackageForm(packageId && packageData ? adaptPackageToFormPackage(packageData) : undefined);
   
   // Setup submission handler
   const { handleSubmit, isSubmitting } = usePackageSubmit(packageId, onSuccess);

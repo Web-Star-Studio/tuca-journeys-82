@@ -21,7 +21,7 @@ export const usePackageMutations = () => {
 
   // Update package mutation
   const updatePackage = useMutation({
-    mutationFn: ({ id, ...packageData }: Package) => packageService.updatePackage(id, packageData),
+    mutationFn: (packageData: Package) => packageService.updatePackage(packageData.id, packageData),
     onSuccess: (updatedPackage) => {
       // Invalidate specific package query and packages list
       queryClient.invalidateQueries({ queryKey: ['package', updatedPackage.id] });

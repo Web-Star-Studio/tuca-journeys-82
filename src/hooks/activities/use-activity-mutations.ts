@@ -9,11 +9,10 @@ export const useActivityMutations = () => {
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const {
-    mutateAsync: createActivity,
-    isPending: isCreating
-  } = useMutation({
-    mutationFn: activityService.createActivity.bind(activityService),
+  // Create activity
+  const createActivityMutation = useMutation({
+    mutationFn: (activityData: Partial<Activity>) => 
+      activityService.createActivity(activityData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success('Atividade criada com sucesso');
@@ -24,10 +23,8 @@ export const useActivityMutations = () => {
     }
   });
 
-  const {
-    mutateAsync: updateActivity,
-    isPending: isUpdating
-  } = useMutation({
+  // Update activity
+  const updateActivityMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: Partial<Activity> }) => 
       activityService.updateActivity(id, data),
     onSuccess: () => {
@@ -40,50 +37,57 @@ export const useActivityMutations = () => {
     }
   });
 
-  const deleteActivity = async (id: number) => {
-    try {
+  // Delete activity
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (activityId: number) => {
       setIsDeleting(true);
-      await activityService.deleteActivity(id);
+      try {
+        await activityService.deleteActivity(activityId);
+        return activityId;
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success('Atividade excluída com sucesso');
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting activity:', error);
       toast.error('Erro ao excluir atividade');
-    } finally {
-      setIsDeleting(false);
     }
+  });
+
+  // Toggle featured status
+  const toggleActivityFeatured = (activity: Activity) => {
+    updateActivityMutation.mutate({
+      id: activity.id,
+      data: {
+        ...activity,
+        is_featured: !(activity.is_featured ?? false)
+      }
+    });
   };
 
-  const toggleActivityFeatured = async (activity: Activity) => {
-    try {
-      await updateActivity({
-        id: activity.id,
-        data: { is_featured: !activity.is_featured }
-      });
-    } catch (error) {
-      console.error('Error toggling featured status:', error);
-    }
-  };
-
-  const toggleActivityActive = async (activity: Activity) => {
-    try {
-      await updateActivity({
-        id: activity.id,
-        data: { is_active: !activity.is_active }
-      });
-    } catch (error) {
-      console.error('Error toggling active status:', error);
-    }
+  // Toggle active status
+  const toggleActivityActive = (activity: Activity) => {
+    updateActivityMutation.mutate({
+      id: activity.id,
+      data: {
+        ...activity,
+        is_active: !(activity.is_active ?? true)
+      }
+    });
   };
 
   return {
-    createActivity,
-    updateActivity,
-    deleteActivity,
+    createActivity: createActivityMutation.mutate,
+    updateActivity: updateActivityMutation.mutate,
+    deleteActivity: deleteActivityMutation.mutate,
     toggleActivityFeatured,
     toggleActivityActive,
-    isCreating,
-    isUpdating,
-    isDeleting
+    isCreating: createActivityMutation.isPending,
+    isUpdating: updateActivityMutation.isPending,
+    isDeleting,
   };
 };

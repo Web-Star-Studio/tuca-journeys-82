@@ -29,6 +29,7 @@ export interface Activity {
   duration: string;
   category: string;
   max_participants: number;
+  min_participants?: number;
   difficulty: string;
   meeting_point?: string;
   includes: string[];
@@ -52,6 +53,7 @@ export interface ActivityFilters {
   minPrice?: number;
   maxPrice?: number;
   difficulty?: string;
+  query?: string;
   [key: string]: any;
 }
 

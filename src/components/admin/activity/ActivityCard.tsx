@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,15 +10,19 @@ import { Switch } from "@/components/ui/switch";
 import { Activity } from "@/types/activity";
 import { useActivityMutations } from "@/hooks/activities/use-activity-mutations";
 
-interface ActivityCardProps {
+export interface ActivityCardProps {
   activity: Activity;
-  onEditActivity: (activity: Activity) => void;
-  onDeleteActivity: (activity: Activity) => void;
+  onEditActivity?: (activity: Activity) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  onEdit?: (activity: Activity) => void;
+  onDelete?: (activity: Activity) => void;
   disabled?: boolean;
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = ({
   activity,
+  onEdit,
+  onDelete,
   onEditActivity,
   onDeleteActivity,
   disabled = false,
@@ -37,8 +42,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     
     toggleActivityActive(activity);
   };
+
+  // Handle both naming conventions for edit/delete functions
+  const handleEdit = (activity: Activity) => {
+    if (onEdit) onEdit(activity);
+    else if (onEditActivity) onEditActivity(activity);
+  };
   
-  // We're keeping this card but adding a visual indicator for inactive activities
+  const handleDelete = (activity: Activity) => {
+    if (onDelete) onDelete(activity);
+    else if (onDeleteActivity) onDeleteActivity(activity);
+  };
+  
   return (
     <Card className={`overflow-hidden ${!(activity.is_active ?? true) ? 'opacity-70' : ''}`}>
       <div
@@ -121,7 +136,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           variant="outline"
           className="w-full"
           size="sm"
-          onClick={() => onEditActivity(activity)}
+          onClick={() => handleEdit(activity)}
           disabled={disabled}
         >
           <PencilIcon className="h-4 w-4 mr-1" />
@@ -131,7 +146,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           variant="outline"
           className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
           size="sm"
-          onClick={() => onDeleteActivity(activity)}
+          onClick={() => handleDelete(activity)}
           disabled={disabled}
         >
           <Trash2 className="h-4 w-4 mr-1" />

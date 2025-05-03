@@ -11,23 +11,23 @@ export interface ActivityAvailabilityParams {
 }
 
 export interface ActivityBulkAvailabilityParams {
+  activityId: number;
   dates: Date[];
   availableSpots: number;
   customPrice?: number;
   status?: 'available' | 'unavailable';
-  activityId: number; // Added to match the expected type
 }
 
 /**
  * Hook to manage activity availability
  */
-export const useActivityAvailability = (activityId: number) => {
+export const useActivityAvailability = (activityId?: number) => {
   const queryClient = useQueryClient();
 
   // Fetch availability for a specific activity
   const { data: availability, isLoading } = useQuery({
     queryKey: ['activity-availability', activityId],
-    queryFn: () => activityService.getActivityAvailability(activityId),
+    queryFn: () => activityService.getActivityAvailability(activityId as number),
     enabled: !!activityId,
   });
 
@@ -35,7 +35,7 @@ export const useActivityAvailability = (activityId: number) => {
   const updateAvailabilityMutation = useMutation({
     mutationFn: (params: ActivityAvailabilityParams) =>
       activityService.updateActivityAvailability(
-        activityId, 
+        activityId as number, 
         params.date, 
         params.availableSpots, 
         params.customPrice, 

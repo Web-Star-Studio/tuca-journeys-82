@@ -151,7 +151,7 @@ class ActivityService extends BaseApiService {
   // Methods for activity availability
   async getActivityAvailability(activityId: number): Promise<ActivityAvailability[]> {
     try {
-      // Using tours table directly instead of RPC
+      // We need to use 'tours.tour_availability' for now - will adapt to match ActivityAvailability type
       const { data, error } = await this.supabase
         .from('tour_availability')
         .select('*')
@@ -162,6 +162,7 @@ class ActivityService extends BaseApiService {
         throw error;
       }
 
+      // Map the DB data to our ActivityAvailability type
       return data.map(item => ({
         id: item.id,
         activityId: item.tour_id,
@@ -232,6 +233,7 @@ class ActivityService extends BaseApiService {
         result = data;
       }
 
+      // Map the result to our ActivityAvailability type
       return {
         id: result.id,
         activityId: result.tour_id,
@@ -274,6 +276,7 @@ class ActivityService extends BaseApiService {
         throw error;
       }
       
+      // Map the results to our ActivityAvailability type
       return data.map(item => ({
         id: item.id,
         activityId: item.tour_id,

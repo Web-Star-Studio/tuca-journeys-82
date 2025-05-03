@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { useActivity, useActivityAvailability } from "@/hooks/activities";
+import { useActivity } from "@/hooks/activities";
+import { useActivityAvailability } from "@/hooks/activities/use-activity-availability";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

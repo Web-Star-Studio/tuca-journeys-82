@@ -7,7 +7,7 @@ export interface Product {
   category: string;
   stock: number;
   featured: boolean;
-  image_url: string;
+  image: string;
   gallery?: string[];
   weight?: number;
   dimensions?: string;
@@ -15,4 +15,6 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   status: 'active' | 'inactive' | 'out_of_stock';
+  benefits?: string[];
+  is_new?: boolean;
 }

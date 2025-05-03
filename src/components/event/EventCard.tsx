@@ -1,84 +1,71 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { CalendarDays, MapPin, Heart } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Event } from "@/types/event";
-import { useWishlist } from "@/contexts/WishlistContext";
-import { formatCurrency } from "@/utils/formatters";
-import { formatDate } from "@/utils/date";
-import SafeImage from "@/components/ui/safe-image";
+import React from 'react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { formatCurrency } from '@/utils/formatters';
+import { formatDate } from '@/utils/date';
 
 interface EventCardProps {
-  event: Event;
+  id: number;
+  name: string;
+  image_url: string;
+  date: string;
+  location: string;
+  price: number;
+  short_description?: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  
-  const handleWishlistClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    if (isInWishlist(event.id, "event")) {
-      removeFromWishlist(event.id, "event");
-    } else {
-      addToWishlist({
-        id: event.id,
-        type: "event",
-        title: event.name,
-        image: event.image_url
-      });
-    }
-  };
-  
-  const isWishlisted = isInWishlist(event.id, "event");
-
+const EventCard: React.FC<EventCardProps> = ({
+  id,
+  name,
+  image_url,
+  date,
+  location,
+  price,
+  short_description
+}) => {
   return (
-    <Link to={`/eventos/${event.id}`}>
-      <Card className="overflow-hidden h-full hover:shadow-md transition-shadow">
-        <div className="relative h-48">
-          <SafeImage
-            src={event.image_url}
-            alt={event.name}
-            className="h-full w-full object-cover"
-          />
-          <button
-            onClick={handleWishlistClick}
-            className="absolute top-2 right-2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors"
-          >
-            <Heart
-              className={`h-5 w-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"}`}
-            />
-          </button>
-          {event.is_featured && (
-            <Badge className="absolute top-2 left-2 bg-yellow-500">Destaque</Badge>
+    <Card className="overflow-hidden flex flex-col h-full">
+      <div className="relative">
+        <img
+          src={image_url}
+          alt={name}
+          className="w-full h-48 object-cover hover:scale-105 transition-transform"
+        />
+      </div>
+      <CardContent className="flex-grow pt-4">
+        <div className="mb-3">
+          <h3 className="font-medium text-lg line-clamp-1">{name}</h3>
+          {short_description && (
+            <p className="text-muted-foreground text-sm line-clamp-2 mt-1">
+              {short_description}
+            </p>
           )}
         </div>
-        <CardContent className="pt-4">
-          <h3 className="font-semibold text-lg mb-1 line-clamp-2">{event.name}</h3>
-          <p className="text-sm text-gray-500 line-clamp-2 mb-2">
-            {event.short_description}
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center text-gray-600">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span>{formatDate(date)}</span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <MapPin className="h-4 w-4 mr-2" />
+            <span className="line-clamp-1">{location}</span>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-2 pb-4 border-t flex items-center justify-between">
+        <div>
+          <p className="text-tuca-ocean-blue font-medium">
+            {formatCurrency(price)}
           </p>
-          <div className="flex items-center text-sm text-gray-500 mb-2">
-            <CalendarDays className="h-4 w-4 mr-1" />
-            <span>{formatDate(event.date)}</span>
-          </div>
-          <div className="flex items-center text-sm text-gray-500 mb-3">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span>{event.location}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <Badge variant="outline">
-              {event.category}
-            </Badge>
-            <p className="font-semibold text-tuca-ocean-blue">
-              {formatCurrency(event.price)}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+        <Link to={`/eventos/${id}`}>
+          <Button size="sm" variant="outline">Ver Detalhes</Button>
+        </Link>
+      </CardFooter>
+    </Card>
   );
 };
 

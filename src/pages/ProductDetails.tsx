@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Product } from "@/data/products";
-import { RelatedProducts } from "@/components/product/RelatedProducts";
-import { ProductImage } from "@/components/product/ProductImage";
-import { ProductBenefits } from "@/components/product/ProductBenefits";
-import { ProductActions } from "@/components/product/ProductActions";
-import { useWishlist } from "@/contexts/WishlistContext";
 import Header from "@/components/Header";
+import RelatedProducts from "@/components/product/RelatedProducts";
+import ProductImage from "@/components/product/ProductImage";
+import ProductBenefits from "@/components/product/ProductBenefits";
+import ProductActions from "@/components/product/ProductActions";
+import { useWishlist } from "@/contexts/WishlistContext";
 import Footer from "@/components/Footer";
+import { Product } from "@/types/product";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,9 +29,11 @@ const ProductDetails = () => {
         price: 79.9,
         image: "/products/camiseta.jpg",
         category: "Vestuário",
-        inStock: true,
+        stock: 10,
+        featured: true,
         benefits: ["Algodão orgânico", "Design exclusivo", "Confortável"],
-        relatedProducts: [2, 3],
+        gallery: [],
+        status: 'active',
       };
 
       setProduct(mockProduct);
@@ -56,7 +58,9 @@ const ProductDetails = () => {
       price: 49.9,
       image: "/products/bone.jpg",
       category: "Acessórios",
-      inStock: true,
+      stock: 5,
+      featured: false,
+      status: 'active',
     },
     {
       id: 3,
@@ -65,7 +69,9 @@ const ProductDetails = () => {
       price: 29.9,
       image: "/products/caneca.jpg",
       category: "Acessórios",
-      inStock: true,
+      stock: 20,
+      featured: false,
+      status: 'active',
     },
   ];
 
@@ -96,8 +102,8 @@ const ProductDetails = () => {
             <div className="text-tuca-ocean-blue text-xl font-medium mb-4">
               R$ {product.price.toFixed(2).replace(".", ",")}
             </div>
-            <ProductActions productName={product.name} inStock={product.inStock} />
-            <ProductBenefits />
+            <ProductActions productName={product.name} inStock={product.stock > 0} />
+            <ProductBenefits benefits={product.benefits || []} />
           </div>
         </div>
         <RelatedProducts products={relatedProductsData} />

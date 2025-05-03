@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { activityService } from '@/services/activity-service';
+import { Activity, ActivityFilters } from '@/types/activity';
 
 /**
  * Hook for searching activities
  */
 export const useSearchActivities = (initialFilters = {}) => {
-  const [searchParams, setSearchParams] = useState({
+  const [searchParams, setSearchParams] = useState<ActivityFilters>({
     query: '',
     category: 'Todos',
     sortBy: 'recommended',
@@ -25,12 +26,12 @@ export const useSearchActivities = (initialFilters = {}) => {
   });
 
   // Function to update search params
-  const updateSearch = (newParams) => {
+  const updateSearch = (newParams: Partial<ActivityFilters>) => {
     setSearchParams((prev) => ({ ...prev, ...newParams }));
   };
 
   // Function to handle category change
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     updateSearch({ category });
   };

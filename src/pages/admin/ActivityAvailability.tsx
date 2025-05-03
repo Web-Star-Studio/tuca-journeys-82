@@ -1,152 +1,231 @@
 
-import React, { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
-import { useActivityAvailability } from "@/hooks/activities";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import AdminLayout from "@/components/admin/AdminLayout";
+import { useActivity, useActivityAvailability } from "@/hooks/activities";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Calendar, AlertCircle, Check } from "lucide-react";
+import { Loader2, ArrowLeft, CalendarDays, CheckCircle, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
 
-const ActivityAvailability: React.FC = () => {
+const ActivityAvailability = () => {
   const { id } = useParams<{ id: string }>();
   const activityId = id ? parseInt(id) : undefined;
   
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [availableSpots, setAvailableSpots] = useState<number>(10);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [spots, setSpots] = useState<number>(10);
   const [customPrice, setCustomPrice] = useState<string>("");
-  
-  const { 
-    availability,
-    isLoading,
-    updateAvailability,
-    isUpdating
-  } = activityId ? useActivityAvailability(activityId) : { 
-    availability: undefined, 
-    isLoading: false, 
-    updateAvailability: () => {}, 
-    isUpdating: false 
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const { activity, isLoading: isActivityLoading } = useActivity(activityId);
+  const { 
+    availability, 
+    isLoading: isAvailabilityLoading,
+    updateAvailability,
+    bulkUpdateAvailability,
+    isUpdating
+  } = useActivityAvailability(activityId);
+
+  const handleBulkUpdate = async () => {
+    if (!activityId || !selectedDates.length) return;
     
-    if (!selectedDate || !activityId) return;
-    
-    updateAvailability({
-      date: selectedDate,
-      availableSpots,
+    await bulkUpdateAvailability({
+      activityId,
+      dates: selectedDates,
+      availableSpots: spots,
       customPrice: customPrice ? parseFloat(customPrice) : undefined,
       status: 'available'
     });
+    
+    setSelectedDates([]);
   };
 
-  return (
-    <AdminLayout pageTitle="Gerenciar Disponibilidade de Atividades">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-semibold">Disponibilidade de Atividades</h2>
-          <p className="text-muted-foreground">
-            Gerencie a disponibilidade e preços especiais para datas específicas
-          </p>
-        </div>
+  const getDateAvailability = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return availability?.find(a => a.date === dateStr);
+  };
 
-        {!activityId ? (
-          <div className="bg-amber-50 p-4 rounded-md border border-amber-200 flex items-center">
-            <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
-            <p className="text-amber-800">
-              Selecione uma atividade para gerenciar sua disponibilidade.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Definir disponibilidade</CardTitle>
-                <CardDescription>
-                  Ajuste a disponibilidade de vagas para uma data específica
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Data</Label>
-                    <DatePicker 
-                      date={selectedDate} 
-                      onSelect={setSelectedDate} 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="spots">Vagas disponíveis</Label>
-                    <Input 
-                      id="spots"
-                      type="number" 
-                      value={availableSpots}
-                      onChange={(e) => setAvailableSpots(parseInt(e.target.value))}
-                      min={0}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Preço especial (opcional)</Label>
-                    <Input 
-                      id="price"
-                      type="number" 
-                      value={customPrice}
-                      onChange={(e) => setCustomPrice(e.target.value)}
-                      placeholder="Deixe em branco para usar o preço padrão"
-                    />
-                  </div>
-                  
-                  <Button type="submit" disabled={isUpdating}>
-                    {isUpdating ? "Salvando..." : "Salvar disponibilidade"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Datas configuradas</CardTitle>
-                <CardDescription>
-                  Visualize as datas com configurações especiais
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <p className="text-center py-8 text-muted-foreground">Carregando...</p>
-                ) : availability && availability.length > 0 ? (
-                  <div className="space-y-2">
-                    {availability.map((item: any) => (
-                      <div key={item.id} className="flex items-center justify-between p-2 border rounded-md">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span>{new Date(item.date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <span>{item.available_spots} vagas</span>
-                          {item.custom_price && (
-                            <span className="text-green-600">
-                              R$ {item.custom_price.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
+  // Custom renderer for calendar dates to show availability
+  const renderDay = (day: Date) => {
+    const dateAvailability = getDateAvailability(day);
+    
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        {day.getDate()}
+        {dateAvailability && (
+          <span 
+            className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-1 rounded-full ${
+              dateAvailability.status === 'available' ? 'bg-green-500' : 'bg-red-500'
+            }`}
+          />
+        )}
+        {selectedDates.some(d => 
+          d.getDate() === day.getDate() && 
+          d.getMonth() === day.getMonth() && 
+          d.getFullYear() === day.getFullYear()
+        ) && (
+          <div className="absolute inset-0 border-2 border-tuca-ocean-blue rounded-md pointer-events-none" />
+        )}
+      </div>
+    );
+  };
+
+  const isLoading = isActivityLoading || isAvailabilityLoading;
+
+  if (isLoading) {
+    return (
+      <AdminLayout pageTitle="Carregando...">
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-tuca-ocean-blue" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!activity) {
+    return (
+      <AdminLayout pageTitle="Atividade não encontrada">
+        <div className="p-6 bg-red-50 text-red-800 rounded-md">
+          A atividade solicitada não foi encontrada.
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout pageTitle={`Disponibilidade: ${activity.title}`}>
+      <div className="mb-6">
+        <Button variant="outline" className="mb-4" onClick={() => window.history.back()}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <CalendarDays className="mr-2 h-5 w-5" />
+              Calendário de Disponibilidade
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 text-sm text-muted-foreground">
+              Selecione uma ou mais datas para definir a disponibilidade.
+            </div>
+            <Calendar
+              mode="multiple"
+              selected={selectedDates}
+              onSelect={setSelectedDates}
+              className="border rounded-md p-3"
+              components={{
+                Day: ({ day, ...props }) => (
+                  <button {...props}>
+                    {renderDay(day)}
+                  </button>
+                ),
+              }}
+              disabled={{ before: new Date() }}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurar Disponibilidade</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {selectedDates.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Selecione datas no calendário para configurar sua disponibilidade
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <p className="font-medium">Datas selecionadas:</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {selectedDates.map((date, index) => (
+                      <div key={index} className="bg-tuca-light-blue/20 px-2 py-1 rounded text-sm">
+                        {format(date, 'dd/MM/yyyy')}
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Nenhuma configuração de disponibilidade encontrada.</p>
-                    <p className="text-sm">Configure datas específicas usando o formulário ao lado.</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="spots">Vagas disponíveis</Label>
+                  <Input
+                    id="spots"
+                    type="number"
+                    value={spots}
+                    onChange={(e) => setSpots(parseInt(e.target.value) || 0)}
+                    min={0}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="price">
+                    Preço personalizado (opcional)
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">R$</span>
+                    <Input
+                      id="price"
+                      type="text"
+                      value={customPrice}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9,.]/g, '');
+                        setCustomPrice(value);
+                      }}
+                      className="pl-8"
+                      placeholder={`${activity.price?.toLocaleString('pt-BR') || '0,00'}`}
+                    />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                  <p className="text-xs text-muted-foreground">
+                    Deixe em branco para usar o preço padrão da atividade (R$ {activity.price?.toLocaleString('pt-BR') || '0,00'})
+                  </p>
+                </div>
+                
+                <Button 
+                  className="w-full" 
+                  onClick={handleBulkUpdate}
+                  disabled={isUpdating || selectedDates.length === 0}
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Atualizando...
+                    </>
+                  ) : (
+                    <>
+                      {selectedDates.length > 1 ? 'Atualizar todas as datas selecionadas' : 'Atualizar data'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            <div className="mt-8 pt-4 border-t">
+              <h3 className="font-medium mb-2">Legenda</h3>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                  <span>Com disponibilidade</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                  <span>Sem disponibilidade</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-tuca-ocean-blue rounded-md mr-2"></div>
+                  <span>Selecionada para edição</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );

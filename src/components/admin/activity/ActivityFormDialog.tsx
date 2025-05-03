@@ -7,7 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import ActivityForm, { ActivityFormValues } from "@/components/admin/activity/ActivityForm";
+import ActivityForm from "@/components/admin/activity/ActivityForm";
+import { ActivityFormValues } from "@/components/admin/activity/ActivityForm";
 
 interface ActivityFormDialogProps {
   open: boolean;
@@ -55,5 +56,6 @@ const ActivityFormDialog: React.FC<ActivityFormDialogProps> = ({
   );
 };
 
-export { ActivityFormValues };
+export { ActivityFormDialog };
+export type { ActivityFormValues };
 export default ActivityFormDialog;

@@ -11,7 +11,7 @@ export interface WishlistItem {
 export interface WishlistContextType {
   wishlist: WishlistItem[];
   wishlistItems: WishlistItem[]; // Alias for backward compatibility
-  addToWishlist: (item: WishlistItem) => void;
+  addToWishlist: (id: number, type: string, item: Partial<WishlistItem>) => void;
   removeFromWishlist: (id: number, type: string) => void;
   isInWishlist: (id: number, type?: string) => boolean;
 }
@@ -27,9 +27,15 @@ const WishlistContext = createContext<WishlistContextType>({
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
 
-  const addToWishlist = (item: WishlistItem) => {
-    if (!isInWishlist(item.id, item.type)) {
-      setWishlist([...wishlist, item]);
+  const addToWishlist = (id: number, type: string, item: Partial<WishlistItem>) => {
+    if (!isInWishlist(id, type)) {
+      const newItem: WishlistItem = {
+        id,
+        type: type as WishlistItem['type'],
+        title: item.title || 'Item sem título',
+        image: item.image
+      };
+      setWishlist([...wishlist, newItem]);
     }
   };
 

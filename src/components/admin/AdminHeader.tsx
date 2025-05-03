@@ -153,7 +153,7 @@ const AdminHeader = ({ pageTitle }: AdminHeaderProps) => {
           </PopoverContent>
         </Popover>
         
-        <UserMenu />
+        {user && <UserMenu user={user} />}
       </div>
     </header>
   );

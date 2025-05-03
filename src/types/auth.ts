@@ -1,4 +1,3 @@
-
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export interface SignOutResult {
@@ -24,6 +23,18 @@ export type AuthUser = User & {
     [key: string]: any;
   };
 };
+
+// Auth context type definition
+export interface AuthContextType {
+  user: AuthUser | null;
+  isLoading: boolean;
+  isAdmin?: boolean;
+  signIn?: (email: string, password: string) => Promise<any>;
+  signUp?: (email: string, password: string, metadata?: any) => Promise<any>;
+  signOut?: () => Promise<SignOutResult>;
+  resetPassword?: (email: string) => Promise<any>;
+  checkPermission?: (permission: string) => Promise<boolean>;
+}
 
 // Convert Supabase User to our User type
 export const adaptSupabaseUser = (user: SupabaseUser | null): User | null => {

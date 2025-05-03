@@ -9,7 +9,8 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { useActivitiesBase, useActivityMutations } from "@/hooks/activities/use-activities-base";
+import { useActivitiesBase } from "@/hooks/activities/use-activities-base";
+import { useActivityMutations } from "@/hooks/activities/use-activity-mutations";
 
 // Define form schema using zod
 export const activityFormSchema = z.object({

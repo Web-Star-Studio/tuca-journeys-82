@@ -1,11 +1,11 @@
 
 import { Package } from '@/types/package';
-import { Package as FormPackage } from '@/data/types/packageTypes';
+import { PackageFormValues } from '@/components/admin/packages/types';
 
 /**
  * Convert from our canonical Package type to the legacy Package type used in forms
  */
-export const adaptPackageToFormPackage = (packageData: Package): FormPackage => {
+export const adaptPackageToFormPackage = (packageData: Package): PackageFormValues => {
   return {
     id: packageData.id,
     title: packageData.title,
@@ -17,8 +17,8 @@ export const adaptPackageToFormPackage = (packageData: Package): FormPackage => 
     rating: packageData.rating || 0,
     category: packageData.category || '',
     highlights: [],
-    includes: packageData.includes || [],
-    excludes: packageData.excludes || [],
+    includes: packageData.includes?.map(item => ({ title: item })) || [],
+    excludes: packageData.excludes?.map(item => ({ title: item })) || [],
     itinerary: packageData.itinerary?.map(item => ({ 
       day: item.day, 
       title: item.title, 
@@ -32,7 +32,7 @@ export const adaptPackageToFormPackage = (packageData: Package): FormPackage => 
  * Convert from the legacy form Package type to our canonical Package type
  * This ensures all required fields have values
  */
-export const adaptFormPackageToPackage = (formPackage: FormPackage): Package => {
+export const adaptFormPackageToPackage = (formPackage: PackageFormValues): Package => {
   // Ensure all required fields have values
   return {
     id: formPackage.id || -1, // For new packages, use a temporary ID that will be replaced by the database
@@ -44,8 +44,8 @@ export const adaptFormPackageToPackage = (formPackage: FormPackage): Package => 
     max_participants: formPackage.persons || 0, 
     rating: formPackage.rating || 0,
     category: formPackage.category || 'Uncategorized',
-    includes: formPackage.includes || [],
-    excludes: formPackage.excludes || [],
+    includes: formPackage.includes?.map(item => item.title) || [],
+    excludes: formPackage.excludes?.map(item => item.title) || [],
     itinerary: formPackage.itinerary?.map(item => ({ 
       day: item.day, 
       title: item.title, 

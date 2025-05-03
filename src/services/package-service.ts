@@ -11,7 +11,7 @@ type DBPackage = {
   short_description: string;
   price: number;
   image_url: string;
-  duration: string;
+  duration: string; // Updated to string to match the DB schema
   max_guests: number;
   itinerary: any;
   includes: string[];
@@ -39,7 +39,7 @@ class PackageService extends BaseApiService {
     }
 
     // Use type assertion to help TypeScript understand the data flow
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
   }
 
   async getPackageById(id: number): Promise<Package> {
@@ -54,7 +54,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
 
   async getFeaturedPackages(limit: number = 3): Promise<Package[]> {
@@ -69,15 +69,16 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as unknown as DBPackage));
   }
   
   async createPackage(packageData: Omit<Package, 'id'>): Promise<Package> {
     const dbData = this.adaptComponentPackageToDB(packageData);
     
+    // Remove the array wrapper as we're inserting a single item
     const { data, error } = await this.supabase
       .from('packages')
-      .insert([dbData])
+      .insert(dbData)
       .select()
       .single();
       
@@ -86,7 +87,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
   
   async updatePackage(id: number, packageData: Partial<Package>): Promise<Package> {
@@ -104,7 +105,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
     
-    return this.adaptDBPackageToComponentPackage(data as DBPackage);
+    return this.adaptDBPackageToComponentPackage(data as unknown as DBPackage);
   }
   
   async deletePackage(id: number): Promise<void> {
@@ -143,9 +144,9 @@ class PackageService extends BaseApiService {
     };
   }
 
-  private adaptComponentPackageToDB(packageData: Partial<Package>): Partial<DBPackage> {
+  private adaptComponentPackageToDB(packageData: Partial<Package> & {id?: number}): Record<string, any> {
     // Create an object with the specific fields needed by the DB
-    const dbPackage: Partial<DBPackage> = {
+    const dbPackage: Record<string, any> = {
       title: packageData.title,
       name: packageData.title, // Ensure both fields are set
       description: packageData.description,
@@ -160,7 +161,8 @@ class PackageService extends BaseApiService {
       itinerary: packageData.itinerary,
       max_guests: packageData.max_participants,
       is_featured: packageData.is_featured,
-      partner_id: packageData.partner_id
+      partner_id: packageData.partner_id,
+      rating: packageData.rating
     };
 
     // Remove undefined fields to avoid overwriting with nulls

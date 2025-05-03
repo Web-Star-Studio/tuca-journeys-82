@@ -18,6 +18,7 @@ import EventForm from "@/components/admin/events/EventForm";
 import EventsTable from "@/components/admin/events/EventsTable";
 import { eventService } from "@/services/event-service";
 import { Event, EventFilters } from "@/types/event";
+import { adaptComponentEventToDB } from "@/utils/eventAdapter";
 
 const Events = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -38,13 +39,19 @@ const Events = () => {
   });
   
   const createEventMutation = useMutation({
-    mutationFn: (eventData: Partial<Event>) => eventService.createEvent(eventData),
+    mutationFn: (eventData: Partial<Event>) => {
+      console.log('Creating event with data:', eventData);
+      // Convert the form data to match DB schema
+      const dbEventData = adaptComponentEventToDB(eventData);
+      return eventService.createEvent(dbEventData);
+    },
     onSuccess: () => {
       toast.success("Evento criado com sucesso!");
       setIsCreateModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
     },
     onError: (err: any) => {
+      console.error("Error creating event:", err);
       toast.error("Erro ao criar evento", { 
         description: err.message || "Tente novamente mais tarde" 
       });
@@ -52,8 +59,12 @@ const Events = () => {
   });
   
   const updateEventMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number, data: Partial<Event> }) => 
-      eventService.updateEvent(id, data),
+    mutationFn: ({ id, data }: { id: number, data: Partial<Event> }) => {
+      console.log('Updating event with data:', data);
+      // Convert the form data to match DB schema
+      const dbEventData = adaptComponentEventToDB(data);
+      return eventService.updateEvent(id, dbEventData);
+    },
     onSuccess: () => {
       toast.success("Evento atualizado com sucesso!");
       setIsEditModalOpen(false);
@@ -62,6 +73,7 @@ const Events = () => {
       queryClient.invalidateQueries({ queryKey: ['event'] }); // Invalidate single event queries as well
     },
     onError: (err: any) => {
+      console.error("Error updating event:", err);
       toast.error("Erro ao atualizar evento", { 
         description: err.message || "Tente novamente mais tarde" 
       });
@@ -87,15 +99,18 @@ const Events = () => {
   };
 
   const handleCreateEvent = (data: any) => {
+    console.log('Form submitted data for create:', data);
     createEventMutation.mutate(data);
   };
 
   const handleEditEvent = (event: Event) => {
+    console.log('Editing event:', event);
     setCurrentEvent(event);
     setIsEditModalOpen(true);
   };
 
   const handleUpdateEvent = (data: any) => {
+    console.log('Form submitted data for update:', data);
     if (currentEvent) {
       updateEventMutation.mutate({ id: currentEvent.id, data });
     }

@@ -1,3 +1,4 @@
+
 import { BaseApiService } from './base-api';
 import { Event, EventFilters, AttendeeInfo } from '@/types/event';
 
@@ -46,18 +47,24 @@ class EventService extends BaseApiService {
     return data as Event[];
   }
 
-  async getFeaturedEvents(filters: EventFilters = {}) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*')
-      .eq('is_featured', true);
+  async getFeaturedEvents(limit: number = 3) {
+    try {
+      const { data, error } = await this.supabase
+        .from('events')
+        .select('*')
+        .eq('is_featured', true)
+        .limit(limit);
 
-    if (error) {
-      console.error('Error fetching featured events:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching featured events:', error);
+        throw error;
+      }
+
+      return data as Event[];
+    } catch (err) {
+      console.error('Exception in getFeaturedEvents:', err);
+      return []; // Return empty array on error
     }
-
-    return data as Event[];
   }
 
   async getEventById(id: number) {
@@ -76,6 +83,14 @@ class EventService extends BaseApiService {
   }
 
   async createEvent(eventData: Partial<Event>) {
+    console.log('Creating event with data:', eventData);
+    
+    // Ensure we're using the correct field for featured status
+    if (eventData.featured !== undefined && eventData.is_featured === undefined) {
+      eventData.is_featured = eventData.featured;
+      delete eventData.featured; // Remove the featured property
+    }
+    
     // Convert eventData from array to single object if needed
     const dataToInsert = Array.isArray(eventData) ? eventData[0] : eventData;
     
@@ -94,6 +109,14 @@ class EventService extends BaseApiService {
   }
 
   async updateEvent(id: number, eventData: Partial<Event>) {
+    console.log('Updating event with data:', eventData);
+    
+    // Ensure we're using the correct field for featured status
+    if (eventData.featured !== undefined && eventData.is_featured === undefined) {
+      eventData.is_featured = eventData.featured;
+      delete eventData.featured; // Remove the featured property
+    }
+
     const { data, error } = await this.supabase
       .from('events')
       .update(eventData)

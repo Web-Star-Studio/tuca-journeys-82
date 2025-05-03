@@ -1,11 +1,11 @@
 
 import { Package } from '@/types/package';
-import { Package as OldPackage } from '@/data/types/packageTypes';
+import { Package as FormPackage } from '@/data/types/packageTypes';
 
 /**
  * Convert from our canonical Package type to the legacy Package type used in forms
  */
-export const adaptPackageToFormPackage = (packageData: Package): OldPackage => {
+export const adaptPackageToFormPackage = (packageData: Package): FormPackage => {
   return {
     id: packageData.id,
     title: packageData.title,
@@ -30,16 +30,18 @@ export const adaptPackageToFormPackage = (packageData: Package): OldPackage => {
 
 /**
  * Convert from the legacy form Package type to our canonical Package type
+ * This ensures all required fields have values
  */
-export const adaptFormPackageToPackage = (formPackage: OldPackage): Package => {
+export const adaptFormPackageToPackage = (formPackage: FormPackage): Package => {
+  // Ensure all required fields have values
   return {
-    id: formPackage.id,
-    title: formPackage.title,
-    description: formPackage.description,
-    image_url: formPackage.image,
-    price: formPackage.price,
-    duration: `${formPackage.days} days`,
-    max_participants: formPackage.persons, 
+    id: formPackage.id || -1, // For new packages, use a temporary ID that will be replaced by the database
+    title: formPackage.title || 'Unnamed Package',
+    description: formPackage.description || 'No description',
+    image_url: formPackage.image || '',
+    price: formPackage.price || 0,
+    duration: `${formPackage.days || 1} days`,
+    max_participants: formPackage.persons || 0, 
     rating: formPackage.rating || 0,
     category: formPackage.category || 'Uncategorized',
     includes: formPackage.includes || [],
@@ -50,7 +52,7 @@ export const adaptFormPackageToPackage = (formPackage: OldPackage): Package => {
       description: item.description 
     })) || [],
     is_featured: false,
-    short_description: '',
+    short_description: formPackage.description?.substring(0, 150) || '',
     gallery_images: [],
   };
 };

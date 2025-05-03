@@ -15,8 +15,8 @@ export const usePackageSubmit = (
     if (packageId) {
       // Update existing package - convert from form Package to our canonical Package
       const packageData = adaptFormPackageToPackage({
-        id: packageId,
         ...data,
+        id: packageId,
       });
       
       updatePackage.mutate(packageData, {
@@ -24,10 +24,14 @@ export const usePackageSubmit = (
       });
     } else {
       // Create new package - convert from form Package to our canonical Package
-      const packageData = adaptFormPackageToPackage(data);
+      const packageData = adaptFormPackageToPackage({
+        ...data,
+        id: -1, // Temporary ID, will be replaced by database
+      });
       
-      // Type assertion to handle the omission of the id field for creation
-      createPackage.mutate(packageData as Omit<Package, 'id'>, {
+      // Create a new package without the ID
+      const { id, ...packageWithoutId } = packageData;
+      createPackage.mutate(packageWithoutId as Omit<Package, 'id'>, {
         onSuccess: onSuccess,
       });
     }

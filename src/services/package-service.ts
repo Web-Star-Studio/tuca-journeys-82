@@ -1,10 +1,29 @@
 
 import { BaseApiService } from './base-api';
 import { Package } from '@/types/package';
-import type { Database } from '@/integrations/supabase/types';
 
-// Create explicit type for database package row
-type DBPackage = Database['public']['Tables']['packages']['Row'];
+// Define an explicit type for database package row
+type DBPackage = {
+  id: number;
+  title: string;
+  name: string;
+  description: string;
+  short_description: string;
+  price: number;
+  image_url: string;
+  duration: string;
+  max_guests: number;
+  itinerary: any;
+  includes: string[];
+  excludes: string[];
+  category: string;
+  is_featured: boolean;
+  gallery_images: string[];
+  rating: number;
+  created_at: string;
+  updated_at: string;
+  partner_id?: string;
+};
 
 class PackageService extends BaseApiService {
   async getPackages(filters = {}): Promise<Package[]> {
@@ -20,7 +39,7 @@ class PackageService extends BaseApiService {
     }
 
     // Use type assertion to help TypeScript understand the data flow
-    return data.map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
   }
 
   async getPackageById(id: number): Promise<Package> {
@@ -50,7 +69,7 @@ class PackageService extends BaseApiService {
       throw error;
     }
 
-    return data.map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
+    return (data || []).map(pkg => this.adaptDBPackageToComponentPackage(pkg as DBPackage));
   }
   
   async createPackage(packageData: Omit<Package, 'id'>): Promise<Package> {
@@ -100,7 +119,7 @@ class PackageService extends BaseApiService {
     }
   }
 
-  // Helper adapter methods moved inside the service to avoid circular dependencies
+  // Helper adapter methods inside the service
   private adaptDBPackageToComponentPackage(dbPackage: DBPackage): Package {
     return {
       id: dbPackage.id,

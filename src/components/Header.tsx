@@ -1,15 +1,16 @@
+
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useUI } from '@/contexts/UIContext';
-import { ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 
 const navigationLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Atividades', href: '/atividades' }, // Updated from Passeios
+  { name: 'Atividades', href: '/atividades' },
   { name: 'Eventos', href: '/eventos' },
   { name: 'Restaurantes', href: '/restaurantes' },
   { name: 'Acomodações', href: '/acomodacoes' },
@@ -18,7 +19,7 @@ const navigationLinks = [
 ];
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { wishlist } = useWishlist();
   const { isCartOpen, toggleCart, isWishlistOpen, toggleWishlist } = useUI();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -83,7 +84,7 @@ const Header = () => {
                   Meu Perfil
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => signOut()}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   Sair
@@ -121,7 +122,7 @@ const Header = () => {
                     <Link to="/perfil" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                       Meu Perfil
                     </Link>
-                    <Button variant="outline" onClick={logout}>Sair</Button>
+                    <Button variant="outline" onClick={() => signOut()}>Sair</Button>
                   </>
                 ) : (
                   <Link to="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">

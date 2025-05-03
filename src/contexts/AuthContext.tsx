@@ -1,80 +1,100 @@
 
-import React, { createContext, useContext, useState } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  user_metadata: {
-    name: string;
-  };
-}
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+import { SignOutResult } from '@/types/auth';
+import { useAuthState } from '@/hooks/auth/use-auth-state';
+import { useAuthOperations } from '@/hooks/auth/use-auth-operations';
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  session: Session | null;
+  loading: boolean;
+  isAdmin: boolean;
+  signIn: (email: string, password: string) => Promise<any>;
+  signOut: () => Promise<SignOutResult>;
+  signUp: (email: string, password: string, name: string) => Promise<any>;
+  resetPassword: (email: string) => Promise<any>;
+  checkPermission: (permission: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: async () => {},
-  register: async () => {},
-  logout: () => {},
-  isAuthenticated: false,
-  isLoading: false,
+  session: null,
+  loading: true,
+  isAdmin: false,
+  signIn: async () => ({}),
+  signOut: async () => ({ success: false }),
+  signUp: async () => ({}),
+  resetPassword: async () => ({}),
+  checkPermission: async () => false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, session, loading } = useAuthState();
+  const { signIn, signOut, signUp, resetPassword } = useAuthOperations();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        try {
+          // Check if user has admin role
+          const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .in('role', ['admin', 'master'])
+            .single();
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
+          if (data && !error) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdmin();
+  }, [user]);
+
+  const checkPermission = async (permission: string): Promise<boolean> => {
+    if (!user) return false;
+    
     try {
-      // Simulate login - would be replaced with actual auth logic
-      console.log('Logging in with', email, password);
-      setUser({ id: '1', email, user_metadata: { name: 'Test User' } });
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      // Check if user has specific permission
+      const { data, error } = await supabase
+        .rpc('user_has_permission', {
+          user_id: user.id,
+          required_permission: permission
+        });
 
-  const register = async (email: string, password: string, name: string) => {
-    setIsLoading(true);
-    try {
-      // Simulate registration - would be replaced with actual auth logic
-      console.log('Registering with', email, password, name);
-      setUser({ id: '1', email, user_metadata: { name } });
+      if (error) throw error;
+      return !!data;
     } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+      console.error('Error checking permission:', error);
+      return false;
     }
-  };
-
-  const logout = () => {
-    // Simulate logout
-    setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!user,
-        isLoading,
-      }}
-    >
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      isAdmin,
+      signIn,
+      signOut,
+      signUp,
+      resetPassword,
+      checkPermission
+    }}>
       {children}
     </AuthContext.Provider>
   );

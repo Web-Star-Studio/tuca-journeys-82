@@ -20,7 +20,7 @@ export interface DatePickerProps {
 export function DatePicker({
   date,
   onSelect,
-  placeholder = "Pick a date",
+  placeholder = "Selecione uma data",
 }: DatePickerProps) {
   return (
     <Popover>

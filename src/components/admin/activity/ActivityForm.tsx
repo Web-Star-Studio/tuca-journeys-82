@@ -9,6 +9,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { useActivitiesBase, useActivityMutations } from "@/hooks/activities/use-activities-base";
 
 // Define form schema using zod
 export const activityFormSchema = z.object({
@@ -54,7 +55,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
   const [previewUrl, setPreviewUrl] = useState("");
   
   const { activity, isLoading } = useActivity(activityId);
-  const { createActivity, updateActivity, isSaving } = useActivities();
+  const { createActivity, updateActivity, isSaving } = useActivityMutations();
 
   // Initialize form with empty values
   const form = useForm<ActivityFormValues>({

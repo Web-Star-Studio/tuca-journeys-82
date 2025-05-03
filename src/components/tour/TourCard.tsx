@@ -26,8 +26,8 @@ const TourCard = ({ tour }: TourCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isInWishlist(tour.id)) {
-      removeFromWishlist(tour.id);
+    if (isInWishlist(tour.id, 'tour')) {
+      removeFromWishlist(tour.id, 'tour');
       toast({
         title: "Removido dos favoritos",
         description: "O passeio foi removido da sua lista de favoritos.",
@@ -36,7 +36,7 @@ const TourCard = ({ tour }: TourCardProps) => {
       addToWishlist({
         id: tour.id,
         type: 'tour',
-        name: tour.title,
+        title: tour.title,
         image: tour.image
       });
       toast({
@@ -63,7 +63,7 @@ const TourCard = ({ tour }: TourCardProps) => {
     navigate(`/reservar/passeio/${tour.id}`);
   };
 
-  const isWishlisted = isInWishlist(tour.id);
+  const isWishlisted = isInWishlist(tour.id, 'tour');
 
   return (
     <Card className="overflow-hidden border-0 rounded-2xl shadow-sm hover:shadow-md transition-all duration-500 hover-scale bg-white">

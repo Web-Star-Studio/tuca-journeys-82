@@ -150,10 +150,9 @@ class ActivityService extends BaseApiService {
 
   // Methods for activity availability
   async getActivityAvailability(activityId: number) {
+    // Using raw SQL query instead of direct table access to avoid type conflicts
     const { data, error } = await this.supabase
-      .from('tour_availability')  // Using tour_availability table for now
-      .select('*')
-      .eq('tour_id', activityId);
+      .rpc('get_tour_availability', { p_tour_id: activityId });
 
     if (error) {
       console.error(`Error fetching availability for activity ${activityId}:`, error);
@@ -170,19 +169,17 @@ class ActivityService extends BaseApiService {
     customPrice?: number,
     status: 'available' | 'unavailable' = 'available'
   ) {
+    // Use stored procedure or raw SQL to avoid type conflicts
     const dateStr = date.toISOString().split('T')[0];
     
     const { data, error } = await this.supabase
-      .from('tour_availability')
-      .upsert({
-        tour_id: activityId,
-        date: dateStr,
-        available_spots: availableSpots,
-        custom_price: customPrice,
-        status
-      })
-      .select()
-      .single();
+      .rpc('update_tour_availability', { 
+        p_tour_id: activityId,
+        p_date: dateStr,
+        p_spots: availableSpots,
+        p_price: customPrice,
+        p_status: status
+      });
 
     if (error) {
       console.error(`Error updating availability for activity ${activityId}:`, error);
@@ -190,6 +187,26 @@ class ActivityService extends BaseApiService {
     }
 
     return data;
+  }
+  
+  async bulkUpdateActivityAvailability(params: any) {
+    // Implementation for bulk update, using RPC or custom logic
+    const { dates, availableSpots, customPrice, status = 'available' } = params;
+    
+    // Simple implementation that calls updateActivityAvailability for each date
+    const results = await Promise.all(
+      dates.map((date: Date) => 
+        this.updateActivityAvailability(
+          params.activityId,
+          date,
+          availableSpots,
+          customPrice,
+          status
+        )
+      )
+    );
+    
+    return results;
   }
 }
 

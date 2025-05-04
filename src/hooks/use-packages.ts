@@ -12,7 +12,7 @@ export const usePackages = (category?: string) => {
   const { createPackage, updatePackage, deletePackage } = usePackageMutations();
 
   return {
-    data: query.data,
+    data: query.data || [],
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

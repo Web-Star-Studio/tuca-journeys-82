@@ -47,6 +47,7 @@ function App() {
                 <Route path="/reservar/acomodacao/:id" element={<AccommodationBooking />} />
                 <Route path="/sobre" element={<About />} />
                 <Route path="/contato" element={<Contact />} />
+                
                 {/* Admin routes */}
                 {adminRoutes.map((route) => (
                   <Route key={route.path} path={route.path} element={route.element} />

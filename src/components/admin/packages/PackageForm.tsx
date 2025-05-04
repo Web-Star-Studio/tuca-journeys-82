@@ -36,7 +36,7 @@ const PackageForm = ({ packageId, onSuccess, onCancel }: PackageFormProps) => {
     datesArray 
   } = usePackageForm(
     // Convert from canonical Package to form Package if data is available
-    packageId && packageData ? adaptPackageToFormPackage(packageData) as any : undefined
+    packageId && packageData ? adaptPackageToFormPackage(packageData) : undefined
   );
   
   // Setup submission handler

@@ -5,7 +5,27 @@ import { PackageFormValues } from '@/components/admin/packages/types';
 /**
  * Convert from our canonical Package type to the legacy Package type used in forms
  */
-export const adaptPackageToFormPackage = (packageData: Package): PackageFormValues => {
+export const adaptPackageToFormPackage = (packageData: Package | null): PackageFormValues => {
+  if (!packageData) {
+    // Return default form values if no package data
+    return {
+      id: undefined,
+      title: '',
+      description: '',
+      image: '',
+      price: 0,
+      days: 1,
+      persons: 0,
+      rating: 0,
+      category: '',
+      highlights: [],
+      includes: [],
+      excludes: [],
+      itinerary: [],
+      dates: [],
+    };
+  }
+  
   return {
     id: packageData.id,
     title: packageData.title,
@@ -55,6 +75,7 @@ export const adaptFormPackageToPackage = (formPackage: PackageFormValues): Packa
     short_description: formPackage.description?.substring(0, 150) || '',
     gallery_images: [],
     created_at: "",
-    updated_at: ""
+    updated_at: "",
+    partner_id: ""
   };
 };

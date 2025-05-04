@@ -17,7 +17,6 @@ const itineraryItemSchema = z.object({
 
 // Define the package form schema
 export const packageFormSchema = z.object({
-  id: z.number().optional(),
   title: z.string().min(3, "O título deve ter pelo menos 3 caracteres"),
   description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
   image: z.string().url("URL da imagem inválida"),

@@ -89,15 +89,13 @@ const ReservationCalendar: React.FC<ReservationCalendarProps> = ({ onDateSelect 
           highlighted: "bg-blue-100 font-bold relative reservation-day",
         }}
         components={{
-          DayContent: (props) => {
-            // Fixed: Correctly access the day from props
-            const dayDate = props.date;
+          DayContent: ({ date: dayDate, ...props }) => {
             const formattedDate = format(dayDate, 'yyyy-MM-dd');
             const count = reservationsByDate[formattedDate] || 0;
             
             return (
               <div className="relative h-full w-full flex items-center justify-center">
-                <span>{dayDate.getDate()}</span>
+                {props.children}
                 {count > 0 && (
                   <span className="absolute bottom-0.5 text-[9px] text-blue-700">
                     {count} reserv.

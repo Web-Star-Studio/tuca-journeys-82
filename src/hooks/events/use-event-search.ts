@@ -1,60 +1,87 @@
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { eventService } from '@/services/event-service';
+import { useState } from 'react';
 import { Event, EventFilters } from '@/types/event';
+import { eventService } from '@/services/event-service';
 
-export function useFeaturedEvents(limit: number = 3) {
-  const [filters, setFilters] = useState<EventFilters>({
-    category: '',
-    date: null,
-    searchQuery: ''
-  });
+/**
+ * Hook for searching events with pagination support
+ */
+export const useEventSearch = (initialFilters: EventFilters = {}) => {
+  const [filters, setFilters] = useState<EventFilters>(initialFilters);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ['events', 'featured', limit],
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
+    queryKey: ['events', 'search', filters, page],
     queryFn: async () => {
-      const featuredEvents = await eventService.getFeaturedEvents(limit);
-      return featuredEvents;
+      const result = await eventService.getEvents({
+        ...filters,
+        limit: itemsPerPage,
+        offset: (page - 1) * itemsPerPage
+      });
+      
+      // Calculate total count or use the length as an estimate
+      const totalCount = result.length;
+      
+      return {
+        events: result,
+        total: totalCount
+      };
+    },
+    staleTime: 1000 * 60, // Cache for 1 minute
+  });
+
+  const totalPages = data?.total ? Math.ceil(data.total / itemsPerPage) : 0;
+
+  const updateFilters = (newFilters: Partial<EventFilters>) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters
+    }));
+    setPage(1); // Reset to first page when filters change
+  };
+
+  return {
+    events: data?.events || [],
+    isLoading,
+    error,
+    refetch,
+    filters,
+    updateFilters,
+    pagination: {
+      page,
+      setPage,
+      totalPages,
+      itemsPerPage,
+      total: data?.total || 0
     }
-  });
-
-  return {
-    events,
-    isLoading,
-    filters,
-    setFilters
   };
-}
+};
 
-export function useEventDetail(eventId: number) {
+/**
+ * Hook for fetching a single event by ID
+ */
+export const useEventDetail = (eventId: number) => {
   return useQuery({
-    queryKey: ['event', eventId],
+    queryKey: ['events', eventId],
     queryFn: () => eventService.getEventById(eventId),
-    enabled: !!eventId && eventId > 0
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
-}
+};
 
-export function useEventSearch() {
-  const [filters, setFilters] = useState<EventFilters>({
-    category: '',
-    date: null,
-    searchQuery: '',
-    sortBy: 'date_asc',
-    minPrice: undefined,
-    maxPrice: undefined,
-    difficulty: ''
+/**
+ * Hook for fetching featured events
+ */
+export const useFeaturedEvents = (limit: number = 4) => {
+  return useQuery({
+    queryKey: ['events', 'featured', limit],
+    queryFn: () => eventService.getFeaturedEvents(limit),
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
   });
-
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ['events', filters],
-    queryFn: () => eventService.getEvents(filters)
-  });
-
-  return {
-    events,
-    isLoading,
-    filters,
-    setFilters
-  };
-}
+};

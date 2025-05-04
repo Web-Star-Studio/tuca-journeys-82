@@ -1,190 +1,180 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { AuthContextType, SignOutResult, User } from '@/types/auth';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { useAuthOperations } from "@/hooks/auth/use-auth-operations";
+import { useAuthState } from "@/hooks/auth/use-auth-state";
+import { useResetPassword } from "@/hooks/auth/use-reset-password";
+import { isAdminEmail, isUserAdmin } from "@/lib/auth-helpers";
+import { currentUserHasPermission, preloadUserPermissions } from "@/lib/role-helpers";
+import { SignOutResult } from "@/types/auth";
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  isLoading: boolean;
+  isAdmin: boolean;
+  permissions: {
+    canRead: boolean;
+    canWrite: boolean;
+    canDelete: boolean;
+    isAdmin: boolean;
+  };
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, name: string) => Promise<any>;
+  signOut: () => Promise<SignOutResult>;
+  resetPassword: (email: string) => Promise<any>;
+  checkPermission: (permission: 'read' | 'write' | 'delete' | 'admin' | 'master') => Promise<boolean>;
+}
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  isLoading: true
+  session: null,
+  isLoading: true,
+  isAdmin: false,
+  permissions: {
+    canRead: false,
+    canWrite: false,
+    canDelete: false,
+    isAdmin: false,
+  },
+  signIn: async () => ({}),
+  signUp: async () => ({}),
+  signOut: async () => ({ success: false }),
+  resetPassword: async () => ({}),
+  checkPermission: async () => false,
 });
 
+export const useAuth = () => useContext(AuthContext);
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-
+  const { user, session, loading: isLoading, setLoading } = useAuthState();
+  const { signIn: authSignIn, signUp: authSignUp, signOut: authSignOut } = useAuthOperations();
+  const { resetPassword: authResetPassword } = useResetPassword();
+  
+  // State for user permissions
+  const [permissions, setPermissions] = useState({
+    canRead: false,
+    canWrite: false,
+    canDelete: false,
+    isAdmin: false,
+  });
+  
+  // Save current user email in localStorage for legacy support during transition
   useEffect(() => {
-    const getInitialSession = async () => {
-      try {
-        setIsLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
-        
-        if (session?.user) {
-          await checkAndSetAdminStatus(session.user);
+    if (user?.email) {
+      window.localStorage.setItem('current_user_email', user.email);
+    } else {
+      window.localStorage.removeItem('current_user_email');
+    }
+  }, [user]);
+  
+  // Update permissions when user changes
+  useEffect(() => {
+    const updatePermissions = async () => {
+      if (user) {
+        try {
+          // Preload permissions for better performance
+          await preloadUserPermissions(user.id);
+          
+          const [canRead, canWrite, canDelete, isAdmin] = await Promise.all([
+            currentUserHasPermission('read'),
+            currentUserHasPermission('write'),
+            currentUserHasPermission('delete'),
+            currentUserHasPermission('admin'),
+          ]);
+          
+          setPermissions({
+            canRead,
+            canWrite,
+            canDelete,
+            isAdmin,
+          });
+        } catch (error) {
+          console.error('Error updating permissions:', error);
+          setPermissions({
+            canRead: false,
+            canWrite: false,
+            canDelete: false,
+            isAdmin: false,
+          });
         }
-      } catch (error) {
-        console.error('Error getting initial session:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
-      setUser(session?.user || null);
-      
-      if (session?.user) {
-        await checkAndSetAdminStatus(session.user);
       } else {
-        setIsAdmin(false);
+        setPermissions({
+          canRead: false,
+          canWrite: false,
+          canDelete: false,
+          isAdmin: false,
+        });
       }
-      
-      setIsLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
     };
-  }, []);
-
-  const checkAndSetAdminStatus = async (user: User) => {
-    try {
-      // First check app_metadata for quick admin check
-      if (user.app_metadata?.isAdmin) {
-        setIsAdmin(true);
-        return;
-      }
-      
-      // Then check in user_permissions or user_roles table
-      const { data, error } = await supabase
-        .from('user_permissions')
-        .select('permission')
-        .eq('user_id', user.id)
-        .eq('permission', 'admin')
-        .maybeSingle();
-      
-      setIsAdmin(!!data);
-      
-      if (error) {
-        console.error('Error checking admin permissions:', error);
-      }
-    } catch (err) {
-      console.error('Error in checkAndSetAdminStatus:', err);
-      setIsAdmin(false);
-    }
-  };
-
+    
+    updatePermissions();
+  }, [user]);
+  
+  // Check admin status on login/signup
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        throw error;
+      const result = await authSignIn(email, password);
+      if (result.data?.user) {
+        const isAdmin = await isUserAdmin(result.data.user.id);
+        result.data.user.app_metadata = result.data.user.app_metadata || {};
+        result.data.user.app_metadata.isAdmin = isAdmin;
+        
+        // Store email in localStorage for legacy support
+        if (result.data.user.email) {
+          window.localStorage.setItem('current_user_email', result.data.user.email);
+        }
       }
-      
-      return data;
-    } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
+      return result;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, metadata = {}) => {
+  const signUp = async (email: string, password: string, name: string) => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: metadata
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
+      const result = await authSignUp(email, password, name);
+      return result;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async (): Promise<SignOutResult> => {
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        return { success: false, error };
-      }
-      
-      setIsAdmin(false);
-      return { success: true };
-    } catch (error) {
-      console.error('Error signing out:', error);
-      return { success: false, error };
+      // Clean up localStorage
+      window.localStorage.removeItem('current_user_email');
+      return await authSignOut();
+    } finally {
+      setLoading(false);
     }
   };
-
+  
   const resetPassword = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password-confirmation`,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      throw error;
-    }
+    return await authResetPassword(email);
   };
-
-  const checkPermission = async (permission: string): Promise<boolean> => {
+  
+  // Function to check if user has a specific permission
+  const checkPermission = async (permission: 'read' | 'write' | 'delete' | 'admin' | 'master') => {
     if (!user) return false;
-    
-    try {
-      // First check admin status for full access
-      if (isAdmin) return true;
-      
-      // Check specific permission
-      const { data, error } = await supabase
-        .from('user_permissions')
-        .select('permission')
-        .eq('user_id', user.id)
-        .eq('permission', permission)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error checking permission:', error);
-        return false;
-      }
-      
-      return !!data;
-    } catch (error) {
-      console.error('Error in checkPermission:', error);
-      return false;
-    }
+    return await currentUserHasPermission(permission);
   };
 
   const value = {
     user,
+    session,
     isLoading,
-    isAdmin,
+    isAdmin: !!user && (permissions.isAdmin || user.app_metadata?.isAdmin),
+    permissions,
     signIn,
     signUp,
     signOut,
     resetPassword,
-    checkPermission
+    checkPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export const useAuth = () => useContext(AuthContext);

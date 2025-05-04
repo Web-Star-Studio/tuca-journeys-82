@@ -97,7 +97,7 @@ const EventsTable = ({ events, onEdit, onDelete }: EventsTableProps) => {
                       <div className="font-medium">{event.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {event.category}
-                        {event.is_featured && (
+                        {event.featured && (
                           <Badge variant="default" className="ml-2 text-[10px] py-0">
                             Destaque
                           </Badge>

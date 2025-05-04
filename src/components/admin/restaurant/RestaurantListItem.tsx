@@ -39,103 +39,91 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
   onDelete
 }) => {
   return (
-    <Card className="overflow-hidden hover:shadow-sm transition-shadow">
-      <CardContent className="p-0 flex">
-        <div 
-          className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-cover bg-center" 
-          style={{ backgroundImage: `url(${restaurant.image_url})` }}
-        />
+    <Card className="overflow-hidden hover:border-muted-foreground/20 transition-colors">
+      <div className="flex flex-col md:flex-row">
+        <div className="w-full md:w-40 h-32 md:h-full">
+          {restaurant.image_url ? (
+            <img
+              src={restaurant.image_url}
+              alt={restaurant.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full w-full bg-muted flex items-center justify-center">
+              <Utensils className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+        </div>
         
-        <div className="p-4 flex-1">
+        <CardContent className="flex-1 p-4">
           <div className="flex justify-between items-start">
             <div>
-              <div className="flex items-center gap-1">
-                <h3 className="text-lg font-semibold">{restaurant.name}</h3>
-                {restaurant.is_featured && (
-                  <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-300">
-                    Destaque
-                  </Badge>
-                )}
-                {!restaurant.is_active && (
-                  <Badge variant="outline" className="ml-2 bg-red-100 text-red-800 border-red-300">
-                    Inativo
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex items-center text-muted-foreground text-xs mt-1 space-x-4">
-                <div className="flex items-center">
-                  <Utensils className="h-3 w-3 mr-1" />
-                  <span>{restaurant.cuisine_type}</span>
-                </div>
-                <div className="flex items-center">
+              <h3 className="font-semibold text-lg line-clamp-1">{restaurant.name}</h3>
+              <div className="flex items-center space-x-2 text-muted-foreground text-sm mb-2">
+                <span className="flex items-center">
                   <MapPin className="h-3 w-3 mr-1" />
-                  <span>{restaurant.location}</span>
-                </div>
-                <div>
-                  <span>{restaurant.price_range}</span>
-                </div>
+                  {restaurant.location}
+                </span>
+                <span className="flex items-center">
+                  <Utensils className="h-3 w-3 mr-1" />
+                  {restaurant.cuisine_type}
+                </span>
               </div>
+              <p className="text-sm line-clamp-2 text-muted-foreground">
+                {restaurant.short_description}
+              </p>
             </div>
             
-            <div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => onView(restaurant)}>
-                    <Eye className="h-4 w-4 mr-2" /> Ver Detalhes
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onEdit(restaurant)}>
-                    <Edit className="h-4 w-4 mr-2" /> Editar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="text-red-600" 
-                    onClick={() => onDelete(restaurant)}
-                  >
-                    <Trash className="h-4 w-4 mr-2" /> Excluir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex space-x-2">
+              {restaurant.is_featured && (
+                <Badge variant="secondary" className="border-amber-500 text-amber-700">
+                  Destaque
+                </Badge>
+              )}
+              {!restaurant.is_active && (
+                <Badge variant="secondary" className="border-red-500 text-red-700">
+                  Inativo
+                </Badge>
+              )}
             </div>
           </div>
-          
-          <p className="text-sm mt-2 text-muted-foreground line-clamp-2">
-            {restaurant.short_description}
-          </p>
-        </div>
-      </CardContent>
+        </CardContent>
+      </div>
       
-      <CardFooter className="bg-muted/20 px-4 py-2 flex justify-end gap-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onView(restaurant)}
-        >
-          <Eye className="h-4 w-4 mr-2" /> 
-          Ver
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onEdit(restaurant)}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Editar
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-red-600"
-          onClick={() => onDelete(restaurant)}
-        >
-          <Trash className="h-4 w-4 mr-2" />
-          Excluir
-        </Button>
+      <CardFooter className="flex justify-between items-center p-4 pt-0 border-t mt-2">
+        <div className="flex space-x-1">
+          <Button variant="ghost" size="sm" onClick={() => onView(restaurant)}>
+            <Eye className="h-4 w-4 mr-1" />
+            Detalhes
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onEdit(restaurant)}>
+            <Edit className="h-4 w-4 mr-1" />
+            Editar
+          </Button>
+        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Opções</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => onView(restaurant)}>
+              <Eye className="h-4 w-4 mr-2" />
+              Ver Detalhes
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(restaurant)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDelete(restaurant)} className="text-red-600 focus:text-red-600">
+              <Trash className="h-4 w-4 mr-2" />
+              Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );

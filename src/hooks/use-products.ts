@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/types/product';
@@ -39,25 +38,7 @@ export function useProducts(filters?: ProductFilters) {
         throw error;
       }
       
-      return data.map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        category: item.category,
-        stock: item.stock,
-        featured: item.featured || false,
-        image_url: item.image_url,
-        gallery: item.gallery,
-        weight: item.weight,
-        dimensions: item.dimensions,
-        partner_id: item.partner_id,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        status: item.status || 'active',
-        is_new: isProductNew(item.created_at),
-        benefits: [],
-      } as Product));
+      return data || [];
     },
     staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
@@ -65,24 +46,9 @@ export function useProducts(filters?: ProductFilters) {
   // Create a new product
   const createProduct = useMutation({
     mutationFn: async (product: Omit<Product, 'id'>) => {
-      const productToInsert = {
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        category: product.category,
-        stock: product.stock,
-        featured: product.featured,
-        image_url: product.image_url,
-        gallery: product.gallery,
-        weight: product.weight,
-        dimensions: product.dimensions,
-        partner_id: product.partner_id,
-        status: product.status,
-      };
-      
       const { data, error } = await supabase
         .from('products')
-        .insert(productToInsert)
+        .insert(product)
         .select()
         .single();
       
@@ -102,25 +68,9 @@ export function useProducts(filters?: ProductFilters) {
   // Update an existing product
   const updateProduct = useMutation({
     mutationFn: async (product: Product) => {
-      const productToUpdate = {
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        category: product.category,
-        stock: product.stock,
-        featured: product.featured,
-        image_url: product.image_url,
-        gallery: product.gallery,
-        weight: product.weight,
-        dimensions: product.dimensions,
-        partner_id: product.partner_id,
-        status: product.status,
-      };
-      
       const { data, error } = await supabase
         .from('products')
-        .update(productToUpdate)
+        .update(product)
         .eq('id', product.id)
         .select()
         .single();
@@ -178,19 +128,6 @@ export function useProducts(filters?: ProductFilters) {
         return uniqueCategories || [];
       }
     });
-  };
-  
-  // Helper function to determine if a product is new
-  const isProductNew = (createdAt?: string): boolean => {
-    if (!createdAt) return false;
-    
-    const createdDate = new Date(createdAt);
-    const now = new Date();
-    // Product is new if created within the last 30 days
-    const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays <= 30;
   };
   
   return {

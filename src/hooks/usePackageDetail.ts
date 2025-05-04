@@ -1,58 +1,57 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Package } from "@/types/package";
+import { Package, getPackageById } from "@/data/packages";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { packageService } from "@/services/package-service";
+import { useToast } from "@/components/ui/use-toast";
 
-export const usePackageDetail = () => {
-  const [package_, setPackage] = useState<Package | null>(null);
+export const usePackageDetail = (id: string | undefined) => {
+  const [packageData, setPackageData] = useState<Package | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { id } = useParams<{ id: string }>();
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { addToWishlist, wishlistItems, removeFromWishlist } = useWishlist();
+  const { toast } = useToast();
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
-    const fetchPackage = async () => {
-      if (!id) return;
-      
-      try {
-        setIsLoading(true);
-        const data = await packageService.getPackageById(parseInt(id));
-        setPackage(data);
-      } catch (err) {
-        console.error("Error fetching package:", err);
-        setError(err instanceof Error ? err : new Error("Failed to fetch package"));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const foundPackage = getPackageById(Number(id));
+    setPackageData(foundPackage || null);
+    setIsLoading(false);
 
-    fetchPackage();
-  }, [id]);
+    // Check if package is in wishlist
+    if (foundPackage) {
+      const inWishlist = wishlistItems.some(
+        (item) => item.id === foundPackage.id && item.type === "package"
+      );
+      setIsInWishlist(inWishlist);
+    }
+  }, [id, wishlistItems]);
 
-  const toggleWishlist = () => {
-    if (!package_) return;
-    
-    const isInList = isInWishlist(package_.id, "package");
-    
-    if (isInList) {
-      removeFromWishlist(package_.id, "package");
+  const handleWishlistToggle = () => {
+    if (!packageData) return;
+
+    if (isInWishlist) {
+      removeFromWishlist(packageData.id);
+      toast({
+        title: "Removido da lista de desejos",
+        description: `${packageData.title} foi removido da sua lista de desejos.`,
+      });
     } else {
       addToWishlist({
-        id: package_.id,
+        id: packageData.id,
         type: "package",
-        title: package_.title,
-        image: package_.image_url
+        name: packageData.title,
+        image: packageData.image
+      });
+      toast({
+        title: "Adicionado à lista de desejos",
+        description: `${packageData.title} foi adicionado à sua lista de desejos.`,
       });
     }
   };
 
   return {
-    package: package_,
+    packageData,
     isLoading,
-    error,
-    isInWishlist: package_ ? isInWishlist(package_.id, "package") : false,
-    toggleWishlist
+    isInWishlist,
+    handleWishlistToggle
   };
 };

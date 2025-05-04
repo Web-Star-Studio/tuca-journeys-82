@@ -46,7 +46,7 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   
   const menuItems: SidebarItem[] = [
     { title: "Dashboard", icon: Home, path: "/admin" },
-    { title: "Atividades", icon: Landmark, path: "/admin/activities" },
+    { title: "Passeios", icon: Landmark, path: "/admin/tours" },
     { title: "Eventos", icon: CalendarDays, path: "/admin/events" },
     { title: "Hospedagens", icon: Hotel, path: "/admin/accommodations" },
     { title: "Restaurantes", icon: Utensils, path: "/admin/restaurants" },
@@ -116,7 +116,7 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
               "flex items-center space-x-2 rounded-md px-3 py-2 w-full justify-start text-muted-foreground hover:bg-muted hover:text-foreground",
               collapsed && "justify-center"
             )}
-            onClick={() => signOut()}
+            onClick={signOut}
           >
             <LogOut className={cn("h-5 w-5", collapsed ? "mx-auto" : "")} />
             {!collapsed && <span className="text-sm">Sair</span>}
